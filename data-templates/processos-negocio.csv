@@ -1,0 +1,4 @@
+id,identificacao,descricao,nivelMaturidade,areaResponsavel,frequencia,duracaoMedia,complexidade,normas
+880e8400-e29b-41d4-a716-446655440001,PROC-FIN-001,Conciliação Bancária,Gerenciado,Financeiro,Diário,120,Média,"[{""id"":""norma-001"",""tipoNorma"":""Norma Legal"",""obrigatoriedade"":""Obrigatório"",""itemNorma"":""Lei 6.404/1976 Art. 177"",""dataInicio"":""2024-01-01"",""status"":""Ativo""}]"
+880e8400-e29b-41d4-a716-446655440002,PROC-RH-001,Folha de Pagamento,Definido,RH,Mensal,480,Alta,"[{""id"":""norma-002"",""tipoNorma"":""Norma Legal"",""obrigatoriedade"":""Obrigatório"",""itemNorma"":""CLT Art. 459"",""dataInicio"":""2024-01-01"",""status"":""Ativo""}]"
+880e8400-e29b-41d4-a716-446655440003,PROC-VEN-001,Processamento de Pedidos,Repetível,Comercial,Diário,60,Baixa,"[]"

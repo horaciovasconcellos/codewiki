@@ -1,0 +1,5 @@
+id,sigla,descricao,dominio,subcategoria,certificacoes
+770e8400-e29b-41d4-a716-446655440001,JAVA-DEV,Desenvolvimento Java,Técnica,Backend,"[{""id"":""cert-001"",""nomeCertificacao"":""Oracle Certified Professional Java SE"",""tempoValidadeDias"":1095}]"
+770e8400-e29b-41d4-a716-446655440002,REACT-DEV,Desenvolvimento React,Técnica,Frontend,"[{""id"":""cert-002"",""nomeCertificacao"":""Meta Front-End Developer"",""tempoValidadeDias"":730}]"
+770e8400-e29b-41d4-a716-446655440003,AWS-ARCH,Arquitetura AWS,Técnica,Infraestrutura,"[{""id"":""cert-003"",""nomeCertificacao"":""AWS Solutions Architect"",""tempoValidadeDias"":1095}]"
+770e8400-e29b-41d4-a716-446655440004,LIDERANCA,Liderança de Equipes,Comportamental,Outras,"[{""id"":""cert-004"",""nomeCertificacao"":""Certified ScrumMaster"",""tempoValidadeDias"":730}]"

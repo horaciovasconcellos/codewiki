@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="002-01-create-configuracoes" author="sistema">
+        <comment>Criação da tabela de configurações</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS configuracoes (
+                id VARCHAR(36) PRIMARY KEY,
+                chave VARCHAR(100) UNIQUE NOT NULL,
+                valor TEXT NOT NULL,
+                tipo ENUM('string', 'number', 'boolean', 'json') DEFAULT 'string',
+                descricao VARCHAR(255),
+                categoria VARCHAR(50),
+                editavel BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_chave (chave),
+                INDEX idx_categoria (categoria)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            DROP TABLE IF EXISTS configuracoes;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

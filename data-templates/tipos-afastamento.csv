@@ -1,0 +1,5 @@
+id,sigla,descricao,argumentacaoLegal,numeroDias,tipoTempo
+550e8400-e29b-41d4-a716-446655440001,FER,Férias,Lei 5.452/1943 (CLT) Art. 129,30,C
+550e8400-e29b-41d4-a716-446655440002,LIC-MED,Licença Médica,Lei 8.213/1991 Art. 60,15,C
+550e8400-e29b-41d4-a716-446655440003,LIC-MAT,Licença Maternidade,Lei 11.770/2008 Art. 1º,180,C
+550e8400-e29b-41d4-a716-446655440004,LIC-PAT,Licença Paternidade,Lei 13.257/2016 Art. 38,20,C

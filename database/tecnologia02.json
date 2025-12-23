@@ -1,0 +1,355 @@
+{
+  "tecnologias": [
+    {
+      "sigla": "ODB",
+      "versao": "23c",
+      "nome": "Oracle Database",
+      "categoria": "Banco de Dados",
+      "status": "Ativa",
+      "fornecedor": "Oracle",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "ODB",
+      "versao": "11g",
+      "nome": "Oracle Database",
+      "categoria": "Banco de Dados",
+      "status": "Obsoleta",
+      "fornecedor": "Oracle",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "JDK",
+      "versao": "21",
+      "nome": "Java Development Kit",
+      "categoria": "Linguagem/SDK",
+      "status": "Ativa",
+      "fornecedor": "Oracle",
+      "tipo_licenciamento": "GPL/Proprietário"
+    },
+    {
+      "sigla": "JDK",
+      "versao": "8",
+      "nome": "Java Development Kit",
+      "categoria": "Linguagem/SDK",
+      "status": "Obsoleta",
+      "fornecedor": "Oracle",
+      "tipo_licenciamento": "GPL/Proprietário"
+    },
+    {
+      "sigla": "OCI",
+      "versao": "Current",
+      "nome": "Oracle Cloud Infrastructure",
+      "categoria": "Cloud Computing",
+      "status": "Ativa",
+      "fornecedor": "Oracle",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "WIN",
+      "versao": "11",
+      "nome": "Windows",
+      "categoria": "Sistema Operacional",
+      "status": "Ativa",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "WIN",
+      "versao": "7",
+      "nome": "Windows",
+      "categoria": "Sistema Operacional",
+      "status": "Obsoleta",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SQLS",
+      "versao": "2022",
+      "nome": "SQL Server",
+      "categoria": "Banco de Dados",
+      "status": "Ativa",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SQLS",
+      "versao": "2008",
+      "nome": "SQL Server",
+      "categoria": "Banco de Dados",
+      "status": "Obsoleta",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "AZ",
+      "versao": "Current",
+      "nome": "Azure",
+      "categoria": "Cloud Computing",
+      "status": "Ativa",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "M365",
+      "versao": "Current",
+      "nome": "Microsoft 365",
+      "categoria": "Produtividade",
+      "status": "Ativa",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "PWS",
+      "versao": "7.4",
+      "nome": "PowerShell",
+      "categoria": "Automação/Script",
+      "status": "Ativa",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "MIT"
+    },
+    {
+      "sigla": "NETFX",
+      "versao": "4.8",
+      "nome": ".NET Framework",
+      "categoria": "Framework",
+      "status": "Obsoleta",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "NET",
+      "versao": "8",
+      "nome": ".NET",
+      "categoria": "Framework",
+      "status": "Ativa",
+      "fornecedor": "Microsoft",
+      "tipo_licenciamento": "MIT"
+    },
+    {
+      "sigla": "S4H",
+      "versao": "2023",
+      "nome": "SAP S/4HANA",
+      "categoria": "ERP",
+      "status": "Ativa",
+      "fornecedor": "SAP",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "ECC",
+      "versao": "6.0",
+      "nome": "SAP ECC",
+      "categoria": "ERP",
+      "status": "Obsoleta",
+      "fornecedor": "SAP",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "BW4",
+      "versao": "2023",
+      "nome": "SAP BW/4HANA",
+      "categoria": "Business Intelligence",
+      "status": "Ativa",
+      "fornecedor": "SAP",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "HANA",
+      "versao": "2.0",
+      "nome": "SAP HANA",
+      "categoria": "Banco de Dados",
+      "status": "Ativa",
+      "fornecedor": "SAP",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "DYN",
+      "versao": "Current",
+      "nome": "Dynatrace Platform",
+      "categoria": "Observabilidade/APM",
+      "status": "Ativa",
+      "fornecedor": "Dynatrace",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "DYNAPP",
+      "versao": "7.x",
+      "nome": "Dynatrace AppMon",
+      "categoria": "APM",
+      "status": "Obsoleta",
+      "fornecedor": "Dynatrace",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SYSAID",
+      "versao": "23.x",
+      "nome": "SysAid ITSM",
+      "categoria": "Service Desk/ITSM",
+      "status": "Ativa",
+      "fornecedor": "SysAid",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "DD",
+      "versao": "Current",
+      "nome": "Datadog Platform",
+      "categoria": "Observabilidade/Monitoramento",
+      "status": "Ativa",
+      "fornecedor": "DataDog",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "GH",
+      "versao": "Current",
+      "nome": "GitHub",
+      "categoria": "DevOps/SCM",
+      "status": "Ativa",
+      "fornecedor": "GitHub",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "GHENT",
+      "versao": "3.13",
+      "nome": "GitHub Enterprise Server",
+      "categoria": "DevOps/SCM",
+      "status": "Ativa",
+      "fornecedor": "GitHub",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "GHACT",
+      "versao": "Current",
+      "nome": "GitHub Actions",
+      "categoria": "CI/CD",
+      "status": "Ativa",
+      "fornecedor": "GitHub",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "GL",
+      "versao": "17.x",
+      "nome": "GitLab",
+      "categoria": "DevOps/SCM",
+      "status": "Ativa",
+      "fornecedor": "GitLab",
+      "tipo_licenciamento": "MIT/Proprietário"
+    },
+    {
+      "sigla": "GLCI",
+      "versao": "Current",
+      "nome": "GitLab CI/CD",
+      "categoria": "CI/CD",
+      "status": "Ativa",
+      "fornecedor": "GitLab",
+      "tipo_licenciamento": "MIT/Proprietário"
+    },
+    {
+      "sigla": "UBU",
+      "versao": "24.04 LTS",
+      "nome": "Ubuntu",
+      "categoria": "Sistema Operacional",
+      "status": "Ativa",
+      "fornecedor": "Canonical/Ubuntu",
+      "tipo_licenciamento": "GPL/Open Source"
+    },
+    {
+      "sigla": "UBU",
+      "versao": "16.04 LTS",
+      "nome": "Ubuntu",
+      "categoria": "Sistema Operacional",
+      "status": "Obsoleta",
+      "fornecedor": "Canonical/Ubuntu",
+      "tipo_licenciamento": "GPL/Open Source"
+    },
+    {
+      "sigla": "SNAP",
+      "versao": "Current",
+      "nome": "Snap Package Manager",
+      "categoria": "Gerenciador de Pacotes",
+      "status": "Ativa",
+      "fornecedor": "Canonical/Ubuntu",
+      "tipo_licenciamento": "GPL"
+    },
+    {
+      "sigla": "REACT",
+      "versao": "18",
+      "nome": "React",
+      "categoria": "Framework Frontend",
+      "status": "Ativa",
+      "fornecedor": "Meta/Facebook",
+      "tipo_licenciamento": "MIT"
+    },
+    {
+      "sigla": "REACT",
+      "versao": "15",
+      "nome": "React",
+      "categoria": "Framework Frontend",
+      "status": "Obsoleta",
+      "fornecedor": "Meta/Facebook",
+      "tipo_licenciamento": "MIT"
+    },
+    {
+      "sigla": "RN",
+      "versao": "0.74",
+      "nome": "React Native",
+      "categoria": "Framework Mobile",
+      "status": "Ativa",
+      "fornecedor": "Meta/Facebook",
+      "tipo_licenciamento": "MIT"
+    },
+    {
+      "sigla": "PYGRAPH",
+      "versao": "2.x",
+      "nome": "PyTorch",
+      "categoria": "Machine Learning",
+      "status": "Ativa",
+      "fornecedor": "Meta/Facebook",
+      "tipo_licenciamento": "BSD"
+    },
+    {
+      "sigla": "RHEL",
+      "versao": "9",
+      "nome": "Red Hat Enterprise Linux",
+      "categoria": "Sistema Operacional",
+      "status": "Ativa",
+      "fornecedor": "Red Hat",
+      "tipo_licenciamento": "GPL/Proprietário"
+    },
+    {
+      "sigla": "RHEL",
+      "versao": "6",
+      "nome": "Red Hat Enterprise Linux",
+      "categoria": "Sistema Operacional",
+      "status": "Obsoleta",
+      "fornecedor": "Red Hat",
+      "tipo_licenciamento": "GPL/Proprietário"
+    },
+    {
+      "sigla": "OCP",
+      "versao": "4.15",
+      "nome": "OpenShift Container Platform",
+      "categoria": "Container Orchestration",
+      "status": "Ativa",
+      "fornecedor": "Red Hat",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "ANS",
+      "versao": "2.16",
+      "nome": "Ansible",
+      "categoria": "Automação/IaC",
+      "status": "Ativa",
+      "fornecedor": "Red Hat",
+      "tipo_licenciamento": "GPL"
+    },
+    {
+      "sigla": "JBOSS",
+      "versao": "EAP 8",
+      "nome": "JBoss Enterprise Application Platform",
+      "categoria": "Application Server",
+      "status": "Ativa",
+      "fornecedor": "Red Hat",
+      "tipo_licenciamento": "Proprietário"
+    }
+  ]
+}

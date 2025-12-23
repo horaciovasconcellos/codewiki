@@ -1,0 +1,184 @@
+{
+  "oracle_ebs_technologies": [
+    {
+      "sigla": "EBS",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle e-Business Suite",
+      "categoria": "ERP Suite",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "DB",
+      "versao_release": "19c",
+      "nome_tecnologia": "Oracle Database",
+      "categoria": "Banco de Dados",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "WLS",
+      "versao_release": "12.2.1.4",
+      "nome_tecnologia": "Oracle WebLogic Server",
+      "categoria": "Application Server",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "OHS",
+      "versao_release": "12.2.1.4",
+      "nome_tecnologia": "Oracle HTTP Server",
+      "categoria": "Web Server",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Forms",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle Forms",
+      "categoria": "Development Framework",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Reports",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle Reports",
+      "categoria": "Reporting Tool",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "BI Publisher",
+      "versao_release": "12.2.1.4",
+      "nome_tecnologia": "Oracle BI Publisher",
+      "categoria": "Business Intelligence",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "OAF",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle Application Framework",
+      "categoria": "Development Framework",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Workflow",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle Workflow",
+      "categoria": "Business Process Management",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "ADI",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Application Desktop Integrator",
+      "categoria": "Desktop Integration",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Discoverer",
+      "versao_release": "11.1.1.7",
+      "nome_tecnologia": "Oracle Discoverer",
+      "categoria": "Ad-hoc Query & Reporting",
+      "status": "Descontinuado",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "ADF",
+      "versao_release": "12.2.1.4",
+      "nome_tecnologia": "Oracle Application Development Framework",
+      "categoria": "Development Framework",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "JDev",
+      "versao_release": "12.2.1.4",
+      "nome_tecnologia": "Oracle JDeveloper",
+      "categoria": "IDE",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SOA",
+      "versao_release": "12.2.1.4",
+      "nome_tecnologia": "Oracle SOA Suite",
+      "categoria": "Integration/Middleware",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "OID",
+      "versao_release": "12.2.1.4",
+      "nome_tecnologia": "Oracle Internet Directory",
+      "categoria": "LDAP Directory",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SSO",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle Single Sign-On",
+      "categoria": "Authentication",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "XML Gateway",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle XML Gateway",
+      "categoria": "Integration",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Concurrent Manager",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle Concurrent Processing",
+      "categoria": "Job Scheduling",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "AutoConfig",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle AutoConfig",
+      "categoria": "Configuration Management",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Rapid Install",
+      "versao_release": "12.2.x",
+      "nome_tecnologia": "Oracle Rapid Install",
+      "categoria": "Installation Tool",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Proprietário"
+    }
+  ]
+}

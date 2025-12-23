@@ -1,0 +1,130 @@
+[
+  {
+    "sigla": "PORTAL-WEB",
+    "descricao": "Portal Web Corporativo",
+    "urlDocumentacao": "https://docs.empresa.com/portal-web",
+    "faseCicloVida": "Produção",
+    "criticidadeNegocio": "Alta",
+    "tecnologias": [
+      {
+        "tecnologiaId": "NOTA: Substitua por UUID válido da tabela tecnologias",
+        "dataInicio": "2024-01-15",
+        "status": "Ativo"
+      }
+    ],
+    "ambientes": [
+      {
+        "tipoAmbiente": "Dev",
+        "urlAmbiente": "https://portal-dev.empresa.com",
+        "dataCriacao": "2024-01-10",
+        "tempoLiberacao": 7,
+        "status": "Ativo"
+      },
+      {
+        "tipoAmbiente": "QA",
+        "urlAmbiente": "https://portal-qa.empresa.com",
+        "dataCriacao": "2024-01-12",
+        "tempoLiberacao": 14,
+        "status": "Ativo"
+      },
+      {
+        "tipoAmbiente": "Prod",
+        "urlAmbiente": "https://portal.empresa.com",
+        "dataCriacao": "2024-01-15",
+        "tempoLiberacao": 30,
+        "status": "Ativo"
+      }
+    ],
+    "capacidades": [
+      {
+        "capacidadeId": "NOTA: Substitua por UUID válido da tabela capacidades_negocio",
+        "grauCobertura": 85,
+        "dataInicio": "2024-01-15",
+        "status": "Ativo"
+      }
+    ],
+    "processos": [
+      {
+        "processoId": "NOTA: Substitua por UUID válido da tabela processos_negocio",
+        "tipoSuporte": "Operacional",
+        "criticidade": "Alta",
+        "dataInicio": "2024-01-15",
+        "status": "Ativo"
+      }
+    ],
+    "integracoes": [
+      {
+        "aplicacaoDestinoId": "NOTA: Substitua por UUID de outra aplicação",
+        "tipoIntegracao": "API REST",
+        "protocolo": "HTTPS",
+        "frequencia": "Real-time",
+        "descricao": "Sincronização de usuários e permissões",
+        "status": "Ativo"
+      }
+    ],
+    "slas": [
+      {
+        "slaId": "NOTA: Substitua por UUID válido da tabela slas",
+        "descricao": "Disponibilidade 99.9% em horário comercial",
+        "dataInicio": "2024-01-15",
+        "dataTermino": "2024-12-31",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "sigla": "API-GW",
+    "descricao": "API Gateway Corporativo",
+    "urlDocumentacao": "https://docs.empresa.com/api-gateway",
+    "faseCicloVida": "Produção",
+    "criticidadeNegocio": "Muito Alta",
+    "ambientes": [
+      {
+        "tipoAmbiente": "Prod",
+        "urlAmbiente": "https://api.empresa.com",
+        "dataCriacao": "2023-06-01",
+        "tempoLiberacao": 60,
+        "status": "Ativo"
+      },
+      {
+        "tipoAmbiente": "Cloud",
+        "urlAmbiente": "https://api-cloud.empresa.com",
+        "dataCriacao": "2024-03-15",
+        "tempoLiberacao": 45,
+        "status": "Ativo"
+      }
+    ],
+    "integracoes": [
+      {
+        "aplicacaoDestinoId": "NOTA: UUID do CRM",
+        "tipoIntegracao": "API REST",
+        "protocolo": "HTTPS",
+        "frequencia": "Real-time",
+        "descricao": "Roteamento de requisições para CRM",
+        "status": "Ativo"
+      },
+      {
+        "aplicacaoDestinoId": "NOTA: UUID do ERP",
+        "tipoIntegracao": "API REST",
+        "protocolo": "HTTPS",
+        "frequencia": "Real-time",
+        "descricao": "Roteamento de requisições para ERP",
+        "status": "Ativo"
+      }
+    ],
+    "slas": [
+      {
+        "slaId": "NOTA: Substitua por UUID válido",
+        "descricao": "Disponibilidade 99.99% - 24x7",
+        "dataInicio": "2023-06-01",
+        "status": "Ativo"
+      },
+      {
+        "slaId": "NOTA: Substitua por UUID válido",
+        "descricao": "Latência < 100ms p95",
+        "dataInicio": "2023-06-01",
+        "status": "Ativo"
+      }
+    ]
+  }
+]

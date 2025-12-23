@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carga Automática - Processos de Negócio</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 18px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .count {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Carga de Processos</h1>
+        <div id="status" class="status loading">
+            Carregando dados...
+        </div>
+        <div id="count" class="count">0</div>
+        <div id="details"></div>
+        <button onclick="irParaProcessos()">Ver Processos de Negócio</button>
+        <div class="info">
+            Os dados foram salvos no localStorage<br>
+            e estão prontos para uso!
+        </div>
+    </div>
+
+    <script>
+const processosData = [
+  {id:"admn-00001",identificacao:"ADMN-00001",descricao:"Gestão de Contratos Administrativos",areaResponsavel:"Administração",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-iso9001-001",tipoNorma:"Norma Técnica",itemNorma:"ISO 9001 - Cláusula 8.4",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-lei8666-001",tipoNorma:"Norma Legal",itemNorma:"Lei nº 8.666/93 - Art. 54 a 88",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]},
+  {id:"fina-00001",identificacao:"FINA-00001",descricao:"Controle de Contas a Pagar",areaResponsavel:"Financeiro",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-ifrs9-001",tipoNorma:"Regulamentação Internacional",itemNorma:"IFRS 9 - Seção 5.5",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-bacen-001",tipoNorma:"Norma Reguladora",itemNorma:"Resolução BACEN 4.557 - Cap. III",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]},
+  {id:"tech-00001",identificacao:"TECH-00001",descricao:"Desenvolvimento de Software",areaResponsavel:"Tecnologia da Informação",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-iso27001-001",tipoNorma:"Norma Técnica",itemNorma:"ISO/IEC 27001 - Anexo A.14",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-gdpr-001",tipoNorma:"Regulamentação Internacional",itemNorma:"GDPR - Art. 25",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]},
+  {id:"saude-00001",identificacao:"SAUDE-00001",descricao:"Atendimento Ambulatorial",areaResponsavel:"Saúde",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-nr32-001",tipoNorma:"Norma Reguladora",itemNorma:"NR-32 - Item 32.2",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-anvisa-001",tipoNorma:"Norma Reguladora",itemNorma:"ANVISA RDC 301/2019 - Cap. 5",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-iec62304-001",tipoNorma:"Norma Técnica",itemNorma:"IEC 62304 - Seção 5.1",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Recomendado",status:"Ativo"}]},
+  {id:"elet-00001",identificacao:"ELET-00001",descricao:"Manutenção de Infraestrutura Elétrica",areaResponsavel:"Engenharia",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-nr10-001",tipoNorma:"Norma Reguladora",itemNorma:"NR-10 - Item 10.2",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-nbr5410-001",tipoNorma:"Norma Técnica",itemNorma:"ABNT NBR 5410 - Seção 5",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]},
+  {id:"aces-00001",identificacao:"ACES-00001",descricao:"Adequação de Acessibilidade",areaResponsavel:"Obras e Infraestrutura",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-nbr9050-001",tipoNorma:"Norma Técnica",itemNorma:"ABNT NBR 9050 - Seção 4",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-lei13146-001",tipoNorma:"Norma Legal",itemNorma:"Lei 13.146/2015 - Título III",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]},
+  {id:"come-00001",identificacao:"COME-00001",descricao:"Importação e Exportação de Produtos",areaResponsavel:"Comercial",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-omc-001",tipoNorma:"Regulamentação Internacional",itemNorma:"OMC/WTO - GATT Art. XI",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-regaduaneiro-001",tipoNorma:"Norma Reguladora",itemNorma:"Decreto 6.759/2009 - Título II",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]},
+  {id:"banc-00001",identificacao:"BANC-00001",descricao:"Gestão de Riscos Financeiros",areaResponsavel:"Compliance Bancário",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-basel3-001",tipoNorma:"Regulamentação Internacional",itemNorma:"Basel III - Pilar 1",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-cmn-001",tipoNorma:"Norma Reguladora",itemNorma:"Resolução CMN 4.557/2017 - Art. 3º",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]},
+  {id:"cont-00001",identificacao:"CONT-00001",descricao:"Elaboração de Demonstrações Financeiras",areaResponsavel:"Contabilidade",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-ifrs15-001",tipoNorma:"Regulamentação Internacional",itemNorma:"IFRS 15 - Parágrafo 31",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-cpc00-001",tipoNorma:"Norma Técnica",itemNorma:"CPC 00 (R2) - Capítulo 4",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]},
+  {id:"segu-00001",identificacao:"SEGU-00001",descricao:"Gestão de Incidentes de Segurança",areaResponsavel:"Segurança da Informação",nivelMaturidade:"Inicial",frequencia:"Ad-Hoc",duracaoMedia:8,complexidade:"Média",normas:[{id:"norma-iso27001-002",tipoNorma:"Norma Técnica",itemNorma:"ISO/IEC 27001 - Anexo A.16",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-lgpd-001",tipoNorma:"Norma Legal",itemNorma:"LGPD Lei 13.709/2018 - Art. 48",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"},{id:"norma-gdpr-002",tipoNorma:"Regulamentação Internacional",itemNorma:"GDPR - Art. 33",dataInicio:"2024-01-15",dataTermino:null,obrigatoriedade:"Obrigatório",status:"Ativo"}]}
+];
+
+window.onload = function() {
+    setTimeout(() => {
+        try {
+            localStorage.setItem('processos-negocio', JSON.stringify(processosData));
+            const totalNormas = processosData.flatMap(p => p.normas).length;
+            
+            document.getElementById('status').className = 'status success';
+            document.getElementById('status').textContent = '✅ Dados carregados com sucesso!';
+            document.getElementById('count').textContent = processosData.length;
+            document.getElementById('details').innerHTML = `
+                <div style="color: #666; margin-top: 10px;">
+                    <strong>${processosData.length}</strong> processos de negócio<br>
+                    <strong>${totalNormas}</strong> normas cadastradas
+                </div>
+            `;
+        } catch (error) {
+            document.getElementById('status').className = 'status';
+            document.getElementById('status').style.background = '#f8d7da';
+            document.getElementById('status').style.color = '#721c24';
+            document.getElementById('status').textContent = '❌ Erro: ' + error.message;
+        }
+    }, 500);
+};
+
+function irParaProcessos() {
+    window.location.href = '/';
+}
+    </script>
+</body>
+</html>

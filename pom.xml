@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>br.com.auditoria</groupId>
+    <artifactId>sistema-auditoria-db</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>Sistema de Auditoria - Database</name>
+    <description>Gerenciamento de banco de dados com Liquibase</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <liquibase.version>4.25.1</liquibase.version>
+        <mysql.connector.version>8.0.33</mysql.connector.version>
+        
+        <!-- Database Properties - Podem ser sobrescritas via linha de comando ou CI/CD -->
+        <db.url>jdbc:mysql://localhost:3306/auditoria_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=America/Sao_Paulo</db.url>
+        <db.username>root</db.username>
+        <db.password>rootpass123</db.password>
+        <db.driver>com.mysql.cj.jdbc.Driver</db.driver>
+    </properties>
+
+    <dependencies>
+        <!-- MySQL Connector -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${mysql.connector.version}</version>
+        </dependency>
+
+        <!-- Liquibase Core -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Liquibase Maven Plugin -->
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>${liquibase.version}</version>
+                <configuration>
+                    <changeLogFile>src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
+                    <driver>${db.driver}</driver>
+                    <url>${db.url}</url>
+                    <username>${db.username}</username>
+                    <password>${db.password}</password>
+                    <verbose>true</verbose>
+                    <logging>debug</logging>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>update-database</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.mysql</groupId>
+                        <artifactId>mysql-connector-j</artifactId>
+                        <version>${mysql.connector.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Profile para ambiente de desenvolvimento -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <db.url>jdbc:mysql://localhost:3306/auditoria_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=America/Sao_Paulo</db.url>
+                <db.username>root</db.username>
+                <db.password>rootpass123</db.password>
+            </properties>
+        </profile>
+
+        <!-- Profile para ambiente de CI/CD -->
+        <profile>
+            <id>ci</id>
+            <properties>
+                <db.url>jdbc:mysql://mysql-master:3306/auditoria_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=America/Sao_Paulo</db.url>
+                <db.username>root</db.username>
+                <db.password>rootpass123</db.password>
+            </properties>
+        </profile>
+
+        <!-- Profile para ambiente de produção -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <db.url>${env.DB_URL}</db.url>
+                <db.username>${env.DB_USERNAME}</db.username>
+                <db.password>${env.DB_PASSWORD}</db.password>
+            </properties>
+        </profile>
+    </profiles>
+</project>

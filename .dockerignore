@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.env.local
+.vscode
+.idea
+dist
+.DS_Store
+*.md
+!README.md
+coverage
+.eslintcache
+package-lock.json

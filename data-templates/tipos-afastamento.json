@@ -1,0 +1,34 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "sigla": "FER",
+    "descricao": "Férias",
+    "argumentacaoLegal": "Lei 5.452/1943 (CLT) Art. 129",
+    "numeroDias": 30,
+    "tipoTempo": "C"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "sigla": "LIC-MED",
+    "descricao": "Licença Médica",
+    "argumentacaoLegal": "Lei 8.213/1991 Art. 60",
+    "numeroDias": 15,
+    "tipoTempo": "C"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440003",
+    "sigla": "LIC-MAT",
+    "descricao": "Licença Maternidade",
+    "argumentacaoLegal": "Lei 11.770/2008 Art. 1º",
+    "numeroDias": 180,
+    "tipoTempo": "C"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440004",
+    "sigla": "LIC-PAT",
+    "descricao": "Licença Paternidade",
+    "argumentacaoLegal": "Lei 13.257/2016 Art. 38",
+    "numeroDias": 20,
+    "tipoTempo": "C"
+  }
+]

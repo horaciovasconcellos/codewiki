@@ -1,0 +1,14 @@
+{% extends "partials/header.html" %}
+
+{% block header %}
+  {{ super() }}
+  <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+    <a href="https://github.com/{{ config.extra.repo_owner }}/{{ config.extra.repo_name }}/stargazers">
+      ⭐ {{ github_info().stars }}
+    </a>
+    <a href="https://github.com/{{ config.extra.repo_owner }}/{{ config.extra.repo_name }}/network/members">
+      🍴 {{ github_info().forks }}
+    </a>
+    <span>📦 v{{ github_info().version }}</span>
+  </div>
+{% endblock %}

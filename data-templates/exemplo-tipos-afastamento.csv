@@ -1,0 +1,8 @@
+nome,descricao,remunerado,afastaINSS
+Férias,Período de descanso anual do colaborador,true,false
+Licença Médica,Afastamento por motivos de saúde,true,true
+Licença Maternidade,Licença para mães após o parto,true,true
+Licença Paternidade,Licença para pais após nascimento do filho,true,false
+Ausência Justificada,Falta justificada com documentação,false,false
+Suspensão Disciplinar,Suspensão por infração disciplinar,false,false
+Afastamento INSS,Afastamento por auxílio-doença,true,true

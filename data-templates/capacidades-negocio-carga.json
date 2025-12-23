@@ -1,0 +1,132 @@
+[
+  {
+    "sigla": "FIN-01",
+    "nome": "Gestão Financeira",
+    "descricao": "Capacidade de gerenciar recursos financeiros, incluindo planejamento orçamentário, controle de gastos e análise de investimentos",
+    "nivel": "Nível 1",
+    "categoria": "Financeiro",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Alinhada ao objetivo estratégico de sustenibilidade financeira e eficiência operacional",
+      "beneficiosEsperados": "Redução de custos operacionais, melhor previsibilidade financeira e otimização de investimentos",
+      "estadoFuturoDesejado": "Sistema integrado de gestão financeira com dashboards em tempo real e análises preditivas automatizadas",
+      "gapEstadoAtualFuturo": "Necessário implementar sistema ERP financeiro e treinar equipe em análise de dados"
+    }
+  },
+  {
+    "sigla": "RH-01",
+    "nome": "Gestão de Talentos",
+    "descricao": "Capacidade de atrair, desenvolver e reter talentos qualificados",
+    "nivel": "Nível 1",
+    "categoria": "RH",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Suporta o objetivo de excelência operacional através de equipes qualificadas",
+      "beneficiosEsperados": "Redução de turnover, aumento de produtividade e melhoria do clima organizacional",
+      "estadoFuturoDesejado": "Programa estruturado de desenvolvimento com trilhas de carreira e sistema de avaliação 360°",
+      "gapEstadoAtualFuturo": "Criar programa de desenvolvimento, implementar avaliações periódicas e estruturar plano de sucessão"
+    }
+  },
+  {
+    "sigla": "LOG-01",
+    "nome": "Gestão de Cadeia de Suprimentos",
+    "descricao": "Capacidade de gerenciar o fluxo de materiais e informações desde fornecedores até clientes",
+    "nivel": "Nível 2",
+    "categoria": "Logística",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Alinhada aos objetivos de eficiência operacional e satisfação do cliente",
+      "beneficiosEsperados": "Redução de custos logísticos, melhoria no tempo de entrega e aumento da disponibilidade de produtos",
+      "estadoFuturoDesejado": "Cadeia de suprimentos integrada com visibilidade end-to-end e capacidade preditiva de demanda",
+      "gapEstadoAtualFuturo": "Implementar WMS, integrar sistemas de fornecedores e desenvolver modelos de previsão"
+    }
+  },
+  {
+    "sigla": "ATE-01",
+    "nome": "Atendimento ao Cliente",
+    "descricao": "Capacidade de atender e resolver demandas de clientes de forma eficiente e satisfatória",
+    "nivel": "Nível 1",
+    "categoria": "Atendimento",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Diretamente alinhada ao objetivo de excelência em experiência do cliente",
+      "beneficiosEsperados": "Aumento do NPS, redução de reclamações e fidelização de clientes",
+      "estadoFuturoDesejado": "Atendimento omnichannel com IA para resolução automática de 70% das demandas",
+      "gapEstadoAtualFuturo": "Implementar plataforma omnichannel, treinar equipe e desenvolver chatbots inteligentes"
+    }
+  },
+  {
+    "sigla": "PROD-01",
+    "nome": "Gestão da Produção",
+    "descricao": "Capacidade de planejar, executar e controlar processos produtivos",
+    "nivel": "Nível 2",
+    "categoria": "Produção",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Suporta objetivos de qualidade, eficiência e competitividade",
+      "beneficiosEsperados": "Aumento de produtividade, redução de desperdícios e melhoria da qualidade",
+      "estadoFuturoDesejado": "Produção com Industry 4.0: IoT, automação inteligente e manutenção preditiva",
+      "gapEstadoAtualFuturo": "Implementar sensores IoT, sistema MES e algoritmos de otimização"
+    }
+  },
+  {
+    "sigla": "COM-01",
+    "nome": "Gestão Comercial",
+    "descricao": "Capacidade de identificar oportunidades, negociar e fechar vendas",
+    "nivel": "Nível 1",
+    "categoria": "Comercial",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Alinhada ao objetivo de crescimento de receita e expansão de mercado",
+      "beneficiosEsperados": "Aumento de vendas, melhoria na taxa de conversão e expansão da carteira de clientes",
+      "estadoFuturoDesejado": "Processo comercial data-driven com CRM integrado e análise preditiva de oportunidades",
+      "gapEstadoAtualFuturo": "Implementar CRM, criar pipeline estruturado e desenvolver modelos de scoring"
+    }
+  },
+  {
+    "sigla": "FIN-02",
+    "nome": "Compliance e Auditoria",
+    "descricao": "Capacidade de garantir conformidade regulatória e controles internos efetivos",
+    "nivel": "Nível 2",
+    "categoria": "Financeiro",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Suporta objetivo de governança e mitigação de riscos",
+      "beneficiosEsperados": "Redução de riscos legais, melhoria em auditorias e maior confiabilidade de dados",
+      "estadoFuturoDesejado": "Sistema automatizado de compliance com monitoramento contínuo e alertas proativos",
+      "gapEstadoAtualFuturo": "Implementar GRC, automatizar controles e treinar equipe em frameworks regulatórios"
+    }
+  },
+  {
+    "sigla": "RH-02",
+    "nome": "Gestão de Performance",
+    "descricao": "Capacidade de avaliar, acompanhar e melhorar o desempenho organizacional e individual",
+    "nivel": "Nível 2",
+    "categoria": "RH",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Alinhada ao objetivo de excelência operacional e desenvolvimento contínuo",
+      "beneficiosEsperados": "Aumento de produtividade, alinhamento de metas e cultura de melhoria contínua",
+      "estadoFuturoDesejado": "Sistema integrado de OKRs com acompanhamento em tempo real e feedback contínuo",
+      "gapEstadoAtualFuturo": "Implementar metodologia OKR, treinar lideranças e criar dashboard de performance"
+    }
+  },
+  {
+    "sigla": "LOG-02",
+    "nome": "Gestão de Armazenagem",
+    "descricao": "Capacidade de gerenciar estoques e operações de armazém de forma eficiente",
+    "nivel": "Nível 2",
+    "categoria": "Logística",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Suporta eficiência operacional e redução de custos",
+      "beneficiosEsperados": "Redução de perdas, otimização de espaço e melhoria na acuracidade de inventário",
+      "estadoFuturoDesejado": "Armazém automatizado com robótica e rastreabilidade por RFID",
+      "gapEstadoAtualFuturo": "Implementar WMS, automação de movimentação e sistema RFID"
+    }
+  },
+  {
+    "sigla": "ATE-02",
+    "nome": "Gestão de Reclamações",
+    "descricao": "Capacidade de registrar, analisar e resolver reclamações de clientes",
+    "nivel": "Nível 1",
+    "categoria": "Atendimento",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Alinhada à melhoria contínua e satisfação do cliente",
+      "beneficiosEsperados": "Redução de reclamações recorrentes, aumento de satisfação e insights para melhorias",
+      "estadoFuturoDesejado": "Sistema integrado com análise de sentimento e ações corretivas automáticas",
+      "gapEstadoAtualFuturo": "Implementar sistema de tickets, análise de texto e workflows de resolução"
+    }
+  }
+]

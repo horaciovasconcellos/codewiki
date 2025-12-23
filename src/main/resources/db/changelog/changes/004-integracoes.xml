@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="004-01-create-integracoes" author="sistema">
+        <comment>Criação da tabela de integrações</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS integracoes (
+                id VARCHAR(36) PRIMARY KEY,
+                nome VARCHAR(100) UNIQUE NOT NULL,
+                tipo ENUM('API', 'WebHook', 'FTP', 'Database', 'Mensageria') NOT NULL,
+                url_endpoint VARCHAR(500),
+                metodo_http VARCHAR(10),
+                headers JSON,
+                autenticacao_tipo VARCHAR(50),
+                credenciais JSON,
+                status ENUM('Ativo', 'Inativo', 'Em Teste', 'Erro') DEFAULT 'Inativo',
+                ultima_execucao TIMESTAMP NULL,
+                proxima_execucao TIMESTAMP NULL,
+                frequencia_minutos INT,
+                timeout_segundos INT DEFAULT 30,
+                tentativas_max INT DEFAULT 3,
+                logs_retencao_dias INT DEFAULT 30,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_nome (nome),
+                INDEX idx_status (status),
+                INDEX idx_tipo (tipo)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            DROP TABLE IF EXISTS integracoes;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="004-02-create-logs-integracoes" author="sistema">
+        <comment>Criação da tabela de logs de integrações</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS logs_integracoes (
+                id VARCHAR(36) PRIMARY KEY,
+                integracao_id VARCHAR(36) NOT NULL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status ENUM('Sucesso', 'Erro', 'Em Andamento', 'Timeout') NOT NULL,
+                request_payload JSON,
+                response_payload JSON,
+                response_status_code INT,
+                duration_ms INT,
+                error_message TEXT,
+                tentativa_numero INT DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (integracao_id) REFERENCES integracoes(id) ON DELETE CASCADE,
+                INDEX idx_integracao (integracao_id),
+                INDEX idx_timestamp (timestamp),
+                INDEX idx_status (status)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            DROP TABLE IF EXISTS logs_integracoes;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

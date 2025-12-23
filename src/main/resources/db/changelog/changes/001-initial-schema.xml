@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="001-01-initial-schema" author="sistema">
+        <comment>Criação do schema inicial do Sistema de Auditoria</comment>
+        <sqlFile path="database/01-init-schema-data.sql" 
+                 relativeToChangelogFile="false" 
+                 splitStatements="true" 
+                 stripComments="true"
+                 endDelimiter=";"/>
+        <rollback>
+            DROP TABLE IF EXISTS sla_aplicacoes;
+            DROP TABLE IF EXISTS slas;
+            DROP TABLE IF EXISTS responsaveis_processo;
+            DROP TABLE IF EXISTS normas_processo;
+            DROP TABLE IF EXISTS processos_negocio;
+            DROP TABLE IF EXISTS capacidade_aplicacoes;
+            DROP TABLE IF EXISTS aplicacao_tecnologias;
+            DROP TABLE IF EXISTS aplicacoes;
+            DROP TABLE IF EXISTS capacidades_negocio;
+            DROP TABLE IF EXISTS tecnologias;
+            DROP TABLE IF EXISTS colaborador_habilidades;
+            DROP TABLE IF EXISTS habilidades;
+            DROP TABLE IF EXISTS afastamentos;
+            DROP TABLE IF EXISTS colaboradores;
+            DROP TABLE IF EXISTS tipos_afastamento;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

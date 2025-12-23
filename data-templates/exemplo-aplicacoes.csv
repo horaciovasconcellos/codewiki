@@ -1,0 +1,7 @@
+nome,descricao,stack,status,criticidade,url
+Sistema de Vendas,Plataforma de vendas online,Java (Spring Boot),Ativa,Alta,https://vendas.empresa.com
+Portal do Cliente,Portal de autoatendimento para clientes,React + Node.js,Ativa,Alta,https://portal.empresa.com
+API Gateway,Gateway de APIs corporativas,Node.js (Express),Ativa,Crítica,https://api.empresa.com
+Sistema de RH,Gestão de recursos humanos,Python (Django),Ativa,Média,https://rh.empresa.com
+Dashboard Analytics,Dashboards de análise de dados,React + TypeScript,Em Desenvolvimento,Média,
+Sistema Legado,Sistema antigo em manutenção,Java (Legacy),Manutenção,Baixa,

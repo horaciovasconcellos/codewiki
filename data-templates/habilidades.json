@@ -1,0 +1,58 @@
+[
+  {
+    "id": "770e8400-e29b-41d4-a716-446655440001",
+    "sigla": "JAVA-DEV",
+    "descricao": "Desenvolvimento Java",
+    "dominio": "Técnica",
+    "subcategoria": "Backend",
+    "certificacoes": [
+      {
+        "id": "cert-001",
+        "nomeCertificacao": "Oracle Certified Professional Java SE",
+        "tempoValidadeDias": 1095
+      }
+    ]
+  },
+  {
+    "id": "770e8400-e29b-41d4-a716-446655440002",
+    "sigla": "REACT-DEV",
+    "descricao": "Desenvolvimento React",
+    "dominio": "Técnica",
+    "subcategoria": "Frontend",
+    "certificacoes": [
+      {
+        "id": "cert-002",
+        "nomeCertificacao": "Meta Front-End Developer",
+        "tempoValidadeDias": 730
+      }
+    ]
+  },
+  {
+    "id": "770e8400-e29b-41d4-a716-446655440003",
+    "sigla": "AWS-ARCH",
+    "descricao": "Arquitetura AWS",
+    "dominio": "Técnica",
+    "subcategoria": "Infraestrutura",
+    "certificacoes": [
+      {
+        "id": "cert-003",
+        "nomeCertificacao": "AWS Solutions Architect",
+        "tempoValidadeDias": 1095
+      }
+    ]
+  },
+  {
+    "id": "770e8400-e29b-41d4-a716-446655440004",
+    "sigla": "LIDERANCA",
+    "descricao": "Liderança de Equipes",
+    "dominio": "Comportamental",
+    "subcategoria": "Outras",
+    "certificacoes": [
+      {
+        "id": "cert-004",
+        "nomeCertificacao": "Certified ScrumMaster",
+        "tempoValidadeDias": 730
+      }
+    ]
+  }
+]

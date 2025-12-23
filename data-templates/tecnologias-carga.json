@@ -1,0 +1,182 @@
+[
+  {
+    "sigla": "JAVA-17",
+    "nome": "Java",
+    "versaoRelease": "17 LTS",
+    "categoria": "Linguagem de Programação",
+    "status": "Ativo",
+    "fornecedorFabricante": "Oracle",
+    "tipoLicenciamento": "GPL v2 + Classpath Exception",
+    "maturidadeInterna": "Otimizado",
+    "nivelSuporteInterno": "Suporte Completo",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": true
+    }
+  },
+  {
+    "sigla": "REACT-18",
+    "nome": "React",
+    "versaoRelease": "18.2.0",
+    "categoria": "Framework Frontend",
+    "status": "Ativo",
+    "fornecedorFabricante": "Meta (Facebook)",
+    "tipoLicenciamento": "MIT",
+    "maturidadeInterna": "Gerenciado",
+    "nivelSuporteInterno": "Suporte Completo",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": false
+    }
+  },
+  {
+    "sigla": "MYSQL-8",
+    "nome": "MySQL",
+    "versaoRelease": "8.0.35",
+    "categoria": "Banco de Dados Relacional",
+    "status": "Ativo",
+    "fornecedorFabricante": "Oracle",
+    "tipoLicenciamento": "GPL v2",
+    "maturidadeInterna": "Gerenciado",
+    "nivelSuporteInterno": "Suporte Regular",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": true
+    }
+  },
+  {
+    "sigla": "DOCKER",
+    "nome": "Docker",
+    "versaoRelease": "24.0.7",
+    "categoria": "Containerização",
+    "status": "Ativo",
+    "fornecedorFabricante": "Docker Inc",
+    "tipoLicenciamento": "Apache 2.0",
+    "maturidadeInterna": "Definido",
+    "nivelSuporteInterno": "Suporte Regular",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": true
+    }
+  },
+  {
+    "sigla": "AWS",
+    "nome": "Amazon Web Services",
+    "versaoRelease": "2024",
+    "categoria": "Cloud Provider",
+    "status": "Ativo",
+    "fornecedorFabricante": "Amazon",
+    "tipoLicenciamento": "SaaS",
+    "maturidadeInterna": "Gerenciado",
+    "nivelSuporteInterno": "Suporte Completo",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": false
+    }
+  },
+  {
+    "sigla": "SPRING-BOOT-3",
+    "nome": "Spring Boot",
+    "versaoRelease": "3.2.0",
+    "categoria": "Framework Backend",
+    "status": "Ativo",
+    "fornecedorFabricante": "VMware (Pivotal)",
+    "tipoLicenciamento": "Apache 2.0",
+    "maturidadeInterna": "Gerenciado",
+    "nivelSuporteInterno": "Suporte Completo",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": true
+    }
+  },
+  {
+    "sigla": "POSTGRES-15",
+    "nome": "PostgreSQL",
+    "versaoRelease": "15.5",
+    "categoria": "Banco de Dados Relacional",
+    "status": "Ativo",
+    "fornecedorFabricante": "PostgreSQL Global Development Group",
+    "tipoLicenciamento": "PostgreSQL License",
+    "maturidadeInterna": "Definido",
+    "nivelSuporteInterno": "Suporte Regular",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": false
+    }
+  },
+  {
+    "sigla": "NODEJS-20",
+    "nome": "Node.js",
+    "versaoRelease": "20.10.0 LTS",
+    "categoria": "Runtime JavaScript",
+    "status": "Ativo",
+    "fornecedorFabricante": "OpenJS Foundation",
+    "tipoLicenciamento": "MIT",
+    "maturidadeInterna": "Gerenciado",
+    "nivelSuporteInterno": "Suporte Completo",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": true
+    }
+  },
+  {
+    "sigla": "TYPESCRIPT-5",
+    "nome": "TypeScript",
+    "versaoRelease": "5.3.3",
+    "categoria": "Linguagem de Programação",
+    "status": "Ativo",
+    "fornecedorFabricante": "Microsoft",
+    "tipoLicenciamento": "Apache 2.0",
+    "maturidadeInterna": "Gerenciado",
+    "nivelSuporteInterno": "Suporte Completo",
+    "ambientes": {
+      "dev": true,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": false
+    }
+  },
+  {
+    "sigla": "KUBERNETES",
+    "nome": "Kubernetes",
+    "versaoRelease": "1.28.4",
+    "categoria": "Orquestração de Containers",
+    "status": "Ativo",
+    "fornecedorFabricante": "CNCF",
+    "tipoLicenciamento": "Apache 2.0",
+    "maturidadeInterna": "Definido",
+    "nivelSuporteInterno": "Suporte Regular",
+    "ambientes": {
+      "dev": false,
+      "qa": true,
+      "prod": true,
+      "cloud": true,
+      "onPremise": false
+    }
+  }
+]

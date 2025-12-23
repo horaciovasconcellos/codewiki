@@ -1,0 +1,354 @@
+[
+  {
+    "identificacao": "ADMN-00001",
+    "descricao": "Gestão de Contratos Administrativos",
+    "areaResponsavel": "Administração",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-001",
+        "nome": "ISO 9001",
+        "tipo": "Norma Técnica",
+        "descricao": "Sistema de Gestão da Qualidade",
+        "itemNorma": "Cláusula 8.4 - Controle de processos, produtos e serviços providos externamente",
+        "dataInicio": "2024-01-15",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-002",
+        "nome": "Lei nº 8.666/93",
+        "tipo": "Norma Reguladora",
+        "descricao": "Lei de Licitações e Contratos Administrativos",
+        "itemNorma": "Art. 54 a 80 - Dos Contratos",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "FINA-00001",
+    "descricao": "Controle de Contas a Pagar",
+    "areaResponsavel": "Financeiro",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-003",
+        "nome": "IFRS 9",
+        "tipo": "Regulamentação Internacional",
+        "descricao": "Normas internacionais de contabilidade - Instrumentos Financeiros",
+        "itemNorma": "Seção 5.5 - Mensuração e reconhecimento de passivos financeiros",
+        "dataInicio": "2024-03-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-004",
+        "nome": "Resoluções do BACEN nº 4.557",
+        "tipo": "Norma Reguladora",
+        "descricao": "Regras para o sistema financeiro - Gestão de Riscos",
+        "itemNorma": "Art. 3º - Estrutura de gerenciamento de riscos",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "TECH-00001",
+    "descricao": "Desenvolvimento de Software",
+    "areaResponsavel": "Tecnologia da Informação",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-005",
+        "nome": "ISO/IEC 27001",
+        "tipo": "Norma Técnica",
+        "descricao": "Gestão de Segurança da Informação",
+        "itemNorma": "Anexo A.14 - Aquisição, desenvolvimento e manutenção de sistemas",
+        "dataInicio": "2024-02-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-006",
+        "nome": "GDPR",
+        "tipo": "Regulamentação Internacional",
+        "descricao": "Regulamento Geral de Proteção de Dados - União Europeia",
+        "itemNorma": "Art. 25 - Proteção de dados desde a concepção e por padrão",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "SAUDE-00001",
+    "descricao": "Atendimento Ambulatorial",
+    "areaResponsavel": "Saúde",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-007",
+        "nome": "NR-32",
+        "tipo": "Norma Reguladora",
+        "descricao": "Segurança e saúde em serviços de saúde",
+        "itemNorma": "Item 32.2 - Riscos biológicos",
+        "dataInicio": "2024-01-15",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-008",
+        "nome": "ANVISA RDC nº 301/2019",
+        "tipo": "Norma Reguladora",
+        "descricao": "Boas Práticas de Fabricação de Medicamentos",
+        "itemNorma": "Capítulo III - Pessoal",
+        "dataInicio": "2024-02-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-009",
+        "nome": "IEC 62304",
+        "tipo": "Norma Técnica",
+        "descricao": "Software para dispositivos médicos - Processos de ciclo de vida",
+        "itemNorma": "Seção 5 - Processo de desenvolvimento de software",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Não Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "ELET-00001",
+    "descricao": "Manutenção de Infraestrutura Elétrica",
+    "areaResponsavel": "Engenharia",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-010",
+        "nome": "NR-10",
+        "tipo": "Norma Reguladora",
+        "descricao": "Segurança em instalações e serviços em eletricidade",
+        "itemNorma": "Item 10.2.1 - Medidas de controle",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-011",
+        "nome": "ABNT NBR 5410",
+        "tipo": "Norma Técnica",
+        "descricao": "Instalações elétricas de baixa tensão",
+        "itemNorma": "Seção 6 - Verificações finais",
+        "dataInicio": "2024-01-15",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "ACES-00001",
+    "descricao": "Adequação de Acessibilidade",
+    "areaResponsavel": "Obras e Infraestrutura",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-012",
+        "nome": "ABNT NBR 9050",
+        "tipo": "Norma Técnica",
+        "descricao": "Acessibilidade a edificações, mobiliário e espaços urbanos",
+        "itemNorma": "Seção 4 - Parâmetros antropométricos",
+        "dataInicio": "2024-02-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-013",
+        "nome": "Lei nº 13.146/2015",
+        "tipo": "Norma Reguladora",
+        "descricao": "Lei Brasileira de Inclusão da Pessoa com Deficiência",
+        "itemNorma": "Art. 55 a 60 - Da Acessibilidade",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "COME-00001",
+    "descricao": "Importação e Exportação de Produtos",
+    "areaResponsavel": "Comercial",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-014",
+        "nome": "Acordos da OMC (WTO)",
+        "tipo": "Regulamentação Internacional",
+        "descricao": "Organização Mundial do Comércio - Regras de comércio internacional",
+        "itemNorma": "GATT - Acordo Geral sobre Tarifas e Comércio",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-015",
+        "nome": "Regulamento Aduaneiro (Decreto nº 6.759/2009)",
+        "tipo": "Norma Reguladora",
+        "descricao": "Regulamento Aduaneiro Brasileiro",
+        "itemNorma": "Título IV - Do Despacho Aduaneiro",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "BANC-00001",
+    "descricao": "Gestão de Riscos Financeiros",
+    "areaResponsavel": "Compliance Bancário",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-016",
+        "nome": "Basel III",
+        "tipo": "Regulamentação Internacional",
+        "descricao": "Regras internacionais para o sistema bancário - Adequação de capital",
+        "itemNorma": "Pilar I - Requisitos mínimos de capital",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-017",
+        "nome": "Resolução CMN nº 4.557/2017",
+        "tipo": "Norma Reguladora",
+        "descricao": "Estrutura de gerenciamento de riscos",
+        "itemNorma": "Art. 2º - Princípios para gerenciamento de riscos",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "CONT-00001",
+    "descricao": "Elaboração de Demonstrações Financeiras",
+    "areaResponsavel": "Contabilidade",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-018",
+        "nome": "IFRS 15",
+        "tipo": "Regulamentação Internacional",
+        "descricao": "Normas internacionais de contabilidade - Receita de Contratos com Clientes",
+        "itemNorma": "Passo 5 - Reconhecimento de receita",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-019",
+        "nome": "CPC 00 (R2)",
+        "tipo": "Norma Técnica",
+        "descricao": "Estrutura Conceitual para Relatório Financeiro",
+        "itemNorma": "Capítulo 3 - Características qualitativas",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  },
+  {
+    "identificacao": "SEGU-00001",
+    "descricao": "Gestão de Incidentes de Segurança",
+    "areaResponsavel": "Segurança da Informação",
+    "nivelMaturidade": "Inicial",
+    "frequencia": "Ad-Hoc",
+    "duracaoMedia": 8,
+    "complexidade": "Média",
+    "normas": [
+      {
+        "id": "norma-020",
+        "nome": "ISO/IEC 27001",
+        "tipo": "Norma Técnica",
+        "descricao": "Gestão de Segurança da Informação",
+        "itemNorma": "A.16 - Gestão de incidentes de segurança da informação",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-021",
+        "nome": "LGPD - Lei nº 13.709/2018",
+        "tipo": "Norma Reguladora",
+        "descricao": "Lei Geral de Proteção de Dados",
+        "itemNorma": "Art. 48 - Comunicação de incidente de segurança",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      },
+      {
+        "id": "norma-022",
+        "nome": "GDPR",
+        "tipo": "Regulamentação Internacional",
+        "descricao": "Regulamento Geral de Proteção de Dados - UE",
+        "itemNorma": "Art. 33 - Notificação de violação de dados pessoais",
+        "dataInicio": "2024-01-01",
+        "dataTermino": null,
+        "obrigatoriedade": "Obrigatória",
+        "status": "Ativo"
+      }
+    ]
+  }
+]

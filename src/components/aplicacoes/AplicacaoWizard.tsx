@@ -1,0 +1,416 @@
+import { useState, useEffect } from 'react';
+import { 
+  Aplicacao, 
+  FaseCicloVida, 
+  CriticidadeNegocio,
+  TipoAplicacao,
+  CloudProvider,
+  AssociacaoTecnologiaAplicacao,
+  AmbienteTecnologico,
+  AssociacaoCapacidadeNegocio,
+  AssociacaoProcessoNegocio,
+  IntegracaoAplicacao,
+  AssociacaoSLAAplicacao,
+  AssociacaoRunbookAplicacao,
+  Contrato,
+  Tecnologia,
+  ProcessoNegocio,
+  CapacidadeNegocio
+} from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, ArrowRight, Check, X } from '@phosphor-icons/react';
+import { toast } from 'sonner';
+import { StepBasicInfo } from './wizard-steps/StepBasicInfo';
+import { StepTecnologias } from './wizard-steps/StepTecnologias';
+import { StepAmbientes } from './wizard-steps/StepAmbientes';
+import { StepCapacidades } from './wizard-steps/StepCapacidades';
+import { StepProcessos } from './wizard-steps/StepProcessos';
+import { StepIntegracoes } from './wizard-steps/StepIntegracoes';
+import { StepSLAs } from './wizard-steps/StepSLAs';
+import { StepRunbooks } from './wizard-steps/StepRunbooks';
+import { StepContratos } from './wizard-steps/StepContratos';
+import { StepProjetos } from './wizard-steps/StepProjetos';
+import { StepReview } from './wizard-steps/StepReview';
+
+interface AplicacaoWizardProps {
+  aplicacao?: Aplicacao;
+  aplicacoes: Aplicacao[];
+  tecnologias: Tecnologia[];
+  processos: ProcessoNegocio[];
+  capacidades: CapacidadeNegocio[];
+  onSave: (aplicacao: Aplicacao) => void;
+  onCancel: () => void;
+}
+
+export function AplicacaoWizard({ 
+  aplicacao, 
+  aplicacoes, 
+  tecnologias, 
+  processos, 
+  capacidades,
+  onSave, 
+  onCancel 
+}: AplicacaoWizardProps) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [sigla, setSigla] = useState(aplicacao?.sigla || '');
+  const [descricao, setDescricao] = useState(aplicacao?.descricao || '');
+  const [urlDocumentacao, setUrlDocumentacao] = useState(aplicacao?.urlDocumentacao || '');
+  const [tipoAplicacao, setTipoAplicacao] = useState<TipoAplicacao | undefined>(aplicacao?.tipoAplicacao);
+  const [cloudProvider, setCloudProvider] = useState<CloudProvider | undefined>(aplicacao?.cloudProvider);
+  const [faseCicloVida, setFaseCicloVida] = useState<FaseCicloVida>(aplicacao?.faseCicloVida || 'Planejamento');
+  const [criticidadeNegocio, setCriticidadeNegocio] = useState<CriticidadeNegocio>(aplicacao?.criticidadeNegocio || 'Média');
+  const [tecnologiasAssociadas, setTecnologiasAssociadas] = useState<AssociacaoTecnologiaAplicacao[]>(aplicacao?.tecnologias || []);
+  const [ambientes, setAmbientes] = useState<AmbienteTecnologico[]>(aplicacao?.ambientes || []);
+  const [capacidadesAssociadas, setCapacidadesAssociadas] = useState<AssociacaoCapacidadeNegocio[]>(aplicacao?.capacidades || []);
+  const [processosAssociados, setProcessosAssociados] = useState<AssociacaoProcessoNegocio[]>(aplicacao?.processos || []);
+  const [integracoes, setIntegracoes] = useState<IntegracaoAplicacao[]>(aplicacao?.integracoes || []);
+  const [slas, setSlas] = useState<AssociacaoSLAAplicacao[]>(aplicacao?.slas || []);
+  const [runbooks, setRunbooks] = useState<AssociacaoRunbookAplicacao[]>(aplicacao?.runbooks || []);
+  const [contratos, setContratos] = useState<Contrato[]>([]);
+
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+  // Carregar contratos quando aplicacao for carregada
+  useEffect(() => {
+    if (aplicacao?.id) {
+      const loadContratos = async () => {
+        try {
+          const response = await fetch(`${API_URL}/api/aplicacoes/${aplicacao.id}/contratos`);
+          if (response.ok) {
+            const data = await response.json();
+            setContratos(data);
+          }
+        } catch (error) {
+          console.error('[AplicacaoWizard] Erro ao carregar contratos:', error);
+        }
+      };
+      loadContratos();
+    }
+  }, [aplicacao?.id]);
+
+  // Atualiza estados quando aplicacao mudar (carregamento assíncrono)
+  useEffect(() => {
+    if (aplicacao) {
+      console.log('[AplicacaoWizard] Aplicacao carregada:', aplicacao);
+      setSigla(aplicacao.sigla || '');
+      setDescricao(aplicacao.descricao || '');
+      setUrlDocumentacao(aplicacao.urlDocumentacao || '');
+      setTipoAplicacao(aplicacao.tipoAplicacao);
+      setCloudProvider(aplicacao.cloudProvider);
+      setFaseCicloVida(aplicacao.faseCicloVida || 'Planejamento');
+      setCriticidadeNegocio(aplicacao.criticidadeNegocio || 'Média');
+      setTecnologiasAssociadas(aplicacao.tecnologias || []);
+      setAmbientes(aplicacao.ambientes || []);
+      setCapacidadesAssociadas(aplicacao.capacidades || []);
+      setProcessosAssociados(aplicacao.processos || []);
+      setIntegracoes(aplicacao.integracoes || []);
+      setSlas(aplicacao.slas || []);
+      setRunbooks(aplicacao.runbooks || []);
+      
+      console.log('[AplicacaoWizard] Estados atualizados:', {
+        tecnologias: (aplicacao.tecnologias || []).length,
+        ambientes: (aplicacao.ambientes || []).length,
+        capacidades: (aplicacao.capacidades || []).length,
+        processos: (aplicacao.processos || []).length,
+        integracoes: (aplicacao.integracoes || []).length,
+        slas: (aplicacao.slas || []).length,
+        runbooks: (aplicacao.runbooks || []).length
+      });
+    }
+  }, [aplicacao]);
+
+  const isEditing = !!aplicacao;
+  const totalSteps = 11;
+
+  const steps = [
+    { number: 1, title: 'Informações Básicas', description: 'Dados fundamentais da aplicação' },
+    { number: 2, title: 'Tecnologias', description: 'Associação de tecnologias' },
+    { number: 3, title: 'Ambientes', description: 'Ambientes tecnológicos' },
+    { number: 4, title: 'Capacidades', description: 'Capacidades de negócio' },
+    { number: 5, title: 'Processos', description: 'Processos de negócio' },
+    { number: 6, title: 'Integrações', description: 'Integrações com outras aplicações' },
+    { number: 7, title: 'SLAs', description: 'Service Level Agreements' },
+    { number: 8, title: 'Runbooks', description: 'SLAs e Contratos - Runbooks operacionais' },
+    { number: 9, title: 'Contratos', description: 'Contratos da aplicação' },
+    { number: 10, title: 'Projetos', description: 'Projetos relacionados à aplicação' },
+    { number: 11, title: 'Revisão', description: 'Confirme os dados antes de salvar' },
+  ];
+
+  const validateStep = (step: number): boolean => {
+    switch (step) {
+      case 1:
+        if (!sigla || !sigla.trim()) {
+          toast.error('Informe a sigla da aplicação');
+          return false;
+        }
+        if (sigla.length > 20) {
+          toast.error('Sigla deve ter até 20 caracteres alfanuméricos');
+          return false;
+        }
+        if (!descricao || !descricao.trim()) {
+          toast.error('Informe a descrição da aplicação');
+          return false;
+        }
+        if (descricao.length > 200) {
+          toast.error('Descrição deve ter até 200 caracteres');
+          return false;
+        }
+        if (!urlDocumentacao || !urlDocumentacao.trim()) {
+          toast.error('Informe a URL da documentação');
+          return false;
+        }
+        if (!tipoAplicacao) {
+          toast.error('Selecione o tipo de aplicação');
+          return false;
+        }
+        const siglaExiste = aplicacoes.some(
+          a => a.sigla?.toLowerCase() === sigla.toLowerCase() && a.id !== aplicacao?.id
+        );
+        if (siglaExiste) {
+          toast.error('Sigla já cadastrada');
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+    }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleSave = async () => {
+    if (!validateStep(1)) return;
+
+    const aplicacaoData: Aplicacao = {
+      id: aplicacao?.id || crypto.randomUUID(),
+      sigla,
+      descricao,
+      urlDocumentacao,
+      tipoAplicacao,
+      cloudProvider: cloudProvider || undefined,
+      faseCicloVida,
+      criticidadeNegocio,
+      tecnologias: tecnologiasAssociadas,
+      ambientes,
+      capacidades: capacidadesAssociadas,
+      processos: processosAssociados,
+      integracoes,
+      slas,
+      runbooks,
+    };
+
+    console.log('[AplicacaoWizard] ========== SALVANDO ==========');
+    console.log('[AplicacaoWizard] Dados completos:', aplicacaoData);
+    console.log('[AplicacaoWizard] Tecnologias detalhadas:', aplicacaoData.tecnologias);
+    console.log('[AplicacaoWizard] Contadores:', {
+      tecnologias: aplicacaoData.tecnologias?.length || 0,
+      ambientes: aplicacaoData.ambientes?.length || 0,
+      capacidades: aplicacaoData.capacidades?.length || 0,
+      processos: aplicacaoData.processos?.length || 0,
+      integracoes: aplicacaoData.integracoes?.length || 0,
+      slas: aplicacaoData.slas?.length || 0,
+      runbooks: aplicacaoData.runbooks?.length || 0,
+      contratos: contratos.length
+    });
+
+    // Salvar aplicação
+    onSave(aplicacaoData);
+
+    toast.success(isEditing ? 'Aplicação atualizada com sucesso' : 'Aplicação cadastrada com sucesso');
+
+    // Nota: Contratos são gerenciados apenas em edição (quando aplicacao.id já existe)
+    // Para novas aplicações, contratos devem ser adicionados após criação
+  };
+
+  return (
+    <div className="min-h-screen bg-muted/30">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {isEditing ? 'Editar Aplicação' : 'Nova Aplicação'}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {steps[currentStep - 1].description}
+              </p>
+            </div>
+            <Button variant="ghost" onClick={onCancel}>
+              <X className="mr-2" />
+              Cancelar
+            </Button>
+          </div>
+
+          <div className="mb-6">
+            <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
+            <div className="flex justify-between mt-4 overflow-x-auto">
+              {steps.map((step) => (
+                <div
+                  key={step.number}
+                  className={`flex flex-col items-center flex-1 min-w-[100px] ${
+                    step.number === currentStep ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      step.number < currentStep
+                        ? 'bg-primary text-primary-foreground'
+                        : step.number === currentStep
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    {step.number < currentStep ? <Check size={20} /> : step.number}
+                  </div>
+                  <p className="text-xs font-medium text-center">{step.title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{steps[currentStep - 1].title}</CardTitle>
+            <CardDescription>{steps[currentStep - 1].description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {currentStep === 1 && (
+              <StepBasicInfo
+                sigla={sigla}
+                setSigla={setSigla}
+                descricao={descricao}
+                setDescricao={setDescricao}
+                urlDocumentacao={urlDocumentacao}
+                setUrlDocumentacao={setUrlDocumentacao}
+                tipoAplicacao={tipoAplicacao}
+                setTipoAplicacao={setTipoAplicacao}
+                cloudProvider={cloudProvider}
+                setCloudProvider={setCloudProvider}
+                faseCicloVida={faseCicloVida}
+                setFaseCicloVida={setFaseCicloVida}
+                criticidadeNegocio={criticidadeNegocio}
+                setCriticidadeNegocio={setCriticidadeNegocio}
+              />
+            )}
+            {currentStep === 2 && (
+              <StepTecnologias
+                tecnologias={tecnologias}
+                tecnologiasAssociadas={tecnologiasAssociadas}
+                setTecnologiasAssociadas={setTecnologiasAssociadas}
+              />
+            )}
+            {currentStep === 3 && (
+              <StepAmbientes
+                ambientes={ambientes}
+                setAmbientes={setAmbientes}
+              />
+            )}
+            {currentStep === 4 && (
+              <StepCapacidades
+                capacidades={capacidades}
+                capacidadesAssociadas={capacidadesAssociadas}
+                setCapacidadesAssociadas={setCapacidadesAssociadas}
+              />
+            )}
+            {currentStep === 5 && (
+              <StepProcessos
+                processos={processos}
+                processosAssociados={processosAssociados}
+                setProcessosAssociados={setProcessosAssociados}
+              />
+            )}
+            {currentStep === 6 && (
+              <StepIntegracoes
+                aplicacoes={aplicacoes.filter(a => a.id !== aplicacao?.id)}
+                integracoes={integracoes}
+                setIntegracoes={setIntegracoes}
+              />
+            )}
+            {currentStep === 7 && (
+              <StepSLAs
+                slas={slas}
+                setSlas={setSlas}
+              />
+            )}
+            {currentStep === 8 && (
+              <StepRunbooks
+                runbooks={runbooks}
+                setRunbooks={setRunbooks}
+              />
+            )}
+            {currentStep === 9 && (
+              <StepContratos
+                aplicacaoId={aplicacao?.id || ''}
+                contratos={contratos}
+                setContratos={setContratos}
+              />
+            )}
+            {currentStep === 10 && (
+              <StepProjetos
+                aplicacaoSigla={sigla}
+              />
+            )}
+            {currentStep === 11 && (
+              <StepReview
+                sigla={sigla}
+                descricao={descricao}
+                urlDocumentacao={urlDocumentacao}
+                tipoAplicacao={tipoAplicacao}
+                faseCicloVida={faseCicloVida}
+                criticidadeNegocio={criticidadeNegocio}
+                tecnologias={tecnologias}
+                tecnologiasAssociadas={tecnologiasAssociadas}
+                ambientes={ambientes}
+                capacidades={capacidades}
+                capacidadesAssociadas={capacidadesAssociadas}
+                processos={processos}
+                processosAssociados={processosAssociados}
+                aplicacoes={aplicacoes}
+                integracoes={integracoes}
+                slas={slas}
+                runbooks={runbooks}
+                contratos={contratos}
+                aplicacaoId={aplicacao?.id}
+              />
+            )}
+
+            <div className="flex justify-between mt-8 pt-6 border-t">
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={currentStep === 1}
+              >
+                <ArrowLeft className="mr-2" />
+                Anterior
+              </Button>
+              {currentStep < totalSteps ? (
+                <Button onClick={handleNext}>
+                  Próximo
+                  <ArrowRight className="ml-2" />
+                </Button>
+              ) : (
+                <Button onClick={handleSave}>
+                  <Check className="mr-2" />
+                  {isEditing ? 'Salvar Alterações' : 'Criar Aplicação'}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

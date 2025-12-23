@@ -1,0 +1,23 @@
+site_name: Sistema de Auditoria
+site_description: Auditoria de Sistemas
+site_author: Horacio Vasconcellos
+docs_dir: docs
+strict: false
+
+theme:
+  name: "material"
+  language: pt-BR
+  features:
+    - navigation.instant
+    - search.highlight
+    - search.share
+  palette:
+    - primary: 'deep purple'
+
+plugins:
+  - search
+
+markdown_extensions:
+  - attr_list
+  - pymdownx.highlight
+  - pymdownx.superfences

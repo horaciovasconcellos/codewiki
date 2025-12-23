@@ -1,0 +1,74 @@
+[
+  {
+    "sigla": "REST-API",
+    "tecnologias": ["HTTP/JSON", "HTTP"],
+    "tipo": "Sincrono",
+    "usoTipico": "APIs RESTful para comunicação entre serviços web com resposta imediata"
+  },
+  {
+    "sigla": "SOAP-WS",
+    "tecnologias": ["WS", "XML"],
+    "tipo": "Sincrono",
+    "usoTipico": "Web Services SOAP para integrações enterprise legadas"
+  },
+  {
+    "sigla": "GRPC",
+    "tecnologias": ["Protobuf", "HTTP"],
+    "tipo": "Sincrono",
+    "usoTipico": "Comunicação de alto desempenho entre microserviços"
+  },
+  {
+    "sigla": "MSG-QUEUE",
+    "tecnologias": ["SNS/SQS", "Kafka/Kinesis"],
+    "tipo": "Assincrono",
+    "usoTipico": "Filas de mensagens para processamento assíncrono e desacoplamento"
+  },
+  {
+    "sigla": "EVENT-BUS",
+    "tecnologias": ["EventBridge", "Pub/Sub", "SAP Event Mesh"],
+    "tipo": "Assincrono",
+    "usoTipico": "Event-driven architecture para notificações e reações a eventos"
+  },
+  {
+    "sigla": "FILE-TRANSFER",
+    "tecnologias": ["S3/Blob/GCS", "SFTP cloud"],
+    "tipo": "Assincrono",
+    "usoTipico": "Transferência de arquivos em lote para ETL e integração de dados"
+  },
+  {
+    "sigla": "ESB",
+    "tecnologias": ["Mulesoft", "SIS", "Boomi"],
+    "tipo": "Ambos",
+    "usoTipico": "Enterprise Service Bus para orquestração e transformação de integrações"
+  },
+  {
+    "sigla": "WEBHOOK",
+    "tecnologias": ["HTTP POST", "HTTP/JSON"],
+    "tipo": "Assincrono",
+    "usoTipico": "Notificações push baseadas em eventos via callbacks HTTP"
+  },
+  {
+    "sigla": "STREAM",
+    "tecnologias": ["Kafka/Kinesis"],
+    "tipo": "Assincrono",
+    "usoTipico": "Streaming de dados em tempo real para analytics e processamento"
+  },
+  {
+    "sigla": "RPC",
+    "tecnologias": ["Protobuf", "HTTP"],
+    "tipo": "Sincrono",
+    "usoTipico": "Remote Procedure Call para chamadas de função distribuídas"
+  },
+  {
+    "sigla": "BATCH-ETL",
+    "tecnologias": ["S3/Blob/GCS", "SFTP cloud"],
+    "tipo": "Assincrono",
+    "usoTipico": "Processamento em lote de grandes volumes de dados"
+  },
+  {
+    "sigla": "HYBRID-API",
+    "tecnologias": ["HTTP/JSON", "Kafka/Kinesis", "SNS/SQS"],
+    "tipo": "Ambos",
+    "usoTipico": "APIs com suporte síncrono e assíncrono conforme necessidade"
+  }
+]

@@ -1,0 +1,274 @@
+{
+  "venki_supravizio_technologies": [
+    {
+      "sigla": "Supravizio BPM",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Venki Supravizio Business Process Management",
+      "categoria": "BPMS Platform",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "BPMN",
+      "versao_release": "2.0",
+      "nome_tecnologia": "Business Process Model and Notation",
+      "categoria": "Modeling Standard",
+      "status": "Ativo",
+      "fornecedor_empresa": "OMG (Object Management Group)",
+      "tipo_licenciamento": "Padrão Aberto"
+    },
+    {
+      "sigla": "Process Designer",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Process Designer",
+      "categoria": "Process Modeling Tool",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Workflow Engine",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Workflow Engine",
+      "categoria": "Process Execution",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Business Rules",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Business Rules Management",
+      "categoria": "Business Logic",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Dashboard",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Dashboard & Analytics",
+      "categoria": "Business Intelligence",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Forms Builder",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Forms Builder",
+      "categoria": "User Interface Design",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Web Portal",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Web Portal",
+      "categoria": "Web Interface",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Mobile App",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Mobile Application",
+      "categoria": "Mobile Platform",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Process Automation",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Process Automation",
+      "categoria": "Automation Engine",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Integration Layer",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Integration Services",
+      "categoria": "Integration/Middleware",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "REST API",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio REST API",
+      "categoria": "Web Services",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SOAP API",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio SOAP API",
+      "categoria": "Web Services",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "User Management",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio User & Role Management",
+      "categoria": "Security/Authentication",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "LDAP Integration",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio LDAP/Active Directory",
+      "categoria": "Authentication",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Document Management",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Document Management",
+      "categoria": "Content Management",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Notification Engine",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Notification System",
+      "categoria": "Communication",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Reports",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Reporting Module",
+      "categoria": "Reporting Tool",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Process Monitoring",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Process Monitoring",
+      "categoria": "Performance Management",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SLA Management",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio SLA Management",
+      "categoria": "Service Level Management",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Task Manager",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Task Management",
+      "categoria": "Workflow Management",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Config Tool",
+      "versao_release": "3.0",
+      "nome_tecnologia": "Supravizio Configuration Tool",
+      "categoria": "Configuration Management",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Audit Log",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Audit & Compliance",
+      "categoria": "Security/Compliance",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Database",
+      "versao_release": "Compatível",
+      "nome_tecnologia": "Relational Database Support",
+      "categoria": "Data Storage",
+      "status": "Ativo",
+      "fornecedor_empresa": "Múltiplos Fornecedores",
+      "tipo_licenciamento": "Variável"
+    },
+    {
+      "sigla": "Web Server",
+      "versao_release": "Compatível",
+      "nome_tecnologia": "Application/Web Server",
+      "categoria": "Application Server",
+      "status": "Ativo",
+      "fornecedor_empresa": "Múltiplos Fornecedores",
+      "tipo_licenciamento": "Variável"
+    },
+    {
+      "sigla": "Email Integration",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Email Integration",
+      "categoria": "Communication",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Scheduler",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Job Scheduler",
+      "categoria": "Job Scheduling",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Script Engine",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Scripting Engine",
+      "categoria": "Development Tool",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Version Control",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Version Control",
+      "categoria": "Configuration Management",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Backup & Recovery",
+      "versao_release": "18.0.1",
+      "nome_tecnologia": "Supravizio Backup & Recovery",
+      "categoria": "Data Protection",
+      "status": "Ativo",
+      "fornecedor_empresa": "Venki Tecnologia",
+      "tipo_licenciamento": "Proprietário"
+    }
+  ]
+}

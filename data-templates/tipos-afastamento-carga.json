@@ -1,0 +1,128 @@
+[
+  {
+    "sigla": "FER",
+    "descricao": "Férias",
+    "argumentacao_legal": "Art. 129 da CLT",
+    "numero_dias": 30,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "ATM",
+    "descricao": "Atestado Médico",
+    "argumentacao_legal": "Art. 60 da Lei 8.213/91",
+    "numero_dias": 15,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "LM",
+    "descricao": "Licença Maternidade",
+    "argumentacao_legal": "Art. 392 da CLT",
+    "numero_dias": 4,
+    "tipo_tempo": "M"
+  },
+  {
+    "sigla": "LP",
+    "descricao": "Licença Paternidade",
+    "argumentacao_legal": "Art. 473, III da CLT e Art. 10 ADCT CF",
+    "numero_dias": 5,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "FJ",
+    "descricao": "Falta Justificada",
+    "argumentacao_legal": "Art. 473 da CLT",
+    "numero_dias": 1,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "FI",
+    "descricao": "Falta Injustificada",
+    "argumentacao_legal": "Ausência não prevista em lei",
+    "numero_dias": 1,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "CBH",
+    "descricao": "Compensação Banco de Horas",
+    "argumentacao_legal": "Art. 59 da CLT",
+    "numero_dias": 1,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "SUS",
+    "descricao": "Suspensão Disciplinar",
+    "argumentacao_legal": "Art. 474 da CLT",
+    "numero_dias": 30,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "ACT",
+    "descricao": "Acidente de Trabalho",
+    "argumentacao_legal": "Art. 4º da Lei 8.213/91",
+    "numero_dias": 15,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "LUT",
+    "descricao": "Luto/Falecimento",
+    "argumentacao_legal": "Art. 473, I da CLT",
+    "numero_dias": 3,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "CAS",
+    "descricao": "Licença Casamento",
+    "argumentacao_legal": "Art. 473, II da CLT",
+    "numero_dias": 3,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "DSG",
+    "descricao": "Doação de Sangue",
+    "argumentacao_legal": "Art. 473, IV da CLT",
+    "numero_dias": 1,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "SM",
+    "descricao": "Serviço Militar Obrigatório",
+    "argumentacao_legal": "Art. 472 da CLT",
+    "numero_dias": 1,
+    "tipo_tempo": "A"
+  },
+  {
+    "sigla": "CJ",
+    "descricao": "Convocação Judicial",
+    "argumentacao_legal": "Art. 430 do CPP",
+    "numero_dias": 1,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "INSS",
+    "descricao": "Licença INSS",
+    "argumentacao_legal": "Art. 59 da Lei 8.213/91",
+    "numero_dias": 1,
+    "tipo_tempo": "M"
+  },
+  {
+    "sigla": "DOA",
+    "descricao": "Doença Ocupacional",
+    "argumentacao_legal": "Art. 20 da Lei 8.213/91",
+    "numero_dias": 15,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "AAC",
+    "descricao": "Acompanhamento Consulta Filho",
+    "argumentacao_legal": "Art. 473, XI da CLT",
+    "numero_dias": 1,
+    "tipo_tempo": "D"
+  },
+  {
+    "sigla": "ALE",
+    "descricao": "Alistamento Eleitoral",
+    "argumentacao_legal": "Art. 48 da Lei 4.737/65",
+    "numero_dias": 2,
+    "tipo_tempo": "D"
+  }
+]

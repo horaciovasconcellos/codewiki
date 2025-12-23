@@ -1,0 +1,13 @@
+nome,descricao,categoria,nivel
+JavaScript,Linguagem de programação para desenvolvimento web,Técnica,Intermediário
+TypeScript,Superset do JavaScript com tipagem estática,Técnica,Intermediário
+Java,Linguagem de programação orientada a objetos,Técnica,Intermediário
+Python,Linguagem de programação versátil,Técnica,Básico
+SQL,Linguagem de consulta estruturada para bancos de dados,Técnica,Intermediário
+Docker,Containerização de aplicações,Técnica,Básico
+Kubernetes,Orquestração de containers,Técnica,Avançado
+Git,Controle de versão,Técnica,Intermediário
+Comunicação,Habilidade de se comunicar efetivamente,Comportamental,Intermediário
+Trabalho em Equipe,Capacidade de colaborar em equipe,Comportamental,Intermediário
+Liderança,Capacidade de liderar e motivar equipes,Comportamental,Avançado
+Resolução de Problemas,Habilidade analítica para resolver problemas,Comportamental,Intermediário

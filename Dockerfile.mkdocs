@@ -1,0 +1,31 @@
+FROM python:3.11-slim
+
+WORKDIR /docs
+
+# Instalar MkDocs e todos os plugins necessários
+RUN pip install --no-cache-dir \
+    mkdocs==1.5.3 \
+    mkdocs-material==9.5.3 \
+    mkdocs-material-extensions==1.3.1 \
+    pymdown-extensions==10.7 \
+    mkdocs-minify-plugin==0.7.2 \
+    mkdocs-awesome-pages-plugin==2.9.2 \
+    mkdocs-macros-plugin==1.0.5 \
+    markdown-include==0.8.1 \
+    mkdocs-autorefs==0.5.0 \
+    mkdocs-include-markdown-plugin==6.0.4 \
+    mkdocs-open-in-new-tab==1.0.3 \
+    mkdoxy==1.1.3 \
+    path.py
+
+# Criar diretórios
+RUN mkdir -p ./docs ./theme
+
+# Nota: mkdocs.yml, docs/ e theme/ serão montados via volumes
+# Ver docker-compose.yml para configuração de volumes
+
+# Expor porta
+EXPOSE 8082
+
+# Comando para servir a documentação
+CMD ["mkdocs", "serve", "--dev-addr=0.0.0.0:8082"]

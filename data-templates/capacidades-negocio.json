@@ -1,0 +1,44 @@
+[
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440001",
+    "sigla": "CAP-FIN-001",
+    "nome": "Gestão Financeira",
+    "descricao": "Capacidade de gestão e controle financeiro",
+    "nivel": "Nível 1",
+    "categoria": "Financeiro",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Alinhamento com estratégia de redução de custos",
+      "beneficiosEsperados": "Redução de 15% nos custos operacionais",
+      "estadoFuturoDesejado": "Sistema integrado de gestão financeira",
+      "gapEstadoAtualFuturo": "Sistema atual fragmentado e manual"
+    }
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440002",
+    "sigla": "CAP-RH-001",
+    "nome": "Gestão de Talentos",
+    "descricao": "Capacidade de recrutar e desenvolver colaboradores",
+    "nivel": "Nível 1",
+    "categoria": "RH",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Alinhamento com estratégia de retenção de talentos",
+      "beneficiosEsperados": "Aumento de 20% na retenção",
+      "estadoFuturoDesejado": "Plataforma digital de gestão de talentos",
+      "gapEstadoAtualFuturo": "Processos manuais e descentralizados"
+    }
+  },
+  {
+    "id": "660e8400-e29b-41d4-a716-446655440003",
+    "sigla": "CAP-LOG-001",
+    "nome": "Gestão de Estoque",
+    "descricao": "Capacidade de controlar e otimizar estoque",
+    "nivel": "Nível 2",
+    "categoria": "Logística",
+    "coberturaEstrategica": {
+      "alinhamentoObjetivos": "Alinhamento com estratégia de redução de inventário",
+      "beneficiosEsperados": "Redução de 30% no inventário parado",
+      "estadoFuturoDesejado": "Sistema automatizado de gestão de estoque",
+      "gapEstadoAtualFuturo": "Controle manual e com baixa visibilidade"
+    }
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "1",
+    "sigla": "REST",
+    "tecnologias": ["HTTP/JSON"],
+    "tipo": "Sincrono",
+    "usoTipico": "Integrações modernas"
+  },
+  {
+    "id": "2",
+    "sigla": "GRAPHQL",
+    "tecnologias": ["HTTP"],
+    "tipo": "Sincrono",
+    "usoTipico": "APIs flexíveis"
+  },
+  {
+    "id": "3",
+    "sigla": "GRPC",
+    "tecnologias": ["Protobuf"],
+    "tipo": "Sincrono",
+    "usoTipico": "Alta performance"
+  },
+  {
+    "id": "4",
+    "sigla": "SOAP",
+    "tecnologias": ["XML"],
+    "tipo": "Sincrono",
+    "usoTipico": "Sistemas legados"
+  },
+  {
+    "id": "5",
+    "sigla": "WS",
+    "tecnologias": ["WS"],
+    "tipo": "Sincrono",
+    "usoTipico": "Tempo real"
+  },
+  {
+    "id": "6",
+    "sigla": "MSGQUEUE",
+    "tecnologias": ["SNS/SQS", "Pub/Sub"],
+    "tipo": "Assincrono",
+    "usoTipico": "Processos desacoplados"
+  },
+  {
+    "id": "7",
+    "sigla": "EVTMESH",
+    "tecnologias": ["EventBridge", "SAP Event Mesh"],
+    "tipo": "Assincrono",
+    "usoTipico": "Arquitetura orientada a eventos"
+  },
+  {
+    "id": "8",
+    "sigla": "FILETRF",
+    "tecnologias": ["S3/Blob/GCS"],
+    "tipo": "Assincrono",
+    "usoTipico": "Batch"
+  },
+  {
+    "id": "9",
+    "sigla": "SFTP",
+    "tecnologias": ["SFTP cloud"],
+    "tipo": "Assincrono",
+    "usoTipico": "Legados"
+  },
+  {
+    "id": "10",
+    "sigla": "IPAAS",
+    "tecnologias": ["Mulesoft", "SIS", "Boomi"],
+    "tipo": "Ambos",
+    "usoTipico": "Orquestração"
+  },
+  {
+    "id": "11",
+    "sigla": "WEBHOOK",
+    "tecnologias": ["HTTP POST"],
+    "tipo": "Assincrono",
+    "usoTipico": "Notificações"
+  },
+  {
+    "id": "12",
+    "sigla": "STREAMING",
+    "tecnologias": ["Kafka/Kinesis"],
+    "tipo": "Assincrono",
+    "usoTipico": "Big Data/IoT"
+  }
+]

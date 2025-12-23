@@ -1,0 +1,22 @@
+sigla,hostname,tipo,ambiente,finalidade,status,provedor,datacenterRegiao,zonaAvailability,clusterHost,virtualizador,sistemaOperacional,distribuicaoVersao,arquitetura,ferramentaMonitoramento,backupDiario,backupSemanal,backupMensal
+SRV-001,servidor-001.empresa.com,Virtual,Produção,Aplicação,Ativo,OCI,-,-,-,,Oracle Linux,-,x86_64,N/A,false,false,false
+SRV-002,servidor-002.empresa.com,Virtual,Produção,Aplicação,Ativo,OCI,-,-,-,,Oracle Linux,-,x86_64,N/A,false,false,false
+SRV-003,servidor-003.empresa.com,Virtual,Produção,Aplicação,Ativo,OCI,-,-,-,,Oracle Linux,-,x86_64,N/A,false,false,false
+SRV-004,servidor-004.empresa.com,Virtual,Produção,Aplicação,Ativo,OCI,-,-,-,,Oracle Linux,-,x86_64,N/A,false,false,false
+SRV-005,servidor-005.empresa.com,Virtual,Produção,Aplicação,Ativo,OCI,-,-,-,,Oracle Linux,-,x86_64,N/A,false,false,false
+SRV-006,servidor-006.empresa.com,Virtual,Produção,Banco de Dados,Ativo,OCI,-,-,-,,Oracle Linux,-,x86_64,N/A,true,true,false
+SRV-007,servidor-007.empresa.com,Virtual,Homologação,Aplicação,Ativo,OCI,-,-,-,,Oracle Linux,-,x86_64,N/A,false,false,false
+SRV-008,servidor-008.empresa.com,Virtual,Teste,Aplicação,Ativo,OCI,-,-,-,,Oracle Linux,-,x86_64,N/A,false,false,false
+SRV-009,servidor-009.empresa.com,Cloud,Produção,Aplicação,Ativo,AWS,us-east-1,us-east-1a,-,,Ubuntu,22.04,x86_64,CloudWatch,false,false,false
+SRV-010,servidor-010.empresa.com,Físico,Produção,Infraestrutura,Ativo,On-Premise,Datacenter SP,-,-,,RHEL,8.8,x86_64,Zabbix,true,true,true
+SRV-INT-01,int-prod-01.empresa.com,Virtual,Produção,Integração,Ativo,Azure,eastus,eastus-1,cluster-int,Hyper-V,Windows Server,2022,x86_64,DataDog,true,true,false
+SRV-BATCH-01,batch-prod-01.empresa.com,Virtual,Produção,Batch,Ativo,OCI,sa-saopaulo-1,AD-1,cluster-batch,KVM,Oracle Linux,8.6,x86_64,Dynatrace,true,false,false
+SRV-APP-HML,app-homolog-01.empresa.com,Virtual,Homologação,Aplicação,Ativo,On-Premise,DC-SP,,esxi-01,VMware,Ubuntu,20.04 LTS,x86_64,Zabbix,false,true,false
+SRV-DB-HML,db-homolog-01.empresa.com,Virtual,Homologação,Banco de Dados,Ativo,On-Premise,DC-SP,,esxi-01,VMware,RHEL,8.5,x86_64,Zabbix,false,true,false
+SRV-APP-TST,app-teste-01.empresa.com,Virtual,Teste,Aplicação,Ativo,On-Premise,DC-RJ,,esxi-02,VMware,Debian,11,x86_64,N/A,false,false,false
+SRV-DB-TST,db-teste-01.empresa.com,Virtual,Teste,Banco de Dados,Ativo,On-Premise,DC-RJ,,esxi-02,VMware,RHEL,7.9,x86_64,N/A,false,false,false
+SRV-MON-01,monitor-prod-01.empresa.com,Físico,Produção,Monitoramento,Ativo,On-Premise,DC-SP,,,N/A,RHEL,8.6,x86_64,SigNoz,true,true,true
+SRV-APP-DEV,app-dev-01.empresa.com,Cloud,Desenvolvimento,Aplicação,Ativo,AWS,us-east-1,us-east-1c,,Kubernetes,Amazon Linux,2023,arm64,Prometheus,false,false,false
+SRV-DB-DEV,db-dev-01.empresa.com,Cloud,Desenvolvimento,Banco de Dados,Ativo,AWS,us-east-1,us-east-1c,,Kubernetes,Amazon Linux,2023,arm64,Prometheus,false,false,false
+SRV-LEGACY-01,legacy-app-01.empresa.com,Físico,Produção,Aplicação,Em manutenção,On-Premise,DC-SP,,,N/A,Windows Server,2016,x86_64,Zabbix,true,true,false
+SRV-OLD-01,old-system-01.empresa.com,Virtual,Produção,Aplicação,Obsoleto,On-Premise,DC-RJ,,esxi-old,VMware,Windows Server,2012,x86_64,N/A,false,false,false

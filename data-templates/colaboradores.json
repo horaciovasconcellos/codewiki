@@ -1,0 +1,60 @@
+[
+  {
+    "id": "bb0e8400-e29b-41d4-a716-446655440001",
+    "matricula": "5664",
+    "nome": "João Silva",
+    "setor": "Tecnologia da Informação",
+    "dataAdmissao": "2020-01-15",
+    "afastamentos": [
+      {
+        "id": "af-001",
+        "tipoAfastamentoId": "550e8400-e29b-41d4-a716-446655440001",
+        "inicialProvavel": "2024-12-20",
+        "finalProvavel": "2025-01-19"
+      }
+    ],
+    "habilidades": [
+      {
+        "id": "hab-001",
+        "habilidadeId": "770e8400-e29b-41d4-a716-446655440001",
+        "nivelDeclarado": "Avançado",
+        "nivelAvaliado": "Avançado",
+        "dataInicio": "2020-01-15"
+      }
+    ]
+  },
+  {
+    "id": "bb0e8400-e29b-41d4-a716-446655440002",
+    "matricula": "5665",
+    "nome": "Maria Santos",
+    "setor": "Financeiro",
+    "dataAdmissao": "2019-03-10",
+    "afastamentos": [],
+    "habilidades": [
+      {
+        "id": "hab-002",
+        "habilidadeId": "770e8400-e29b-41d4-a716-446655440004",
+        "nivelDeclarado": "Expert",
+        "nivelAvaliado": "Avançado",
+        "dataInicio": "2019-03-10"
+      }
+    ]
+  },
+  {
+    "id": "bb0e8400-e29b-41d4-a716-446655440003",
+    "matricula": "5666",
+    "nome": "Pedro Oliveira",
+    "setor": "Tecnologia da Informação",
+    "dataAdmissao": "2021-06-01",
+    "afastamentos": [],
+    "habilidades": [
+      {
+        "id": "hab-003",
+        "habilidadeId": "770e8400-e29b-41d4-a716-446655440002",
+        "nivelDeclarado": "Intermediário",
+        "nivelAvaliado": "Intermediário",
+        "dataInicio": "2021-06-01"
+      }
+    ]
+  }
+]

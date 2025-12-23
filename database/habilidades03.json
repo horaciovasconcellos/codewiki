@@ -1,0 +1,219 @@
+[
+  {
+    "sigla": "SAP-BTP",
+    "descricao": "Plataforma SAP Business Technology Platform para extensões e integrações",
+    "dominio": "Técnica",
+    "subcategoria": "Aplicação Terceira"
+  },
+  {
+    "sigla": "SAP-FIORI",
+    "descricao": "Desenvolvimento e customização de aplicativos SAP Fiori",
+    "dominio": "Técnica",
+    "subcategoria": "Frontend"
+  },
+  {
+    "sigla": "SAP-ABAP-OO",
+    "descricao": "Programação orientada a objetos com ABAP",
+    "dominio": "Técnica",
+    "subcategoria": "Backend"
+  },
+  {
+    "sigla": "SAP-IDOC",
+    "descricao": "Configuração e tratamento de IDocs para integração SAP",
+    "dominio": "Técnica",
+    "subcategoria": "Integração"
+  },
+  {
+    "sigla": "SAP-PI",
+    "descricao": "Uso da SAP Process Integration para conectividade corporativa",
+    "dominio": "Técnica",
+    "subcategoria": "Integração"
+  },
+  {
+    "sigla": "SAP-SOLMAN",
+    "descricao": "Administração e configuração do SAP Solution Manager",
+    "dominio": "Gestão",
+    "subcategoria": "Governança"
+  },
+  {
+    "sigla": "ORCL-SOA",
+    "descricao": "Desenvolvimento com Oracle SOA Suite para integrações corporativas",
+    "dominio": "Técnica",
+    "subcategoria": "Integração"
+  },
+  {
+    "sigla": "ORCL-AUTON",
+    "descricao": "Administração do Oracle Autonomous Database",
+    "dominio": "Técnica",
+    "subcategoria": "Banco de Dados"
+  },
+  {
+    "sigla": "ORCL-OIC",
+    "descricao": "Integração usando Oracle Integration Cloud",
+    "dominio": "Técnica",
+    "subcategoria": "Integração"
+  },
+  {
+    "sigla": "MS-SCCM",
+    "descricao": "Gerenciamento de ativos e software via Microsoft SCCM",
+    "dominio": "Técnica",
+    "subcategoria": "Infraestrutura"
+  },
+  {
+    "sigla": "MS-DEFENDER",
+    "descricao": "Administração do Microsoft Defender para ambientes corporativos",
+    "dominio": "Segurança",
+    "subcategoria": "Segurança"
+  },
+  {
+    "sigla": "MS-ACTIVE-DIR",
+    "descricao": "Administração do Active Directory e domínios corporativos",
+    "dominio": "Técnica",
+    "subcategoria": "Infraestrutura"
+  },
+  {
+    "sigla": "MS-PROJMGT",
+    "descricao": "Gestão de projetos com Microsoft Project e PMO",
+    "dominio": "Gestão",
+    "subcategoria": "Governança"
+  },
+  {
+    "sigla": "RH-ANSIBLE-TOWER",
+    "descricao": "Automação corporativa com Ansible Tower",
+    "dominio": "DevOps",
+    "subcategoria": "Infraestrutura"
+  },
+  {
+    "sigla": "RH-OPENSHIFT-SVCMESH",
+    "descricao": "Gestão de service mesh no Red Hat OpenShift",
+    "dominio": "Técnica",
+    "subcategoria": "Backend"
+  },
+  {
+    "sigla": "GH-PACKAGES",
+    "descricao": "Publicação e versionamento com GitHub Packages",
+    "dominio": "DevOps",
+    "subcategoria": "Pipeline"
+  },
+  {
+    "sigla": "GH-ADVSEC",
+    "descricao": "Uso de GitHub Advanced Security para segurança de código",
+    "dominio": "Segurança",
+    "subcategoria": "DevOps"
+  },
+  {
+    "sigla": "SPTF-DS-ARCH",
+    "descricao": "Arquitetura de dados e catalogação no Spotify Data Stack",
+    "dominio": "Negócio",
+    "subcategoria": "Analytics"
+  },
+  {
+    "sigla": "SPTF-ML",
+    "descricao": "Aplicação de machine learning e recomendação no ecossistema Spotify",
+    "dominio": "Técnica",
+    "subcategoria": "Backend"
+  },
+  {
+    "sigla": "CLOUD-FINOPS",
+    "descricao": "Gestão financeira de consumo de nuvem",
+    "dominio": "Gestão",
+    "subcategoria": "Governança"
+  },
+  {
+    "sigla": "CLOUD-HYBRID",
+    "descricao": "Administração e arquitetura de ambientes híbridos",
+    "dominio": "Técnica",
+    "subcategoria": "Infraestrutura"
+  },
+  {
+    "sigla": "CLOUD-MULTI",
+    "descricao": "Estratégias Multi-Cloud com governança",
+    "dominio": "Gestão",
+    "subcategoria": "Governança"
+  },
+  {
+    "sigla": "SEC-ZERO-TRUST",
+    "descricao": "Implementação de modelo Zero Trust",
+    "dominio": "Segurança",
+    "subcategoria": "Segurança"
+  },
+  {
+    "sigla": "SEC-IAM",
+    "descricao": "Gestão de identidade e acesso corporativo",
+    "dominio": "Segurança",
+    "subcategoria": "Segurança"
+  },
+  {
+    "sigla": "SEC-DLP",
+    "descricao": "Proteção contra perda de dados",
+    "dominio": "Segurança",
+    "subcategoria": "Segurança"
+  },
+  {
+    "sigla": "SEC-GRC",
+    "descricao": "Governança, risco e compliance",
+    "dominio": "Gestão",
+    "subcategoria": "Governança"
+  },
+  {
+    "sigla": "SOFT-NEGOCIACAO",
+    "descricao": "Habilidade de negociação em ambientes corporativos",
+    "dominio": "Comportamental",
+    "subcategoria": "Relacionamento"
+  },
+  {
+    "sigla": "SOFT-GESTCONFL",
+    "descricao": "Gestão estruturada de conflitos",
+    "dominio": "Comportamental",
+    "subcategoria": "Relacionamento"
+  },
+  {
+    "sigla": "SOFT-COACHING",
+    "descricao": "Coaching e desenvolvimento de equipes",
+    "dominio": "Gestão",
+    "subcategoria": "Liderança"
+  },
+  {
+    "sigla": "SOFT-DATA-LIT",
+    "descricao": "Alfabetização de dados para tomada de decisão",
+    "dominio": "Negócio",
+    "subcategoria": "Analytics"
+  },
+  {
+    "sigla": "SOFT-VISION",
+    "descricao": "Definição de visão estratégica e direcionadores",
+    "dominio": "Gestão",
+    "subcategoria": "Liderança"
+  },
+  {
+    "sigla": "BP-LEAN",
+    "descricao": "Modelagem e otimização de processos Lean",
+    "dominio": "Negócio",
+    "subcategoria": "Processos"
+  },
+  {
+    "sigla": "BP-BPMN",
+    "descricao": "Documentação de processos usando BPMN",
+    "dominio": "Negócio",
+    "subcategoria": "Processos"
+  },
+  {
+    "sigla": "BP-OKR",
+    "descricao": "Definição e gestão de objetivos e resultados chave",
+    "dominio": "Gestão",
+    "subcategoria": "Governança"
+  },
+  {
+    "sigla": "BP-CX",
+    "descricao": "Estratégia e jornada de experiência do cliente",
+    "dominio": "Negócio",
+    "subcategoria": "Atendimento"
+  },
+  {
+    "sigla": "BP-ESG",
+    "descricao": "Planejamento e indicadores ESG",
+    "dominio": "Gestão",
+    "subcategoria": "Governança"
+  }
+]
+

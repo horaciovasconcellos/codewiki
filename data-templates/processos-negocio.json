@@ -1,0 +1,52 @@
+[
+  {
+    "identificacao": "FIN-001",
+    "nome": "Gestão de Contas a Pagar",
+    "descricao": "Processo responsável pelo gerenciamento e pagamento de fornecedores e prestadores de serviço"
+  },
+  {
+    "identificacao": "FIN-002",
+    "nome": "Gestão de Contas a Receber",
+    "descricao": "Processo responsável pela cobrança e recebimento de clientes"
+  },
+  {
+    "identificacao": "RH-001",
+    "nome": "Recrutamento e Seleção",
+    "descricao": "Processo de captação, triagem e contratação de novos colaboradores"
+  },
+  {
+    "identificacao": "RH-002",
+    "nome": "Folha de Pagamento",
+    "descricao": "Processamento mensal de pagamentos, benefícios e encargos dos colaboradores"
+  },
+  {
+    "identificacao": "COM-001",
+    "nome": "Gestão de Vendas",
+    "descricao": "Processo de prospecção, negociação e fechamento de vendas"
+  },
+  {
+    "identificacao": "COM-002",
+    "nome": "Atendimento ao Cliente",
+    "descricao": "Suporte e relacionamento com clientes pós-venda"
+  },
+  {
+    "identificacao": "LOG-001",
+    "nome": "Gestão de Estoque",
+    "descricao": "Controle de entradas, saídas e inventário de produtos"
+  },
+  {
+    "identificacao": "LOG-002",
+    "nome": "Distribuição e Logística",
+    "descricao": "Planejamento e execução de entregas e transporte de mercadorias"
+  },
+  {
+    "identificacao": "TI-001",
+    "nome": "Gestão de Infraestrutura",
+    "descricao": "Manutenção e monitoramento de servidores, redes e sistemas"
+  },
+  {
+    "identificacao": "TI-002",
+    "nome": "Desenvolvimento de Software",
+    "descricao": "Análise, desenvolvimento e manutenção de aplicações"
+  }
+]

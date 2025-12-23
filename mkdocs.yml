@@ -1,0 +1,254 @@
+site_name: Sistema de Auditoria
+site_description: Auditoria de Sistemas
+site_author: Horacio Vasconcellos
+repo_url: https://github.com/horaciovasconcellos/sistema-de-auditoria
+edit_uri: ""
+docs_dir: docs
+repo_name: sistema-de-auditoria
+
+nav:
+  - "Início":
+      - "Bem-vindo": "index.md"
+      - "Licença": "LICENSE.md"
+      
+  - "Primeiros Passos":
+      - "Início Rápido": "QUICKSTART.md"
+      - "Manual de Instalação": "MANUAL_INSTALACAO.md"
+      - "Guia de Deployment": "DEPLOYMENT_GUIDE.md"
+      - "Primeiros Passos Detalhados": "primeiros-passos.md"
+      
+  - "Docker":
+      - "Setup do Docker": "DOCKER_SETUP.md"
+      - "Guia Docker": "DOCKER_GUIDE.md"
+      - "Migração Docker": "DOCKER_MIGRATION.md"
+      - "Container MkDocs": "MKDOCS_CONTAINER.md"
+      
+  - "Configuração":
+      - "Configuração Banco de Dados": "CONFIGURACAO_BD.md"
+      - "Configurações Board Azure": "CONFIGURACOES_BOARD_AZURE.md"
+      - "Volumes": "VOLUMES.md"
+      
+  - "Desenvolvimento":
+      - "Desenvolvimento": "desenvolvimento.md"
+      - "Estrutura Aplicações": "ESTRUTURA_APLICACOES.md"
+      - "Estrutura Capacidades de Negócio": "ESTRUTURA_CAPACIDADES_NEGOCIO.md"
+      - "Estrutura Tecnologias": "ESTRUTURA_TECNOLOGIAS.md"
+      - "Estrutura Tipos de Afastamento": "ESTRUTURA_TIPOS_AFASTAMENTO.md"
+      - "Debug Tecnologias": "DEBUG-TECNOLOGIAS.md"
+      
+  - "API":
+      - "Documentação da API": "DOCUMENTACAO_API.md"
+      - "API Status": "API_STATUS.md"
+      - "API Referência": "api-referencia.md"
+      - "APIs Microsoft Azure DevOps": "APIS_MICROSOFT_AZURE_DEVOPS.md"
+      - "API Habilidades Exemplo": "API_HABILIDADES_EXEMPLO.md"
+      - "Exemplo POST Tipo Afastamento": "EXEMPLO_POST_TIPO_AFASTAMENTO.md"
+      
+  - "Funcionalidades":
+      - "Visão Geral": "funcionalidades.md"
+      - "Sistema de Logging": "LOGGING_IMPLEMENTATION.md"
+      - "Status Logging": "STATUS_LOGGING.md"
+      - "Integrador Log Visual": "INTEGRADOR_LOG_VISUAL.md"
+      - "Identificador de Tecnologias": "IDENTIFICADOR_TECNOLOGIAS.md"
+      - "Implementação Comunicações": "RESUMO_IMPLEMENTACAO_COMUNICACOES.md"
+      
+  - "Banco de Dados":
+      - "Liquibase Database Migration": "LIQUIBASE_DATABASE_MIGRATION.md"
+      - "Liquibase Quickstart": "LIQUIBASE_QUICKSTART.md"
+      
+  - "Azure DevOps":
+      - "Criação de Projeto Passo a Passo": "CRIACAO_PROJETO_PASSO_A_PASSO.md"
+      - "Fluxo Criação Projeto": "FLUXO_CRIACAO_PROJETO.md"
+      - "Mudanças Criação Projeto": "MUDANCAS_CRIACAO_PROJETO.md"
+      - "Debug Azure DevOps": "DEBUG_AZURE_DEVOPS.md"
+      
+  - "Produção":
+      - "Production Deploy": "PRODUCTION_DEPLOY.md"
+      - "Production Cleanup": "PRODUCTION_CLEANUP.md"
+      - "Revisão de Produção": "RESUMO_REVISAO_PRODUCAO.md"
+      
+  - "Testes e Debug":
+      - "Guia Completo de Testes": "GUIA_COMPLETO_TESTES.md"
+      - "Testes Identificador Tecnologias": "TESTES_IDENTIFICADOR_TECNOLOGIAS.md"
+      - "Resumo Identificador Tecnologias": "RESUMO_IDENTIFICADOR_TECNOLOGIAS.md"
+      - "Troubleshooting Runbook": "TROUBLESHOOTING_RUNBOOK.md"
+      - "Instruções de Carga": "INSTRUCOES-CARGA.md"
+      
+  - "Documentação":
+      - "Implementação MkDocs": "MKDOCS_IMPLEMENTACAO.md"
+      - "Atualizações Documentação": "ATUALIZACOES_DOCUMENTACAO.md"
+      - "Índice Geral": "INDICE_GERAL.md"
+      - "Resumo Unificação": "RESUMO_UNIFICACAO.md"
+      
+  - "Release":
+      - "Release Notes": "RELEASE_NOTES.md"
+      - "Changelog": "CHANGELOG.md"
+      - "Leia-me (PT-BR)": "LEIAME.md"
+      
+  - "Segurança":
+      - "Segurança da Informação": "SECURITY.md"
+      - "Requisitos (PRD)": "PRD.md"
+
+copyright:  >
+   Copyright &copy; 2024 Documentação
+   <a href="#__consent">Change cookie settings</a>
+extra_css:
+  - styles/app-theme.css
+  - https://unpkg.com/mermaid@8.5.1/dist/mermaid.css
+  - styles/tablesort.css
+  - styles/60pthemas.css
+extra_javascript:
+  - javascripts/tables.js
+  - javascripts/tablesort.js
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+theme:
+  name: "material"
+  language: pt-BR
+  icon:
+    repo: fontawesome/brands/git-alt
+  custom_dir: theme
+  highlightjs: true
+  features:
+    - announce.dismiss
+    - commit
+    - content.action.edit
+    - content.code.annotate
+    - content.code.annotation
+    - content.code.copy
+    - content.footnote.tooltips
+    - navigation.instant
+    - navigation.prune
+    - search.highlight
+    - search.share
+    - search.suggest
+    - version
+  favicon: img/favicon.ico
+
+  palette:
+    - primary: 'deep purple'
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+plugins:
+  - search
+  - awesome-pages:
+      filename: .pages
+      collapse_single_pages: false
+      strict: false
+markdown_extensions:
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - markdown_include.include:
+      base_path: .
+  - codehilite
+  - attr_list
+  - extra
+  - pymdownx.highlight
+  - pymdownx.extra
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - md_in_html
+  - admonition
+  - abbr
+  - def_list
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.betterem:
+      smart_enable: all
+extra:
+  repo_owner: "60pportunities"
+  repo_name: "OpsPilot"
+  analytics:
+    provider: google
+    property: G-1234567890
+  consent:
+    title: Consentimento
+    description: >-
+       Utilizamos cookies para reconhecer as suas repetidas visitas e preferências, bem como
+       para medir a eficácia da nossa documentação e se os usuários
+       encontre o que eles estão procurando. Com o seu consentimento, você está nos ajudando a
+       melhorar nossa documentação.
+  version:
+    provider: mike
+    default: latest
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/horaciovasconcellos
+    - icon: fontawesome/brands/gitlab
+      link: https://gitlab.com/horaciovasconcellos
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/Horacio_Junior
+      name: Horacio.Vasconcellos on Twitter
+    - icon: fontawesome/brands/mastodon
+      name: Horaci.Vasconcellos on Mastodon
+    - icon: fontawesome/brands/gitter
+      link: https://gitter.im/squidfunk/mkdocs-material
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/77678117787
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/hor%C3%A1cio-correa-t-de-vasconcellos-j%C3%BAnior-b7788467/
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/horacio.vasconcellos/
+    - icon: fontawesome/brands/facebook
+      link: https://www.facebook.com/horacio.vasconcellos
+    - icon: fontawesome/brands/medium
+      link: http://60pportunities.com.br
+    - icon: fontawesome/brands/pied-piper-alt
+      link: https://60pportunities.com.br
+    - icon: fontawesome/brands/product-hunt
+      link: https://www.producthunt.com/@horacio_vasconcellos
+    - icon: fontawesome/brands/slack
+      link: https://gitlab.com/horaciovasconcellos
+    - icon: fontawesome/brands/discord
+      link: http://60pportunities.com.br
+    - icon: fontawesome/solid/paper-plane
+      link: mailto:horacio.vasconcellos@gmail.com  # Adicionei 'link:'
+use_directory_urls: true

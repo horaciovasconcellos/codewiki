@@ -1,0 +1,43 @@
+Step;Campo;Tipo;Obrigatório;Validação;Valores Possíveis;Observação
+1 - Integração Base;Sigla;Texto;Sim;Máx. 30 caracteres;;Campo único identifica a integração
+1 - Integração Base;Nome;Texto;Sim;Máx. 80 caracteres;;Nome descritivo da integração
+1 - Integração Base;Estilo de Integração;Seleção;Não;;Integração de processos|Integração de dados|Integração de análises|Integração do usuário|Integração de dispositivos;Define o tipo/categoria da integração
+1 - Integração Base;Padrão de Caso de Uso;Seleção;Não;;A2A – Application-to-Application|A2B – Application-to-Business|B2B – Business-to-Business|B2C – Business-to-Consumer|C2B – Consumer-to-Business|C2C – Consumer-to-Consumer|T2T – Thing-to-Thing (IoT)|T2C – Thing-to-Cloud|T2A – Thing-to-Application|Virtualização de dados|Orquestração de dados|extração transformação e carregamento (ETL)|Análises incorporadas|Análise entre aplicações|integração de interface do usuário|Integração móvel|Integração de chatbot|Thing to analytics|Thing to process|Thing to data lake;Define o padrão arquitetural
+1 - Integração Base;Integração Tecnológica;Seleção;Não;;APIs (Application Programming Interfaces)|Message Brokers|ESB / iPaaS|Tecnologias de EDI|Integração por Arquivos|Integração via Banco de Dados|ETL/ELT e Data Integration|Integração por Microservices|IoT (Thing Integration)|API Gateway / Gestão de APIs;Tecnologia utilizada na integração
+1 - Integração Base;Especificação;Arquivo;Não;PDF ou DOCX;;Upload da documentação técnica
+2 - User-to-Cloud;Integração;Seleção;Sim;;(Lista das integrações cadastradas no Step 1);Vincula ao cadastro base
+2 - User-to-Cloud;Tipo de Dispositivo;Seleção;Sim;;Desktop|Notebook|Smartphone|Tablet|Outro;Dispositivo do usuário
+2 - User-to-Cloud;Nome do Dispositivo;Texto;Sim;;;Nome/identificação do dispositivo
+2 - User-to-Cloud;Comunicação;Seleção;Sim;;(Lista de comunicações cadastradas);Tipo de protocolo/comunicação
+2 - User-to-Cloud;Tipo de Autenticação;Seleção;Sim;;OAuth2.0|SAML|OpenID Connect|Basic Auth|API Key|JWT|Certificado Digital|SSO|Biometria|MFA;Método de autenticação
+2 - User-to-Cloud;Periodicidade;Seleção;Sim;;Real-Time|Batch|Agendado|On-Demand|Híbrido;Frequência de execução
+2 - User-to-Cloud;Frequência de Uso;Seleção;Sim;;Alta|Média|Baixa;Volume de utilização
+3 - User-to-OnPremise;Integração;Seleção;Sim;;(Lista das integrações cadastradas no Step 1);Vincula ao cadastro base
+3 - User-to-OnPremise;Tipo de Dispositivo;Seleção;Sim;;Desktop|Notebook|Smartphone|Tablet|Outro;Dispositivo do usuário
+3 - User-to-OnPremise;Nome do Dispositivo;Texto;Sim;;;Nome/identificação do dispositivo
+3 - User-to-OnPremise;Aplicação de Destino;Seleção;Sim;;(Lista de aplicações ON-PREMISE);Aplicação destino on-premise
+3 - User-to-OnPremise;Tipo de Integração;Seleção;Sim;;Request/Response|Publish/Subscribe|File Transfer|Data Replication|Master Data Sync;Padrão de integração
+3 - User-to-OnPremise;Tipo de Autenticação;Seleção;Sim;;OAuth2.0|SAML|OpenID Connect|Basic Auth|API Key|JWT|Certificado Digital|SSO|Biometria|MFA;Método de autenticação
+3 - User-to-OnPremise;Periodicidade;Seleção;Sim;;Real-Time|Batch|Agendado|On-Demand|Híbrido;Frequência de execução
+3 - User-to-OnPremise;Frequência de Uso;Seleção;Sim;;Alta|Média|Baixa;Volume de utilização
+4 - Cloud-to-Cloud;Integração;Seleção;Sim;;(Lista das integrações cadastradas no Step 1);Vincula ao cadastro base
+4 - Cloud-to-Cloud;Aplicação de Origem;Seleção;Sim;;(Lista de aplicações CLOUD);Aplicação origem na cloud
+4 - Cloud-to-Cloud;Aplicação de Destino;Seleção;Sim;;(Lista de aplicações CLOUD);Aplicação destino na cloud
+4 - Cloud-to-Cloud;Tipo de Integração;Seleção;Sim;;Request/Response|Publish/Subscribe|File Transfer|Data Replication|Master Data Sync;Padrão de integração
+4 - Cloud-to-Cloud;Tipo de Autenticação;Seleção;Sim;;OAuth2.0|SAML|OpenID Connect|Basic Auth|API Key|JWT|Certificado Digital|SSO|Biometria|MFA;Método de autenticação
+4 - Cloud-to-Cloud;Periodicidade;Seleção;Sim;;Real-Time|Batch|Agendado|On-Demand|Híbrido;Frequência de execução
+4 - Cloud-to-Cloud;Frequência de Uso;Seleção;Sim;;Alta|Média|Baixa;Volume de utilização
+5 - OnPremise-to-Cloud;Integração;Seleção;Sim;;(Lista das integrações cadastradas no Step 1);Vincula ao cadastro base
+5 - OnPremise-to-Cloud;Aplicação de Origem;Seleção;Sim;;(Lista de aplicações ON-PREMISE);Aplicação origem on-premise
+5 - OnPremise-to-Cloud;Aplicação de Destino;Seleção;Sim;;(Lista de aplicações CLOUD);Aplicação destino na cloud
+5 - OnPremise-to-Cloud;Tipo de Integração;Seleção;Sim;;Request/Response|Publish/Subscribe|File Transfer|Data Replication|Master Data Sync;Padrão de integração
+5 - OnPremise-to-Cloud;Tipo de Autenticação;Seleção;Sim;;OAuth2.0|SAML|OpenID Connect|Basic Auth|API Key|JWT|Certificado Digital|SSO|Biometria|MFA;Método de autenticação
+5 - OnPremise-to-Cloud;Periodicidade;Seleção;Sim;;Real-Time|Batch|Agendado|On-Demand|Híbrido;Frequência de execução
+5 - OnPremise-to-Cloud;Frequência de Uso;Seleção;Sim;;Alta|Média|Baixa;Volume de utilização
+6 - OnPremise-to-OnPremise;Integração;Seleção;Sim;;(Lista das integrações cadastradas no Step 1);Vincula ao cadastro base
+6 - OnPremise-to-OnPremise;Aplicação de Origem;Seleção;Sim;;(Lista de aplicações ON-PREMISE);Aplicação origem on-premise
+6 - OnPremise-to-OnPremise;Aplicação de Destino;Seleção;Sim;;(Lista de aplicações ON-PREMISE);Aplicação destino on-premise
+6 - OnPremise-to-OnPremise;Tipo de Integração;Seleção;Sim;;Request/Response|Publish/Subscribe|File Transfer|Data Replication|Master Data Sync;Padrão de integração
+6 - OnPremise-to-OnPremise;Tipo de Autenticação;Seleção;Sim;;OAuth2.0|SAML|OpenID Connect|Basic Auth|API Key|JWT|Certificado Digital|SSO|Biometria|MFA;Método de autenticação
+6 - OnPremise-to-OnPremise;Periodicidade;Seleção;Sim;;Real-Time|Batch|Agendado|On-Demand|Híbrido;Frequência de execução
+6 - OnPremise-to-OnPremise;Frequência de Uso;Seleção;Sim;;Alta|Média|Baixa;Volume de utilização

@@ -1,0 +1,140 @@
+services:
+  mysql-master:
+    image: mysql:8.0
+    container_name: mysql-master
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: auditoria_db
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: apppass123
+    ports:
+      - "3306:3306"
+    volumes:
+      # Dados persistentes
+      - ~/docker/mysql/master/data:/var/lib/mysql
+      # Logs persistentes
+      - ~/docker/mysql/master/logs:/var/log/mysql
+      # Configurações customizadas
+      - ~/docker/mysql/master/config/master.cnf:/etc/mysql/conf.d/master.cnf:ro
+      # Scripts de inicialização
+      - ./database/01-init-schema-data.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./database/03-create-configuracoes.sql:/docker-entrypoint-initdb.d/03-configuracoes.sql:ro
+      - ./database/04-create-logs.sql:/docker-entrypoint-initdb.d/04-logs.sql:ro
+      # Backups (montado para facilitar backups manuais)
+      - ~/docker/mysql/master/backup:/backup
+    networks:
+      - auditoria-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mysql-slave:
+    image: mysql:8.0
+    container_name: mysql-slave
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: auditoria_db
+    ports:
+      - "3307:3306"
+    volumes:
+      # Dados persistentes
+      - ~/docker/mysql/slave/data:/var/lib/mysql
+      # Logs persistentes
+      - ~/docker/mysql/slave/logs:/var/log/mysql
+      # Configurações customizadas
+      - ~/docker/mysql/slave/config/slave.cnf:/etc/mysql/conf.d/slave.cnf:ro
+      # Backups (montado para facilitar backups manuais)
+      - ~/docker/mysql/slave/backup:/backup
+    networks:
+      - auditoria-network
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  replication-setup:
+    image: mysql:8.0
+    container_name: replication-setup
+    volumes:
+      - ./database/02-setup-replication.sh:/setup-replication.sh:ro
+      - ~/docker/mysql/scripts:/scripts:ro
+    networks:
+      - auditoria-network
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+      mysql-slave:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "/setup-replication.sh"]
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auditoria-app
+    ports:
+      - "5173:5173"
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./server:/app/server
+      - ./database:/app/database
+      - ./data-templates:/app/data-templates
+      - /app/node_modules
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql-master
+      MYSQL_PORT: 3306
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: apppass123
+      MYSQL_DATABASE: auditoria_db
+      API_URL: http://localhost:3000
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:3000
+    networks:
+      - auditoria-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mkdocs:
+    build:
+      context: .
+      dockerfile: Dockerfile.mkdocs
+    container_name: auditoria-mkdocs
+    ports:
+      - "8000:8082"
+    volumes:
+      - ./docs:/docs/docs:ro
+      - ./mkdocs-simple.yml:/docs/mkdocs.yml:ro
+    networks:
+      - auditoria-network
+    restart: unless-stopped
+
+# Removendo volumes nomeados (agora usando volumes locais)
+# volumes:
+#   mysql-master-data:
+#   mysql-slave-data:
+
+networks:
+  auditoria-network:
+    driver: bridge
+    name: auditoria-network

@@ -1,0 +1,6 @@
+# Backups automáticos
+*.sql
+backup_*.sql
+
+# Manter este arquivo
+!.gitignore

@@ -1,0 +1,180 @@
+import { useState } from 'react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { TokenAcesso } from '@/lib/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { TokensDataTable } from './TokensDataTable';
+import { TokenForm } from './TokenForm';
+import { TokenDetailsDialog } from './TokenDetailsDialog';
+import { Button } from '@/components/ui/button';
+import { Key, Plus } from '@phosphor-icons/react';
+import { StatusToken, HistoricoTokenAcesso } from '@/lib/types';
+
+export function TokensView() {
+  const [tokens, setTokens] = useLocalStorage<TokenAcesso[]>('tokens-acesso', []);
+  const [selectedToken, setSelectedToken] = useState<TokenAcesso | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [editToken, setEditToken] = useState<TokenAcesso | undefined>(undefined);
+  const [formOpen, setFormOpen] = useState(false);
+
+  const handleView = (token: TokenAcesso) => {
+    setSelectedToken(token);
+    setDetailsOpen(true);
+  };
+
+  const handleEdit = (token: TokenAcesso) => {
+    setEditToken(token);
+    setFormOpen(true);
+  };
+
+  const handleNewToken = () => {
+    setEditToken(undefined);
+    setFormOpen(true);
+  };
+
+  const handleTokenSave = (token: TokenAcesso) => {
+    setTokens((current) => {
+      const currentList = current || [];
+      const existe = currentList.find((t) => t.id === token.id);
+      if (existe) {
+        return currentList.map((t) => (t.id === token.id ? token : t));
+      }
+      return [...currentList, token];
+    });
+    setFormOpen(false);
+    setEditToken(undefined);
+  };
+
+  const handleTokenDelete = (id: string) => {
+    setTokens((current) => {
+      const currentList = current || [];
+      return currentList.filter((t) => t.id !== id);
+    });
+  };
+
+  const handleTokenRevoke = async (id: string, motivo: string) => {
+    const user = { login: 'sistema' };
+    const now = new Date().toISOString();
+
+    setTokens((current) => {
+      const currentList = current || [];
+      return currentList.map((t) => {
+        if (t.id === id) {
+          const novaEntradaHistorico: HistoricoTokenAcesso = {
+            id: crypto.randomUUID(),
+            tokenId: id,
+            tipoAcao: 'Revogação',
+            descricao: `Token revogado - ${motivo}`,
+            realizadoPor: user?.login || 'sistema',
+            dataHora: now,
+            dadosAnteriores: { status: t.status },
+            dadosNovos: { status: 'Revogado' as StatusToken },
+          };
+
+          return {
+            ...t,
+            status: 'Revogado' as StatusToken,
+            motivoRevogacao: motivo,
+            ultimaAtualizacao: now,
+            historico: [...(t.historico || []), novaEntradaHistorico],
+          };
+        }
+        return t;
+      });
+    });
+  };
+
+  const handleTokenRenew = async (id: string) => {
+    const user = { login: 'sistema' };
+    const now = new Date().toISOString();
+
+    setTokens((current) => {
+      const currentList = current || [];
+      return currentList.map((t) => {
+        if (t.id === id && t.permitirRegeneracao) {
+          const novaDataExpiracao = new Date();
+          novaDataExpiracao.setFullYear(novaDataExpiracao.getFullYear() + 1);
+
+          const novaEntradaHistorico: HistoricoTokenAcesso = {
+            id: crypto.randomUUID(),
+            tokenId: id,
+            tipoAcao: 'Renovação',
+            descricao: `Token renovado - Nova data de expiração: ${
+              novaDataExpiracao.toISOString().split('T')[0]
+            }`,
+            realizadoPor: user?.login || 'sistema',
+            dataHora: now,
+            dadosAnteriores: { dataExpiracao: t.dataExpiracao },
+            dadosNovos: { dataExpiracao: novaDataExpiracao.toISOString() },
+          };
+
+          return {
+            ...t,
+            dataExpiracao: novaDataExpiracao.toISOString(),
+            status: 'Ativo' as StatusToken,
+            ultimaAtualizacao: now,
+            historico: [...(t.historico || []), novaEntradaHistorico],
+          };
+        }
+        return t;
+      });
+    });
+  };
+
+  return (
+    <div className="container mx-auto py-8 px-4 max-w-[1800px]">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <SidebarTrigger />
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+              <Key size={32} weight="duotone" className="text-primary" />
+              Tokens de Acesso
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Gerenciamento de tokens para autenticação de usuários, aplicações e integrações
+            </p>
+          </div>
+        </div>
+
+        <Separator />
+
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Lista de Tokens</CardTitle>
+                <CardDescription>{tokens.length} token(s) cadastrado(s)</CardDescription>
+              </div>
+              <Button onClick={handleNewToken}>
+                <Plus className="mr-2" size={16} />
+                Novo Token
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <TokensDataTable
+              tokens={tokens || []}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleTokenDelete}
+              onRevoke={handleTokenRevoke}
+              onRenew={handleTokenRenew}
+            />
+          </CardContent>
+        </Card>
+
+        <TokenDetailsDialog token={selectedToken} open={detailsOpen} onOpenChange={setDetailsOpen} />
+
+        <TokenForm
+          tokens={tokens || []}
+          onSave={handleTokenSave}
+          editToken={editToken}
+          open={formOpen}
+          onOpenChange={setFormOpen}
+        />
+      </div>
+    </div>
+  );
+}

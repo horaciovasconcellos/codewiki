@@ -1,0 +1,100 @@
+[
+  {
+    "produto": "Azure DevOps",
+    "workItemProcess": "Scrum",
+    "projeto": "Projeto Portal Colaboradores",
+    "dataInicial": "2025-01-15",
+    "iteracao": 1,
+    "incluirQuery": true,
+    "incluirMaven": true,
+    "incluirLiquibase": true,
+    "criarTimeSustentacao": true,
+    "repositorios": [
+      {
+        "nome": "portal-frontend",
+        "tipo": "Git",
+        "url": "https://dev.azure.com/empresa/projeto/_git/portal-frontend"
+      },
+      {
+        "nome": "portal-backend",
+        "tipo": "Git",
+        "url": "https://dev.azure.com/empresa/projeto/_git/portal-backend"
+      }
+    ],
+    "nomeTime": "Time Portal",
+    "numeroSemanas": 2,
+    "iteracaoMensal": false,
+    "status": "Pendente"
+  },
+  {
+    "produto": "Azure DevOps",
+    "workItemProcess": "Agile",
+    "projeto": "Sistema Financeiro V2",
+    "dataInicial": "2025-02-01",
+    "iteracao": 1,
+    "incluirQuery": true,
+    "incluirMaven": false,
+    "incluirLiquibase": true,
+    "criarTimeSustentacao": false,
+    "repositorios": [
+      {
+        "nome": "financeiro-api",
+        "tipo": "Git",
+        "url": "https://dev.azure.com/empresa/financeiro/_git/api"
+      }
+    ],
+    "nomeTime": "Time Financeiro",
+    "numeroSemanas": 3,
+    "iteracaoMensal": false,
+    "status": "Pendente"
+  },
+  {
+    "produto": "Azure DevOps",
+    "workItemProcess": "Scrum",
+    "projeto": "Mobile App Cliente",
+    "dataInicial": "2025-03-01",
+    "iteracao": 1,
+    "incluirQuery": false,
+    "incluirMaven": false,
+    "incluirLiquibase": false,
+    "criarTimeSustentacao": true,
+    "repositorios": [
+      {
+        "nome": "mobile-app",
+        "tipo": "Git",
+        "url": "https://dev.azure.com/empresa/mobile/_git/app"
+      }
+    ],
+    "nomeTime": "Time Mobile",
+    "numeroSemanas": 2,
+    "iteracaoMensal": true,
+    "status": "Pendente"
+  },
+  {
+    "produto": "Azure DevOps",
+    "workItemProcess": "Basic",
+    "projeto": "Infraestrutura como Código",
+    "dataInicial": "2025-01-20",
+    "iteracao": 1,
+    "incluirQuery": false,
+    "incluirMaven": false,
+    "incluirLiquibase": false,
+    "criarTimeSustentacao": false,
+    "repositorios": [
+      {
+        "nome": "iac-terraform",
+        "tipo": "Git",
+        "url": "https://dev.azure.com/empresa/infra/_git/terraform"
+      },
+      {
+        "nome": "iac-ansible",
+        "tipo": "Git",
+        "url": "https://dev.azure.com/empresa/infra/_git/ansible"
+      }
+    ],
+    "nomeTime": "Time DevOps",
+    "numeroSemanas": 1,
+    "iteracaoMensal": false,
+    "status": "Pendente"
+  }
+]

@@ -1,0 +1,558 @@
+# Scripts - Sistema de Auditoria
+
+Esta pasta contém os scripts de banco de dados e carga de dados do Sistema de Auditoria.
+
+## 📂 Estrutura de Arquivos
+
+### Scripts SQL
+- `create-tables.sql` - Criação de tabelas (MySQL)
+- `create-contratos-tables.sql` - Tabelas de contratos
+- `load-data.sql` - Carga inicial de dados (Oracle - legado)
+- `fix-tecnologias.sql` - Correções em tecnologias
+- `migrate-habilidades.sql` - Migração de habilidades
+- `update-capacidades.sql` - Atualizações em capacidades
+
+### Scripts de Carga (Bash + API REST)
+- `load-tipos-afastamento.sh` - Carga de tipos de afastamento
+- `load-habilidades.sh` - Carga de habilidades
+- `load-capacidades-negocio.sh` - Carga de capacidades de negócio
+- `load-colaboradores.sh` - Carga de colaboradores
+- `load-tecnologias.sh` - Carga de tecnologias
+- `load-processos.sh` - Carga de processos de negócio
+- `load-slas.sh` - Carga de SLAs
+- `load-aplicacoes.sh` - Carga de aplicações
+- `import-tecnologias-pom.sh` - **[NOVO]** Importa tecnologias de arquivo pom.xml Maven
+
+### Scripts de Migração
+- `migrate-habilidades.sh` - Migração de estrutura de habilidades
+- `load-habilidades.js` - Carga via Node.js (alternativa)
+
+### Scripts de Manutenção
+- `backup-mysql.sh` - Backup do MySQL
+- `restore-mysql.sh` - Restauração do MySQL
+- `check-db-structure.sh` - Verificação de estrutura
+- `diagnose-server.sh` - Diagnóstico do servidor
+- `full-diagnostic.sh` - Diagnóstico completo
+
+### Scripts de Teste
+- `test-criar-tipo-afastamento.sh` - Teste de criação
+- `test-habilidades.sh` - Teste de habilidades
+- `test-single-habilidade.sh` - Teste unitário
+
+### Utilitários
+- `export-data.sh` - Exportação de dados
+- `load-data.sh` - Carga genérica (legado)
+
+## 📚 Arquivos de Documentação
+
+- `README.md` - Este arquivo
+- `README-CARGA-HABILIDADES.md` - Guia de carga de habilidades
+- `README_MIGRACAO_HABILIDADES.md` - Guia de migração
+
+## Arquivos Disponíveis
+
+### 1. `create-tables.sql`
+Script de criação de todas as tabelas do sistema.
+
+**Tabelas criadas:**
+- `tipos_afastamento` - Tipos de afastamento de colaboradores
+- `colaboradores` - Cadastro de colaboradores
+- `afastamentos` - Registro de afastamentos
+- `tecnologias` - Cadastro de tecnologias
+- `processos_negocio` - Processos de negócio
+- `aplicacoes` - Aplicações do sistema
+- `capacidades_negocio` - Capacidades de negócio
+- `slas` - Service Level Agreements
+- `runbooks` - Runbooks operacionais
+- `habilidades` - Habilidades técnicas e comportamentais
+- `habilidades_colaboradores` - Associação de habilidades aos colaboradores
+- `repositorios_projetos` - Repositórios de projetos (com campo calculado)
+- `projetos_gerados` - Histórico de projetos gerados
+- `repos_por_projeto` - Associação de repositórios aos projetos
+- `tokens_acesso` - Tokens de acesso para APIs
+- `tokens_escopos` - Escopos dos tokens
+- `tokens_origens` - Origens permitidas para os tokens
+
+**Características:**
+- Todas as tabelas incluem constraints de chave primária e estrangeira
+- Índices para otimização de performance
+- Comentários em tabelas e colunas
+- Campo calculado (VIRTUAL) para `nome_repositorio` = `produto-categoria-tecnologia`
+
+### 2. `load-data.sql`
+Script de carga inicial de dados para popular as tabelas com informações de exemplo.
+
+**Dados incluídos:**
+- 5 tipos de afastamento
+- 10 habilidades
+- 3 capacidades de negócio
+- 5 aplicações (SISAUD, PORTAL, FINANCE, RHUMANO, ANALITICA)
+- 5 tecnologias
+- 3 processos de negócio
+- 3 SLAs
+- 3 runbooks
+- 1 colaborador de exemplo (matrícula 5664)
+- 3 habilidades do colaborador
+- 9 repositórios de exemplo
+- 1 projeto gerado de exemplo
+- 1 token de acesso de exemplo
+
+## Como Executar
+
+### Opção 1: SQL*Plus (Oracle)
+```bash
+# Conectar ao banco de dados
+sqlplus usuario/senha@banco
+
+# Executar script de criação
+@create-tables.sql
+
+# Executar script de carga
+@load-data.sql
+```
+
+### Opção 2: SQL Developer
+1. Abra o SQL Developer
+2. Conecte-se ao banco de dados
+3. Abra o arquivo `create-tables.sql`
+4. Execute o script (F5 ou botão Run Script)
+5. Abra o arquivo `load-data.sql`
+6. Execute o script (F5 ou botão Run Script)
+
+### Opção 3: Linha de Comando
+```bash
+# Executar script de criação
+sqlplus usuario/senha@banco @create-tables.sql
+
+# Executar script de carga
+sqlplus usuario/senha@banco @load-data.sql
+```
+
+## Ordem de Execução
+
+**IMPORTANTE:** Execute os scripts na seguinte ordem:
+
+1. **Primeiro:** `create-tables.sql` - Cria todas as estruturas
+2. **Depois:** `load-data.sql` - Popula as tabelas com dados
+
+## Campo Calculado - Nome do Repositório
+
+A tabela `repositorios_projetos` possui um campo calculado que concatena automaticamente:
+
+```
+nome_repositorio = produto + '-' + categoria + '-' + tecnologia
+```
+
+**Exemplos:**
+- Produto: `SISAUD`, Categoria: `backend`, Tecnologia: `java` → `SISAUD-backend-java`
+- Produto: `PORTAL`, Categoria: `frontend`, Tecnologia: `angular` → `PORTAL-frontend-angular`
+- Produto: `FINANCE`, Categoria: `api`, Tecnologia: `java` → `FINANCE-api-java`
+
+Este campo é **VIRTUAL** (calculado automaticamente) e não pode ser inserido ou atualizado manualmente.
+
+## Validações e Regras
+
+### Tipos de Afastamento
+- `tipo_tempo`: Aceita apenas 'C' (Corrido) ou 'N' (Não corrido)
+
+### Tokens de Acesso
+- `status`: Ativo, Revogado, Expirado, Pendente, Suspenso
+- `ambiente`: Produção, Homologação, Desenvolvimento
+- `tipo_entidade`: Pessoa Física, Pessoa Jurídica, Sistema, Serviço Interno
+
+### Repositórios
+- Combinação única de produto + categoria + tecnologia
+
+### Aplicações
+- Siglas únicas (constraint `uk_aplicacoes_sigla`)
+
+## Categorias de Repositório
+
+Valores aceitos para o campo `categoria`:
+- analiticos
+- api
+- app
+- batch
+- dashboard
+- etl
+- frontend
+- backend
+- integracao
+- portal
+- svc
+
+## Tecnologias de Repositório
+
+Valores aceitos para o campo `tecnologia`:
+- airflow
+- angular
+- databricks
+- go
+- java
+- kotlin
+- mulesoft
+- node
+- php
+- plsql
+- powerbi
+- python
+- react
+- spark
+- ords
+
+## Verificação de Carga
+
+Após executar o script de carga, você verá um resumo com a quantidade de registros em cada tabela:
+
+```
+TABELA                          REGISTROS
+------------------------------ ----------
+Aplicações                              5
+Capacidades de Negócio                  3
+Colaboradores                           1
+Habilidades                            10
+Habilidades Colaboradores               3
+Processos de Negócio                    3
+Projetos Gerados                        1
+Repositórios de Projetos                9
+Repositórios por Projeto                3
+Runbooks                                3
+SLAs                                    3
+Tecnologias                             5
+Tipos de Afastamento                    5
+Tokens Escopos                          2
+Tokens Origens                          2
+Tokens de Acesso                        1
+```
+
+## Limpeza de Dados
+
+Para remover todos os dados e estruturas:
+
+```sql
+-- ATENÇÃO: Este comando apaga TODOS os dados!
+DROP TABLE tokens_origens CASCADE CONSTRAINTS;
+DROP TABLE tokens_escopos CASCADE CONSTRAINTS;
+DROP TABLE tokens_acesso CASCADE CONSTRAINTS;
+DROP TABLE repos_por_projeto CASCADE CONSTRAINTS;
+DROP TABLE projetos_gerados CASCADE CONSTRAINTS;
+DROP TABLE repositorios_projetos CASCADE CONSTRAINTS;
+DROP TABLE habilidades_colaboradores CASCADE CONSTRAINTS;
+DROP TABLE habilidades CASCADE CONSTRAINTS;
+DROP TABLE runbooks CASCADE CONSTRAINTS;
+DROP TABLE slas CASCADE CONSTRAINTS;
+DROP TABLE capacidades_negocio CASCADE CONSTRAINTS;
+DROP TABLE aplicacoes CASCADE CONSTRAINTS;
+DROP TABLE processos_negocio CASCADE CONSTRAINTS;
+DROP TABLE tecnologias CASCADE CONSTRAINTS;
+DROP TABLE afastamentos CASCADE CONSTRAINTS;
+DROP TABLE colaboradores CASCADE CONSTRAINTS;
+DROP TABLE tipos_afastamento CASCADE CONSTRAINTS;
+```
+
+## Scripts de Carga via API REST
+
+Os scripts de carga utilizam a API REST do sistema para popular o banco de dados. Todos seguem o mesmo padrão:
+
+### Padrão de Nomenclatura
+
+```bash
+load-{entidade}.sh
+```
+
+Exemplos:
+- `load-tipos-afastamento.sh`
+- `load-habilidades.sh`
+- `load-capacidades-negocio.sh`
+- `load-colaboradores.sh`
+- `load-tecnologias.sh`
+- `load-processos.sh`
+- `load-slas.sh`
+- `load-aplicacoes.sh`
+
+### Como Usar os Scripts de Carga
+
+```bash
+# 1. Tornar executável (apenas primeira vez)
+chmod +x load-tipos-afastamento.sh
+
+# 2. Executar (arquivo padrão em data-templates/)
+./load-tipos-afastamento.sh
+
+# 3. OU especificar arquivo customizado
+./load-tipos-afastamento.sh meus-tipos.json
+```
+
+### Pré-requisitos
+
+1. **jq** instalado:
+   ```bash
+   # macOS
+   brew install jq
+   
+   # Linux
+   sudo apt-get install jq
+   ```
+
+2. **Servidor rodando**:
+   ```bash
+   # Opção 1: Docker
+   docker-compose up
+   
+   # Opção 2: Local
+   npm run dev
+   ```
+
+3. **Arquivo de dados** em `data-templates/`:
+   - `tipos-afastamento.json`
+   - `habilidades.json`
+   - `capacidades-negocio.json`
+   - `colaboradores.json`
+   - etc.
+
+### Estrutura dos Scripts
+
+Todos os scripts seguem o mesmo padrão:
+
+1. **Validação**:
+   - Verificar se arquivo existe
+   - Validar JSON
+   - Verificar se servidor está rodando
+
+2. **Confirmação**:
+   - Mostrar total de registros
+   - Pedir confirmação do usuário
+
+3. **Processamento**:
+   - Verificar se registro já existe
+   - Se existe: atualizar (PUT)
+   - Se não existe: criar (POST)
+   - Logar cada operação
+
+4. **Resumo**:
+   - Criados
+   - Atualizados
+   - Duplicados
+   - Erros
+   - Total no banco
+
+### Exemplo de Saída
+
+```
+==========================================
+CARGA DE TIPOS DE AFASTAMENTO
+==========================================
+
+📄 Arquivo: ../data-templates/tipos-afastamento.json
+
+🔍 Verificando servidor...
+✓ Servidor OK
+
+🔍 Validando arquivo JSON...
+✓ JSON válido
+
+📊 Total de tipos de afastamento a processar: 12
+
+Deseja continuar com a carga? (s/N) s
+
+==========================================
+PROCESSANDO REGISTROS
+==========================================
+
+Processando: FER - Férias
+  ✓ Criado (ID: 550e8400-e29b-41d4-a716-446655440001)
+
+Processando: LIC-MED - Licença Médica
+  ↻ Atualizado (ID: 550e8400-e29b-41d4-a716-446655440002)
+
+==========================================
+RESUMO DA CARGA
+==========================================
+✓ Criados:      8
+↻ Atualizados:  3
+⚠ Duplicados:   1
+✗ Erros:        0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Total:        12
+
+🔍 Verificando registros no banco...
+✓ Total de tipos de afastamento no banco: 12
+
+✓ Carga concluída!
+```
+
+### Logs
+
+Cada execução gera um arquivo de log:
+
+```
+load-tipos-afastamento-20251125_103045.log
+load-habilidades-20251125_103145.log
+load-capacidades-20251123_124914.log
+```
+
+Os logs contêm:
+- Data/hora de início
+- Erros detalhados (se houver)
+- Mensagens de aviso
+
+### Ordem Recomendada de Carga
+
+1. `load-tipos-afastamento.sh` - Tipos de afastamento (sem dependências)
+2. `load-habilidades.sh` - Habilidades (sem dependências)
+3. `load-capacidades-negocio.sh` - Capacidades (sem dependências)
+4. `load-tecnologias.sh` - Tecnologias (sem dependências)
+5. `load-processos.sh` - Processos (sem dependências)
+6. `load-slas.sh` - SLAs (sem dependências)
+7. `load-colaboradores.sh` - Colaboradores (depende de tipos-afastamento e habilidades)
+8. `load-aplicacoes.sh` - Aplicações (depende de tecnologias, capacidades, processos, SLAs)
+
+### Carga Completa (Todos os Dados)
+
+```bash
+#!/bin/bash
+# Script para carga completa de todos os dados
+
+echo "🚀 Iniciando carga completa..."
+
+./load-tipos-afastamento.sh
+./load-habilidades.sh
+./load-capacidades-negocio.sh
+./load-tecnologias.sh
+./load-processos.sh
+./load-slas.sh
+./load-colaboradores.sh
+./load-aplicacoes.sh
+
+echo "✅ Carga completa concluída!"
+```
+
+### Troubleshooting
+
+**Erro: "jq não está instalado"**
+```bash
+brew install jq
+```
+
+**Erro: "Servidor não está respondendo"**
+```bash
+# Verificar se servidor está rodando
+curl http://localhost:3000/health
+
+# Iniciar servidor
+docker-compose up
+# OU
+npm run dev
+```
+
+**Erro: "Arquivo JSON inválido"**
+```bash
+# Validar JSON manualmente
+jq empty data-templates/tipos-afastamento.json
+```
+
+**Erro: "Permission denied"**
+```bash
+# Tornar script executável
+chmod +x load-tipos-afastamento.sh
+```
+
+---
+
+## 🔧 Script de Importação de Tecnologias Maven
+
+### `import-tecnologias-pom.sh`
+
+Script que extrai dependências e plugins de um arquivo `pom.xml` Maven e cadastra automaticamente no sistema de auditoria via API REST.
+
+#### Pré-requisitos
+
+```bash
+# macOS
+brew install libxml2 jq
+
+# Linux (Ubuntu/Debian)
+sudo apt-get install libxml2-utils jq
+
+# Linux (CentOS/RHEL)
+sudo yum install libxml2 jq
+```
+
+#### Uso
+
+```bash
+# Sintaxe básica
+./import-tecnologias-pom.sh <caminho-do-pom.xml> [URL_API]
+
+# Exemplos
+./import-tecnologias-pom.sh exemplo-pom.xml
+./import-tecnologias-pom.sh /path/to/projeto/pom.xml
+./import-tecnologias-pom.sh ~/projetos/meu-app/pom.xml http://localhost:3000/api
+```
+
+#### Funcionalidades
+
+- ✅ Extrai **dependências** do pom.xml
+- ✅ Extrai **plugins** de build
+- ✅ Resolve **propriedades** Maven (ex: `${spring.boot.version}`)
+- ✅ Categoriza automaticamente (Framework, ORM, Database, Testing, etc.)
+- ✅ Identifica tipo baseado no scope (test, runtime, provided)
+- ✅ Cadastra via API REST
+- ✅ Log colorido com resumo de importação
+- ✅ Tratamento de erros e duplicadas
+
+#### Exemplo de Output
+
+```
+[INFO] ======================================================
+[INFO] Importando tecnologias do pom.xml
+[INFO] ======================================================
+[INFO] Arquivo: exemplo-pom.xml
+[INFO] API URL: http://localhost:3000/api
+[INFO] 
+[INFO] Projeto: com.exemplo:minha-aplicacao:1.0.0
+[INFO] 
+[INFO] Extraindo dependências...
+[INFO] 
+[SUCCESS] ✓ org.springframework.boot:spring-boot-starter-web 3.2.0 cadastrada
+[SUCCESS] ✓ org.springframework.boot:spring-boot-starter-data-jpa 3.2.0 cadastrada
+[SUCCESS] ✓ com.mysql:mysql-connector-j 8.2.0 cadastrada
+[SUCCESS] ✓ org.liquibase:liquibase-core 4.25.0 cadastrada
+[WARNING] ⚠ org.projectlombok:lombok 1.18.30 - HTTP 409: Já existe
+[INFO] 
+[INFO] ======================================================
+[INFO] Resumo da Importação
+[INFO] ======================================================
+[INFO] Total de tecnologias: 10
+[SUCCESS] Cadastradas com sucesso: 8
+[WARNING] Falhas/Duplicadas: 2
+[INFO] ======================================================
+```
+
+#### Categorização Automática
+
+| GroupId Pattern | Categoria | Exemplos |
+|----------------|-----------|----------|
+| `org.springframework.*` | Framework | Spring Boot, Spring Data |
+| `org.hibernate.*` | ORM | Hibernate Core, Validator |
+| `com.mysql.*`, `org.postgresql.*` | Database Driver | MySQL, PostgreSQL |
+| `junit.*`, `org.mockito.*` | Testing | JUnit, Mockito |
+| `org.slf4j.*`, `ch.qos.logback.*` | Logging | SLF4J, Logback |
+| `com.fasterxml.*`, `com.google.code.gson.*` | JSON | Jackson, Gson |
+| `org.liquibase.*`, `org.flywaydb.*` | Database Migration | Liquibase, Flyway |
+| `javax.*`, `jakarta.*` | Java EE | Servlet, Validation |
+| Outros | Library | Demais dependências |
+
+#### Arquivo de Exemplo
+
+Um arquivo `exemplo-pom.xml` está incluído para testes:
+
+```bash
+./import-tecnologias-pom.sh exemplo-pom.xml
+```
+
+---
+
+## Suporte
+
+Para dúvidas ou problemas relacionados aos scripts, entre em contato com a equipe de desenvolvimento.

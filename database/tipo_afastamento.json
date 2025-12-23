@@ -1,0 +1,101 @@
+[
+  {
+    "sigla": "LNO",
+    "numero_dias": 2,
+    "descricao": "Licença nojo (falecimento de cônjuge, ascendente, descendente, irmão ou pessoa dependente economicamente declarada).",
+    "argumentacao_legal": "Art. 473, inciso I da CLT — ausência abonada por até 2 dias consecutivos mediante comprovação (certidão de óbito).",
+    "tipo_tempo": "C"
+  },
+  {
+    "sigla": "LCAS",
+    "numero_dias": 3,
+    "descricao": "Licença por casamento — ausência remunerada para o empregado que casar.",
+    "argumentacao_legal": "Art. 473, inciso II da CLT — até 3 dias consecutivos.",
+    "tipo_tempo": "C"
+  },
+  {
+    "sigla": "LPAT",
+    "numero_dias": 5,
+    "descricao": "Licença-paternidade (padrão) — afastamento remunerado por nascimento de filho.",
+    "argumentacao_legal": "Art. 473, inciso III da CLT — 5 dias consecutivos. (Empresas inscritas no Programa Empresa Cidadã podem estender; ver legislação do Programa Empresa Cidadã/Lei nº 11.770/2008 e Lei nº 13.257/2016 sobre prorrogação).",
+    "tipo_tempo": "C"
+  },
+  {
+    "sigla": "LMAE",
+    "numero_dias": 120,
+    "descricao": "Licença-maternidade (mínimo legal) — afastamento remunerado da mãe após o parto.",
+    "argumentacao_legal": "Art. 392 da CLT e legislação correlata — direito a 120 dias de licença-maternidade sem prejuízo do emprego e do salário; pode haver prorrogação por adesão ao Programa Empresa Cidadã (prorroga +60 dias).",
+    "tipo_tempo": "C"
+  },
+  {
+    "sigla": "LAD",
+    "numero_dias": 120,
+    "descricao": "Licença adotante/guardião — afastamento por ocasião da adoção ou guarda judicial de criança/ adolescente (prazo base).",
+    "argumentacao_legal": "Lei nº 10.421/2002 e outras normas que equiparam a adoção à licença-maternidade — 120 dias (podendo haver regras específicas e prorrogações).",
+    "tipo_tempo": "C"
+  },
+  {
+    "sigla": "DDO",
+    "numero_dias": 1,
+    "descricao": "Doação voluntária de sangue — falta justificada por um dia por ano para doador que comprove a doação.",
+    "argumentacao_legal": "Art. 473, inciso IV da CLT — ausência abonada mediante comprovação.",
+    "tipo_tempo": "N"
+  },
+  {
+    "sigla": "ALIS",
+    "numero_dias": 2,
+    "descricao": "Alistamento eleitoral ou serviço militar (comparecimento para alistamento/convocação).",
+    "argumentacao_legal": "Art. 473, incisos V/VI da CLT e normas sobre serviço militar obrigatório — ausência abonada mediante comprovação.",
+    "tipo_tempo": "N"
+  },
+  {
+    "sigla": "VEST",
+    "numero_dias": 9999,
+    "descricao": "Provas de exame vestibular/ENEM — ausência para realização de provas ou exames seletivos.",
+    "argumentacao_legal": "Art. 473, inciso VII da CLT — previsão de abono para realização de provas quando comprovadas.",
+    "tipo_tempo": "N"
+  },
+  {
+    "sigla": "JUIZ",
+    "numero_dias": 9999,
+    "descricao": "Comparecimento em juízo, por motivo de intimação, testemunho, ou obrigação legal.",
+    "argumentacao_legal": "Art. 473, inciso VIII da CLT — ausência justificada para cumprimento de obrigação judicial mediante comprovação.",
+    "tipo_tempo": "N"
+  },
+  {
+    "sigla": "ACOMP_PN",
+    "numero_dias": 2,
+    "descricao": "Acompanhamento à gestante (consultas médicas da esposa/companheira) — ausência para acompanhamento de pré-natal.",
+    "argumentacao_legal": "Art. 473, inciso IX da CLT — até 2 dias para acompanhar a gestante em consultas médicas e exames complementares.",
+    "tipo_tempo": "N"
+  },
+  {
+    "sigla": "ACOMP_FIL",
+    "numero_dias": 1,
+    "descricao": "Acompanhamento de filho menor (até 6 anos) em consulta médica — 1 dia por ano para acompanhamento de filho menor de 6 anos.",
+    "argumentacao_legal": "Incluído no art. 473 em redações posteriores — abono de 1 dia por ano, mediante comprovação (consulte políticas internas e interpretações jurídicas).",
+    "tipo_tempo": "N"
+  },
+  {
+    "sigla": "EXAM_CAN",
+    "numero_dias": 9999,
+    "descricao": "Realização de exames preventivos de câncer (mulheres) — ausência para realização de exames preventivos.",
+    "argumentacao_legal": "Art. 473, inciso XI (e alterações posteriores) da CLT — abona faltas para exames preventivos mediante comprovação.",
+    "tipo_tempo": "N"
+  },
+  {
+    "sigla": "ABORT",
+    "numero_dias": 2,
+    "descricao": "Aborto não criminoso — afastamento remunerado por até 2 dias.",
+    "argumentacao_legal": "Art. 392 da CLT (e interpretações) prevê licença em caso de aborto não criminoso; prazos e condições podem ser regulamentados por normas correlatas e jurisprudência.",
+    "tipo_tempo": "C"
+  },
+  {
+    "sigla": "ACIDENTE_TRAB",
+    "numero_dias": 999,
+    "descricao": "Afastamento por doença ou acidente de trabalho — cobertura e licença conforme legislação previdenciária (INSS).",
+    "argumentacao_legal": "Normas da Previdência Social e CLT — afastamentos por acidente/auxílio-doença seguem regras do INSS e estabilidade acidentária (quando aplicável).",
+    "tipo_tempo": "N"
+  }
+]
+

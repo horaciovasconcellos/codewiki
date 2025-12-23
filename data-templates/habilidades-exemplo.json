@@ -1,0 +1,92 @@
+[
+  {
+    "sigla": "JAVA",
+    "descricao": "Java - Linguagem de programação orientada a objetos",
+    "dominio": "Técnica",
+    "subcategoria": "Backend"
+  },
+  {
+    "sigla": "PYTHON",
+    "descricao": "Python - Linguagem de programação versátil",
+    "dominio": "Técnica",
+    "subcategoria": "Backend"
+  },
+  {
+    "sigla": "ANGULAR",
+    "descricao": "Angular - Framework para aplicações web",
+    "dominio": "Técnica",
+    "subcategoria": "Frontend"
+  },
+  {
+    "sigla": "VUE",
+    "descricao": "Vue.js - Framework JavaScript progressivo",
+    "dominio": "Técnica",
+    "subcategoria": "Frontend"
+  },
+  {
+    "sigla": "DOCKER",
+    "descricao": "Docker - Containerização de aplicações",
+    "dominio": "Técnica",
+    "subcategoria": "DevOps"
+  },
+  {
+    "sigla": "K8S",
+    "descricao": "Kubernetes - Orquestração de containers",
+    "dominio": "Técnica",
+    "subcategoria": "DevOps"
+  },
+  {
+    "sigla": "AWS",
+    "descricao": "Amazon Web Services - Plataforma de cloud computing",
+    "dominio": "Técnica",
+    "subcategoria": "Cloud"
+  },
+  {
+    "sigla": "AZURE",
+    "descricao": "Microsoft Azure - Plataforma de cloud computing",
+    "dominio": "Técnica",
+    "subcategoria": "Cloud"
+  },
+  {
+    "sigla": "POSTGRES",
+    "descricao": "PostgreSQL - Sistema de gerenciamento de banco de dados relacional",
+    "dominio": "Técnica",
+    "subcategoria": "Database"
+  },
+  {
+    "sigla": "MONGODB",
+    "descricao": "MongoDB - Banco de dados NoSQL orientado a documentos",
+    "dominio": "Técnica",
+    "subcategoria": "Database"
+  },
+  {
+    "sigla": "SCRUM",
+    "descricao": "Scrum - Framework ágil para gestão de projetos",
+    "dominio": "Negócio",
+    "subcategoria": "Gestão"
+  },
+  {
+    "sigla": "LIDERANCA",
+    "descricao": "Liderança de equipes e gestão de pessoas",
+    "dominio": "Negócio",
+    "subcategoria": "Gestão"
+  },
+  {
+    "sigla": "ANALNEGOCIOS",
+    "descricao": "Análise de negócios e requisitos",
+    "dominio": "Negócio",
+    "subcategoria": "Análise"
+  },
+  {
+    "sigla": "UIUX",
+    "descricao": "UI/UX Design - Design de interfaces e experiência do usuário",
+    "dominio": "Design",
+    "subcategoria": "UX"
+  },
+  {
+    "sigla": "FIGMA",
+    "descricao": "Figma - Ferramenta de design colaborativo",
+    "dominio": "Design",
+    "subcategoria": "Ferramentas"
+  }
+]

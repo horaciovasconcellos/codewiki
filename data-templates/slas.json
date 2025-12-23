@@ -1,0 +1,135 @@
+[
+  {
+    "sigla": "SLA-APP-001",
+    "descricao": "SLA para aplicações críticas de negócio",
+    "tipoSLA": "SLA por Serviço",
+    "dataInicio": "2025-01-01",
+    "status": "Ativo",
+    "disponibilidade": {
+      "percentualUptime": 99.9
+    },
+    "performance": {
+      "latenciaMaxima": 200,
+      "throughput": 1000,
+      "iopsStorage": 5000,
+      "errosPorMinuto": 5
+    },
+    "suporteAtendimento": {
+      "tempoResposta": "15 minutos",
+      "tempoSolucao": "4 horas",
+      "horaInicialAtendimento": "08:00",
+      "horaTerminoAtendimento": "18:00"
+    },
+    "servico": {
+      "disponibilidadeSistema": "99.9%",
+      "backupDiario": "Sim, às 02:00",
+      "tempoRespostaAPIs": "< 200ms",
+      "rpoRtoDR": "RPO: 1h, RTO: 4h",
+      "clonagem": "Disponível para ambiente de testes",
+      "dataAlvoClonagem": "Mensal"
+    }
+  },
+  {
+    "sigla": "SLA-DB-001",
+    "descricao": "SLA para banco de dados Oracle",
+    "tipoSLA": "SLA Baseado em Componentes",
+    "dataInicio": "2025-01-01",
+    "status": "Ativo",
+    "componentes": {
+      "slaBancoDados": "Disponibilidade 99.95%, backup diário, recovery point < 1h",
+      "slaStorage": "IOPS mínimo 10000, latência < 5ms",
+      "slaRede": "Bandwidth mínimo 10Gbps",
+      "slaMicroservico": "N/A"
+    },
+    "capacidade": {
+      "percentualCPUMaxima": 80,
+      "capacidadeStorageLivre": 20,
+      "escalabilidadeAutomatica": true
+    },
+    "servico": {
+      "disponibilidadeSistema": "99.95%",
+      "backupDiario": "Sim, incremental 6h em 6h",
+      "tempoRespostaAPIs": "N/A",
+      "rpoRtoDR": "RPO: 15min, RTO: 2h",
+      "clonagem": "Disponível com agendamento",
+      "dataAlvoClonagem": "Semanal"
+    }
+  },
+  {
+    "sigla": "SLA-SEC-001",
+    "descricao": "SLA de segurança para todos os sistemas",
+    "tipoSLA": "SLA de Segurança",
+    "dataInicio": "2025-01-01",
+    "status": "Ativo",
+    "seguranca": {
+      "patchingMensalObrigatorio": true,
+      "mfaParaTodosAcessos": true,
+      "tempoCorrecaoVulnerabilidadeCritical": "24 horas"
+    },
+    "suporteAtendimento": {
+      "tempoResposta": "Imediato",
+      "tempoSolucao": "24 horas",
+      "horaInicialAtendimento": "00:00",
+      "horaTerminoAtendimento": "23:59"
+    }
+  },
+  {
+    "sigla": "SLA-SUP-P1",
+    "descricao": "SLA de suporte para incidentes P1",
+    "tipoSLA": "SLA por Nível de Prioridade / Severidade",
+    "dataInicio": "2025-01-01",
+    "status": "Ativo",
+    "prioridade": {
+      "p1": "Resposta: 15min, Solução: 4h",
+      "p2": "Resposta: 1h, Solução: 8h",
+      "p3": "Resposta: 4h, Solução: 24h"
+    },
+    "suporteAtendimento": {
+      "tempoResposta": "15 minutos",
+      "tempoSolucao": "4 horas",
+      "horaInicialAtendimento": "00:00",
+      "horaTerminoAtendimento": "23:59"
+    },
+    "apoio": {
+      "slaEmpresa": "Equipe interna 24x7 para P1",
+      "slaFornecedores": "Suporte premium com SLA garantido"
+    }
+  },
+  {
+    "sigla": "SLA-INFRA-001",
+    "descricao": "SLA operacional de infraestrutura",
+    "tipoSLA": "SLA Operacional",
+    "dataInicio": "2025-01-01",
+    "status": "Ativo",
+    "operacional": {
+      "infraestrutura": "Disponibilidade 99.9%, manutenção programada aos domingos 02:00-06:00",
+      "servico": "Monitoramento 24x7, alertas automáticos",
+      "rede": "Redundância total, failover automático < 30s"
+    },
+    "disponibilidade": {
+      "percentualUptime": 99.9
+    },
+    "capacidade": {
+      "percentualCPUMaxima": 85,
+      "capacidadeStorageLivre": 15,
+      "escalabilidadeAutomatica": true
+    }
+  },
+  {
+    "sigla": "SLA-USER-VIP",
+    "descricao": "SLA para usuários VIP e áreas críticas",
+    "tipoSLA": "SLA por Usuário",
+    "dataInicio": "2025-01-01",
+    "status": "Ativo",
+    "usuario": {
+      "suportePrioritarioAreaCritica": "Atendimento prioritário com canal dedicado",
+      "atendimentoEspecialUsuariosChave": "Gerente de contas dedicado, suporte 24x7"
+    },
+    "suporteAtendimento": {
+      "tempoResposta": "5 minutos",
+      "tempoSolucao": "2 horas",
+      "horaInicialAtendimento": "00:00",
+      "horaTerminoAtendimento": "23:59"
+    }
+  }
+]

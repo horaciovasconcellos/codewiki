@@ -1,0 +1,391 @@
+{
+  "technologies": [
+    {
+      "sigla": "OTRS",
+      "versao_release": "8.0",
+      "nome_tecnologia": "OTRS (Open-Source Ticket Request System)",
+      "categoria": "Service Management/Help Desk",
+      "status": "Ativo",
+      "fornecedor_empresa": "OTRS AG",
+      "tipo_licenciamento": "Open Source (AGPL) / Comercial"
+    },
+    {
+      "sigla": "Znuny",
+      "versao_release": "6.5",
+      "nome_tecnologia": "Znuny (OTRS Community Edition Fork)",
+      "categoria": "Service Management/Help Desk",
+      "status": "Ativo",
+      "fornecedor_empresa": "Znuny GmbH",
+      "tipo_licenciamento": "Open Source (AGPL)"
+    },
+    {
+      "sigla": "OTRS DB",
+      "versao_release": "Compatível",
+      "nome_tecnologia": "OTRS Database Layer",
+      "categoria": "Database Support",
+      "status": "Ativo",
+      "fornecedor_empresa": "OTRS AG",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "OTRS API",
+      "versao_release": "8.0",
+      "nome_tecnologia": "OTRS REST/SOAP API",
+      "categoria": "Integration API",
+      "status": "Ativo",
+      "fornecedor_empresa": "OTRS AG",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SysAid",
+      "versao_release": "23.3",
+      "nome_tecnologia": "SysAid IT Service Management",
+      "categoria": "ITSM/Help Desk",
+      "status": "Ativo",
+      "fornecedor_empresa": "SysAid Technologies",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "SysAid On-Premise",
+      "versao_release": "23.3",
+      "nome_tecnologia": "SysAid On-Premise Server",
+      "categoria": "ITSM Platform",
+      "status": "Ativo",
+      "fornecedor_empresa": "SysAid Technologies",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SysAid Cloud",
+      "versao_release": "Current",
+      "nome_tecnologia": "SysAid Cloud Service",
+      "categoria": "ITSM SaaS",
+      "status": "Ativo",
+      "fornecedor_empresa": "SysAid Technologies",
+      "tipo_licenciamento": "SaaS"
+    },
+    {
+      "sigla": "SysAid Mobile",
+      "versao_release": "Current",
+      "nome_tecnologia": "SysAid Mobile App",
+      "categoria": "Mobile ITSM",
+      "status": "Ativo",
+      "fornecedor_empresa": "SysAid Technologies",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SysAid Agent",
+      "versao_release": "23.3",
+      "nome_tecnologia": "SysAid Remote Control Agent",
+      "categoria": "Remote Support",
+      "status": "Ativo",
+      "fornecedor_empresa": "SysAid Technologies",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "SysAid AI",
+      "versao_release": "Current",
+      "nome_tecnologia": "SysAid Copilot (AI Assistant)",
+      "categoria": "Artificial Intelligence",
+      "status": "Ativo",
+      "fornecedor_empresa": "SysAid Technologies",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Docker",
+      "versao_release": "24.0",
+      "nome_tecnologia": "Docker Engine",
+      "categoria": "Container Runtime",
+      "status": "Ativo",
+      "fornecedor_empresa": "Docker Inc.",
+      "tipo_licenciamento": "Open Source (Apache 2.0) / Comercial"
+    },
+    {
+      "sigla": "Docker Desktop",
+      "versao_release": "4.26",
+      "nome_tecnologia": "Docker Desktop",
+      "categoria": "Development Tool",
+      "status": "Ativo",
+      "fornecedor_empresa": "Docker Inc.",
+      "tipo_licenciamento": "Proprietário/Comercial"
+    },
+    {
+      "sigla": "Docker Compose",
+      "versao_release": "2.23",
+      "nome_tecnologia": "Docker Compose",
+      "categoria": "Container Orchestration",
+      "status": "Ativo",
+      "fornecedor_empresa": "Docker Inc.",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "Docker Hub",
+      "versao_release": "Current",
+      "nome_tecnologia": "Docker Hub Registry",
+      "categoria": "Container Registry",
+      "status": "Ativo",
+      "fornecedor_empresa": "Docker Inc.",
+      "tipo_licenciamento": "SaaS/Freemium"
+    },
+    {
+      "sigla": "Docker Swarm",
+      "versao_release": "24.0",
+      "nome_tecnologia": "Docker Swarm",
+      "categoria": "Container Orchestration",
+      "status": "Ativo",
+      "fornecedor_empresa": "Docker Inc.",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "containerd",
+      "versao_release": "1.7",
+      "nome_tecnologia": "containerd",
+      "categoria": "Container Runtime",
+      "status": "Ativo",
+      "fornecedor_empresa": "CNCF",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "Docker BuildKit",
+      "versao_release": "0.12",
+      "nome_tecnologia": "Docker BuildKit",
+      "categoria": "Build Engine",
+      "status": "Ativo",
+      "fornecedor_empresa": "Docker Inc.",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "Rancher",
+      "versao_release": "2.8",
+      "nome_tecnologia": "Rancher Kubernetes Management",
+      "categoria": "Kubernetes Management Platform",
+      "status": "Ativo",
+      "fornecedor_empresa": "SUSE (Rancher Labs)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "RKE",
+      "versao_release": "1.5",
+      "nome_tecnologia": "Rancher Kubernetes Engine",
+      "categoria": "Kubernetes Distribution",
+      "status": "Ativo",
+      "fornecedor_empresa": "SUSE (Rancher Labs)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "RKE2",
+      "versao_release": "1.28",
+      "nome_tecnologia": "RKE Government (RKE2)",
+      "categoria": "Kubernetes Distribution",
+      "status": "Ativo",
+      "fornecedor_empresa": "SUSE (Rancher Labs)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "K3s",
+      "versao_release": "1.28",
+      "nome_tecnologia": "K3s Lightweight Kubernetes",
+      "categoria": "Kubernetes Distribution",
+      "status": "Ativo",
+      "fornecedor_empresa": "SUSE (Rancher Labs)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "Longhorn",
+      "versao_release": "1.6",
+      "nome_tecnologia": "Longhorn Cloud Native Storage",
+      "categoria": "Container Storage",
+      "status": "Ativo",
+      "fornecedor_empresa": "SUSE (Rancher Labs)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "Fleet",
+      "versao_release": "0.9",
+      "nome_tecnologia": "Rancher Fleet GitOps",
+      "categoria": "GitOps/CD",
+      "status": "Ativo",
+      "fornecedor_empresa": "SUSE (Rancher Labs)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "Harvester",
+      "versao_release": "1.3",
+      "nome_tecnologia": "Harvester HCI",
+      "categoria": "Hyperconverged Infrastructure",
+      "status": "Ativo",
+      "fornecedor_empresa": "SUSE (Rancher Labs)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "NeuVector",
+      "versao_release": "5.3",
+      "nome_tecnologia": "NeuVector Container Security",
+      "categoria": "Container Security",
+      "status": "Ativo",
+      "fornecedor_empresa": "SUSE",
+      "tipo_licenciamento": "Open Source (Apache 2.0) / Comercial"
+    },
+    {
+      "sigla": "Databricks",
+      "versao_release": "Current",
+      "nome_tecnologia": "Databricks Lakehouse Platform",
+      "categoria": "Data Analytics Platform",
+      "status": "Ativo",
+      "fornecedor_empresa": "Databricks Inc.",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "Delta Lake",
+      "versao_release": "3.1",
+      "nome_tecnologia": "Delta Lake Storage Layer",
+      "categoria": "Data Storage/Lake",
+      "status": "Ativo",
+      "fornecedor_empresa": "Linux Foundation (Databricks)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "Apache Spark",
+      "versao_release": "3.5",
+      "nome_tecnologia": "Apache Spark on Databricks",
+      "categoria": "Data Processing Engine",
+      "status": "Ativo",
+      "fornecedor_empresa": "Apache Software Foundation",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "MLflow",
+      "versao_release": "2.9",
+      "nome_tecnologia": "MLflow ML Platform",
+      "categoria": "Machine Learning Operations",
+      "status": "Ativo",
+      "fornecedor_empresa": "Linux Foundation (Databricks)",
+      "tipo_licenciamento": "Open Source (Apache 2.0)"
+    },
+    {
+      "sigla": "Unity Catalog",
+      "versao_release": "Current",
+      "nome_tecnologia": "Databricks Unity Catalog",
+      "categoria": "Data Governance",
+      "status": "Ativo",
+      "fornecedor_empresa": "Databricks Inc.",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Delta Sharing",
+      "versao_release": "1.0",
+      "nome_tecnologia": "Delta Sharing Protocol",
+      "categoria": "Data Sharing",
+      "status": "Ativo",
+      "fornecedor_empresa": "Linux Foundation (Databricks)",
+      "tipo_licenciamento": "Open Source"
+    },
+    {
+      "sigla": "Databricks SQL",
+      "versao_release": "Current",
+      "nome_tecnologia": "Databricks SQL Analytics",
+      "categoria": "SQL Analytics",
+      "status": "Ativo",
+      "fornecedor_empresa": "Databricks Inc.",
+      "tipo_licenciamento": "Proprietário/SaaS"
+    },
+    {
+      "sigla": "AutoML",
+      "versao_release": "Current",
+      "nome_tecnologia": "Databricks AutoML",
+      "categoria": "Machine Learning",
+      "status": "Ativo",
+      "fornecedor_empresa": "Databricks Inc.",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Photon",
+      "versao_release": "Current",
+      "nome_tecnologia": "Databricks Photon Engine",
+      "categoria": "Query Engine",
+      "status": "Ativo",
+      "fornecedor_empresa": "Databricks Inc.",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "Databricks Workflows",
+      "versao_release": "Current",
+      "nome_tecnologia": "Databricks Workflows",
+      "categoria": "Orchestration",
+      "status": "Ativo",
+      "fornecedor_empresa": "Databricks Inc.",
+      "tipo_licenciamento": "Proprietário"
+    },
+    {
+      "sigla": "ORDS",
+      "versao_release": "23.4",
+      "nome_tecnologia": "Oracle REST Data Services",
+      "categoria": "REST API Gateway",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Gratuito (Oracle)"
+    },
+    {
+      "sigla": "ORDS DB API",
+      "versao_release": "23.4",
+      "nome_tecnologia": "ORDS Database API",
+      "categoria": "REST API",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Gratuito (Oracle)"
+    },
+    {
+      "sigla": "SQL Developer Web",
+      "versao_release": "23.4",
+      "nome_tecnologia": "SQL Developer Web (via ORDS)",
+      "categoria": "Web IDE",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Gratuito (Oracle)"
+    },
+    {
+      "sigla": "APEX",
+      "versao_release": "23.2",
+      "nome_tecnologia": "Oracle Application Express",
+      "categoria": "Low-Code Platform",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Gratuito (Oracle)"
+    },
+    {
+      "sigla": "ORDS AutoREST",
+      "versao_release": "23.4",
+      "nome_tecnologia": "ORDS AutoREST Enable",
+      "categoria": "REST Automation",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Gratuito (Oracle)"
+    },
+    {
+      "sigla": "ORDS OAuth",
+      "versao_release": "23.4",
+      "nome_tecnologia": "ORDS OAuth 2.0",
+      "categoria": "Authentication/Security",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Gratuito (Oracle)"
+    },
+    {
+      "sigla": "PL/SQL Gateway",
+      "versao_release": "23.4",
+      "nome_tecnologia": "ORDS PL/SQL Gateway",
+      "categoria": "Legacy Support",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Gratuito (Oracle)"
+    },
+    {
+      "sigla": "SODA",
+      "versao_release": "23.4",
+      "nome_tecnologia": "Simple Oracle Document Access",
+      "categoria": "Document Store API",
+      "status": "Ativo",
+      "fornecedor_empresa": "Oracle Corporation",
+      "tipo_licenciamento": "Gratuito (Oracle)"
+    }
+  ]
+}

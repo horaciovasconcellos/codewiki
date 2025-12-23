@@ -1,0 +1,37 @@
+[
+  {
+    "nome": "Gestão de Clientes",
+    "descricao": "Capacidade de gerenciar o relacionamento com clientes",
+    "nivel": 1,
+    "tipo": "Core",
+    "status": "Ativa"
+  },
+  {
+    "nome": "Gestão Financeira",
+    "descricao": "Capacidade de gestão e controle financeiro",
+    "nivel": 1,
+    "tipo": "Core",
+    "status": "Ativa"
+  },
+  {
+    "nome": "Gestão de Pessoas",
+    "descricao": "Capacidade de gerenciar recursos humanos",
+    "nivel": 1,
+    "tipo": "Support",
+    "status": "Ativa"
+  },
+  {
+    "nome": "Gestão de TI",
+    "descricao": "Capacidade de gestão de infraestrutura e sistemas",
+    "nivel": 1,
+    "tipo": "Support",
+    "status": "Ativa"
+  },
+  {
+    "nome": "Marketing Digital",
+    "descricao": "Capacidade de marketing e comunicação digital",
+    "nivel": 2,
+    "tipo": "Core",
+    "status": "Em Desenvolvimento"
+  }
+]

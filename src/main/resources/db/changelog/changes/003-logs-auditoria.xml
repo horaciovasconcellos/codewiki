@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="003-01-create-logs-auditoria" author="sistema">
+        <comment>Criação da tabela logs_auditoria</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS logs_auditoria (
+                id VARCHAR(36) PRIMARY KEY,
+                timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                user_id VARCHAR(100),
+                entity_type VARCHAR(100) NOT NULL,
+                entity_id VARCHAR(36),
+                operation_type ENUM('CREATE', 'UPDATE', 'DELETE', 'READ') NOT NULL,
+                old_values JSON,
+                new_values JSON,
+                ip_address VARCHAR(45),
+                user_agent TEXT,
+                request_method VARCHAR(10),
+                request_path VARCHAR(500),
+                request_payload JSON,
+                response_status_code INT,
+                duration_ms INT,
+                severity ENUM('debug', 'info', 'warn', 'error') DEFAULT 'info',
+                error_message TEXT,
+                stack_trace TEXT,
+                trace_id VARCHAR(100),
+                span_id VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_timestamp (timestamp),
+                INDEX idx_user_id (user_id),
+                INDEX idx_entity_type (entity_type),
+                INDEX idx_entity_id (entity_id),
+                INDEX idx_operation_type (operation_type),
+                INDEX idx_severity (severity),
+                INDEX idx_trace_id (trace_id),
+                INDEX idx_created_at (created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            DROP TABLE IF EXISTS logs_auditoria;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="003-02-create-views-logs" author="sistema">
+        <comment>Criação de views para análise de logs</comment>
+        <sql>
+            CREATE OR REPLACE VIEW v_logs_erro AS
+            SELECT * FROM logs_auditoria WHERE severity = 'error' ORDER BY timestamp DESC;
+        </sql>
+        <sql>
+            CREATE OR REPLACE VIEW v_logs_por_usuario AS
+            SELECT user_id, COUNT(*) as total_operacoes, entity_type, operation_type, COUNT(*) as quantidade
+            FROM logs_auditoria GROUP BY user_id, entity_type, operation_type;
+        </sql>
+        <sql>
+            CREATE OR REPLACE VIEW v_logs_performance AS
+            SELECT entity_type, operation_type, AVG(duration_ms) as avg_duration, MAX(duration_ms) as max_duration, COUNT(*) as total_requests
+            FROM logs_auditoria WHERE duration_ms IS NOT NULL GROUP BY entity_type, operation_type;
+        </sql>
+        <sql>
+            CREATE OR REPLACE VIEW v_logs_atividade_recente AS
+            SELECT * FROM logs_auditoria WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR) ORDER BY timestamp DESC;
+        </sql>
+        <rollback>
+            DROP VIEW IF EXISTS v_logs_atividade_recente;
+            DROP VIEW IF EXISTS v_logs_performance;
+            DROP VIEW IF EXISTS v_logs_por_usuario;
+            DROP VIEW IF EXISTS v_logs_erro;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="003-03-create-procedure-limpar-logs" author="sistema">
+        <comment>Stored procedure para limpeza de logs antigos</comment>
+        <sql splitStatements="false">
+            DELIMITER //
+            CREATE PROCEDURE IF NOT EXISTS sp_limpar_logs_antigos(IN dias_retencao INT)
+            BEGIN
+                DELETE FROM logs_auditoria 
+                WHERE timestamp &lt; DATE_SUB(NOW(), INTERVAL dias_retencao DAY);
+                
+                SELECT ROW_COUNT() as registros_removidos;
+            END //
+            DELIMITER ;
+        </sql>
+        <rollback>
+            DROP PROCEDURE IF EXISTS sp_limpar_logs_antigos;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

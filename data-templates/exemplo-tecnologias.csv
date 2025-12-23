@@ -1,0 +1,9 @@
+nome,versao,plataforma,categoria,fabricante,tipo,status
+Spring Boot,3.2.0,Java (Maven),Framework,VMware,Framework,Em Uso
+React,18.2.0,JavaScript,Framework,Meta,Biblioteca,Em Uso
+Node.js,20.10.0,JavaScript,Runtime,OpenJS Foundation,Runtime,Em Uso
+PostgreSQL,16.0,Database,SGBD,PostgreSQL Global Development Group,Database,Em Uso
+Docker,24.0.7,Infrastructure,Containerização,Docker Inc,Ferramenta,Em Uso
+Kubernetes,1.28.0,Infrastructure,Orquestração,CNCF,Plataforma,Em Uso
+Redis,7.2.0,Database,Cache,Redis Ltd,Cache,Em Uso
+Nginx,1.25.0,Infrastructure,Web Server,F5 Inc,Servidor,Em Uso
