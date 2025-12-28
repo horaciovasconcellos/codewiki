@@ -1391,7 +1391,7 @@ app.post('/api/habilidades', async (req, res) => {
     const id = uuidv4();
     await pool.query(
       'INSERT INTO habilidades (id, sigla, descricao, tipo, dominio, subcategoria) VALUES (?, ?, ?, ?, ?, ?)',
-      [id, sigla, descricao || sigla, tipo, dominio || tipo, subcategoria || 'Outras']
+      [id, sigla, descricao || sigla, tipo, dominio || 'Desenvolvimento & Engenharia', subcategoria || 'Outras']
     );
     
     const [rows] = await pool.query('SELECT * FROM habilidades WHERE id = ?', [id]);
@@ -1424,7 +1424,7 @@ app.put('/api/habilidades/:id', async (req, res) => {
     
     await pool.query(
       'UPDATE habilidades SET sigla = ?, descricao = ?, tipo = ?, dominio = ?, subcategoria = ? WHERE id = ?',
-      [sigla, descricao || sigla, tipo, dominio || tipo, subcategoria || 'Outras', req.params.id]
+      [sigla, descricao || sigla, tipo, dominio || 'Desenvolvimento & Engenharia', subcategoria || 'Outras', req.params.id]
     );
     
     const [rows] = await pool.query('SELECT * FROM habilidades WHERE id = ?', [req.params.id]);

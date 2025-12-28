@@ -63,7 +63,9 @@ export function DashboardView({
     habilidades: habilidades?.length || 0,
     integracoes: integracoes?.length || 0,
     servidores: servidores?.length || 0,
-    comunicacoes: comunicacoes?.length || 0
+    comunicacoes: comunicacoes?.length || 0,
+    payloads: payloadsStats?.total || 0,
+    payloadsValidos: payloadsStats?.validos || 0
   });
   
   const colaboradoresAtivos = colaboradores.filter(c => !c.dataDemissao).length;
@@ -106,27 +108,27 @@ export function DashboardView({
     quantidade
   }));
 
-  // Dados para gráfico de Habilidades por Categoria
-  const habilidadesPorCategoria = habilidades.reduce((acc, h) => {
-    const categoria = h.categoria || 'Não Definido';
-    acc[categoria] = (acc[categoria] || 0) + 1;
+  // Dados para gráfico de Habilidades por Subcategoria
+  const habilidadesPorSubcategoria = habilidades.reduce((acc, h) => {
+    const subcategoria = h.subcategoria || 'Não Definido';
+    acc[subcategoria] = (acc[subcategoria] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const dadosHabilidadesPorCategoria = Object.entries(habilidadesPorCategoria).map(([categoria, quantidade]) => ({
-    categoria,
+  const dadosHabilidadesPorSubcategoria = Object.entries(habilidadesPorSubcategoria).map(([subcategoria, quantidade]) => ({
+    subcategoria,
     quantidade
   }));
 
-  // Dados para gráfico de Habilidades por Nível
-  const habilidadesPorNivel = habilidades.reduce((acc, h) => {
-    const nivel = h.nivel || 'Não Definido';
-    acc[nivel] = (acc[nivel] || 0) + 1;
+  // Dados para gráfico de Habilidades por Tipo
+  const habilidadesPorTipo = habilidades.reduce((acc, h) => {
+    const tipo = h.tipo || 'Não Definido';
+    acc[tipo] = (acc[tipo] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const dadosHabilidadesPorNivel = Object.entries(habilidadesPorNivel).map(([nivel, quantidade]) => ({
-    nivel,
+  const dadosHabilidadesPorTipo = Object.entries(habilidadesPorTipo).map(([tipo, quantidade]) => ({
+    tipo,
     quantidade
   }));
 
@@ -338,14 +340,14 @@ export function DashboardView({
                     <span className="text-2xl font-bold text-violet-600">{habilidadesCount}</span>
                   </div>
                   <div className="space-y-2">
-                    <div className="text-xs font-medium text-muted-foreground">Por Categoria:</div>
-                    {Object.entries(habilidadesPorCategoria).slice(0, 5).map(([categoria, quantidade]) => (
-                      <div key={categoria} className="flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground truncate flex-1">{categoria}</span>
+                    <div className="text-xs font-medium text-muted-foreground">Por Subcategoria:</div>
+                    {Object.entries(habilidadesPorSubcategoria).slice(0, 5).map(([subcategoria, quantidade]) => (
+                      <div key={subcategoria} className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground truncate flex-1">{subcategoria}</span>
                         <span className="font-semibold ml-2">{quantidade}</span>
                       </div>
                     ))}
-                    {Object.keys(habilidadesPorCategoria).length > 5 && (
+                    {Object.keys(habilidadesPorSubcategoria).length > 5 && (
                       <div className="text-xs text-muted-foreground italic">
                         +{Object.keys(habilidadesPorCategoria).length - 5} categorias...
                       </div>
@@ -419,27 +421,27 @@ export function DashboardView({
               </Card>
             )}
 
-            {/* Gráfico de Habilidades por Categoria */}
-            {dadosHabilidadesPorCategoria.length > 0 && (
+            {/* Gráfico de Habilidades por Subcategoria */}
+            {dadosHabilidadesPorSubcategoria.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Habilidades por Categoria</CardTitle>
-                  <CardDescription className="text-xs">Distribuição por categoria</CardDescription>
+                  <CardTitle className="text-base">Habilidades por Subcategoria</CardTitle>
+                  <CardDescription className="text-xs">Distribuição por subcategoria</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
                       <Pie
-                        data={dadosHabilidadesPorCategoria}
+                        data={dadosHabilidadesPorSubcategoria}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ categoria, quantidade }) => `${categoria}: ${quantidade}`}
+                        label={({ subcategoria, quantidade }) => `${subcategoria}: ${quantidade}`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="quantidade"
                       >
-                        {dadosHabilidadesPorCategoria.map((entry, index) => (
+                        {dadosHabilidadesPorSubcategoria.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
@@ -450,19 +452,19 @@ export function DashboardView({
               </Card>
             )}
 
-            {/* Gráfico de Habilidades por Nível */}
-            {dadosHabilidadesPorNivel.length > 0 && (
+            {/* Gráfico de Habilidades por Tipo */}
+            {dadosHabilidadesPorTipo.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Habilidades por Nível</CardTitle>
-                  <CardDescription className="text-xs">Distribuição por nível de proficiência</CardDescription>
+                  <CardTitle className="text-base">Habilidades por Tipo</CardTitle>
+                  <CardDescription className="text-xs">Distribuição por tipo (Hard Skills vs Soft Skills)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={dadosHabilidadesPorNivel}>
+                    <BarChart data={dadosHabilidadesPorTipo}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis 
-                        dataKey="nivel" 
+                        dataKey="tipo" 
                         fontSize={10}
                       />
                       <YAxis fontSize={10} />
