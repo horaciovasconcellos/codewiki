@@ -6439,6 +6439,11 @@ async function startServer() {
       aplicacoes
     } = req.body;
 
+    console.log('🔍 POST ADR - Aplicações recebidas:', aplicacoes ? `${aplicacoes.length} aplicações` : 'Nenhuma aplicação');
+    if (aplicacoes && aplicacoes.length > 0) {
+      console.log('🔍 Primeira aplicação:', aplicacoes[0]);
+    }
+
     if (!descricao) {
       return res.status(400).json({
         error: 'Campo obrigatório: descricao',
@@ -6511,6 +6516,8 @@ async function startServer() {
       alternativasConsideradas, complianceConstitution, adrSubstitutaId,
       aplicacoes
     } = req.body;
+
+    console.log('🔍 PUT ADR - Aplicações recebidas:', aplicacoes ? `${aplicacoes.length} aplicações` : 'Nenhuma aplicação');
 
     // Validar ADR substituta se status for "Substituído"
     if (status === 'Substituído' && !adrSubstitutaId) {

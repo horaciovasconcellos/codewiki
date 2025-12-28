@@ -260,6 +260,12 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
         aplicacoes: aplicacoesAssociadas.filter(app => app.aplicacaoId)
       };
 
+      console.log('🔍 Salvando ADR:', {
+        method: adrMethod,
+        aplicacoesCount: payload.aplicacoes.length,
+        aplicacoes: payload.aplicacoes,
+      });
+
       const adrResponse = await fetch(adrUrl, {
         method: adrMethod,
         headers: { 'Content-Type': 'application/json' },
