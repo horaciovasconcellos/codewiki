@@ -6359,6 +6359,7 @@ async function startServer() {
   // ENDPOINTS DE ADR (ARCHITECTURAL DECISION RECORDS)
   // =====================================================
 
+  /* ENDPOINTS DUPLICADOS COMENTADOS - Versão melhorada está mais abaixo (linha ~8500)
   // GET - Listar todos os ADRs
   app.get('/api/adrs', async (req, res) => {
     try {
@@ -6413,7 +6414,7 @@ async function startServer() {
           aa.id, aa.adr_id as adrId, aa.aplicacao_id as aplicacaoId,
           aa.data_inicio as dataInicio, aa.data_termino as dataTermino,
           aa.status, aa.observacoes,
-          ap.nome as aplicacaoNome, ap.sigla as aplicacaoSigla
+          ap.descricao as aplicacaoNome, ap.sigla as aplicacaoSigla
         FROM adr_aplicacoes aa
         INNER JOIN aplicacoes ap ON aa.aplicacao_id = ap.id
         WHERE aa.adr_id = ?
@@ -6598,6 +6599,7 @@ async function startServer() {
       res.status(500).json({ error: 'Erro ao excluir ADR', code: 'DATABASE_ERROR' });
     }
   });
+  */
 
   // ===================================
   // ENDPOINTS DE APLICAÇÃO-SERVIDOR
