@@ -168,7 +168,7 @@ export function PayloadsDataTable({ data, onEdit, onDelete, loading }: PayloadsD
           <div className="flex-1 relative">
             <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder="Pesquisar por sigla, definição, descrição ou aplicação..."
+              placeholder="Pesquisar por sigla, descrição curta, descrição longa ou aplicação..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -215,11 +215,11 @@ export function PayloadsDataTable({ data, onEdit, onDelete, loading }: PayloadsD
                 </TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort('definicao')}>
                   <div className="flex items-center">
-                    Definição
+                    Descrição Curta
                     {getSortIcon('definicao')}
                   </div>
                 </TableHead>
-                <TableHead>Descrição</TableHead>
+                <TableHead>Descrição Longa</TableHead>
                 <TableHead className="cursor-pointer" onClick={() => handleSort('dataInicio')}>
                   <div className="flex items-center">
                     Data Início

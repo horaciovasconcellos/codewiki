@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Payload, FormatoArquivoPayload, Aplicacao } from '@/lib/types';
 import {
   Dialog,
@@ -51,23 +51,28 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
     mensagem: string;
   } | null>(null);
 
+  // Carregar aplicações quando o dialog abrir
   useEffect(() => {
     if (open) {
       loadAplicacoes();
-      if (payload) {
-        setFormData({
-          ...payload,
-          dataTermino: payload.dataTermino || '',
-        });
-        // Validar arquivo existente
-        if (payload.conteudoArquivo) {
-          validarArquivo(payload.conteudoArquivo, payload.formatoArquivo);
-        }
-      } else {
-        resetForm();
-      }
     }
-  }, [open, payload]);
+  }, [open]);
+
+  // Atualizar formulário quando payload mudar
+  useEffect(() => {
+    if (payload) {
+      setFormData({
+        ...payload,
+        dataTermino: payload.dataTermino || '',
+      });
+      // Validar arquivo existente
+      if (payload.conteudoArquivo) {
+        validarArquivo(payload.conteudoArquivo, payload.formatoArquivo);
+      }
+    } else {
+      resetForm();
+    }
+  }, [payload, validarArquivo]);
 
   const loadAplicacoes = async () => {
     try {
@@ -98,7 +103,7 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
     setValidacaoInfo(null);
   };
 
-  const validarArquivo = (conteudo: string, formato: FormatoArquivoPayload) => {
+  const validarArquivo = useCallback((conteudo: string, formato: FormatoArquivoPayload) => {
     try {
       if (formato === 'JSON') {
         const parsed = JSON.parse(conteudo);
@@ -206,7 +211,7 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
         errosValidacao: errorMessage
       }));
     }
-  };
+  }, []);
 
   const handleInputChange = (field: keyof Payload, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -337,10 +342,10 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
             </div>
           </div>
 
-          {/* Definição */}
+          {/* Descrição Curta */}
           <div className="grid gap-2">
             <Label htmlFor="definicao">
-              Definição <span className="text-red-500">*</span>
+              Descrição Curta <span className="text-red-500">*</span>
             </Label>
             <Input
               id="definicao"
@@ -351,9 +356,9 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
             />
           </div>
 
-          {/* Descrição */}
+          {/* Descrição Longa */}
           <div className="grid gap-2">
-            <Label htmlFor="descricao">Descrição</Label>
+            <Label htmlFor="descricao">Descrição Longa</Label>
             <Textarea
               id="descricao"
               value={formData.descricao}

@@ -1,0 +1,167 @@
+[
+  {
+    "descricao": "Uso de React com TypeScript no Frontend",
+    "status": "Aceito",
+    "contexto": "Necessidade de framework moderno com type safety para reduzir erros",
+    "decisao": "Adotar React 18+ com TypeScript para todo desenvolvimento frontend",
+    "justificativa": "React tem ecossistema maduro, TypeScript adiciona segurança de tipos",
+    "consequencias_positivas": "Type safety, componentes reutilizáveis, ecossistema rico",
+    "consequencias_negativas": "Bundle size maior, curva de aprendizado TypeScript",
+    "riscos": "Over-engineering em componentes simples",
+    "alternativas_consideradas": "Vue.js, Angular, Svelte",
+    "compliance_constitution": "Conformidade com requisitos de qualidade de código",
+    "referencias": "https://react.dev/ | https://www.typescriptlang.org/",
+    "aplicacoes": [
+      {
+        "aplicacao_sigla": "PORTAL",
+        "data_inicio": "2024-01-15",
+        "status": "Ativo",
+        "observacoes": "Implementação completa em produção"
+      },
+      {
+        "aplicacao_sigla": "ADMIN",
+        "data_inicio": "2024-02-01",
+        "status": "Ativo",
+        "observacoes": "Migração concluída de Vue para React"
+      }
+    ]
+  },
+  {
+    "descricao": "API REST com Node.js e Express",
+    "status": "Aceito",
+    "contexto": "Necessidade de API backend performática com amplo suporte da comunidade",
+    "decisao": "Implementar todas as APIs REST usando Node.js com Express framework",
+    "justificativa": "Node.js oferece excelente performance em I/O, Express é maduro e flexível",
+    "consequencias_positivas": "Performance em I/O, single language stack, vasto ecossistema npm",
+    "consequencias_negativas": "Limitações em CPU-intensive, callback hell se não usar async/await",
+    "riscos": "Memory leaks se não gerenciado corretamente",
+    "alternativas_consideradas": "Fastify, NestJS, Java Spring Boot, Python FastAPI",
+    "compliance_constitution": "Alinhado com stack tecnológico definido",
+    "referencias": "https://expressjs.com/ | https://nodejs.org/",
+    "aplicacoes": [
+      {
+        "aplicacao_sigla": "API-CORE",
+        "data_inicio": "2024-01-10",
+        "status": "Ativo",
+        "observacoes": "API principal do sistema"
+      },
+      {
+        "aplicacao_sigla": "API-AUTH",
+        "data_inicio": "2024-01-20",
+        "status": "Ativo",
+        "observacoes": "Microsserviço de autenticação"
+      },
+      {
+        "aplicacao_sigla": "API-NOTIF",
+        "data_inicio": "2024-03-01",
+        "status": "Planejado",
+        "observacoes": "Microsserviço de notificações em desenvolvimento"
+      }
+    ]
+  },
+  {
+    "descricao": "MySQL 8.0 como Banco de Dados Principal",
+    "status": "Aceito",
+    "contexto": "Necessidade de banco relacional robusto com suporte a transações ACID",
+    "decisao": "Adotar MySQL 8.0 com replicação master-slave para alta disponibilidade",
+    "justificativa": "MySQL oferece maturidade, performance adequada e recursos avançados",
+    "consequencias_positivas": "Alta disponibilidade, transações ACID, comunidade ativa",
+    "consequencias_negativas": "Limitações em escalabilidade horizontal, complexidade em sharding",
+    "riscos": "Lock contention em alta concorrência",
+    "alternativas_consideradas": "PostgreSQL, MariaDB, MongoDB",
+    "compliance_constitution": "Conformidade com requisitos de integridade de dados",
+    "referencias": "https://dev.mysql.com/doc/refman/8.0/en/",
+    "aplicacoes": [
+      {
+        "aplicacao_sigla": "API-CORE",
+        "data_inicio": "2024-01-10",
+        "status": "Ativo",
+        "observacoes": "Banco principal do sistema"
+      },
+      {
+        "aplicacao_sigla": "API-AUTH",
+        "data_inicio": "2024-01-20",
+        "status": "Ativo",
+        "observacoes": "Armazenamento de usuários e permissões"
+      },
+      {
+        "aplicacao_sigla": "API-AUDIT",
+        "data_inicio": "2024-02-15",
+        "status": "Ativo",
+        "observacoes": "Logs de auditoria e rastreamento"
+      }
+    ]
+  },
+  {
+    "descricao": "Docker e Kubernetes para Orquestração",
+    "status": "Aceito",
+    "contexto": "Necessidade de ambientes consistentes e escalabilidade automática",
+    "decisao": "Containerizar com Docker e orquestrar com Kubernetes",
+    "justificativa": "Ambientes consistentes, facilita CI/CD, escalabilidade automática",
+    "consequencias_positivas": "Portabilidade, rollback facilitado, auto-healing",
+    "consequencias_negativas": "Curva de aprendizado, overhead de recursos",
+    "riscos": "Configuração incorreta pode levar a problemas de segurança",
+    "alternativas_consideradas": "Docker Swarm, VMs tradicionais, Serverless",
+    "compliance_constitution": "Alinhado com princípios de DevOps e automação",
+    "referencias": "https://kubernetes.io/docs/ | https://docs.docker.com/",
+    "aplicacoes": [
+      {
+        "aplicacao_sigla": "PORTAL",
+        "data_inicio": "2024-01-15",
+        "status": "Ativo",
+        "observacoes": "Deploy via Kubernetes em produção"
+      },
+      {
+        "aplicacao_sigla": "ADMIN",
+        "data_inicio": "2024-02-01",
+        "status": "Ativo",
+        "observacoes": "Containerizado e orquestrado"
+      },
+      {
+        "aplicacao_sigla": "API-CORE",
+        "data_inicio": "2024-01-10",
+        "status": "Ativo",
+        "observacoes": "Auto-scaling configurado"
+      },
+      {
+        "aplicacao_sigla": "API-AUTH",
+        "data_inicio": "2024-01-20",
+        "status": "Ativo",
+        "observacoes": "3 réplicas em produção"
+      }
+    ]
+  },
+  {
+    "descricao": "CI/CD com GitHub Actions",
+    "status": "Aceito",
+    "contexto": "Necessidade de pipeline automatizado de integração e deploy",
+    "decisao": "Utilizar GitHub Actions para CI/CD com deploy automatizado",
+    "justificativa": "Integração nativa com GitHub, configuração declarativa, runners gratuitos",
+    "consequencias_positivas": "Automação completa, integração nativa, marketplace de actions",
+    "consequencias_negativas": "Limitações em runners gratuitos, vendor lock-in",
+    "riscos": "Falhas em actions podem bloquear deploys",
+    "alternativas_consideradas": "GitLab CI/CD, Azure DevOps, Jenkins, CircleCI",
+    "compliance_constitution": "Conformidade com práticas de DevSecOps",
+    "referencias": "https://docs.github.com/en/actions",
+    "aplicacoes": [
+      {
+        "aplicacao_sigla": "PORTAL",
+        "data_inicio": "2024-01-15",
+        "status": "Ativo",
+        "observacoes": "Deploy automático para staging e produção"
+      },
+      {
+        "aplicacao_sigla": "ADMIN",
+        "data_inicio": "2024-02-01",
+        "status": "Ativo",
+        "observacoes": "Pipeline com testes e security scan"
+      },
+      {
+        "aplicacao_sigla": "API-CORE",
+        "data_inicio": "2024-01-10",
+        "status": "Ativo",
+        "observacoes": "Deploy via GitHub Actions + ArgoCD"
+      }
+    ]
+  }
+]

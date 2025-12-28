@@ -15,7 +15,8 @@ import {
   Contrato,
   Tecnologia,
   ProcessoNegocio,
-  CapacidadeNegocio
+  CapacidadeNegocio,
+  ADRAplicacao
 } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -24,9 +25,11 @@ import { ArrowLeft, ArrowRight, Check, X } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { StepBasicInfo } from './wizard-steps/StepBasicInfo';
 import { StepTecnologias } from './wizard-steps/StepTecnologias';
+import { StepADRs } from './wizard-steps/StepADRs';
 import { StepAmbientes } from './wizard-steps/StepAmbientes';
 import { StepCapacidades } from './wizard-steps/StepCapacidades';
 import { StepProcessos } from './wizard-steps/StepProcessos';
+import { StepPayloads } from './wizard-steps/StepPayloads';
 import { StepIntegracoes } from './wizard-steps/StepIntegracoes';
 import { StepSLAs } from './wizard-steps/StepSLAs';
 import { StepRunbooks } from './wizard-steps/StepRunbooks';
@@ -62,6 +65,7 @@ export function AplicacaoWizard({
   const [faseCicloVida, setFaseCicloVida] = useState<FaseCicloVida>(aplicacao?.faseCicloVida || 'Planejamento');
   const [criticidadeNegocio, setCriticidadeNegocio] = useState<CriticidadeNegocio>(aplicacao?.criticidadeNegocio || 'Média');
   const [tecnologiasAssociadas, setTecnologiasAssociadas] = useState<AssociacaoTecnologiaAplicacao[]>(aplicacao?.tecnologias || []);
+  const [adrsAssociadas, setAdrsAssociadas] = useState<ADRAplicacao[]>([]);
   const [ambientes, setAmbientes] = useState<AmbienteTecnologico[]>(aplicacao?.ambientes || []);
   const [capacidadesAssociadas, setCapacidadesAssociadas] = useState<AssociacaoCapacidadeNegocio[]>(aplicacao?.capacidades || []);
   const [processosAssociados, setProcessosAssociados] = useState<AssociacaoProcessoNegocio[]>(aplicacao?.processos || []);
@@ -87,6 +91,29 @@ export function AplicacaoWizard({
         }
       };
       loadContratos();
+    }
+  }, [aplicacao?.id]);
+
+  // Carregar ADRs associadas quando aplicacao for carregada
+  useEffect(() => {
+    if (aplicacao?.id) {
+      const loadADRs = async () => {
+        try {
+          console.log('[AplicacaoWizard] Carregando ADRs para aplicação:', aplicacao.id);
+          const response = await fetch(`${API_URL}/api/aplicacoes/${aplicacao.id}/adrs`);
+          console.log('[AplicacaoWizard] Response status:', response.status);
+          if (response.ok) {
+            const data = await response.json();
+            console.log('[AplicacaoWizard] ADRs carregadas:', data);
+            setAdrsAssociadas(data);
+          } else {
+            console.error('[AplicacaoWizard] Erro ao carregar ADRs - status:', response.status);
+          }
+        } catch (error) {
+          console.error('[AplicacaoWizard] Erro ao carregar ADRs:', error);
+        }
+      };
+      loadADRs();
     }
   }, [aplicacao?.id]);
 
@@ -122,20 +149,22 @@ export function AplicacaoWizard({
   }, [aplicacao]);
 
   const isEditing = !!aplicacao;
-  const totalSteps = 11;
+  const totalSteps = 13;
 
   const steps = [
     { number: 1, title: 'Informações Básicas', description: 'Dados fundamentais da aplicação' },
     { number: 2, title: 'Tecnologias', description: 'Associação de tecnologias' },
-    { number: 3, title: 'Ambientes', description: 'Ambientes tecnológicos' },
-    { number: 4, title: 'Capacidades', description: 'Capacidades de negócio' },
-    { number: 5, title: 'Processos', description: 'Processos de negócio' },
-    { number: 6, title: 'Integrações', description: 'Integrações com outras aplicações' },
-    { number: 7, title: 'SLAs', description: 'Service Level Agreements' },
-    { number: 8, title: 'Runbooks', description: 'SLAs e Contratos - Runbooks operacionais' },
-    { number: 9, title: 'Contratos', description: 'Contratos da aplicação' },
-    { number: 10, title: 'Projetos', description: 'Projetos relacionados à aplicação' },
-    { number: 11, title: 'Revisão', description: 'Confirme os dados antes de salvar' },
+    { number: 3, title: 'ADRs', description: 'Decisões Arquitetônicas' },
+    { number: 4, title: 'Ambientes', description: 'Ambientes tecnológicos' },
+    { number: 5, title: 'Capacidades', description: 'Capacidades de negócio' },
+    { number: 6, title: 'Processos', description: 'Processos de negócio' },
+    { number: 7, title: 'Payloads', description: 'Payloads e APIs da aplicação' },
+    { number: 8, title: 'Integrações', description: 'Integrações com outras aplicações' },
+    { number: 9, title: 'SLAs', description: 'Service Level Agreements' },
+    { number: 10, title: 'Runbooks', description: 'SLAs e Contratos - Runbooks operacionais' },
+    { number: 11, title: 'Contratos', description: 'Contratos da aplicação' },
+    { number: 12, title: 'Projetos', description: 'Projetos relacionados à aplicação' },
+    { number: 13, title: 'Revisão', description: 'Confirme os dados antes de salvar' },
   ];
 
   const validateStep = (step: number): boolean => {
@@ -207,6 +236,7 @@ export function AplicacaoWizard({
       integracoes,
       slas,
       runbooks,
+      adrs: adrsAssociadas,
     };
 
     console.log('[AplicacaoWizard] ========== SALVANDO ==========');
@@ -220,6 +250,7 @@ export function AplicacaoWizard({
       integracoes: aplicacaoData.integracoes?.length || 0,
       slas: aplicacaoData.slas?.length || 0,
       runbooks: aplicacaoData.runbooks?.length || 0,
+      adrs: aplicacaoData.adrs?.length || 0,
       contratos: contratos.length
     });
 
@@ -313,57 +344,69 @@ export function AplicacaoWizard({
               />
             )}
             {currentStep === 3 && (
+              <StepADRs
+                adrsAssociadas={adrsAssociadas}
+                setAdrsAssociadas={setAdrsAssociadas}
+              />
+            )}
+            {currentStep === 4 && (
               <StepAmbientes
                 ambientes={ambientes}
                 setAmbientes={setAmbientes}
               />
             )}
-            {currentStep === 4 && (
+            {currentStep === 5 && (
               <StepCapacidades
                 capacidades={capacidades}
                 capacidadesAssociadas={capacidadesAssociadas}
                 setCapacidadesAssociadas={setCapacidadesAssociadas}
               />
             )}
-            {currentStep === 5 && (
+            {currentStep === 6 && (
               <StepProcessos
                 processos={processos}
                 processosAssociados={processosAssociados}
                 setProcessosAssociados={setProcessosAssociados}
               />
             )}
-            {currentStep === 6 && (
+            {currentStep === 7 && (
+              <StepPayloads
+                aplicacaoId={aplicacao?.id}
+                aplicacaoSigla={sigla}
+              />
+            )}
+            {currentStep === 8 && (
               <StepIntegracoes
                 aplicacoes={aplicacoes.filter(a => a.id !== aplicacao?.id)}
                 integracoes={integracoes}
                 setIntegracoes={setIntegracoes}
               />
             )}
-            {currentStep === 7 && (
+            {currentStep === 9 && (
               <StepSLAs
                 slas={slas}
                 setSlas={setSlas}
               />
             )}
-            {currentStep === 8 && (
+            {currentStep === 10 && (
               <StepRunbooks
                 runbooks={runbooks}
                 setRunbooks={setRunbooks}
               />
             )}
-            {currentStep === 9 && (
+            {currentStep === 11 && (
               <StepContratos
                 aplicacaoId={aplicacao?.id || ''}
                 contratos={contratos}
                 setContratos={setContratos}
               />
             )}
-            {currentStep === 10 && (
+            {currentStep === 12 && (
               <StepProjetos
                 aplicacaoSigla={sigla}
               />
             )}
-            {currentStep === 11 && (
+            {currentStep === 13 && (
               <StepReview
                 sigla={sigla}
                 descricao={descricao}

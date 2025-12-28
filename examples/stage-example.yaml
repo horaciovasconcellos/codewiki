@@ -1,0 +1,32 @@
+# Exemplo de Stage YAML para importação
+name: Build and Test
+type: Build
+description: |
+  Este stage realiza a compilação do código fonte e execução de testes unitários.
+  Inclui validação de dependências e geração de artefatos.
+timeout: 3600
+reusable: true
+
+# Estrutura adicional (opcional)
+steps:
+  - name: Checkout code
+    uses: actions/checkout@v3
+  
+  - name: Setup Node.js
+    uses: actions/setup-node@v3
+    with:
+      node-version: '18'
+  
+  - name: Install dependencies
+    run: npm ci
+  
+  - name: Run tests
+    run: npm test
+  
+  - name: Build
+    run: npm run build
+
+# Variáveis de ambiente (opcional)
+env:
+  NODE_ENV: production
+  CI: true

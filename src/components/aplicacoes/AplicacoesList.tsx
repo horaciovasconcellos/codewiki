@@ -167,7 +167,9 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
         let integracoesRes: any[] = [];
         let slasRes: any[] = [];
         let contratosRes: any[] = [];
+        let adrsRes: any[] = [];
         let servidoresRes: any[] = [];
+        let payloadsRes: any[] = [];
 
         try {
           const response = await fetch(`${API_URL}/api/aplicacoes/${app.id}`);
@@ -197,6 +199,20 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
             contratosRes = await contratosResponse.json();
           }
 
+          // Buscar ADRs separadamente
+          try {
+            const adrsResponse = await fetch(`${API_URL}/api/aplicacoes/${app.id}/adrs`);
+            console.log(`Buscando ADRs da aplicação ${app.id} (${app.sigla}):`, adrsResponse.status);
+            if (adrsResponse.ok) {
+              adrsRes = await adrsResponse.json();
+              console.log(`ADRs encontradas para ${app.sigla}:`, adrsRes);
+            } else {
+              console.error(`Erro ao buscar ADRs (status ${adrsResponse.status}):`, await adrsResponse.text());
+            }
+          } catch (errADRs) {
+            console.error(`Erro ao buscar ADRs da aplicação ${app.sigla}:`, errADRs);
+          }
+
           // Buscar servidores separadamente
           try {
             const servidoresResponse = await fetch(`${API_URL}/api/aplicacoes/${app.id}/servidores`);
@@ -210,6 +226,20 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
           } catch (errServidores) {
             console.error(`Erro ao buscar servidores da aplicação ${app.sigla}:`, errServidores);
           }
+
+          // Buscar payloads separadamente
+          try {
+            const payloadsResponse = await fetch(`${API_URL}/api/aplicacoes/${app.id}/payloads`);
+            console.log(`Buscando payloads da aplicação ${app.id} (${app.sigla}):`, payloadsResponse.status);
+            if (payloadsResponse.ok) {
+              payloadsRes = await payloadsResponse.json();
+              console.log(`Payloads encontrados para ${app.sigla}:`, payloadsRes);
+            } else {
+              console.error(`Erro ao buscar payloads (status ${payloadsResponse.status}):`, await payloadsResponse.text());
+            }
+          } catch (errPayloads) {
+            console.error(`Erro ao buscar payloads da aplicação ${app.sigla}:`, errPayloads);
+          }
           
           console.log(`=== APLICAÇÃO: ${app.sigla} ===`);
           console.log('Tecnologias:', tecnologiasRes);
@@ -219,7 +249,9 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
           console.log('Integrações:', integracoesRes);
           console.log('SLAs:', slasRes);
           console.log('Contratos:', contratosRes);
+          console.log('ADRs:', adrsRes);
           console.log('Servidores:', servidoresRes);
+          console.log('Payloads:', payloadsRes);
         } catch (err) {
           console.error('Erro ao buscar dados:', err);
         }
@@ -586,6 +618,70 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
           });
         }
 
+        // Separador
+        doc.setDrawColor(229, 231, 235);
+        doc.line(12, yPos, 198, yPos);
+        yPos += 4;
+
+        // Decisões Arquitetônicas (ADRs)
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Decisões Arquitetônicas - ADRs (${adrsRes.length})`, 12, yPos);
+        yPos += 5;
+
+        if (adrsRes.length === 0) {
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(100, 116, 139);
+          doc.text('Nenhuma ADR associada', 12, yPos);
+          yPos += 5;
+        } else {
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          
+          adrsRes.forEach((adr: any) => {
+            // Box da ADR (simulando border rounded)
+            doc.setDrawColor(229, 231, 235);
+            doc.setFillColor(255, 255, 255);
+            doc.roundedRect(12, yPos - 3, 186, 10, 1, 1, 'FD');
+            
+            // Sequência da ADR
+            doc.setFont('helvetica', 'bold');
+            const adrLabel = `ADR-${String(adr.adrSequencia || adr.sequencia || '0000').padStart(4, '0')}`;
+            doc.text(adrLabel, 14, yPos + 1);
+            
+            // Descrição da ADR
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(60, 60, 60);
+            const descricao = adr.adrDescricao || adr.descricao || 'Sem descrição';
+            const descricaoTruncada = descricao.length > 90 ? descricao.substring(0, 87) + '...' : descricao;
+            doc.text(descricaoTruncada, 14, yPos + 5);
+            
+            // Badge do status
+            const getADRStatusColor = (status: string) => {
+              switch (status) {
+                case 'Ativo': return { bg: [220, 252, 231], text: [22, 101, 52] }; // green
+                case 'Inativo': return { bg: [254, 226, 226], text: [153, 27, 27] }; // red
+                case 'Superado': return { bg: [243, 244, 246], text: [75, 85, 99] }; // gray
+                default: return { bg: [254, 249, 195], text: [133, 77, 14] }; // yellow
+              }
+            };
+            
+            const adrStatus = adr.adrStatus || adr.status || 'Ativo';
+            const statusColors = getADRStatusColor(adrStatus);
+            doc.setFillColor(statusColors.bg[0], statusColors.bg[1], statusColors.bg[2]);
+            doc.setTextColor(statusColors.text[0], statusColors.text[1], statusColors.text[2]);
+            const statusWidth = doc.getTextWidth(adrStatus) + 4;
+            doc.roundedRect(194 - statusWidth, yPos - 2, statusWidth, 5, 1, 1, 'F');
+            doc.text(adrStatus, 196 - statusWidth, yPos + 1);
+            
+            doc.setTextColor(0, 0, 0);
+            yPos += 13;
+          });
+        }
+
         // ========== CARD 3: SERVIDORES ==========
         // Título do Card
         doc.setFillColor(248, 250, 252); // bg-slate-50
@@ -625,6 +721,60 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(100, 116, 139);
             doc.text(`- ${hostname}`, 12 + doc.getTextWidth(`• ${sigla} `), yPos);
+            
+            doc.setTextColor(0, 0, 0);
+            yPos += 4;
+          });
+          yPos += 3;
+        }
+
+        // ========== CARD 4: PAYLOADS ==========
+        // Título do Card
+        doc.setFillColor(248, 250, 252); // bg-slate-50
+        doc.rect(10, yPos, 190, 8, 'F');
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('Payloads / APIs', 12, yPos + 5.5);
+        yPos += 12;
+
+        // Lista de Payloads
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Payloads Associados (${payloadsRes.length})`, 12, yPos);
+        yPos += 5;
+
+        if (payloadsRes.length === 0) {
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(100, 116, 139);
+          doc.text('Nenhum payload associado', 12, yPos);
+          yPos += 5;
+        } else {
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          
+          // Exibir cada payload em uma linha
+          payloadsRes.forEach((p: any) => {
+            const sigla = p.sigla || 'N/A';
+            const descricao = p.descricao || 'Sem descrição';
+            const dataInicio = formatDate(p.dataInicio);
+            
+            // Tudo na mesma linha: • Sigla - Descrição (truncada) - Início: data
+            doc.setFont('helvetica', 'bold');
+            doc.text(`• ${sigla}`, 12, yPos);
+            
+            doc.setFont('helvetica', 'normal');
+            const siglaWidth = doc.getTextWidth(`• ${sigla} `);
+            const descricaoTruncada = descricao.length > 50 ? descricao.substring(0, 47) + '...' : descricao;
+            doc.setTextColor(60, 60, 60);
+            doc.text(`- ${descricaoTruncada}`, 12 + siglaWidth, yPos);
+            
+            const descWidth = doc.getTextWidth(`- ${descricaoTruncada} `);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`- Início: ${dataInicio}`, 12 + siglaWidth + descWidth, yPos);
             
             doc.setTextColor(0, 0, 0);
             yPos += 4;

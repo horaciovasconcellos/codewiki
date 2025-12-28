@@ -4,7 +4,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Trash, Eye, PencilSimple } from '@phosphor-icons/react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Trash, Eye, PencilSimple, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { CertificacoesTable } from './CertificacoesTable';
 import { toast } from 'sonner';
 import { useLogging } from '@/hooks/use-logging';
@@ -48,6 +55,8 @@ export function HabilidadesTable({ habilidades, onEdit, onHabilidadeDelete }: Ha
   const { logClick } = useLogging('habilidades-table');
   const [viewingHabilidade, setViewingHabilidade] = useState<Habilidade | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleView = (habilidade: Habilidade) => {
     setViewingHabilidade(habilidade);
@@ -63,6 +72,13 @@ export function HabilidadesTable({ habilidades, onEdit, onHabilidadeDelete }: Ha
     }
   };
 
+  // Paginação
+  const totalPages = Math.ceil(habilidades.length / pageSize);
+  const paginatedHabilidades = habilidades.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   if (habilidades.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
@@ -73,6 +89,12 @@ export function HabilidadesTable({ habilidades, onEdit, onHabilidadeDelete }: Ha
 
   return (
     <>
+      <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
+        <div>
+          Mostrando {paginatedHabilidades.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, habilidades.length)} de {habilidades.length} habilidades
+        </div>
+      </div>
+
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
@@ -87,7 +109,7 @@ export function HabilidadesTable({ habilidades, onEdit, onHabilidadeDelete }: Ha
             </TableRow>
           </TableHeader>
           <TableBody>
-            {habilidades.map((habilidade) => (
+            {paginatedHabilidades.map((habilidade) => (
               <TableRow key={habilidade.id}>
                 <TableCell className="font-mono font-semibold">{habilidade.sigla}</TableCell>
                 <TableCell className="max-w-md truncate">{habilidade.descricao}</TableCell>
@@ -135,6 +157,53 @@ export function HabilidadesTable({ habilidades, onEdit, onHabilidadeDelete }: Ha
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Itens por página:</span>
+            <Select 
+              value={pageSize.toString()} 
+              onValueChange={(value) => {
+                setPageSize(Number(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <CaretLeft size={16} />
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <CaretRight size={16} />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">

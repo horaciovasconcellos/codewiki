@@ -11,7 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { MagnifyingGlass, Pencil, Trash } from '@phosphor-icons/react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { MagnifyingGlass, Pencil, Trash, CaretLeft, CaretRight } from '@phosphor-icons/react';
 
 interface ComunicacaoDataTableProps {
   comunicacoes: Comunicacao[];
@@ -25,12 +32,21 @@ export function ComunicacaoDataTable({
   onDelete,
 }: ComunicacaoDataTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const filteredComunicacoes = comunicacoes.filter((com) =>
     com.sigla.toLowerCase().includes(searchTerm.toLowerCase()) ||
     com.usoTipico.toLowerCase().includes(searchTerm.toLowerCase()) ||
     com.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
     com.tecnologias.some(tec => tec.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // Paginação
+  const totalPages = Math.ceil(filteredComunicacoes.length / pageSize);
+  const paginatedComunicacoes = filteredComunicacoes.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
   );
 
   const getTipoBadgeColor = (tipo: string) => {
@@ -54,9 +70,19 @@ export function ComunicacaoDataTable({
           <Input
             placeholder="Buscar por sigla, tipo, tecnologia ou uso típico..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="pl-10"
           />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div>
+          Mostrando {paginatedComunicacoes.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, filteredComunicacoes.length)} de {filteredComunicacoes.length} comunicações
+          {searchTerm && ` (filtradas de ${comunicacoes.length} total)`}
         </div>
       </div>
 
@@ -72,14 +98,14 @@ export function ComunicacaoDataTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-              {filteredComunicacoes.length === 0 ? (
+              {paginatedComunicacoes.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground">
                     Nenhuma comunicação encontrada
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredComunicacoes.map((com) => (
+                paginatedComunicacoes.map((com) => (
                   <TableRow key={com.id}>
                     <TableCell className="font-medium">{com.sigla}</TableCell>
                     <TableCell>
@@ -126,10 +152,52 @@ export function ComunicacaoDataTable({
           </Table>
         </div>
 
-        <div className="mt-4 text-sm text-muted-foreground">
-          {filteredComunicacoes.length} comunicação(ões) encontrada(s)
-          {searchTerm && ` de ${comunicacoes.length} total(is)`}
-        </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Itens por página:</span>
+              <Select 
+                value={pageSize.toString()} 
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <CaretLeft size={16} />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <CaretRight size={16} />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

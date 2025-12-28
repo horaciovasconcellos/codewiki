@@ -1,0 +1,23 @@
+# Stage de Deploy
+name: Deploy to Production
+type: Deploy
+description: Deploy da aplicação para ambiente de produção
+timeout: 1800
+reusable: false
+
+steps:
+  - name: Login to registry
+    run: docker login
+  
+  - name: Build image
+    run: docker build -t myapp:latest .
+  
+  - name: Push image
+    run: docker push myapp:latest
+  
+  - name: Deploy to Kubernetes
+    run: kubectl apply -f k8s/
+
+environment:
+  name: production
+  url: https://prod.example.com

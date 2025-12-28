@@ -1,0 +1,24 @@
+# Stage de Security Scan
+name: Security Analysis
+type: Security
+description: Análise de vulnerabilidades e segurança do código
+timeout: 2400
+reusable: true
+
+steps:
+  - name: SAST Analysis
+    run: sonar-scanner
+  
+  - name: Dependency Check
+    run: npm audit
+  
+  - name: Container Scan
+    run: trivy image myapp:latest
+  
+  - name: OWASP ZAP
+    run: zap-baseline.py -t https://staging.example.com
+
+reports:
+  - type: security
+    format: sarif
+    path: security-report.sarif

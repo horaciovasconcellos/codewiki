@@ -404,6 +404,7 @@ export interface Aplicacao {
   integracoes?: IntegracaoAplicacao[];
   slas?: AssociacaoSLAAplicacao[];
   runbooks?: AssociacaoRunbookAplicacao[];
+  adrs?: ADRAplicacao[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -1089,4 +1090,115 @@ export interface Payload {
   dataTermino?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// =====================================================
+// STAGES TYPES
+// =====================================================
+
+export type TipoStage = 'Build' | 'Test' | 'Security' | 'Deploy' | 'Quality' | 'Notification' | 'Custom';
+
+export interface Stage {
+  id: string;
+  nome: string;
+  descricao?: string;
+  yamlContent?: string;
+  tipo: TipoStage;
+  reutilizavel: boolean;
+  timeoutSeconds: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// =====================================================
+// PIPELINE DATABASE TYPES
+// =====================================================
+
+export type StatusPipeline = 'Ativa' | 'Em avaliação' | 'Obsoleta' | 'Descontinuada';
+
+export interface Pipeline {
+  id: string;
+  nome: string;
+  status: StatusPipeline;
+  dataInicio?: string;
+  dataTermino?: string;
+  // Grupo trigger
+  triggerBranches?: string;
+  triggerPaths?: string;
+  // Grupo pr
+  prBranches?: string;
+  // Variables
+  variables?: string;
+  // Grupo resources
+  resourcesRepositories?: string;
+  resourcesPipelines?: string;
+  resourcesContainers?: string;
+  // Grupo schedules
+  schedules?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  // Relacionamento
+  stages?: PipelineStage[];
+}
+
+export interface PipelineStage {
+  id: string;
+  pipelineId: string;
+  stageId: string;
+  status: StatusPipeline;
+  dataInicio: string;
+  dataTermino?: string;
+  ordem: number;
+  createdAt?: string;
+  updatedAt?: string;
+  // Relacionamento
+  stage?: Stage;
+}
+
+// =====================================================
+// ADR (ARCHITECTURAL DECISION RECORDS) TYPES
+// =====================================================
+
+export type StatusADR = 'Proposto' | 'Aceito' | 'Rejeitado' | 'Substituído' | 'Obsoleto' | 'Adiado/Retirado';
+export type StatusAplicacaoADR = 'Ativo' | 'Inativo' | 'Planejado' | 'Descontinuado';
+
+export interface ADR {
+  id: string;
+  sequencia: number;
+  descricao: string;
+  dataCriacao: string;
+  dataAtualizacao?: string;
+  status: StatusADR;
+  contexto?: string;
+  decisao?: string;
+  justificativa?: string;
+  consequenciasPositivas?: string;
+  consequenciasNegativas?: string;
+  riscos?: string;
+  alternativasConsideradas?: string;
+  complianceConstitution?: string;
+  adrSubstitutaId?: string;
+  adrSubstitutaSequencia?: number;
+  referencias?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  adrSubstituta?: ADR;
+  aplicacoes?: ADRAplicacao[];
+  aplicacoesCount?: number; // Contador para listagem
+}
+
+export interface ADRAplicacao {
+  id: string;
+  adrId: string;
+  aplicacaoId: string;
+  aplicacaoSigla?: string;
+  aplicacaoNome?: string;
+  aplicacaoDescricao?: string;
+  dataInicio?: string;
+  dataTermino?: string;
+  status: StatusAplicacaoADR;
+  observacoes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  aplicacao?: Aplicacao;
 }

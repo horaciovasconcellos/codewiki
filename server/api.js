@@ -89,11 +89,14 @@ async function initializeDatabase() {
   try {
     pool = mysql.createPool({
       ...dbConfig,
-      charset: 'utf8mb4'
+      charset: 'utf8mb4',
+      charsetNumber: 255
     });
+    
     // Testar conexão
     const connection = await pool.getConnection();
     await connection.query("SET NAMES utf8mb4");
+    await connection.query("SET CHARACTER SET utf8mb4");
     console.log('✓ Conectado ao MySQL');
     connection.release();
     return true;
@@ -103,6 +106,15 @@ async function initializeDatabase() {
     return false;
   }
 }
+
+// Wrapper para getConnection com charset garantido
+const getUtf8Connection = async () => {
+  const connection = await pool.getConnection();
+  await connection.query('SET NAMES utf8mb4');
+  await connection.query('SET CHARACTER SET utf8mb4');
+  await connection.query('SET character_set_connection=utf8mb4');
+  return connection;
+};
 
 // Middleware
 app.use(cors());
@@ -268,12 +280,17 @@ async function mapColaborador(row) {
     [row.id]
   );
   
-  // Buscar habilidades do colaborador - DESABILITADO (tabela removida)
-  // const [habilidades] = await pool.query(
-  //   'SELECT * FROM colaborador_habilidades WHERE colaborador_id = ?',
-  //   [row.id]
-  // );
-  const habilidades = [];
+  // Buscar habilidades do colaborador
+  const [habilidades] = await pool.query(
+    'SELECT * FROM colaborador_habilidades WHERE colaborador_id = ?',
+    [row.id]
+  );
+  
+  // Buscar avaliações do colaborador
+  const [avaliacoes] = await pool.query(
+    'SELECT * FROM avaliacoes_colaborador WHERE colaborador_id = ? ORDER BY data_avaliacao DESC',
+    [row.id]
+  );
   
   return {
     id: row.id,
@@ -297,6 +314,20 @@ async function mapColaborador(row) {
       nivelAvaliado: h.nivel_avaliado,
       dataInicio: formatDate(h.data_inicio),
       dataTermino: formatDate(h.data_termino)
+    })),
+    avaliacoes: avaliacoes.map(av => ({
+      id: av.id,
+      colaboradorId: av.colaborador_id,
+      dataAvaliacao: formatDate(av.data_avaliacao),
+      resultadosEntregas: parseFloat(av.resultados_entregas),
+      competenciasTecnicas: parseFloat(av.competencias_tecnicas),
+      qualidadeSeguranca: parseFloat(av.qualidade_seguranca),
+      comportamentoCultura: parseFloat(av.comportamento_cultura),
+      evolucaoAprendizado: parseFloat(av.evolucao_aprendizado),
+      motivo: av.motivo,
+      dataConversa: formatDate(av.data_conversa),
+      createdAt: av.created_at,
+      updatedAt: av.updated_at
     })),
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -669,27 +700,6 @@ app.get('/api/colaboradores/:id', async (req, res) => {
       return res.status(404).json({ error: 'Colaborador não encontrado', code: 'NOT_FOUND' });
     }
     const colaborador = await mapColaborador(rows[0]);
-    
-    // Buscar avaliações do colaborador
-    const [avaliacoes] = await pool.query(
-      'SELECT * FROM avaliacoes_colaborador WHERE colaborador_id = ? ORDER BY data_avaliacao DESC',
-      [req.params.id]
-    );
-    
-    colaborador.avaliacoes = avaliacoes.map(row => ({
-      id: row.id,
-      colaboradorId: row.colaborador_id,
-      dataAvaliacao: row.data_avaliacao,
-      resultadosEntregas: parseFloat(row.resultados_entregas),
-      competenciasTecnicas: parseFloat(row.competencias_tecnicas),
-      qualidadeSeguranca: parseFloat(row.qualidade_seguranca),
-      comportamentoCultura: parseFloat(row.comportamento_cultura),
-      evolucaoAprendizado: parseFloat(row.evolucao_aprendizado),
-      motivo: row.motivo,
-      dataConversa: row.data_conversa,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
-    }));
     
     res.json(colaborador);
   } catch (error) {
@@ -2983,6 +2993,46 @@ app.post('/api/aplicacoes', async (req, res) => {
       }
     }
 
+    // Salvar ADRs associadas
+    if (req.body.adrs && Array.isArray(req.body.adrs)) {
+      console.log('[API POST /aplicacoes] Salvando ADRs:', req.body.adrs.length);
+      for (const adr of req.body.adrs) {
+        if (!adr.adrId) {
+          console.log('[API POST /aplicacoes] ADR sem adrId, pulando:', adr);
+          continue;
+        }
+        
+        // Converter data para formato MySQL (YYYY-MM-DD)
+        let dataInicio = adr.dataInicio;
+        if (dataInicio) {
+          if (typeof dataInicio === 'string') {
+            dataInicio = dataInicio.split('T')[0];
+          } else if (dataInicio instanceof Date) {
+            dataInicio = dataInicio.toISOString().split('T')[0];
+          }
+        } else {
+          dataInicio = new Date().toISOString().split('T')[0];
+        }
+        
+        let dataTermino = adr.dataTermino;
+        if (dataTermino) {
+          if (typeof dataTermino === 'string') {
+            dataTermino = dataTermino.split('T')[0];
+          } else if (dataTermino instanceof Date) {
+            dataTermino = dataTermino.toISOString().split('T')[0];
+          }
+        } else {
+          dataTermino = null;
+        }
+        
+        await pool.query(
+          'INSERT INTO adr_aplicacoes (id, adr_id, aplicacao_id, data_inicio, data_termino, status) VALUES (?, ?, ?, ?, ?, ?)',
+          [uuidv4(), adr.adrId, id, dataInicio, dataTermino, adr.status || 'Ativo']
+        );
+        console.log('[API POST /aplicacoes] ADR salva:', adr.adrId);
+      }
+    }
+
     const [created] = await pool.query('SELECT * FROM aplicacoes WHERE id = ?', [id]);
     res.status(201).json(mapAplicacao(created[0]));
   } catch (error) {
@@ -3294,6 +3344,49 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
             'INSERT INTO aplicacao_runbooks (id, aplicacao_id, runbook_id, descricao, data_associacao, status) VALUES (?, ?, ?, ?, ?, ?)',
             [uuidv4(), req.params.id, runbook.runbookId, runbook.descricao || '', dataAssociacao, runbook.status || 'Ativo']
           );
+        }
+      }
+    }
+
+    // Atualizar ADRs associadas
+    if (req.body.adrs !== undefined) {
+      console.log('[API PUT /aplicacoes/:id] Atualizando ADRs:', req.body.adrs?.length || 0);
+      await pool.query('DELETE FROM adr_aplicacoes WHERE aplicacao_id = ?', [req.params.id]);
+      if (Array.isArray(req.body.adrs)) {
+        for (const adr of req.body.adrs) {
+          if (!adr.adrId) {
+            console.log('[API PUT /aplicacoes/:id] ADR sem adrId, pulando:', adr);
+            continue;
+          }
+          
+          // Converter data para formato MySQL (YYYY-MM-DD)
+          let dataInicio = adr.dataInicio;
+          if (dataInicio) {
+            if (typeof dataInicio === 'string') {
+              dataInicio = dataInicio.split('T')[0];
+            } else if (dataInicio instanceof Date) {
+              dataInicio = dataInicio.toISOString().split('T')[0];
+            }
+          } else {
+            dataInicio = new Date().toISOString().split('T')[0];
+          }
+          
+          let dataTermino = adr.dataTermino;
+          if (dataTermino) {
+            if (typeof dataTermino === 'string') {
+              dataTermino = dataTermino.split('T')[0];
+            } else if (dataTermino instanceof Date) {
+              dataTermino = dataTermino.toISOString().split('T')[0];
+            }
+          } else {
+            dataTermino = null;
+          }
+          
+          await pool.query(
+            'INSERT INTO adr_aplicacoes (id, adr_id, aplicacao_id, data_inicio, data_termino, status) VALUES (?, ?, ?, ?, ?, ?)',
+            [uuidv4(), adr.adrId, req.params.id, dataInicio, dataTermino, adr.status || 'Ativo']
+          );
+          console.log('[API PUT /aplicacoes/:id] ADR salva:', adr.adrId);
         }
       }
     }
@@ -5880,6 +5973,626 @@ async function startServer() {
   });
 
   // ===================================
+  // ENDPOINTS DE STAGES
+  // ===================================
+
+  // GET - Listar todos os stages
+  app.get('/api/stages', async (req, res) => {
+    try {
+      const [rows] = await pool.query(`
+        SELECT 
+          id, nome, descricao, yaml_content as yamlContent, tipo, reutilizavel,
+          timeout_seconds as timeoutSeconds,
+          created_at as createdAt, updated_at as updatedAt
+        FROM stages
+        ORDER BY nome
+      `);
+      res.json(rows);
+    } catch (error) {
+      console.error('Erro ao buscar stages:', error);
+      res.status(500).json({ error: 'Erro ao buscar stages', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // GET - Buscar stage por ID
+  app.get('/api/stages/:id', async (req, res) => {
+    try {
+      const [rows] = await pool.query(`
+        SELECT 
+          id, nome, descricao, yaml_content as yamlContent, tipo, reutilizavel,
+          timeout_seconds as timeoutSeconds,
+          created_at as createdAt, updated_at as updatedAt
+        FROM stages
+        WHERE id = ?
+      `, [req.params.id]);
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Stage não encontrado', code: 'NOT_FOUND' });
+      }
+      
+      res.json(rows[0]);
+    } catch (error) {
+      console.error('Erro ao buscar stage:', error);
+      res.status(500).json({ error: 'Erro ao buscar stage', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // POST - Criar novo stage
+  app.post('/api/stages', async (req, res) => {
+    const { nome, descricao, yamlContent, tipo, reutilizavel, timeoutSeconds } = req.body;
+
+    if (!nome || !tipo) {
+      return res.status(400).json({
+        error: 'Campos obrigatórios: nome, tipo',
+        code: 'MISSING_FIELDS'
+      });
+    }
+
+    try {
+      const id = uuidv4();
+      
+      await pool.query(`
+        INSERT INTO stages (id, nome, descricao, yaml_content, tipo, reutilizavel, timeout_seconds)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [
+        id, nome, descricao || null, yamlContent || null, tipo,
+        reutilizavel !== undefined ? reutilizavel : true,
+        timeoutSeconds || 3600
+      ]);
+
+      const [rows] = await pool.query('SELECT * FROM stages WHERE id = ?', [id]);
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      console.error('Erro ao criar stage:', error);
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ error: 'Stage com este nome já existe', code: 'DUPLICATE_NAME' });
+      }
+      res.status(500).json({ error: 'Erro ao criar stage', code: 'DATABASE_ERROR', details: error.message });
+    }
+  });
+
+  // PUT - Atualizar stage
+  app.put('/api/stages/:id', async (req, res) => {
+    const { nome, descricao, yamlContent, tipo, reutilizavel, timeoutSeconds } = req.body;
+
+    try {
+      const [result] = await pool.query(`
+        UPDATE stages SET
+          nome = ?, descricao = ?, yaml_content = ?, tipo = ?, reutilizavel = ?,
+          timeout_seconds = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `, [nome, descricao, yamlContent, tipo, reutilizavel, timeoutSeconds, req.params.id]);
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Stage não encontrado', code: 'NOT_FOUND' });
+      }
+
+      const [rows] = await pool.query('SELECT * FROM stages WHERE id = ?', [req.params.id]);
+      res.json(rows[0]);
+    } catch (error) {
+      console.error('Erro ao atualizar stage:', error);
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ error: 'Stage com este nome já existe', code: 'DUPLICATE_NAME' });
+      }
+      res.status(500).json({ error: 'Erro ao atualizar stage', code: 'DATABASE_ERROR', details: error.message });
+    }
+  });
+
+  // DELETE - Excluir stage
+  app.delete('/api/stages/:id', async (req, res) => {
+    try {
+      const [result] = await pool.query('DELETE FROM stages WHERE id = ?', [req.params.id]);
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Stage não encontrado', code: 'NOT_FOUND' });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error('Erro ao excluir stage:', error);
+      res.status(500).json({ error: 'Erro ao excluir stage', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // ===================================
+  // ENDPOINTS DE PIPELINES
+  // ===================================
+
+  // GET - Listar todas as pipelines
+  app.get('/api/pipelines', async (req, res) => {
+    try {
+      const [rows] = await pool.query(`
+        SELECT 
+          id, nome, status,
+          data_inicio as dataInicio,
+          data_termino as dataTermino,
+          trigger_branches as triggerBranches,
+          trigger_paths as triggerPaths,
+          pr_branches as prBranches,
+          variables,
+          resources_repositories as resourcesRepositories,
+          resources_pipelines as resourcesPipelines,
+          resources_containers as resourcesContainers,
+          schedules,
+          created_at as createdAt,
+          updated_at as updatedAt
+        FROM pipelines
+        ORDER BY nome
+      `);
+      res.json(rows);
+    } catch (error) {
+      console.error('Erro ao buscar pipelines:', error);
+      res.status(500).json({ error: 'Erro ao buscar pipelines', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // GET - Buscar pipeline por ID com stages
+  app.get('/api/pipelines/:id', async (req, res) => {
+    try {
+      const [pipelineRows] = await pool.query(`
+        SELECT 
+          id, nome, status,
+          data_inicio as dataInicio,
+          data_termino as dataTermino,
+          trigger_branches as triggerBranches,
+          trigger_paths as triggerPaths,
+          pr_branches as prBranches,
+          variables,
+          resources_repositories as resourcesRepositories,
+          resources_pipelines as resourcesPipelines,
+          resources_containers as resourcesContainers,
+          schedules,
+          created_at as createdAt,
+          updated_at as updatedAt
+        FROM pipelines
+        WHERE id = ?
+      `, [req.params.id]);
+      
+      if (pipelineRows.length === 0) {
+        return res.status(404).json({ error: 'Pipeline não encontrada', code: 'NOT_FOUND' });
+      }
+      
+      const pipeline = pipelineRows[0];
+      
+      // Buscar stages associados
+      const [stageRows] = await pool.query(`
+        SELECT 
+          ps.id, ps.pipeline_id as pipelineId, ps.stage_id as stageId,
+          ps.status, ps.data_inicio as dataInicio, ps.data_termino as dataTermino,
+          ps.ordem,
+          s.nome, s.tipo, s.descricao
+        FROM pipeline_stages ps
+        JOIN stages s ON ps.stage_id = s.id
+        WHERE ps.pipeline_id = ?
+        ORDER BY ps.ordem
+      `, [req.params.id]);
+      
+      pipeline.stages = stageRows.map(row => ({
+        id: row.id,
+        pipelineId: row.pipelineId,
+        stageId: row.stageId,
+        status: row.status,
+        dataInicio: row.dataInicio,
+        dataTermino: row.dataTermino,
+        ordem: row.ordem,
+        stage: {
+          id: row.stageId,
+          nome: row.nome,
+          tipo: row.tipo,
+          descricao: row.descricao
+        }
+      }));
+      
+      res.json(pipeline);
+    } catch (error) {
+      console.error('Erro ao buscar pipeline:', error);
+      res.status(500).json({ error: 'Erro ao buscar pipeline', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // POST - Criar nova pipeline
+  app.post('/api/pipelines', async (req, res) => {
+    const {
+      nome, status, dataInicio, dataTermino,
+      triggerBranches, triggerPaths, prBranches,
+      variables, resourcesRepositories, resourcesPipelines,
+      resourcesContainers, schedules, stages
+    } = req.body;
+
+    console.log('Status recebido:', status, '| Bytes:', Buffer.from(status || 'Em avaliação').toString('hex'));
+    console.log('🔍 Stages recebidos:', stages ? `${stages.length} stages` : 'Nenhum stage');
+    if (stages && stages.length > 0) {
+      console.log('🔍 Primeiro stage:', stages[0]);
+    }
+
+    if (!nome) {
+      return res.status(400).json({
+        error: 'Campo obrigatório: nome',
+        code: 'MISSING_FIELDS'
+      });
+    }
+
+    const connection = await getUtf8Connection();
+    try {
+      await connection.beginTransaction();
+      
+      const id = uuidv4();
+      
+      await connection.query(`
+        INSERT INTO pipelines (
+          id, nome, status, data_inicio, data_termino,
+          trigger_branches, trigger_paths, pr_branches,
+          variables, resources_repositories, resources_pipelines,
+          resources_containers, schedules
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        id, nome, status || 'Em avaliação', dataInicio || null, dataTermino || null,
+        triggerBranches || null, triggerPaths || null, prBranches || null,
+        variables || null, resourcesRepositories || null, resourcesPipelines || null,
+        resourcesContainers || null, schedules || null
+      ]);
+
+      // Inserir stages
+      if (stages && stages.length > 0) {
+        for (let i = 0; i < stages.length; i++) {
+          const stage = stages[i];
+          await connection.query(`
+            INSERT INTO pipeline_stages (
+              id, pipeline_id, stage_id, status,
+              data_inicio, data_termino, ordem
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          `, [
+            stage.id || uuidv4(),
+            id,
+            stage.stageId,
+            stage.status || 'Ativa',
+            stage.dataInicio,
+            stage.dataTermino || null,
+            stage.ordem !== undefined ? stage.ordem : i
+          ]);
+        }
+      }
+
+      await connection.commit();
+
+      const [rows] = await pool.query('SELECT * FROM pipelines WHERE id = ?', [id]);
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      await connection.rollback();
+      console.error('Erro ao criar pipeline:', error);
+      res.status(500).json({ error: 'Erro ao criar pipeline', code: 'DATABASE_ERROR', details: error.message });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // PUT - Atualizar pipeline
+  app.put('/api/pipelines/:id', async (req, res) => {
+    const {
+      nome, status, dataInicio, dataTermino,
+      triggerBranches, triggerPaths, prBranches,
+      variables, resourcesRepositories, resourcesPipelines,
+      resourcesContainers, schedules, stages
+    } = req.body;
+
+    console.log('🔍 PUT Pipeline - Stages recebidos:', stages ? `${stages.length} stages` : 'Nenhum stage');
+
+    const connection = await getUtf8Connection();
+    try {
+      await connection.beginTransaction();
+
+      const [result] = await connection.query(`
+        UPDATE pipelines SET
+          nome = ?, status = ?, data_inicio = ?, data_termino = ?,
+          trigger_branches = ?, trigger_paths = ?, pr_branches = ?,
+          variables = ?, resources_repositories = ?, resources_pipelines = ?,
+          resources_containers = ?, schedules = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `, [
+        nome, status, dataInicio, dataTermino,
+        triggerBranches, triggerPaths, prBranches,
+        variables, resourcesRepositories, resourcesPipelines,
+        resourcesContainers, schedules, req.params.id
+      ]);
+
+      if (result.affectedRows === 0) {
+        await connection.rollback();
+        return res.status(404).json({ error: 'Pipeline não encontrada', code: 'NOT_FOUND' });
+      }
+
+      // Remover stages existentes
+      await connection.query('DELETE FROM pipeline_stages WHERE pipeline_id = ?', [req.params.id]);
+
+      // Inserir novos stages
+      if (stages && stages.length > 0) {
+        for (let i = 0; i < stages.length; i++) {
+          const stage = stages[i];
+          await connection.query(`
+            INSERT INTO pipeline_stages (
+              id, pipeline_id, stage_id, status,
+              data_inicio, data_termino, ordem
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          `, [
+            stage.id || uuidv4(),
+            req.params.id,
+            stage.stageId,
+            stage.status || 'Ativa',
+            stage.dataInicio,
+            stage.dataTermino || null,
+            stage.ordem !== undefined ? stage.ordem : i
+          ]);
+        }
+      }
+
+      await connection.commit();
+
+      const [rows] = await pool.query('SELECT * FROM pipelines WHERE id = ?', [req.params.id]);
+      res.json(rows[0]);
+    } catch (error) {
+      await connection.rollback();
+      console.error('Erro ao atualizar pipeline:', error);
+      res.status(500).json({ error: 'Erro ao atualizar pipeline', code: 'DATABASE_ERROR', details: error.message });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // DELETE - Excluir pipeline
+  app.delete('/api/pipelines/:id', async (req, res) => {
+    try {
+      // Cascade delete configurado no banco excluirá os pipeline_stages automaticamente
+      const [result] = await pool.query('DELETE FROM pipelines WHERE id = ?', [req.params.id]);
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Pipeline não encontrada', code: 'NOT_FOUND' });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error('Erro ao excluir pipeline:', error);
+      res.status(500).json({ error: 'Erro ao excluir pipeline', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // ===================================
+  // ENDPOINTS DE ADR (ARCHITECTURAL DECISION RECORDS)
+  // =====================================================
+
+  // GET - Listar todos os ADRs
+  app.get('/api/adrs', async (req, res) => {
+    try {
+      const [rows] = await pool.query(`
+        SELECT 
+          a.id, a.sequencia, a.descricao, a.data_criacao as dataCriacao,
+          a.status, a.contexto, a.decisao, a.justificativa,
+          a.consequencias_positivas as consequenciasPositivas,
+          a.consequencias_negativas as consequenciasNegativas,
+          a.riscos, a.alternativas_consideradas as alternativasConsideradas,
+          a.compliance_constitution as complianceConstitution,
+          a.adr_substituta_id as adrSubstitutaId,
+          a.referencias, a.created_at as createdAt, a.updated_at as updatedAt,
+          sub.sequencia as adrSubstitutaSequencia,
+          sub.descricao as adrSubstitutaDescricao,
+          (SELECT COUNT(*) FROM adr_aplicacoes WHERE adr_id = a.id) as aplicacoesCount
+        FROM adrs a
+        LEFT JOIN adrs sub ON a.adr_substituta_id = sub.id
+        ORDER BY a.sequencia DESC
+      `);
+      res.json(rows);
+    } catch (error) {
+      console.error('Erro ao buscar ADRs:', error);
+      res.status(500).json({ error: 'Erro ao buscar ADRs', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // GET - Buscar ADR por ID
+  app.get('/api/adrs/:id', async (req, res) => {
+    try {
+      const [rows] = await pool.query(`
+        SELECT 
+          a.id, a.sequencia, a.descricao, a.data_criacao as dataCriacao,
+          a.status, a.contexto, a.decisao, a.justificativa,
+          a.consequencias_positivas as consequenciasPositivas,
+          a.consequencias_negativas as consequenciasNegativas,
+          a.riscos, a.alternativas_consideradas as alternativasConsideradas,
+          a.compliance_constitution as complianceConstitution,
+          a.adr_substituta_id as adrSubstitutaId,
+          a.referencias, a.created_at as createdAt, a.updated_at as updatedAt
+        FROM adrs a
+        WHERE a.id = ?
+      `, [req.params.id]);
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'ADR não encontrado', code: 'NOT_FOUND' });
+      }
+
+      // Buscar aplicações associadas
+      const [aplicacoes] = await pool.query(`
+        SELECT 
+          aa.id, aa.adr_id as adrId, aa.aplicacao_id as aplicacaoId,
+          aa.data_inicio as dataInicio, aa.data_termino as dataTermino,
+          aa.status, aa.observacoes,
+          ap.nome as aplicacaoNome, ap.sigla as aplicacaoSigla
+        FROM adr_aplicacoes aa
+        INNER JOIN aplicacoes ap ON aa.aplicacao_id = ap.id
+        WHERE aa.adr_id = ?
+        ORDER BY aa.data_inicio DESC
+      `, [req.params.id]);
+
+      const adr = rows[0];
+      adr.aplicacoes = aplicacoes;
+      
+      res.json(adr);
+    } catch (error) {
+      console.error('Erro ao buscar ADR:', error);
+      res.status(500).json({ error: 'Erro ao buscar ADR', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // POST - Criar novo ADR
+  app.post('/api/adrs', async (req, res) => {
+    const {
+      descricao, status, contexto, decisao, justificativa,
+      consequenciasPositivas, consequenciasNegativas, riscos,
+      alternativasConsideradas, complianceConstitution, adrSubstitutaId,
+      aplicacoes
+    } = req.body;
+
+    if (!descricao) {
+      return res.status(400).json({
+        error: 'Campo obrigatório: descricao',
+        code: 'MISSING_FIELDS'
+      });
+    }
+
+    // Validar ADR substituta se status for "Substituído"
+    if (status === 'Substituído' && !adrSubstitutaId) {
+      return res.status(400).json({
+        error: 'Campo adrSubstitutaId é obrigatório quando status é Substituído',
+        code: 'MISSING_SUBSTITUTA'
+      });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const id = uuidv4();
+      const referencias = `- [Michael Nygard's ADR Template](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)\n- [ADR GitHub Organization](https://adr.github.io/)\n- [Constitution - Mandatory Artifacts](../../.specify/memory/constitution.md)`;
+      
+      await connection.query(`
+        INSERT INTO adrs (
+          id, descricao, status, contexto, decisao, justificativa,
+          consequencias_positivas, consequencias_negativas, riscos,
+          alternativas_consideradas, compliance_constitution,
+          adr_substituta_id, referencias
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        id, descricao, status || 'Proposto', contexto || null, decisao || null,
+        justificativa || null, consequenciasPositivas || null,
+        consequenciasNegativas || null, riscos || null,
+        alternativasConsideradas || null, complianceConstitution || null,
+        adrSubstitutaId || null, referencias
+      ]);
+
+      // Inserir aplicações associadas
+      if (aplicacoes && aplicacoes.length > 0) {
+        for (const app of aplicacoes) {
+          await connection.query(`
+            INSERT INTO adr_aplicacoes (
+              id, adr_id, aplicacao_id, data_inicio, data_termino, status, observacoes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          `, [
+            uuidv4(), id, app.aplicacaoId, app.dataInicio || null,
+            app.dataTermino || null, app.status || 'Ativo', app.observacoes || null
+          ]);
+        }
+      }
+
+      await connection.commit();
+
+      const [rows] = await connection.query('SELECT * FROM adrs WHERE id = ?', [id]);
+      res.status(201).json(rows[0]);
+    } catch (error) {
+      await connection.rollback();
+      console.error('Erro ao criar ADR:', error);
+      res.status(500).json({ error: 'Erro ao criar ADR', code: 'DATABASE_ERROR', details: error.message });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // PUT - Atualizar ADR
+  app.put('/api/adrs/:id', async (req, res) => {
+    const {
+      descricao, status, contexto, decisao, justificativa,
+      consequenciasPositivas, consequenciasNegativas, riscos,
+      alternativasConsideradas, complianceConstitution, adrSubstitutaId,
+      aplicacoes
+    } = req.body;
+
+    // Validar ADR substituta se status for "Substituído"
+    if (status === 'Substituído' && !adrSubstitutaId) {
+      return res.status(400).json({
+        error: 'Campo adrSubstitutaId é obrigatório quando status é Substituído',
+        code: 'MISSING_SUBSTITUTA'
+      });
+    }
+
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const [result] = await connection.query(`
+        UPDATE adrs SET
+          descricao = ?, status = ?, contexto = ?, decisao = ?,
+          justificativa = ?, consequencias_positivas = ?,
+          consequencias_negativas = ?, riscos = ?,
+          alternativas_consideradas = ?, compliance_constitution = ?,
+          adr_substituta_id = ?
+        WHERE id = ?
+      `, [
+        descricao, status, contexto || null, decisao || null,
+        justificativa || null, consequenciasPositivas || null,
+        consequenciasNegativas || null, riscos || null,
+        alternativasConsideradas || null, complianceConstitution || null,
+        adrSubstitutaId || null, req.params.id
+      ]);
+
+      if (result.affectedRows === 0) {
+        await connection.rollback();
+        return res.status(404).json({ error: 'ADR não encontrado', code: 'NOT_FOUND' });
+      }
+
+      // Atualizar aplicações associadas
+      // Remover associações antigas
+      await connection.query('DELETE FROM adr_aplicacoes WHERE adr_id = ?', [req.params.id]);
+
+      // Inserir novas associações
+      if (aplicacoes && aplicacoes.length > 0) {
+        for (const app of aplicacoes) {
+          await connection.query(`
+            INSERT INTO adr_aplicacoes (
+              id, adr_id, aplicacao_id, data_inicio, data_termino, status, observacoes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+          `, [
+            uuidv4(), req.params.id, app.aplicacaoId, app.dataInicio || null,
+            app.dataTermino || null, app.status || 'Ativo', app.observacoes || null
+          ]);
+        }
+      }
+
+      await connection.commit();
+
+      const [rows] = await connection.query('SELECT * FROM adrs WHERE id = ?', [req.params.id]);
+      res.json(rows[0]);
+    } catch (error) {
+      await connection.rollback();
+      console.error('Erro ao atualizar ADR:', error);
+      res.status(500).json({ error: 'Erro ao atualizar ADR', code: 'DATABASE_ERROR', details: error.message });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // DELETE - Excluir ADR
+  app.delete('/api/adrs/:id', async (req, res) => {
+    try {
+      const [result] = await pool.query('DELETE FROM adrs WHERE id = ?', [req.params.id]);
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'ADR não encontrado', code: 'NOT_FOUND' });
+      }
+      
+      res.json({ success: true, message: 'ADR excluído com sucesso' });
+    } catch (error) {
+      console.error('Erro ao excluir ADR:', error);
+      res.status(500).json({ error: 'Erro ao excluir ADR', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // ===================================
   // ENDPOINTS DE APLICAÇÃO-SERVIDOR
   // ===================================
 
@@ -6062,11 +6775,103 @@ async function startServer() {
     }
   });
 
+  // GET - Buscar payloads de uma aplicação específica
+  app.get('/api/aplicacoes/:aplicacaoId/payloads', async (req, res) => {
+    try {
+      console.log('Buscando payloads para aplicacao_id:', req.params.aplicacaoId);
+      
+      const [rows] = await pool.query(`
+        SELECT 
+          p.id, 
+          p.aplicacao_id as aplicacaoId, 
+          p.sigla, 
+          p.definicao, 
+          p.descricao,
+          p.formato_arquivo as formatoArquivo, 
+          p.conteudo_arquivo as conteudoArquivo,
+          p.versao_openapi as versaoOpenapi, 
+          p.arquivo_valido as arquivoValido,
+          p.ultima_validacao as ultimaValidacao, 
+          p.erros_validacao as errosValidacao,
+          p.data_inicio as dataInicio, 
+          p.data_termino as dataTermino,
+          p.created_at as createdAt, 
+          p.updated_at as updatedAt,
+          a.sigla as aplicacaoSigla, 
+          a.descricao as aplicacaoDescricao
+        FROM payloads p
+        LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
+        WHERE p.aplicacao_id = ?
+        ORDER BY p.data_inicio DESC
+      `, [req.params.aplicacaoId]);
+      
+      console.log(`Encontrados ${rows.length} payloads para aplicacao_id ${req.params.aplicacaoId}`);
+      
+      const payloads = rows.map(row => ({
+        id: row.id,
+        aplicacaoId: row.aplicacaoId,
+        aplicacaoSigla: row.aplicacaoSigla,
+        aplicacaoDescricao: row.aplicacaoDescricao,
+        sigla: row.sigla,
+        definicao: row.definicao,
+        descricao: row.descricao,
+        formatoArquivo: row.formatoArquivo,
+        conteudoArquivo: row.conteudoArquivo,
+        versaoOpenapi: row.versaoOpenapi,
+        arquivoValido: Boolean(row.arquivoValido),
+        ultimaValidacao: row.ultimaValidacao,
+        errosValidacao: row.errosValidacao,
+        dataInicio: row.dataInicio ? formatDateToISO(row.dataInicio) : null,
+        dataTermino: row.dataTermino ? formatDateToISO(row.dataTermino) : null,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt
+      }));
+      
+      res.json(payloads);
+    } catch (error) {
+      console.error('Erro ao buscar payloads da aplicação:', error);
+      res.status(500).json({ error: 'Erro ao buscar payloads da aplicação', code: 'DATABASE_ERROR' });
+    }
+  });
+
   // ===================================
   // ENDPOINTS DE CONTRATOS
   // ===================================
 
   // GET - Listar todos os contratos de uma aplicação
+  // ============ ENDPOINTS PARA ADRs DE APLICAÇÃO ============
+  
+  // GET - Buscar ADRs de uma aplicação
+  app.get('/api/aplicacoes/:aplicacaoId/adrs', async (req, res) => {
+    try {
+      const [rows] = await pool.query(
+        `SELECT 
+          aa.id,
+          aa.adr_id as adrId,
+          aa.aplicacao_id as aplicacaoId,
+          aa.data_inicio as dataInicio,
+          aa.data_termino as dataTermino,
+          aa.status,
+          aa.observacoes,
+          a.sequencia as adrSequencia,
+          a.descricao as adrDescricao,
+          a.status as adrStatus
+        FROM adr_aplicacoes aa
+        INNER JOIN adrs a ON aa.adr_id = a.id
+        WHERE aa.aplicacao_id = ?
+        ORDER BY a.sequencia`,
+        [req.params.aplicacaoId]
+      );
+      
+      res.json(rows);
+    } catch (error) {
+      console.error('[API GET /aplicacoes/:aplicacaoId/adrs] Erro:', error);
+      res.status(500).json({ error: 'Erro ao buscar ADRs da aplicação', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // ============ ENDPOINTS PARA CONTRATOS DE APLICAÇÃO ============
+
   app.get('/api/aplicacoes/:aplicacaoId/contratos', async (req, res) => {
     try {
       const [rows] = await pool.query(
@@ -7352,6 +8157,615 @@ async function startServer() {
     }
   });
 
+  // ===================================
+  // GERADOR DE CATÁLOGO DE APIs COM SWAGGER UI
+  // ===================================
+  
+  app.post('/api/catalog/generate', async (req, res) => {
+    try {
+      console.log('🚀 Iniciando geração do catálogo de APIs com Swagger UI...');
+      
+      const fs = await import('fs').then(m => m.promises);
+      const path = await import('path');
+      
+      // Buscar payloads válidos com aplicações
+      const [payloads] = await pool.query(`
+        SELECT 
+          p.id,
+          p.sigla,
+          p.definicao as descricao_curta,
+          p.descricao as descricao_longa,
+          p.formato_arquivo,
+          p.conteudo_arquivo,
+          p.versao_openapi,
+          p.data_inicio,
+          p.data_termino,
+          a.sigla as aplicacao_sigla,
+          a.descricao as aplicacao_nome
+        FROM payloads p
+        INNER JOIN aplicacoes a ON p.aplicacao_id = a.id
+        WHERE p.arquivo_valido = true
+          AND (p.data_termino IS NULL OR p.data_termino > NOW())
+        ORDER BY a.sigla, p.sigla
+      `);
+      
+      if (payloads.length === 0) {
+        return res.status(404).json({
+          error: 'Nenhum payload válido encontrado',
+          code: 'NO_PAYLOADS'
+        });
+      }
+      
+      // Criar diretórios
+      const docsDir = path.join(process.cwd(), 'docs', 'api-catalog');
+      const publicJsonDir = path.join(process.cwd(), 'public', 'json');
+      
+      await fs.mkdir(docsDir, { recursive: true });
+      await fs.mkdir(publicJsonDir, { recursive: true });
+      
+      // Função para exportar arquivo de especificação
+      const exportSpecFile = async (payload) => {
+        const extension = payload.formato_arquivo.toLowerCase();
+        // Substituir # por - para evitar problemas com URLs
+        const sanitizedSigla = payload.sigla.replace(/#/g, '-');
+        const filename = `${sanitizedSigla}.${extension}`;
+        const docsPath = path.join(docsDir, filename);
+        const publicPath = path.join(publicJsonDir, filename);
+
+        try {
+          // Valida se o conteúdo é JSON válido
+          if (extension === 'json') {
+            JSON.parse(payload.conteudo_arquivo);
+          }
+
+          // Exporta para docs/api-catalog/ (acessível via MkDocs)
+          await fs.writeFile(docsPath, payload.conteudo_arquivo, 'utf8');
+          
+          // Exporta para public/json/ (acessível via React)
+          await fs.writeFile(publicPath, payload.conteudo_arquivo, 'utf8');
+          
+          return filename;
+        } catch (error) {
+          console.error(`Erro ao exportar ${filename}:`, error.message);
+          return null;
+        }
+      };
+      
+      // Função para gerar página individual com Swagger UI
+      const generateApiPage = (payload, specFilename) => {
+        // Caminho do spec - usar caminho relativo ao diretório api-catalog
+        const specPath = specFilename;
+        const dataInicio = payload.data_inicio ? new Date(payload.data_inicio).toLocaleDateString('pt-BR') : 'N/A';
+        const dataTermino = payload.data_termino ? new Date(payload.data_termino).toLocaleDateString('pt-BR') : null;
+        const status = dataTermino ? '🔴 Depreciado' : '🟢 Ativo';
+        // Sanitizar sigla para exibição (sem #)
+        const siglaSanitizada = payload.sigla.replace(/#/g, '-');
+        
+        let content = `# ${payload.aplicacao_nome} - ${siglaSanitizada}
+
+## Aplicação: ${payload.aplicacao_sigla}
+
+**Descrição:** ${payload.aplicacao_nome}  
+**Criticidade:** Média  
+**Total de APIs:** 1
+
+---
+
+## APIs Disponíveis
+
+### ${siglaSanitizada}
+
+**Status:** ${status}  
+**Descrição Curta:** ${payload.descricao_curta || 'N/A'}  
+`;
+
+        if (payload.descricao_longa) {
+          content += `**Descrição Longa:** ${payload.descricao_longa}  
+`;
+        }
+        
+        content += `**Versão OpenAPI:** ${payload.versao_openapi || 'N/A'}  
+**Data de Início:** ${dataInicio}  
+`;
+
+        if (dataTermino) {
+          content += `**Data de Término:** ${dataTermino}  
+`;
+        }
+
+        content += `
+
+---
+
+## 📋 Documentação Interativa da API
+
+Utilize o visualizador abaixo para explorar e testar os endpoints da API:
+
+<swagger-ui src="${specPath}"/>
+
+---
+
+## 📥 Download da Especificação
+
+Você pode baixar a especificação OpenAPI completa:
+
+- [📄 Download ${payload.formato_arquivo}](${specPath})
+- [📄 Download via React](http://localhost:5173/json/${specFilename})
+
+## 🔧 Como Usar
+
+### Importar em Ferramentas
+
+#### Postman
+1. Abra o Postman
+2. Clique em "Import"
+3. Cole a URL: \`http://localhost:5173/json/${specFilename}\`
+4. Clique em "Import"
+
+#### Insomnia
+1. Abra o Insomnia
+2. Clique em "Import/Export"
+3. Selecione "Import Data" → "From URL"
+4. Cole a URL: \`http://localhost:5173/json/${specFilename}\`
+
+#### Swagger Editor
+1. Acesse https://editor.swagger.io/
+2. File → Import URL
+3. Cole a URL: \`http://localhost:5173/json/${specFilename}\`
+
+### Testar com cURL
+
+Exemplo de como testar endpoints usando cURL:
+
+\`\`\`bash
+# Exemplo GET
+curl -X GET "https://api.example.com/endpoint" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer SEU_TOKEN"
+
+# Exemplo POST
+curl -X POST "https://api.example.com/endpoint" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer SEU_TOKEN" \\
+  -d '{"key": "value"}'
+\`\`\`
+
+---
+
+[← Voltar ao Catálogo](index.md)
+`;
+
+        return content;
+      };
+      
+      // Processar payloads e gerar páginas
+      const apiPages = {};
+      let specsExportados = 0;
+      
+      for (const payload of payloads) {
+        const specFilename = await exportSpecFile(payload);
+        
+        if (specFilename) {
+          // Substituir # por - para evitar problemas com URLs
+          const sanitizedSigla = payload.sigla.replace(/#/g, '-');
+          const pageFilename = `${sanitizedSigla}.md`;
+          const pageContent = generateApiPage(payload, specFilename);
+          const pagePath = path.join(docsDir, pageFilename);
+          
+          await fs.writeFile(pagePath, pageContent, 'utf8');
+          apiPages[payload.id] = pageFilename;
+          specsExportados++;
+        }
+      }
+      
+      // Gerar página índice
+      const totalApis = payloads.length;
+      const aplicacoes = [...new Set(payloads.map(p => p.aplicacao_sigla))];
+      const totalAplicacoes = aplicacoes.length;
+
+      let indexContent = `# 📚 Catálogo de APIs
+
+Bem-vindo ao **Catálogo de APIs** do Sistema de Auditoria.
+
+Este catálogo contém a documentação completa e interativa de todas as APIs disponíveis no sistema.
+
+## 📊 Estatísticas
+
+| Métrica | Valor |
+|---------|-------|
+| **Total de Aplicações** | ${totalAplicacoes} |
+| **Total de APIs** | ${totalApis} |
+| **Última Atualização** | ${new Date().toLocaleString('pt-BR')} |
+
+---
+
+## 🗂️ Índice de APIs
+
+A tabela abaixo lista todas as APIs disponíveis. Clique na sigla para acessar a documentação completa e o visualizador interativo Swagger UI.
+
+| Aplicação | Sigla | Descrição | Versão OpenAPI | Status |
+|-----------|-------|-----------|----------------|--------|
+`;
+
+      payloads.forEach(payload => {
+        const pageLink = apiPages[payload.id];
+        const status = '🟢 Ativo';
+        const descricao = payload.descricao_curta || 'N/A';
+        const versao = payload.versao_openapi || 'N/A';
+        // Sanitizar sigla para exibição consistente (sem #)
+        const siglaSanitizada = payload.sigla.replace(/#/g, '-');
+        
+        indexContent += `| ${payload.aplicacao_sigla} | [${siglaSanitizada}](${pageLink}) | ${descricao} | ${versao} | ${status} |\n`;
+      });
+
+      indexContent += `
+---
+
+## 🚀 Como Usar Este Catálogo
+
+### 1. Explorar APIs
+Navegue pela tabela acima e clique na sigla da API desejada.
+
+### 2. Visualizar Documentação
+Cada página de API contém:
+- ✅ Informações gerais da aplicação
+- ✅ Descrição detalhada da API
+- ✅ Visualizador interativo Swagger UI (tag \`<swagger-ui>\`)
+- ✅ Download da especificação OpenAPI
+- ✅ Exemplos de uso com cURL, Postman, etc.
+
+### 3. Testar Endpoints
+O Swagger UI integrado permite:
+- 📋 Visualizar todos os endpoints disponíveis
+- 🔍 Ver parâmetros de entrada e saída
+- ⚡ Testar requisições diretamente no navegador
+- 📝 Gerar código cliente em várias linguagens
+
+### 4. Importar em Ferramentas
+Você pode importar as especificações OpenAPI em:
+- Postman
+- Insomnia
+- Swagger Editor
+- Qualquer ferramenta compatível com OpenAPI 3.0
+
+---
+
+## 📖 Documentação Adicional
+
+- [Guia de Design de APIs](#)
+- [Boas Práticas de APIs RESTful](#)
+- [Governança de APIs](#)
+
+---
+
+## 🔄 Atualização
+
+Este catálogo é gerado automaticamente a partir dos payloads cadastrados no sistema.
+
+**Para regenerar o catálogo:**
+
+1. Acesse a interface web em http://localhost:5173
+2. Navegue até "Catálogo de APIs"
+3. Clique em "Gerar Catálogo de APIs"
+
+---
+
+*Gerado automaticamente em ${new Date().toLocaleString('pt-BR')}*
+`;
+
+      await fs.writeFile(path.join(docsDir, 'index.md'), indexContent, 'utf8');
+      
+      console.log('✅ Catálogo gerado com sucesso!');
+      
+      // Reiniciar container mkdocs para refletir as alterações
+      console.log('🔄 Reiniciando container mkdocs...');
+      const { exec } = await import('child_process');
+      const { promisify } = await import('util');
+      const execPromise = promisify(exec);
+      
+      try {
+        await execPromise('docker restart auditoria-mkdocs');
+        console.log('✅ Container mkdocs reiniciado com sucesso!');
+      } catch (restartError) {
+        console.warn('⚠️ Não foi possível reiniciar o container mkdocs:', restartError.message);
+        console.warn('💡 Execute manualmente: docker restart auditoria-mkdocs');
+      }
+      
+      // Retornar resultado
+      res.json({
+        success: true,
+        stats: {
+          totalAplicacoes,
+          totalApis,
+          pagesGenerated: Object.keys(apiPages).length,
+          specsExportados
+        },
+        message: 'Catálogo gerado com sucesso! O container MkDocs foi reiniciado e está disponível para consulta.'
+      });
+      
+    } catch (error) {
+      console.error('❌ Erro ao gerar catálogo:', error);
+      res.status(500).json({
+        error: 'Erro ao gerar catálogo de APIs',
+        message: error.message,
+        code: 'GENERATION_ERROR'
+      });
+    }
+  });
+
+  // =====================================================
+  // ADR (ARCHITECTURAL DECISION RECORDS) ENDPOINTS
+  // =====================================================
+
+  // GET /api/adrs - Listar todos os ADRs
+  app.get('/api/adrs', async (req, res) => {
+    try {
+      const [adrs] = await pool.query(`
+        SELECT 
+          a.*,
+          a.data_criacao as dataCriacao,
+          a.created_at as createdAt,
+          a.updated_at as updatedAt,
+          a.adr_substituta_id as adrSubstitutaId,
+          sub.sequencia as adrSubstitutaSequencia,
+          (
+            SELECT COUNT(*)
+            FROM adr_aplicacoes aa
+            WHERE aa.adr_id = a.id
+          ) as aplicacoesCount
+        FROM adrs a
+        LEFT JOIN adrs sub ON a.adr_substituta_id = sub.id
+        ORDER BY a.sequencia DESC
+      `);
+      res.json(adrs);
+    } catch (error) {
+      console.error('Erro ao buscar ADRs:', error);
+      res.status(500).json({ error: 'Erro ao buscar ADRs' });
+    }
+  });
+
+  // GET /api/adrs/:id - Buscar ADR específico
+  app.get('/api/adrs/:id', async (req, res) => {
+    try {
+      const [adrs] = await pool.query(`
+        SELECT 
+          a.*,
+          a.data_criacao as dataCriacao,
+          a.created_at as createdAt,
+          a.updated_at as updatedAt,
+          a.adr_substituta_id as adrSubstitutaId,
+          sub.sequencia as adrSubstitutaSequencia,
+          COALESCE(
+            (
+              SELECT JSON_ARRAYAGG(
+                JSON_OBJECT(
+                  'id', aa.id,
+                  'adrId', aa.adr_id,
+                  'aplicacaoId', aa.aplicacao_id,
+                  'aplicacaoSigla', ap.sigla,
+                  'aplicacaoNome', ap.sigla,
+                  'aplicacaoDescricao', ap.descricao,
+                  'dataInicio', aa.data_inicio,
+                  'dataTermino', aa.data_termino,
+                  'status', aa.status,
+                  'observacoes', aa.observacoes,
+                  'createdAt', aa.created_at,
+                  'updatedAt', aa.updated_at
+                )
+              )
+              FROM adr_aplicacoes aa
+              LEFT JOIN aplicacoes ap ON aa.aplicacao_id = ap.id
+              WHERE aa.adr_id = a.id
+            ),
+            JSON_ARRAY()
+          ) as aplicacoes
+        FROM adrs a
+        LEFT JOIN adrs sub ON a.adr_substituta_id = sub.id
+        WHERE a.id = ?
+      `, [req.params.id]);
+
+      if (adrs.length === 0) {
+        return res.status(404).json({ error: 'ADR não encontrado' });
+      }
+
+      const adr = adrs[0];
+      if (adr.aplicacoes && typeof adr.aplicacoes === 'string') {
+        try {
+          adr.aplicacoes = JSON.parse(adr.aplicacoes);
+        } catch (e) {
+          adr.aplicacoes = [];
+        }
+      } else {
+        adr.aplicacoes = adr.aplicacoes || [];
+      }
+
+      res.json(adr);
+    } catch (error) {
+      console.error('Erro ao buscar ADR:', error);
+      res.status(500).json({ error: 'Erro ao buscar ADR' });
+    }
+  });
+
+  // POST /api/adrs - Criar novo ADR
+  app.post('/api/adrs', async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const {
+        descricao,
+        status,
+        contexto,
+        decisao,
+        justificativa,
+        consequenciasPositivas,
+        consequenciasNegativas,
+        riscos,
+        alternativasConsideradas,
+        complianceConstitution,
+        adrSubstitutaId,
+        referencias,
+        aplicacoes
+      } = req.body;
+
+      const id = uuidv4();
+
+      await connection.query(
+        `INSERT INTO adrs (
+          id, descricao, status, contexto, decisao, justificativa,
+          consequencias_positivas, consequencias_negativas, riscos,
+          alternativas_consideradas, compliance_constitution,
+          adr_substituta_id, referencias
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id, descricao, status, contexto, decisao, justificativa,
+          consequenciasPositivas, consequenciasNegativas, riscos,
+          alternativasConsideradas, complianceConstitution,
+          adrSubstitutaId || null, referencias
+        ]
+      );
+
+      // Inserir aplicações associadas
+      if (aplicacoes && aplicacoes.length > 0) {
+        for (const app of aplicacoes) {
+          await connection.query(
+            `INSERT INTO adr_aplicacoes (
+              id, adr_id, aplicacao_id, data_inicio, data_termino, status, observacoes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              uuidv4(), id, app.aplicacaoId, app.dataInicio || null,
+              app.dataTermino || null, app.status, app.observacoes
+            ]
+          );
+        }
+      }
+
+      await connection.commit();
+
+      // Buscar ADR completo
+      const [adrs] = await pool.query(`
+        SELECT 
+          a.*,
+          a.data_criacao as dataCriacao,
+          a.created_at as createdAt,
+          a.updated_at as updatedAt,
+          a.adr_substituta_id as adrSubstitutaId
+        FROM adrs a
+        WHERE a.id = ?
+      `, [id]);
+
+      res.status(201).json(adrs[0]);
+    } catch (error) {
+      await connection.rollback();
+      console.error('Erro ao criar ADR:', error);
+      res.status(500).json({ error: 'Erro ao criar ADR' });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // PUT /api/adrs/:id - Atualizar ADR
+  app.put('/api/adrs/:id', async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const {
+        descricao,
+        status,
+        contexto,
+        decisao,
+        justificativa,
+        consequenciasPositivas,
+        consequenciasNegativas,
+        riscos,
+        alternativasConsideradas,
+        complianceConstitution,
+        adrSubstitutaId,
+        referencias,
+        aplicacoes
+      } = req.body;
+
+      await connection.query(
+        `UPDATE adrs SET
+          descricao = ?,
+          status = ?,
+          contexto = ?,
+          decisao = ?,
+          justificativa = ?,
+          consequencias_positivas = ?,
+          consequencias_negativas = ?,
+          riscos = ?,
+          alternativas_consideradas = ?,
+          compliance_constitution = ?,
+          adr_substituta_id = ?,
+          referencias = ?
+        WHERE id = ?`,
+        [
+          descricao, status, contexto, decisao, justificativa,
+          consequenciasPositivas, consequenciasNegativas, riscos,
+          alternativasConsideradas, complianceConstitution,
+          adrSubstitutaId || null, referencias, req.params.id
+        ]
+      );
+
+      // Atualizar aplicações (remover e reinserir)
+      await connection.query('DELETE FROM adr_aplicacoes WHERE adr_id = ?', [req.params.id]);
+
+      if (aplicacoes && aplicacoes.length > 0) {
+        for (const app of aplicacoes) {
+          await connection.query(
+            `INSERT INTO adr_aplicacoes (
+              id, adr_id, aplicacao_id, data_inicio, data_termino, status, observacoes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              uuidv4(), req.params.id, app.aplicacaoId, app.dataInicio || null,
+              app.dataTermino || null, app.status, app.observacoes
+            ]
+          );
+        }
+      }
+
+      await connection.commit();
+
+      // Buscar ADR atualizado
+      const [adrs] = await pool.query(`
+        SELECT 
+          a.*,
+          a.data_criacao as dataCriacao,
+          a.created_at as createdAt,
+          a.updated_at as updatedAt,
+          a.adr_substituta_id as adrSubstitutaId
+        FROM adrs a
+        WHERE a.id = ?
+      `, [req.params.id]);
+
+      res.json(adrs[0]);
+    } catch (error) {
+      await connection.rollback();
+      console.error('Erro ao atualizar ADR:', error);
+      res.status(500).json({ error: 'Erro ao atualizar ADR' });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // DELETE /api/adrs/:id - Excluir ADR
+  app.delete('/api/adrs/:id', async (req, res) => {
+    try {
+      const [result] = await pool.query('DELETE FROM adrs WHERE id = ?', [req.params.id]);
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'ADR não encontrado' });
+      }
+
+      res.json({ message: 'ADR excluído com sucesso' });
+    } catch (error) {
+      console.error('Erro ao excluir ADR:', error);
+      res.status(500).json({ error: 'Erro ao excluir ADR' });
+    }
+  });
+
   app.listen(PORT, () => {
     console.log('');
     console.log('🚀 API Server rodando em http://localhost:' + PORT);
@@ -7372,6 +8786,11 @@ async function startServer() {
     console.log('  GET    /api/logs-auditoria/stats');
     console.log('  POST   /api/aplicacoes/bulk          [Carga em lote]');
     console.log('  GET    /api/azure-devops/consultar-projeto/:projectName/:teamName');
+    console.log('  GET    /api/adrs                     [ADRs]');
+    console.log('  GET    /api/adrs/:id                 [ADR específico]');
+    console.log('  POST   /api/adrs                     [Criar ADR]');
+    console.log('  PUT    /api/adrs/:id                 [Atualizar ADR]');
+    console.log('  DELETE /api/adrs/:id                 [Excluir ADR]');
     console.log('  GET    /health');
     console.log('');
   });

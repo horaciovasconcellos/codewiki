@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Eye, PencilSimple, Plus, Trash, MagnifyingGlass, X } from '@phosphor-icons/react';
+import { Eye, PencilSimple, Plus, Trash, MagnifyingGlass, X, FilePdf } from '@phosphor-icons/react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,7 @@ interface ColaboradoresDataTableProps {
   onEdit: (colaborador: Colaborador) => void;
   onDelete: (id: string) => void;
   onNew: () => void;
+  onGeneratePDF?: (colaborador: Colaborador) => void;
 }
 
 export function ColaboradoresDataTable({
@@ -39,7 +40,8 @@ export function ColaboradoresDataTable({
   onView,
   onEdit,
   onDelete,
-  onNew
+  onNew,
+  onGeneratePDF
 }: ColaboradoresDataTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSetor, setFilterSetor] = useState<string>('todos');
@@ -229,10 +231,21 @@ export function ColaboradoresDataTable({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-2">
+                        {onGeneratePDF && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onGeneratePDF(colaborador)}
+                            title="Gerar PDF"
+                          >
+                            <FilePdf />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => onView(colaborador)}
+                          title="Visualizar"
                         >
                           <Eye />
                         </Button>
@@ -240,6 +253,7 @@ export function ColaboradoresDataTable({
                           variant="ghost"
                           size="sm"
                           onClick={() => onEdit(colaborador)}
+                          title="Editar"
                         >
                           <PencilSimple />
                         </Button>

@@ -1,0 +1,86 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ORDS generated API for clara.v1",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://apis.bbts.com.br/bbts/3pl/clara/v1/"
+    }
+  ],
+  "paths": {
+    "/get_ordem": {
+      "get": {
+        "description": "Retrieve a record from clara.v1",
+        "responses": {
+          "200": {
+            "description": "The queried record.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ds_comentario": {
+                      "$ref": "#/components/schemas/VARCHAR2"
+                    },
+                    "ds_dgco": {
+                      "$ref": "#/components/schemas/VARCHAR2"
+                    },
+                    "ds_modalidade": {
+                      "$ref": "#/components/schemas/VARCHAR2"
+                    },
+                    "ds_status": {
+                      "$ref": "#/components/schemas/VARCHAR2"
+                    },
+                    "ds_tipo_doc": {
+                      "$ref": "#/components/schemas/VARCHAR2"
+                    },
+                    "nm_comprador": {
+                      "$ref": "#/components/schemas/VARCHAR2"
+                    },
+                    "nm_fornecedor": {
+                      "$ref": "#/components/schemas/VARCHAR2"
+                    },
+                    "nr_liberacao": {
+                      "$ref": "#/components/schemas/NUMBER"
+                    },
+                    "nr_oc": {
+                      "$ref": "#/components/schemas/VARCHAR2"
+                    },
+                    "vl_quantia": {
+                      "$ref": "#/components/schemas/NUMBER"
+                    },
+                    "vl_quantia_vinculada": {
+                      "$ref": "#/components/schemas/NUMBER"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "nr_ordem",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Implicit parameter"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NUMBER": {
+        "type": "number"
+      },
+      "VARCHAR2": {
+        "type": "string"
+      }
+    }
+  }
+}

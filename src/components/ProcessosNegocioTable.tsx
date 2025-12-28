@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { ProcessoNegocio } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProcessoNegocioForm } from './ProcessoNegocioForm';
-import { Pencil, Trash } from '@phosphor-icons/react';
+import { Pencil, Trash, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -16,6 +17,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ProcessosNegocioTableProps {
   processos: ProcessoNegocio[];
@@ -24,6 +32,8 @@ interface ProcessosNegocioTableProps {
 }
 
 export function ProcessosNegocioTable({ processos, onProcessoSave, onProcessoDelete }: ProcessosNegocioTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const handleDelete = (id: string) => {
     onProcessoDelete(id);
     toast.success('Processo deletado com sucesso');
@@ -60,8 +70,20 @@ export function ProcessosNegocioTable({ processos, onProcessoSave, onProcessoDel
     );
   }
 
+  // Paginação
+  const totalPages = Math.ceil(processos.length / pageSize);
+  const paginatedProcessos = processos.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
     <div className="border rounded-lg">
+      <div className="flex items-center justify-between mb-4 px-4 pt-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          Mostrando {paginatedProcessos.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, processos.length)} de {processos.length} processos
+        </div>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -77,7 +99,7 @@ export function ProcessosNegocioTable({ processos, onProcessoSave, onProcessoDel
           </TableRow>
         </TableHeader>
         <TableBody>
-          {processos.map((processo) => (
+          {paginatedProcessos.map((processo) => (
             <TableRow key={processo.id}>
               <TableCell className="font-medium font-mono">{processo.identificacao}</TableCell>
               <TableCell>{processo.descricao}</TableCell>
@@ -134,6 +156,53 @@ export function ProcessosNegocioTable({ processos, onProcessoSave, onProcessoDel
           ))}
         </TableBody>
       </Table>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4 px-4 pb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Itens por página:</span>
+            <Select 
+              value={pageSize.toString()} 
+              onValueChange={(value) => {
+                setPageSize(Number(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <CaretLeft size={16} />
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <CaretRight size={16} />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

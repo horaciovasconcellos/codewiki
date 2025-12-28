@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Viewer - Sistema de Auditoria</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .topbar {
+            background-color: #6200ea;
+            padding: 10px 20px;
+        }
+        .topbar-wrapper {
+            max-width: 1460px;
+            margin: 0 auto;
+        }
+        .topbar-wrapper h1 {
+            color: white;
+            font-size: 20px;
+            margin: 0;
+            font-family: sans-serif;
+        }
+        #swagger-ui {
+            max-width: 1460px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-wrapper">
+            <h1>🔧 API Viewer - Sistema de Auditoria</h1>
+        </div>
+    </div>
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        // Pegar URL da API dos parâmetros
+        const urlParams = new URLSearchParams(window.location.search);
+        const apiUrl = urlParams.get('url') || '/api-catalog/openapi/example.json';
+
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: apiUrl,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                tryItOutEnabled: true,
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'],
+                validatorUrl: null,
+                displayRequestDuration: true,
+                filter: true,
+                syntaxHighlight: {
+                    activate: true,
+                    theme: "monokai"
+                }
+            });
+
+            window.ui = ui;
+        };
+    </script>
+</body>
+</html>

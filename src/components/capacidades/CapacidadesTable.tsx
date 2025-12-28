@@ -6,7 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PencilSimple, Trash, Eye } from '@phosphor-icons/react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { PencilSimple, Trash, Eye, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -52,6 +59,8 @@ const getCategoriaColor = (categoria: string) => {
 export function CapacidadesTable({ capacidades, onCapacidadeSave, onCapacidadeDelete }: CapacidadesTableProps) {
   const [selectedCapacidade, setSelectedCapacidade] = useState<CapacidadeNegocio | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleDelete = (id: string) => {
     onCapacidadeDelete(id);
@@ -62,6 +71,13 @@ export function CapacidadesTable({ capacidades, onCapacidadeSave, onCapacidadeDe
     setSelectedCapacidade(capacidade);
     setViewDialogOpen(true);
   };
+
+  // Paginação
+  const totalPages = Math.ceil(capacidades.length / pageSize);
+  const paginatedCapacidades = capacidades.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   if (capacidades.length === 0) {
     return (
@@ -74,6 +90,12 @@ export function CapacidadesTable({ capacidades, onCapacidadeSave, onCapacidadeDe
 
   return (
     <>
+      <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
+        <div>
+          Mostrando {paginatedCapacidades.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, capacidades.length)} de {capacidades.length} capacidades
+        </div>
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -87,7 +109,7 @@ export function CapacidadesTable({ capacidades, onCapacidadeSave, onCapacidadeDe
             </TableRow>
           </TableHeader>
           <TableBody>
-            {capacidades.map((capacidade) => (
+            {paginatedCapacidades.map((capacidade) => (
               <TableRow key={capacidade.id}>
                 <TableCell className="font-mono font-semibold">{capacidade.sigla}</TableCell>
                 <TableCell className="font-medium">{capacidade.nome}</TableCell>
@@ -152,6 +174,53 @@ export function CapacidadesTable({ capacidades, onCapacidadeSave, onCapacidadeDe
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Itens por página:</span>
+            <Select 
+              value={pageSize.toString()} 
+              onValueChange={(value) => {
+                setPageSize(Number(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <CaretLeft size={16} />
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <CaretRight size={16} />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh]">

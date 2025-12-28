@@ -51,6 +51,8 @@ nav:
       - "Integrador Log Visual": "INTEGRADOR_LOG_VISUAL.md"
       - "Identificador de Tecnologias": "IDENTIFICADOR_TECNOLOGIAS.md"
       - "Implementação Comunicações": "RESUMO_IMPLEMENTACAO_COMUNICACOES.md"
+      - "Sistema de ADR": "SISTEMA-ADR.md"
+      - "Pipeline Database": "PIPELINE-WIZARD-STAGES.md"
       
   - "Banco de Dados":
       - "Liquibase Database Migration": "LIQUIBASE_DATABASE_MIGRATION.md"
@@ -73,6 +75,7 @@ nav:
       - "Resumo Identificador Tecnologias": "RESUMO_IDENTIFICADOR_TECNOLOGIAS.md"
       - "Troubleshooting Runbook": "TROUBLESHOOTING_RUNBOOK.md"
       - "Instruções de Carga": "INSTRUCOES-CARGA.md"
+      - "Guia de Carga de ADRs": "GUIA-CARGA-ADRS.md"
       
   - "Documentação":
       - "Implementação MkDocs": "MKDOCS_IMPLEMENTACAO.md"
@@ -149,10 +152,19 @@ theme:
         name: Switch to system preference
 plugins:
   - search
+  - swagger-ui-tag:
+      docExpansion: "list"
+      filter: true
+      syntaxHighlightTheme: "monokai"
+      tryItOutEnabled: true
   - awesome-pages:
       filename: .pages
       collapse_single_pages: false
       strict: false
+
+  - "Catálogo de APIs":
+      - "Visão Geral": "api-catalog/index.md"
+
 markdown_extensions:
   - markdown.extensions.codehilite:
       guess_lang: false

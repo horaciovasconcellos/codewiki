@@ -1,0 +1,67 @@
+[
+  {
+    "descricao": "Uso de Arquitetura de Microsserviços",
+    "status": "Aceito",
+    "contexto": "Sistema monolítico atual apresenta dificuldades de escalabilidade e manutenção com crescimento da base de usuários e funcionalidades.",
+    "decisao": "Migrar gradualmente para arquitetura de microsserviços com comunicação via API Gateway e mensageria assíncrona (RabbitMQ/Kafka).",
+    "justificativa": "Microsserviços permitem melhor escalabilidade, deploy independente, facilita manutenção e evolução do sistema. Cada serviço pode ter sua própria stack tecnológica e equipe dedicada.",
+    "consequencias_positivas": "- Escalabilidade horizontal de serviços individuais\n- Deploy independente reduz risco de mudanças\n- Isolamento de falhas aumenta resiliência\n- Permite uso de tecnologias heterogêneas\n- Facilita onboarding de novos desenvolvedores em serviços específicos",
+    "consequencias_negativas": "- Complexidade operacional aumentada\n- Overhead de comunicação entre serviços\n- Necessidade de orquestração e service mesh\n- Debugging distribuído mais complexo\n- Custo inicial de refatoração",
+    "riscos": "- Maior complexidade no monitoramento e troubleshooting\n- Possível degradação de performance na comunicação inter-serviços\n- Necessidade de equipe com conhecimento em sistemas distribuídos",
+    "alternativas_consideradas": "1. **Arquitetura monolítica modular**: Manter monolito mas com módulos bem definidos. Rejeitado por não resolver problema de escalabilidade.\n2. **SOA (Service-Oriented Architecture)**: Mais pesado e acoplado que microsserviços. Rejeitado por overhead.\n3. **Serverless**: Avaliado mas descartado pela falta de controle e vendor lock-in.",
+    "compliance_constitution": "Alinhado com princípios de escalabilidade, manutenibilidade e resiliência definidos na Constitution. Requer implementação de observabilidade conforme mandatos de monitoramento.",
+    "referencias": "- [Microservices Pattern by Chris Richardson](https://microservices.io/)\n- [Martin Fowler - Microservices Guide](https://martinfowler.com/articles/microservices.html)\n- [Building Microservices - Sam Newman](https://www.oreilly.com/library/view/building-microservices/9781491950340/)"
+  },
+  {
+    "descricao": "Banco de Dados MySQL para Persistência Principal",
+    "status": "Aceito",
+    "contexto": "Necessidade de um banco de dados relacional robusto e confiável para armazenamento de dados críticos de negócio, com suporte a transações ACID e integridade referencial.",
+    "decisao": "Adotar MySQL 8.0 como banco de dados principal com configuração de replicação master-slave para alta disponibilidade e read-scalability.",
+    "justificativa": "MySQL 8.0 oferece maturidade comprovada, performance adequada para nosso caso de uso, recursos avançados (suporte a JSON, full-text search, particionamento) e custo-benefício excelente.",
+    "consequencias_positivas": "- Alta disponibilidade através de replicação\n- Suporte completo a transações ACID\n- Comunidade ativa e ampla documentação\n- Ferramentas de gerenciamento maduras\n- Suporte nativo a JSON para dados semi-estruturados\n- Compatibilidade com ORMs populares",
+    "consequencias_negativas": "- Limitações em escalabilidade horizontal nativa\n- Complexidade em sharding manual se necessário\n- Licenciamento GPL pode ser restritivo para alguns casos",
+    "riscos": "- Lock contention em cenários de alta concorrência de escrita\n- Custos de hardware para replicação e backups\n- Necessidade de DBA experiente para tuning",
+    "alternativas_consideradas": "1. **PostgreSQL**: Melhor conformidade com padrões SQL e recursos avançados. Não escolhido pela menor familiaridade da equipe.\n2. **MongoDB**: NoSQL document-based. Descartado pela necessidade de integridade referencial.\n3. **MariaDB**: Fork do MySQL. Descartado por preferir upstream oficial.",
+    "compliance_constitution": "Conformidade total com requisitos de integridade de dados e backup definidos na Constitution. Implementação de replicação atende mandatos de alta disponibilidade.",
+    "referencias": "- [MySQL 8.0 Reference Manual](https://dev.mysql.com/doc/refman/8.0/en/)\n- [High Availability Guide](https://dev.mysql.com/doc/mysql-ha-scalability/en/)\n- [Performance Tuning Guide](https://dev.mysql.com/doc/refman/8.0/en/optimization.html)"
+  },
+  {
+    "descricao": "React com TypeScript para Frontend",
+    "status": "Aceito",
+    "contexto": "Necessidade de framework frontend moderno com tipagem forte para reduzir erros em runtime e melhorar produtividade do time.",
+    "decisao": "Adotar React 18+ com TypeScript e shadcn/ui para componentes, usando Vite como build tool.",
+    "justificativa": "React tem ecossistema maduro e vasta comunidade. TypeScript adiciona segurança de tipos, melhor refatoração e documentação inline. shadcn/ui oferece componentes acessíveis e customizáveis.",
+    "consequencias_positivas": "- Type safety reduz bugs em produção\n- Melhor experiência de desenvolvimento com autocomplete\n- Componentes reutilizáveis aceleram desenvolvimento\n- Ecossistema rico de bibliotecas\n- Server Components no futuro (React 19)\n- Facilita onboarding com documentação tipada",
+    "consequencias_negativas": "- Bundle size maior comparado a alternativas minimalistas\n- Complexidade adicional do TypeScript para desenvolvedores júnior\n- Necessidade de configuração de build tools\n- Curva de aprendizado inicial",
+    "riscos": "- Possível over-engineering em componentes muito simples\n- Dependência de conhecimento específico do ecossistema React\n- Mudanças frequentes no ecossistema podem exigir atualizações",
+    "alternativas_consideradas": "1. **Vue.js com TypeScript**: Mais simples e opinionated. Não escolhido por menor disponibilidade de desenvolvedores.\n2. **Angular**: Framework completo mas muito opinativo e pesado. Descartado.\n3. **Svelte**: Compilador interessante mas ecossistema menor. Mantido como opção futura.",
+    "compliance_constitution": "Conformidade com requisitos de qualidade de código e manutenibilidade da Constitution. TypeScript atende mandato de documentação de código.",
+    "referencias": "- [React Documentation](https://react.dev/)\n- [TypeScript Handbook](https://www.typescriptlang.org/docs/)\n- [shadcn/ui Components](https://ui.shadcn.com/)"
+  },
+  {
+    "descricao": "Autenticação JWT com OAuth 2.0",
+    "status": "Proposto",
+    "contexto": "Necessidade de sistema de autenticação seguro, escalável e moderno para proteger APIs e permitir integração com provedores de identidade externos.",
+    "decisao": "Implementar autenticação baseada em JWT (JSON Web Tokens) com fluxo OAuth 2.0, integrando com Azure AD como provedor de identidade principal.",
+    "justificativa": "JWT permite autenticação stateless escalável. OAuth 2.0 é padrão da indústria para autorização e permite integração com múltiplos provedores (Azure AD, Google, GitHub).",
+    "consequencias_positivas": "- Escalabilidade (stateless, sem necessidade de sessão no servidor)\n- Suporte cross-domain e CORS\n- Integração com provedores externos facilita SSO\n- Padrão da indústria amplamente suportado\n- Permite granularidade de permissões via scopes",
+    "consequencias_negativas": "- Tokens podem ser roubados se não protegidos adequadamente\n- Necessidade de estratégia de refresh token\n- Revogação de tokens é mais complexa\n- Token size pode ser significativo",
+    "riscos": "- Token hijacking se HTTPS não obrigatório\n- XSS pode expor tokens se armazenados incorretamente\n- Necessidade de gerenciar expiração e rotação de secrets",
+    "alternativas_consideradas": "1. **Session-based authentication**: Mais simples mas não escalável. Descartado.\n2. **SAML**: Mais pesado e complexo. Descartado por overhead.\n3. **Auth0 como serviço gerenciado**: Avaliado mas descartado por custo e preferência por controle.",
+    "compliance_constitution": "Conformidade com requisitos de segurança da Constitution. Implementação deve seguir mandatos de criptografia e proteção de credenciais.",
+    "referencias": "- [JWT.io Introduction](https://jwt.io/introduction)\n- [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749)\n- [OAuth 2.0 Security Best Practices](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics)"
+  },
+  {
+    "descricao": "CI/CD com GitHub Actions",
+    "status": "Aceito",
+    "contexto": "Necessidade de pipeline automatizado de integração contínua e deploy contínuo para acelerar entregas e reduzir erros humanos.",
+    "decisao": "Utilizar GitHub Actions como plataforma de CI/CD com workflows automatizados para testes, build, security scanning e deploy em ambientes staging e produção.",
+    "justificativa": "GitHub Actions oferece integração nativa com repositório, configuração declarativa via YAML, vasto marketplace de actions prontas e runners gratuitos.",
+    "consequencias_positivas": "- Automação completa do pipeline de entrega\n- Integração nativa com GitHub (PRs, issues, releases)\n- Vasto marketplace de actions reutilizáveis\n- Configuração versionada junto ao código\n- Suporte a matrix builds para múltiplos ambientes\n- Runners gratuitos para projetos open-source",
+    "consequencias_negativas": "- Limitações em runners gratuitos (tempo de execução, concorrência)\n- Vendor lock-in com GitHub\n- Necessidade de self-hosted runners para cargas pesadas\n- Debug de workflows pode ser desafiador",
+    "riscos": "- Falhas em actions críticas podem bloquear deploys\n- Secrets management inadequado pode expor credenciais\n- Dependência de disponibilidade da plataforma GitHub",
+    "alternativas_consideradas": "1. **GitLab CI/CD**: Mais features mas requer migração de repositório. Descartado.\n2. **Azure DevOps Pipelines**: Avaliado mas preferência por GitHub devido ao repositório.\n3. **Jenkins**: Self-hosted com controle total mas overhead de manutenção. Descartado.\n4. **CircleCI**: Boas features mas custo maior. Descartado.",
+    "compliance_constitution": "Conformidade com práticas de DevSecOps definidas na Constitution. Pipeline deve incluir security scanning e testes automatizados conforme mandatos.",
+    "referencias": "- [GitHub Actions Documentation](https://docs.github.com/en/actions)\n- [GitHub Actions Toolkit](https://github.com/actions/toolkit)\n- [CI/CD Best Practices](https://github.com/marketplace?type=actions)"
+  }
+]

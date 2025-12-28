@@ -11,12 +11,15 @@ import { SLAsView } from '@/components/slas/SLAsView';
 import { HabilidadesView } from '@/components/habilidades/HabilidadesView';
 import { ServidoresView } from '@/components/servidores/ServidoresView';
 import { PayloadsView } from '@/components/payloads/PayloadsView';
+import { StagesView } from '@/components/stages/StagesView';
+import { PipelinesView } from '@/components/pipelines/PipelinesView';
 import { TokensView } from '@/components/tokens/TokensView';
 import { ConfiguracaoIntegracoesView } from '@/components/ConfiguracaoIntegracoesView';
 import { ComunicacaoView } from '@/components/comunicacao/ComunicacaoView';
 import { NotificacoesView } from '@/components/notificacoes/NotificacoesView';
 import { DashboardView } from '@/components/DashboardView';
 import { LogsAndTracesView } from '@/components/LogsAndTracesView';
+import { ADRsView } from '@/components/adr/ADRsView';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
@@ -28,6 +31,7 @@ import { GeradorProjetosView } from '@/components/gerador-projetos/GeradorProjet
 import { CargaDadosView } from '@/components/carga/CargaDadosView';
 import { CargaLockfilesView } from '@/components/carga/CargaLockfilesView';
 import { AzureWorkItemsView } from '@/components/azure-work-items/AzureWorkItemsView';
+import { ApiCatalogGeneratorView } from '@/components/ApiCatalogGeneratorView';
 import { useLogging } from '@/hooks/use-logging';
 import { useApi, apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -56,7 +60,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'documentacao-apis' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -376,6 +380,14 @@ function App() {
         return <ServidoresView />;
       case 'payloads':
         return <PayloadsView />;
+      case 'stages':
+        return <StagesView />;
+      case 'pipelines':
+        return <PipelinesView />;
+      case 'adrs':
+        return <ADRsView />;
+      case 'api-catalog-generator':
+        return <ApiCatalogGeneratorView />;
       case 'documentacao-apis':
         return <DocumentacaoAPIsView />;
       case 'tokens-acesso':
@@ -463,6 +475,86 @@ function App() {
             </SidebarGroup>
 
             <SidebarGroup>
+              <SidebarGroupLabel>DevSecOps</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'stages'}
+                      onClick={() => {
+                        logClick('nav_stages');
+                        setCurrentView('stages');
+                      }}
+                    >
+                      <ListChecks />
+                      <span>Stages</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'pipelines'}
+                      onClick={() => {
+                        logClick('nav_pipelines');
+                        setCurrentView('pipelines');
+                      }}
+                    >
+                      <GitBranch />
+                      <span>Pipeline Database</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'adrs'}
+                      onClick={() => {
+                        logClick('nav_adrs');
+                        setCurrentView('adrs');
+                      }}
+                    >
+                      <FileText />
+                      <span>Decisões Arquitetônicas</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'notificacoes'}
+                      onClick={() => {
+                        logClick('nav_notificacoes');
+                        setCurrentView('notificacoes');
+                      }}
+                    >
+                      <Envelope />
+                      <span>Notificações</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'azure-work-items'}
+                      onClick={() => {
+                        logClick('nav_azure_work_items');
+                        setCurrentView('azure-work-items');
+                      }}
+                    >
+                      <ListChecks />
+                      <span>Work Items Azure</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'gerador-projetos'}
+                      onClick={() => {
+                        logClick('nav_gerador_projetos');
+                        setCurrentView('gerador-projetos');
+                      }}
+                    >
+                      <FolderPlus />
+                      <span>Gerador de Projetos</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
               <SidebarGroupLabel>Integrações Externas</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -491,39 +583,6 @@ function App() {
                     >
                       <GitBranch />
                       <span>Processos de Negócio</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'notificacoes'}
-                      onClick={() => setCurrentView('notificacoes')}
-                    >
-                      <Envelope />
-                      <span>Notificações</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'azure-work-items'}
-                      onClick={() => {
-                        logClick('nav_azure_work_items');
-                        setCurrentView('azure-work-items');
-                      }}
-                    >
-                      <ListChecks />
-                      <span>Work Items Azure</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'gerador-projetos'}
-                      onClick={() => {
-                        logClick('nav_gerador_projetos');
-                        setCurrentView('gerador-projetos');
-                      }}
-                    >
-                      <FolderPlus />
-                      <span>Gerador de Projetos</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   {/* TODO: Adicionar ChatBot Duvidas */}
@@ -581,6 +640,18 @@ function App() {
                     >
                       <FileText />
                       <span>Payloads</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'api-catalog-generator'}
+                      onClick={() => {
+                        logClick('nav_api_catalog_generator');
+                        setCurrentView('api-catalog-generator');
+                      }}
+                    >
+                      <BookOpen />
+                      <span>Catálogo de APIs</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>

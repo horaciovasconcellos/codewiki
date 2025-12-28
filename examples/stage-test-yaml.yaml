@@ -1,0 +1,27 @@
+name: Test Stage com YAML
+type: Test
+description: Stage de teste para validar persistência de YAML
+timeout: 1800
+reusable: true
+
+steps:
+  - name: Checkout
+    uses: actions/checkout@v3
+  
+  - name: Setup Node
+    uses: actions/setup-node@v3
+    with:
+      node-version: '18'
+  
+  - name: Install Dependencies
+    run: npm ci
+  
+  - name: Run Tests
+    run: npm test
+    env:
+      NODE_ENV: test
+      CI: true
+
+environment:
+  NODE_ENV: test
+  CI: true

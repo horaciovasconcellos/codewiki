@@ -1,0 +1,7 @@
+# Ignore arquivos JSON/YAML gerados automaticamente
+*.json
+*.yaml
+*.yml
+
+# Mas mantenha o README
+!README.md
