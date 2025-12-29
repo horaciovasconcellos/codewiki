@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { FloppyDisk, X, Plus, Trash, Play } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useApi } from '@/hooks/use-api';
+import { RepositoriosDataTable } from './RepositoriosDataTable';
 
 interface GeradorProjetosFormProps {
   projeto?: ProjetoGerado;
@@ -18,16 +19,18 @@ interface GeradorProjetosFormProps {
   onCancel: () => void;
 }
 
-type GrupoRepositorio = 'bibliotecas' | 'crm' | 'documentacao' | 'erp' | 'interno' | 'packages' | 'projetos' | 'servico';
-type TipoRepositorio = 'acl' | 'api' | 'backend' | 'docs' | 'domínio' | 'frontend' | 'funcionalidade' | 'mobile';
-type LinguagemRepositorio = 'abap' | 'c' | 'go' | 'java' | 'javascript' | 'php' | 'pl_sql' | 'python' | 'rust' | 'shell' | 'typescript';
+type GrupoRepositorio = 'bibliotecas' | 'crm' | 'doc' | 'erp' | 'interno' | 'packages' | 'projetos' | 'servico';
+type TipoRepositorio = 'acl' | 'api' | 'backend' | 'biblioteca' | 'docs' | 'domínio' | 'frontend' | 'funcionalidade' | 'mobile';
+type LinguagemRepositorio = 'abap' | 'c' | 'go' | 'java' | 'javascript' | 'php' | 'pl_sql' | 'python' | 'rust' | 'shell' | 'ssg' | 'typescript';
 
 interface RepositorioProjetoExtended {
   id: string;
+  nome: string;
   grupo: GrupoRepositorio;
   tipo: TipoRepositorio;
   linguagem: LinguagemRepositorio;
   display: string;
+  criado?: boolean; // Se já foi criado no Azure DevOps
 }
 
 const getNextMonday = (): string => {
@@ -45,6 +48,9 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
   const [aplicacaoBaseId, setAplicacaoBaseId] = useState('');
   const [nomeProjeto, setNomeProjeto] = useState('');
   const [workItemProcess, setWorkItemProcess] = useState<WorkItemProcess>('Scrum');
+  
+  // Verificar se o projeto já foi processado (tem URL do projeto ou status Processado)
+  const projetoJaProcessado = projeto?.status === 'Processado' || !!projeto?.urlProjeto;
   const [nomeTime, setNomeTime] = useState('');
   const [dataInicial, setDataInicial] = useState(getNextMonday());
   const [numeroSemanas, setNumeroSemanas] = useState('2');
@@ -86,10 +92,13 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       
       const repos: RepositorioProjetoExtended[] = projeto.repositorios.map(r => ({
         id: r.id,
+        nome: r.nome || `${r.produto}-${r.categoria}-${r.tecnologia}`,
         grupo: r.produto as GrupoRepositorio,
         tipo: r.categoria as any as TipoRepositorio,
         linguagem: r.tecnologia as any as LinguagemRepositorio,
-        display: `${r.produto}-${r.categoria}-${r.tecnologia}`
+        display: `${r.produto}-${r.categoria}-${r.tecnologia}`,
+        // Marcar como criado se tem urlProjeto ou se o projeto inteiro foi processado
+        criado: !!r.urlProjeto || projeto.status === 'Processado'
       }));
       setRepositorios(repos);
     }
@@ -110,6 +119,11 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
   }, [criarTimeSustentacao]);
 
   const handleAddRepositorio = () => {
+    if (projetoJaProcessado) {
+      toast.error('Não é possível adicionar repositórios a um projeto já processado');
+      return;
+    }
+    
     if (!novoRepoGrupo || !novoRepoTipo || !novoRepoLinguagem) {
       toast.error('Preencha todos os campos do repositório');
       return;
@@ -124,10 +138,12 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
 
     const novoRepo: RepositorioProjetoExtended = {
       id: `repo-${Date.now()}`,
+      nome: display, // Nome padrão baseado na combinação
       grupo: novoRepoGrupo,
       tipo: novoRepoTipo,
       linguagem: novoRepoLinguagem,
-      display
+      display,
+      criado: false
     };
 
     setRepositorios([...repositorios, novoRepo]);
@@ -138,7 +154,24 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
   };
 
   const handleRemoveRepositorio = (id: string) => {
+    const repo = repositorios.find(r => r.id === id);
+    if (repo?.criado) {
+      toast.error('Não é possível excluir um repositório já criado no Azure DevOps');
+      return;
+    }
     setRepositorios(repositorios.filter(r => r.id !== id));
+    toast.success('Repositório removido');
+  };
+
+  const handleUpdateRepositorioNome = (id: string, novoNome: string) => {
+    const repo = repositorios.find(r => r.id === id);
+    if (repo?.criado) {
+      toast.error('Não é possível editar um repositório já criado no Azure DevOps');
+      return;
+    }
+    setRepositorios(repositorios.map(r => 
+      r.id === id ? { ...r, nome: novoNome } : r
+    ));
   };
 
   const validateForm = (): boolean => {
@@ -172,6 +205,12 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
 
   const handleSubmit = (gerar: boolean) => {
     if (!validateForm()) return;
+    
+    // Impedir geração de projeto já processado
+    if (gerar && projetoJaProcessado) {
+      toast.error('Este projeto já foi processado e não pode ser gerado novamente');
+      return;
+    }
 
     const aplicacao = aplicacoes?.find(a => a.id === aplicacaoBaseId);
 
@@ -191,6 +230,7 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       iteracaoMensal,
       repositorios: repositorios.map(r => ({
         id: r.id,
+        nome: r.nome,
         produto: r.grupo,
         categoria: r.tipo as any,
         tecnologia: r.linguagem as any
@@ -354,16 +394,27 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
 
           {/* DataTable Repositórios */}
           <div className="space-y-3">
-            <Label>DataTable Repositórios</Label>
+            <div className="flex items-center justify-between">
+              <Label>DataTable Repositórios</Label>
+              {projetoJaProcessado && (
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  Projeto Processado
+                </Badge>
+              )}
+            </div>
             <div className="grid grid-cols-3 gap-2">
-              <Select value={novoRepoGrupo} onValueChange={(v) => setNovoRepoGrupo(v as GrupoRepositorio)}>
+              <Select 
+                value={novoRepoGrupo} 
+                onValueChange={(v) => setNovoRepoGrupo(v as GrupoRepositorio)}
+                disabled={projetoJaProcessado}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Grupo" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bibliotecas">bibliotecas</SelectItem>
                   <SelectItem value="crm">crm</SelectItem>
-                  <SelectItem value="documentacao">documentacao</SelectItem>
+                  <SelectItem value="doc">doc</SelectItem>
                   <SelectItem value="erp">erp</SelectItem>
                   <SelectItem value="interno">interno</SelectItem>
                   <SelectItem value="packages">packages</SelectItem>
@@ -371,7 +422,11 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                   <SelectItem value="servico">servico</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={novoRepoTipo} onValueChange={(v) => setNovoRepoTipo(v as TipoRepositorio)}>
+              <Select 
+                value={novoRepoTipo} 
+                onValueChange={(v) => setNovoRepoTipo(v as TipoRepositorio)}
+                disabled={projetoJaProcessado}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
@@ -379,6 +434,7 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                   <SelectItem value="acl">acl</SelectItem>
                   <SelectItem value="api">api</SelectItem>
                   <SelectItem value="backend">backend</SelectItem>
+                  <SelectItem value="biblioteca">biblioteca</SelectItem>
                   <SelectItem value="docs">docs</SelectItem>
                   <SelectItem value="domínio">domínio</SelectItem>
                   <SelectItem value="frontend">frontend</SelectItem>
@@ -386,7 +442,11 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                   <SelectItem value="mobile">mobile</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={novoRepoLinguagem} onValueChange={(v) => setNovoRepoLinguagem(v as LinguagemRepositorio)}>
+              <Select 
+                value={novoRepoLinguagem} 
+                onValueChange={(v) => setNovoRepoLinguagem(v as LinguagemRepositorio)}
+                disabled={projetoJaProcessado}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Linguagem" />
                 </SelectTrigger>
@@ -401,56 +461,60 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                   <SelectItem value="python">python</SelectItem>
                   <SelectItem value="rust">rust</SelectItem>
                   <SelectItem value="shell">shell</SelectItem>
+                  <SelectItem value="ssg">ssg</SelectItem>
                   <SelectItem value="typescript">typescript</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Button type="button" onClick={handleAddRepositorio} variant="outline" size="sm">
+            <Button 
+              type="button" 
+              onClick={handleAddRepositorio} 
+              variant="outline" 
+              size="sm"
+              disabled={projetoJaProcessado}
+            >
               <Plus className="mr-2 h-4 w-4" />
-              Adicionar Repositório
+              {projetoJaProcessado ? 'Projeto Já Processado' : 'Adicionar Repositório'}
             </Button>
 
-            {repositorios.length > 0 && (
-              <div className="border rounded-md p-3 space-y-2">
-                <div className="font-medium text-sm mb-2">Repositórios Adicionados:</div>
-                {repositorios.map((repo) => (
-                  <div key={repo.id} className="flex items-center justify-between text-sm bg-muted p-2 rounded">
-                    <div className="flex flex-col">
-                      <span className="font-mono font-medium">{repo.display}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {repo.grupo} / {repo.tipo} / {repo.linguagem}
-                      </span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveRepositorio(repo.id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* DataTable de Repositórios */}
+            <RepositoriosDataTable 
+              repositorios={repositorios}
+              onUpdateNome={handleUpdateRepositorioNome}
+              onDelete={handleRemoveRepositorio}
+              projetoProcessado={projetoJaProcessado}
+            />
           </div>
 
           <Separator />
 
           {/* Botões */}
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              <X className="mr-2" size={16} />
-              Cancelar
-            </Button>
-            <Button type="button" variant="secondary" onClick={() => handleSubmit(false)}>
-              <FloppyDisk className="mr-2" size={16} />
-              Salvar (Permitir Integração Azure)
-            </Button>
-            <Button type="button" onClick={() => handleSubmit(true)}>
-              <Play className="mr-2" size={16} />
-              Salvar e Gerar Estruturas
-            </Button>
+          <div className="flex flex-col gap-3">
+            {projetoJaProcessado && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
+                <strong>ℹ️ Projeto já processado:</strong> Este projeto já foi gerado no Azure DevOps. 
+                Não é possível adicionar novos repositórios ou gerar as estruturas novamente.
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                <X className="mr-2" size={16} />
+                Cancelar
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => handleSubmit(false)}>
+                <FloppyDisk className="mr-2" size={16} />
+                Salvar (Permitir Integração Azure)
+              </Button>
+              <Button 
+                type="button" 
+                onClick={() => handleSubmit(true)}
+                disabled={projetoJaProcessado}
+                title={projetoJaProcessado ? 'Projeto já foi processado e não pode ser gerado novamente' : 'Gerar estruturas no Azure DevOps'}
+              >
+                <Play className="mr-2" size={16} />
+                {projetoJaProcessado ? 'Projeto Já Processado' : 'Salvar e Gerar Estruturas'}
+              </Button>
+            </div>
           </div>
         </form>
       </CardContent>

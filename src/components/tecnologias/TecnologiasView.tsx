@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Tecnologia, Colaborador } from '@/lib/types';
 import { TecnologiaWizard } from './TecnologiaWizard';
 import { TecnologiaDetails } from './TecnologiaDetails';
@@ -15,6 +16,7 @@ interface TecnologiasViewProps {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
+  const { logEvent, logError } = useLogging('tecnologias');
   const [tecnologias, setTecnologias] = useState<Tecnologia[]>([]);
   const [showWizard, setShowWizard] = useState(false);
   const [selectedTecnologia, setSelectedTecnologia] = useState<Tecnologia | null>(null);
@@ -29,6 +31,8 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
     try {
       setLoading(true);
       console.log('Carregando tecnologias de:', `${API_URL}/api/tecnologias`);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/tecnologias`);
       if (response.ok) {
         const data = await response.json();
@@ -39,6 +43,7 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
         toast.error('Erro ao carregar tecnologias');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar tecnologias:', error);
       toast.error('Erro ao carregar dados');
     } finally {
@@ -61,6 +66,9 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
       };
       // Remover o objeto ambientes do payload
       delete tecnologiaPayload.ambientes;
+      
+      logEvent('api_call_start', 'api_call');
+
       
       const response = await fetch(
         isEditing ? `${API_URL}/api/tecnologias/${tecnologia.id}` : `${API_URL}/api/tecnologias`,
@@ -108,6 +116,7 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
       setEditingTecnologia(undefined);
       toast.success(isEditing ? 'Tecnologia atualizada com sucesso' : 'Tecnologia cadastrada com sucesso');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar tecnologia:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao salvar tecnologia');
     }
@@ -116,6 +125,8 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
   const saveResponsaveis = async (tecnologiaId: string, responsaveis: any[]) => {
     try {
       // Primeiro, buscar responsáveis existentes
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/tecnologias/${tecnologiaId}/responsaveis`);
       const existentes = response.ok ? await response.json() : [];
 
@@ -153,6 +164,7 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
         }
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar responsáveis:', error);
       toast.error('Erro ao salvar responsáveis');
     }
@@ -160,6 +172,8 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
 
   const saveContratos = async (tecnologiaId: string, contratos: any[]) => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/tecnologias/${tecnologiaId}/contratos`);
       const existentes = response.ok ? await response.json() : [];
 
@@ -188,6 +202,7 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
         }
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar contratos:', error);
       toast.error('Erro ao salvar contratos');
     }
@@ -195,6 +210,8 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
 
   const saveContratosAMS = async (tecnologiaId: string, contratosAMS: any[]) => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/tecnologias/${tecnologiaId}/contratos-ams`);
       const existentes = response.ok ? await response.json() : [];
 
@@ -224,6 +241,7 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
         }
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar contratos AMS:', error);
       toast.error('Erro ao salvar contratos AMS');
     }
@@ -231,6 +249,8 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
 
   const saveCustosSaaS = async (tecnologiaId: string, custosSaaS: any[]) => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/tecnologias/${tecnologiaId}/custos-saas`);
       const existentes = response.ok ? await response.json() : [];
 
@@ -260,6 +280,7 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
         }
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar custos SaaS:', error);
       toast.error('Erro ao salvar custos SaaS');
     }
@@ -267,6 +288,8 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
 
   const saveManutencoesSaaS = async (tecnologiaId: string, manutencoesSaaS: any[]) => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/tecnologias/${tecnologiaId}/manutencoes-saas`);
       const existentes = response.ok ? await response.json() : [];
 
@@ -293,6 +316,7 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
         }
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar manutenções SaaS:', error);
       toast.error('Erro ao salvar manutenções SaaS');
     }
@@ -300,6 +324,8 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
 
   const handleDelete = async (id: string) => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/tecnologias/${id}`, {
         method: 'DELETE'
       });
@@ -312,6 +338,7 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
       setSelectedTecnologia(null);
       toast.success('Tecnologia excluída com sucesso');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao excluir tecnologia:', error);
       toast.error('Erro ao excluir tecnologia');
     }

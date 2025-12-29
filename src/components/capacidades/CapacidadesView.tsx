@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { CapacidadeNegocio } from '@/lib/types';
 import { CapacidadeForm } from './CapacidadeForm';
 import { CapacidadesTable } from './CapacidadesTable';

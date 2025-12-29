@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Payload } from '@/lib/types';
 import { PayloadsDataTable } from './PayloadsDataTable';
 import { PayloadWizard } from './PayloadWizard';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function PayloadsView() {
+  const { logClick, logEvent, logError } = useLogging('payloads-view');
   const [payloads, setPayloads] = useState<Payload[]>([]);
   const [showWizard, setShowWizard] = useState(false);
   const [editingPayload, setEditingPayload] = useState<Payload | undefined>(undefined);
@@ -22,6 +24,8 @@ export function PayloadsView() {
   const loadPayloads = async () => {
     try {
       setLoading(true);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/payloads`);
       if (response.ok) {
         const data = await response.json();
@@ -30,6 +34,7 @@ export function PayloadsView() {
         toast.error('Erro ao carregar payloads');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar payloads:', error);
       toast.error('Erro ao carregar dados');
     } finally {
@@ -40,6 +45,9 @@ export function PayloadsView() {
   const handleSave = async (payload: Payload) => {
     try {
       const isEditing = !!payload.id && payloads.some(p => p.id === payload.id);
+      
+      logEvent('api_call_start', 'api_call');
+
       
       const response = await fetch(
         isEditing ? `${API_URL}/api/payloads/${payload.id}` : `${API_URL}/api/payloads`,
@@ -60,6 +68,7 @@ export function PayloadsView() {
       setEditingPayload(undefined);
       toast.success(isEditing ? 'Payload atualizado com sucesso' : 'Payload cadastrado com sucesso');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar payload:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao salvar payload');
     }
@@ -72,6 +81,8 @@ export function PayloadsView() {
 
   const handleDelete = async (id: string) => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/payloads/${id}`, {
         method: 'DELETE'
       });
@@ -83,6 +94,7 @@ export function PayloadsView() {
 
       await loadPayloads();
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao excluir payload:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao excluir payload');
     }

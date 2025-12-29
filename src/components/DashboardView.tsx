@@ -1,6 +1,7 @@
 import { Colaborador, TipoAfastamento, Tecnologia, ProcessoNegocio, Aplicacao, Runbook, CapacidadeNegocio, SLA, Habilidade, Servidor, Integracao, Comunicacao } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, ListChecks, Code, GitBranch, Calendar, DeviceMobile, BookOpen, Target, ClipboardText, Certificate, ShareNetwork, HardDrives, FileText } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
+import { Users, ListChecks, Code, GitBranch, Calendar, DeviceMobile, BookOpen, Target, ClipboardText, Certificate, ShareNetwork, HardDrives, FileText, ArrowsClockwise, Info } from '@phosphor-icons/react';
 import { useLogging } from '@/hooks/use-logging';
 import { AplicacoesDashboard } from './AplicacoesDashboard';
 import { useApi } from '@/hooks/use-api';
@@ -16,6 +17,7 @@ interface DashboardViewProps {
   capacidades: CapacidadeNegocio[];
   slas: SLA[];
   habilidades: Habilidade[];
+  onNavigate?: (view: string) => void;
 }
 
 export function DashboardView({ 
@@ -27,7 +29,8 @@ export function DashboardView({
   runbooks,
   capacidades,
   slas,
-  habilidades
+  habilidades,
+  onNavigate
 }: DashboardViewProps) {
   const { logClick } = useLogging('dashboard');
   const { data: integracoes } = useApi<Integracao[]>('/integracoes', []);
@@ -50,6 +53,13 @@ export function DashboardView({
     ativos: 0,
     descontinuados: 0
   });
+  const { data: agingData } = useApi<{
+    histogram: Array<{ faixa: string; quantidade: number; percentual: number | string }>;
+    stats: { total: number; mediaIdade: number; idadeMaxima: number; idadeMinima: number; totalProjetos?: number; projetos: number | string[] };
+  }>('/dashboard/aging-chart', {
+    histogram: [],
+    stats: { total: 0, mediaIdade: 0, idadeMaxima: 0, idadeMinima: 0, projetos: 0 }
+  });
   
   console.log('[DashboardView] Dados recebidos:', {
     colaboradores: colaboradores?.length || 0,
@@ -66,6 +76,13 @@ export function DashboardView({
     comunicacoes: comunicacoes?.length || 0,
     payloads: payloadsStats?.total || 0,
     payloadsValidos: payloadsStats?.validos || 0
+  });
+  
+  console.log('[DashboardView] Aging Data:', {
+    agingData,
+    hasData: agingData?.stats?.total,
+    histogramLength: agingData?.histogram?.length,
+    histogramSample: agingData?.histogram?.[0]
   });
   
   const colaboradoresAtivos = colaboradores.filter(c => !c.dataDemissao).length;
@@ -349,7 +366,7 @@ export function DashboardView({
                     ))}
                     {Object.keys(habilidadesPorSubcategoria).length > 5 && (
                       <div className="text-xs text-muted-foreground italic">
-                        +{Object.keys(habilidadesPorCategoria).length - 5} categorias...
+                        +{Object.keys(habilidadesPorSubcategoria).length - 5} categorias...
                       </div>
                     )}
                   </div>
@@ -360,6 +377,123 @@ export function DashboardView({
               </CardContent>
             </Card>
           </div>
+
+          {/* Aging Chart - Histograma de Atraso de Work Items */}
+          {/* Verificar se há dados reais: total > 0 E (histogram vazio OU todas as quantidades são 0) */}
+          {(!agingData || 
+            !agingData.stats || 
+            agingData.stats.total === 0 || 
+            !agingData.histogram || 
+            agingData.histogram.length === 0 ||
+            agingData.histogram.every(h => h.quantidade === 0)) && (
+            <Card className="border-blue-200 bg-blue-50">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Info className="text-blue-600" size={20} />
+                  Aging Chart - Sincronizar Azure
+                </CardTitle>
+                <CardDescription className="text-xs">Configure a sincronização para visualizar os dados</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Para visualizar o <strong>Aging Distribution Chart</strong> com os work items do Azure DevOps, você precisa:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Configurar a integração com o Azure DevOps nas configurações</li>
+                    <li>Sincronizar os work items dos seus projetos</li>
+                    <li>Os dados serão processados e exibidos automaticamente</li>
+                  </ol>
+                  <div className="flex gap-2 pt-2">
+                    {onNavigate && (
+                      <>
+                        <Button 
+                          onClick={() => onNavigate('azure-work-items')} 
+                          className="flex items-center gap-2"
+                          size="sm"
+                        >
+                          <ArrowsClockwise size={16} />
+                          Sincronizar Work Items
+                        </Button>
+                        <Button 
+                          onClick={() => onNavigate('configuracoes')} 
+                          variant="outline"
+                          size="sm"
+                        >
+                          Configurações
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {agingData && agingData.stats && agingData.stats.total > 0 && agingData.histogram && agingData.histogram.length > 0 && agingData.histogram.some(h => h.quantidade > 0) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Calendar className="text-blue-600" size={20} />
+                  Aging Chart - Work Items
+                </CardTitle>
+                <CardDescription className="text-xs">Distribuição de work items por tempo desde criação</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={agingData.histogram}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="faixa" 
+                        fontSize={11}
+                        label={{ value: 'Faixa de Dias', position: 'insideBottom', offset: -5, fontSize: 12 }}
+                      />
+                      <YAxis 
+                        fontSize={11}
+                        label={{ value: 'Quantidade', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                      />
+                      <Tooltip 
+                        formatter={(value: number, name: string, props: any) => {
+                          if (name === 'quantidade') {
+                            return [`${value} work items (${props.payload.percentual.toFixed(1)}%)`, 'Quantidade'];
+                          }
+                          return [value, name];
+                        }}
+                        labelStyle={{ fontWeight: 'bold' }}
+                      />
+                      <Bar dataKey="quantidade" fill="#3b82f6" name="Work Items" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2 border-t">
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">Total</div>
+                      <div className="text-lg font-bold text-blue-600">{agingData.stats.total}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">Média</div>
+                      <div className="text-lg font-bold">{agingData.stats.mediaIdade} dias</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">Mínimo</div>
+                      <div className="text-lg font-bold text-green-600">{agingData.stats.idadeMinima} dias</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">Máximo</div>
+                      <div className="text-lg font-bold text-red-600">{agingData.stats.idadeMaxima} dias</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-muted-foreground">Projetos</div>
+                      <div className="text-lg font-bold text-purple-600">
+                        {agingData.stats.totalProjetos || (Array.isArray(agingData.stats.projetos) ? agingData.stats.projetos.length : agingData.stats.projetos)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Gráficos de Análise */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

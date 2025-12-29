@@ -1,0 +1,173 @@
+# Template de Pipeline para Pull Request
+# Este template é executado automaticamente quando PRs são criados ou atualizados
+
+trigger: none  # Não executar em commits diretos
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+      - release/*
+  paths:
+    exclude:
+      - docs/*
+      - README.md
+      - .gitignore
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  nodeVersion: '18.x'
+
+stages:
+  # Stage 1: Build e Testes Unitários
+  - stage: Build
+    displayName: 'Build and Unit Tests'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build Application'
+        steps:
+          # Checkout do código
+          - checkout: self
+            fetchDepth: 0
+            displayName: 'Checkout Repository'
+
+          # Setup Node.js
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js $(nodeVersion)'
+
+          # Instalar dependências
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          # Build
+          - script: npm run build
+            displayName: 'Build Application'
+
+          # Testes unitários
+          - script: npm run test:unit
+            displayName: 'Run Unit Tests'
+
+          # Gerar relatório de cobertura
+          - script: npm run test:coverage
+            displayName: 'Generate Coverage Report'
+
+          # Publicar resultados dos testes
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-results.xml'
+              mergeTestResults: true
+            displayName: 'Publish Test Results'
+
+          # Publicar cobertura de código
+          - task: PublishCodeCoverageResults@1
+            condition: succeededOrFailed()
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+            displayName: 'Publish Code Coverage'
+
+  # Stage 2: Análise de Qualidade de Código
+  - stage: CodeQuality
+    displayName: 'Code Quality Analysis'
+    dependsOn: Build
+    jobs:
+      - job: LintJob
+        displayName: 'Lint and Code Quality'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          # ESLint
+          - script: npm run lint
+            displayName: 'Run ESLint'
+
+          # Prettier check
+          - script: npm run prettier:check
+            displayName: 'Check Code Formatting'
+
+          # Type checking
+          - script: npm run type-check
+            displayName: 'TypeScript Type Check'
+
+  # Stage 3: Análise de Segurança
+  - stage: Security
+    displayName: 'Security Scan'
+    dependsOn: Build
+    jobs:
+      - job: SecurityScanJob
+        displayName: 'Security Scanning'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          # npm audit
+          - script: npm audit --audit-level=high
+            continueOnError: true
+            displayName: 'NPM Security Audit'
+
+          # Dependabot ou Snyk (se configurado)
+          - script: npm run security:check
+            continueOnError: true
+            displayName: 'Run Security Checks'
+
+  # Stage 4: Validação Final
+  - stage: Validation
+    displayName: 'Final Validation'
+    dependsOn:
+      - Build
+      - CodeQuality
+      - Security
+    jobs:
+      - job: ValidationJob
+        displayName: 'Validate PR'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          # Verificar tamanho do PR
+          - script: |
+              FILES_CHANGED=$(git diff --name-only origin/$(System.PullRequest.TargetBranch)...HEAD | wc -l)
+              echo "Files changed: $FILES_CHANGED"
+              if [ $FILES_CHANGED -gt 50 ]; then
+                echo "##vso[task.logissue type=warning]PR tem mais de 50 arquivos alterados. Considere dividir em PRs menores."
+              fi
+            displayName: 'Check PR Size'
+
+          # Comentar no PR (opcional)
+          - script: |
+              echo "✅ Todas as validações passaram!"
+              echo "Pronto para review e merge."
+            displayName: 'Validation Summary'
+
+# Configurações adicionais
+resources:
+  repositories:
+    - repository: self
+      type: git
+
+# Notificações (opcional)
+# Configure notificações no Azure DevOps

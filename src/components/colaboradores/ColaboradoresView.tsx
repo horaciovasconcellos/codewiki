@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Colaborador, TipoAfastamento, Habilidade } from '@/lib/types';
 import { ColaboradorDetails } from './ColaboradorDetails';
 import { ColaboradorWizard } from './ColaboradorWizard';
@@ -170,6 +171,7 @@ export function ColaboradoresView({
       setIsEditing(false);
       setEditingColaborador(undefined);
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar colaborador:', error);
       toast.error('Erro ao salvar colaborador');
     }
@@ -477,6 +479,7 @@ export function ColaboradoresView({
       doc.save(fileName);
       toast.success('PDF gerado com sucesso!');
     } catch (error: any) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao gerar PDF:', error);
       toast.error('Erro ao gerar PDF');
     }

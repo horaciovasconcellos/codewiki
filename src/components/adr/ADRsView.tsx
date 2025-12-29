@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ADRWizard } from './ADRWizard';
@@ -23,6 +24,7 @@ import 'jspdf-autotable';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function ADRsView() {
+  const { logClick, logEvent, logError } = useLogging('adrs-view');
   const [adrs, setAdrs] = useState<ADR[]>([]);
   const [loading, setLoading] = useState(true);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -39,6 +41,8 @@ export function ADRsView() {
   const fetchADRs = async () => {
     try {
       setLoading(true);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/adrs`);
       
       if (!response.ok) {
@@ -48,6 +52,7 @@ export function ADRsView() {
       const data = await response.json();
       setAdrs(data);
     } catch (error: any) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar ADRs:', error);
       toast.error(error.message || 'Erro ao carregar ADRs');
     } finally {
@@ -59,6 +64,8 @@ export function ADRsView() {
     if (adr) {
       // Buscar ADR completo com aplicações
       try {
+        logEvent('api_call_start', 'api_call');
+
         const response = await fetch(`${API_URL}/api/adrs/${adr.id}`);
         if (response.ok) {
           const adrCompleto = await response.json();
@@ -67,7 +74,8 @@ export function ADRsView() {
           setEditingADR(adr);
         }
       } catch (error) {
-        console.error('Erro ao carregar ADR completo:', error);
+        logError(error as Error, 'error_caught');
+      console.error('Erro ao carregar ADR completo:', error);
         setEditingADR(adr);
       }
     } else {
@@ -88,6 +96,8 @@ export function ADRsView() {
   const handleView = async (adr: ADR) => {
     // Buscar ADR completo com aplicações
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/adrs/${adr.id}`);
       if (response.ok) {
         const adrCompleto = await response.json();
@@ -96,6 +106,7 @@ export function ADRsView() {
         setViewingADR(adr);
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar ADR completo:', error);
       setViewingADR(adr);
     }
@@ -116,6 +127,8 @@ export function ADRsView() {
     if (!adrToDelete) return;
 
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/adrs/${adrToDelete}`, {
         method: 'DELETE',
       });
@@ -128,6 +141,7 @@ export function ADRsView() {
       toast.success('ADR excluído com sucesso');
       fetchADRs();
     } catch (error: any) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao excluir ADR:', error);
       toast.error(error.message || 'Erro ao excluir ADR');
     } finally {
@@ -144,6 +158,8 @@ export function ADRsView() {
       const adrsCompletos = await Promise.all(
         adrs.map(async (adr) => {
           try {
+            logEvent('api_call_start', 'api_call');
+
             const response = await fetch(`${API_URL}/api/adrs/${adr.id}`);
             if (response.ok) {
               return await response.json();
@@ -294,6 +310,7 @@ export function ADRsView() {
       doc.save(`ADRs-${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success('PDF gerado com sucesso!');
     } catch (error: any) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao gerar PDF:', error);
       toast.error('Erro ao gerar PDF');
     }

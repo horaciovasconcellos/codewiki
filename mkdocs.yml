@@ -37,9 +37,7 @@ nav:
       - "Debug Tecnologias": "DEBUG-TECNOLOGIAS.md"
       
   - "API":
-      - "Documentação da API": "DOCUMENTACAO_API.md"
-      - "API Status": "API_STATUS.md"
-      - "API Referência": "api-referencia.md"
+      - "📘 Referência Completa": "API-REFERENCIA-COMPLETA.md"
       - "APIs Microsoft Azure DevOps": "APIS_MICROSOFT_AZURE_DEVOPS.md"
       - "API Habilidades Exemplo": "API_HABILIDADES_EXEMPLO.md"
       - "Exemplo POST Tipo Afastamento": "EXEMPLO_POST_TIPO_AFASTAMENTO.md"
@@ -51,8 +49,53 @@ nav:
       - "Integrador Log Visual": "INTEGRADOR_LOG_VISUAL.md"
       - "Identificador de Tecnologias": "IDENTIFICADOR_TECNOLOGIAS.md"
       - "Implementação Comunicações": "RESUMO_IMPLEMENTACAO_COMUNICACOES.md"
-      - "Sistema de ADR": "SISTEMA-ADR.md"
-      - "Pipeline Database": "PIPELINE-WIZARD-STAGES.md"
+      
+  - "DevSecOps":
+      - "Pipeline Database": "PIPELINE-DATABASE.md"
+      - "Pipeline Wizard e Stages": "PIPELINE-WIZARD-STAGES.md"
+      - "Importação de Stages YAML": "STAGES-YAML-IMPORT.md"
+      
+  - "Azure":
+      - "Dashboard DORA": "DASHBOARD-DORA.md"
+      - "Templates Azure DevOps": "README-AZURE-DEVOPS-TEMPLATES.md"
+      - "Quick Start Azure Templates": "QUICK-START-AZURE-TEMPLATES.md"
+      - "Troubleshooting Azure Templates": "TROUBLESHOOTING-AZURE-TEMPLATES.md"
+      - "Sincronização Work Items": "azure-devops-workitems-sync.md"
+      
+  - "ReportBook":
+      - "Sistema ADR": "SISTEMA-ADR.md"
+      - "Resumo Implementação ADR": "RESUMO-IMPLEMENTACAO-ADR.md"
+      - "Melhorias UI ADR": "MELHORIAS-UI-ADR.md"
+      - "Guia de Carga de ADRs": "GUIA-CARGA-ADRS.md"
+      
+  - "Integrações Externas":
+      - "Fix Colaboradores e Habilidades": "FIX-COLABORADORES-HABILIDADES-AVALIACOES.md"
+      
+  - "Documentação":
+      - "Catálogo de APIs (Auto-Update)": "CATALOGO-APIS-AUTO-UPDATE.md"
+      
+  - "Observabilidade":
+      - "Logging - Auditoria Completa": "LOGGING-AUDIT-REPORT.md"
+      - "Logging - Implementação Completa": "LOGGING-IMPLEMENTATION-COMPLETE.md"
+      - "Logging - Referência Rápida": "LOGGING-QUICK-REFERENCE.md"
+      - "Logging - Resumo de Sucesso": "LOGGING-SUCCESS-SUMMARY.md"
+      
+  - "Documentação de Telas":
+      - "� Sumário Executivo": "TELAS-SUMARIO-EXECUTIVO.md"
+      - "�📑 Índice Geral": "TELAS-INDICE.md"
+      - "📋 Resumo Completo": "TELAS-RESUMO-COMPLETO.md"
+      - "Core":
+          - "Dashboard": "TELA-DASHBOARD.md"
+          - "Logs and Traces": "TELA-LOGS-TRACES.md"
+      - "Cadastros":
+          - "Aplicações": "TELA-APLICACOES.md"
+      - "DevOps":
+          - "Gerador de Projetos": "TELA-GERADOR-PROJETOS.md"
+      - "Documentação":
+          - "ReportBook": "TELA-REPORTBOOK.md"
+      
+  - "Features":
+      - "Status de Repositórios Persistido": "FEATURE-STATUS-REPOSITORIO.md"
       
   - "Banco de Dados":
       - "Liquibase Database Migration": "LIQUIBASE_DATABASE_MIGRATION.md"
@@ -73,11 +116,10 @@ nav:
       - "Guia Completo de Testes": "GUIA_COMPLETO_TESTES.md"
       - "Testes Identificador Tecnologias": "TESTES_IDENTIFICADOR_TECNOLOGIAS.md"
       - "Resumo Identificador Tecnologias": "RESUMO_IDENTIFICADOR_TECNOLOGIAS.md"
-      - "Troubleshooting Runbook": "TROUBLESHOOTING_RUNBOOK.md"
       - "Instruções de Carga": "INSTRUCOES-CARGA.md"
       - "Guia de Carga de ADRs": "GUIA-CARGA-ADRS.md"
       
-  - "Documentação":
+  - "Documentação Técnica":
       - "Implementação MkDocs": "MKDOCS_IMPLEMENTACAO.md"
       - "Atualizações Documentação": "ATUALIZACOES_DOCUMENTACAO.md"
       - "Índice Geral": "INDICE_GERAL.md"

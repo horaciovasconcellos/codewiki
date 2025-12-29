@@ -20,6 +20,7 @@ import { SLAApoioForm } from './forms/SLAApoioForm';
 import { SLAOperacionalForm } from './forms/SLAOperacionalForm';
 import { SLAComponentesForm } from './forms/SLAComponentesForm';
 import { SLAUsuarioForm } from './forms/SLAUsuarioForm';
+import { SLAClienteForm } from './forms/SLAClienteForm';
 import { SLAServicoForm } from './forms/SLAServicoForm';
 
 interface SLAFormProps {
@@ -237,9 +238,7 @@ export function SLAForm({ slas, onSave, onCancel, editingSLA }: SLAFormProps) {
               <SLAServicoForm data={servicoData} onChange={setServicoData} />
             )}
             {tipoSLA === 'SLA por Cliente' && (
-              <div className="text-muted-foreground text-sm p-4 border border-border rounded-md">
-                Este tipo de SLA utiliza apenas as informações básicas.
-              </div>
+              <SLAClienteForm data={usuarioData} onChange={setUsuarioData} />
             )}
                 </TabsContent>
               </Tabs>

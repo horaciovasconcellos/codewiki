@@ -1,0 +1,107 @@
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass123
+          MYSQL_DATABASE: auditoria_db_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Instalar dependências
+      run: |
+        npm ci
+        npm install -g typescript
+
+    - name: Lint
+      run: npm run lint
+
+    - name: Build
+      run: npm run build
+
+    - name: Testes unitários
+      run: npm test
+      env:
+        NODE_ENV: test
+        MYSQL_HOST: localhost
+        MYSQL_PORT: 3306
+        MYSQL_USER: root
+        MYSQL_PASSWORD: rootpass123
+        MYSQL_DATABASE: auditoria_db_test
+
+    - name: Testes de integração
+      run: npm run test:integration
+      env:
+        NODE_ENV: test
+
+    - name: Cobertura de código
+      run: npm run test:coverage
+
+    - name: Upload de artefatos
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: dist/
+
+  deploy-staging:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: Download artefatos
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+        path: dist/
+
+    - name: Deploy para Staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Comandos de deploy para staging
+
+  deploy-production:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Download artefatos
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+        path: dist/
+
+    - name: Deploy para Produção
+      run: |
+        echo "Deploying to production environment..."
+        # Comandos de deploy para produção
+
+    - name: Notificação de sucesso
+      run: |
+        echo "Deploy concluído com sucesso!"

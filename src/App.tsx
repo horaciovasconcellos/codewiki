@@ -6,6 +6,7 @@ import { ColaboradoresView } from '@/components/colaboradores/ColaboradoresView'
 import { ProcessosView } from '@/components/processos/ProcessosView';
 import { AplicacoesView } from '@/components/aplicacoes/AplicacoesView';
 import { RunbooksView } from '@/components/runbooks/RunbooksView';
+import { ScriptsView } from '@/components/scripts/ScriptsView';
 import { CapacidadesView } from '@/components/capacidades/CapacidadesView';
 import { SLAsView } from '@/components/slas/SLAsView';
 import { HabilidadesView } from '@/components/habilidades/HabilidadesView';
@@ -23,7 +24,7 @@ import { ADRsView } from '@/components/adr/ADRsView';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
-import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope } from '@phosphor-icons/react';
+import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope } from '@phosphor-icons/react';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarTrigger } from '@/components/ui/sidebar';
 import { IntegracaoView } from '@/components/integracoes/IntegracaoView';
 import { DocumentacaoAPIsView } from '@/components/DocumentacaoAPIsView';
@@ -31,7 +32,10 @@ import { GeradorProjetosView } from '@/components/gerador-projetos/GeradorProjet
 import { CargaDadosView } from '@/components/carga/CargaDadosView';
 import { CargaLockfilesView } from '@/components/carga/CargaLockfilesView';
 import { AzureWorkItemsView } from '@/components/azure-work-items/AzureWorkItemsView';
+import { DoraDashboardView } from '@/components/dora/DoraDashboardView';
 import { ApiCatalogGeneratorView } from '@/components/ApiCatalogGeneratorView';
+import { ReportBookView } from '@/components/reportbook/ReportBookView';
+import { SimilarityAnalyzer } from '@/components/reportbook/SimilarityAnalyzer';
 import { useLogging } from '@/hooks/use-logging';
 import { useApi, apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -60,7 +64,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -324,6 +328,7 @@ function App() {
             capacidades={capacidades || []}
             slas={slas || []}
             habilidades={habilidades || []}
+            onNavigate={(view) => setCurrentView(view as ViewType)}
           />
         );
       case 'logs-traces':
@@ -340,6 +345,8 @@ function App() {
         return <AplicacoesView capacidades={capacidades || []} />;
       case 'runbooks':
         return <RunbooksView />;
+      case 'scripts':
+        return <ScriptsView />;
       case 'capacidades-negocio':
         return (
           <CapacidadesView
@@ -398,6 +405,12 @@ function App() {
         return <GeradorProjetosView />;
       case 'azure-work-items':
         return <AzureWorkItemsView />;
+      case 'dora-dashboard':
+        return <DoraDashboardView />;
+      case 'reportbook':
+        return <ReportBookView />;
+      case 'similarity-analyzer':
+        return <SimilarityAnalyzer />;
       case 'carga-dados':
         return <CargaDadosView />;
       case 'carga-lockfiles':
@@ -480,18 +493,6 @@ function App() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      isActive={currentView === 'stages'}
-                      onClick={() => {
-                        logClick('nav_stages');
-                        setCurrentView('stages');
-                      }}
-                    >
-                      <ListChecks />
-                      <span>Stages</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
                       isActive={currentView === 'pipelines'}
                       onClick={() => {
                         logClick('nav_pipelines');
@@ -504,38 +505,34 @@ function App() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      isActive={currentView === 'adrs'}
+                      isActive={currentView === 'stages'}
                       onClick={() => {
-                        logClick('nav_adrs');
-                        setCurrentView('adrs');
-                      }}
-                    >
-                      <FileText />
-                      <span>Decisões Arquitetônicas</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'notificacoes'}
-                      onClick={() => {
-                        logClick('nav_notificacoes');
-                        setCurrentView('notificacoes');
-                      }}
-                    >
-                      <Envelope />
-                      <span>Notificações</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'azure-work-items'}
-                      onClick={() => {
-                        logClick('nav_azure_work_items');
-                        setCurrentView('azure-work-items');
+                        logClick('nav_stages');
+                        setCurrentView('stages');
                       }}
                     >
                       <ListChecks />
-                      <span>Work Items Azure</span>
+                      <span>Stages</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Azure</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'dora-dashboard'}
+                      onClick={() => {
+                        logClick('nav_dora_dashboard');
+                        setCurrentView('dora-dashboard');
+                      }}
+                    >
+                      <ChartLineUp />
+                      <span>Dashboard DORA</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
@@ -550,6 +547,50 @@ function App() {
                       <span>Gerador de Projetos</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'azure-work-items'}
+                      onClick={() => {
+                        logClick('nav_azure_work_items');
+                        setCurrentView('azure-work-items');
+                      }}
+                    >
+                      <ListChecks />
+                      <span>Sincronizar Azure</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>ReportBook</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'similarity-analyzer'}
+                      onClick={() => {
+                        logClick('nav_similarity_analyzer');
+                        setCurrentView('similarity-analyzer');
+                      }}
+                    >
+                      <ChartBar />
+                      <span>Analisador de Similaridade</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'reportbook'}
+                      onClick={() => {
+                        logClick('nav_reportbook');
+                        setCurrentView('reportbook');
+                      }}
+                    >
+                      <BookOpen />
+                      <span>Relatórios</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -560,50 +601,20 @@ function App() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
+                      isActive={currentView === 'capacidades-negocio'}
+                      onClick={() => setCurrentView('capacidades-negocio')}
+                    >
+                      <Target />
+                      <span>Capacidades de Negócio</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
                       isActive={currentView === 'colaboradores'}
                       onClick={() => setCurrentView('colaboradores')}
                     >
                       <Users />
                       <span>Colaboradores</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'tipos-afastamento'}
-                      onClick={() => setCurrentView('tipos-afastamento')}
-                    >
-                      <ListChecks />
-                      <span>Tipos de Afastamento</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'processos-negocio'}
-                      onClick={() => setCurrentView('processos-negocio')}
-                    >
-                      <GitBranch />
-                      <span>Processos de Negócio</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  {/* TODO: Adicionar ChatBot Duvidas */}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Registros</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'comunicacao'}
-                      onClick={() => {
-                        logClick('nav_comunicacao');
-                        setCurrentView('comunicacao');
-                      }}
-                    >
-                      <ShareNetwork />
-                      <span>Comunicação</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
@@ -620,67 +631,30 @@ function App() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      isActive={currentView === 'servidores'}
-                      onClick={() => {
-                        logClick('nav_servidores');
-                        setCurrentView('servidores');
-                      }}
+                      isActive={currentView === 'processos-negocio'}
+                      onClick={() => setCurrentView('processos-negocio')}
                     >
-                      <HardDrives />
-                      <span>Servidores</span>
+                      <GitBranch />
+                      <span>Processos de Negócio</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      isActive={currentView === 'payloads'}
-                      onClick={() => {
-                        logClick('nav_payloads');
-                        setCurrentView('payloads');
-                      }}
+                      isActive={currentView === 'tipos-afastamento'}
+                      onClick={() => setCurrentView('tipos-afastamento')}
                     >
-                      <FileText />
-                      <span>Payloads</span>
+                      <ListChecks />
+                      <span>Tipos de Afastamento</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'api-catalog-generator'}
-                      onClick={() => {
-                        logClick('nav_api_catalog_generator');
-                        setCurrentView('api-catalog-generator');
-                      }}
-                    >
-                      <BookOpen />
-                      <span>Catálogo de APIs</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'tecnologias'}
-                      onClick={() => setCurrentView('tecnologias')}
-                    >
-                      <Code />
-                      <span>Tecnologias</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'slas'}
-                      onClick={() => setCurrentView('slas')}
-                    >
-                      <ClipboardText />
-                      <span>SLAs</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'capacidades-negocio'}
-                      onClick={() => setCurrentView('capacidades-negocio')}
-                    >
-                      <Target />
-                      <span>Capacidades de Negócio</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Registros</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       isActive={currentView === 'aplicacoes'}
@@ -688,6 +662,30 @@ function App() {
                     >
                       <DeviceMobile />
                       <span>Aplicações</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'comunicacao'}
+                      onClick={() => {
+                        logClick('nav_comunicacao');
+                        setCurrentView('comunicacao');
+                      }}
+                    >
+                      <ShareNetwork />
+                      <span>Comunicação</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'adrs'}
+                      onClick={() => {
+                        logClick('nav_adrs');
+                        setCurrentView('adrs');
+                      }}
+                    >
+                      <FileText />
+                      <span>Decisões Arquitetônicas</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
@@ -701,11 +699,62 @@ function App() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton
+                      isActive={currentView === 'notificacoes'}
+                      onClick={() => {
+                        logClick('nav_notificacoes');
+                        setCurrentView('notificacoes');
+                      }}
+                    >
+                      <Envelope />
+                      <span>Notificações</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
                       isActive={currentView === 'runbooks'}
                       onClick={() => setCurrentView('runbooks')}
                     >
                       <BookOpen />
                       <span>Runbooks</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'scripts'}
+                      onClick={() => setCurrentView('scripts')}
+                    >
+                      <Terminal />
+                      <span>Scripts</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'servidores'}
+                      onClick={() => {
+                        logClick('nav_servidores');
+                        setCurrentView('servidores');
+                      }}
+                    >
+                      <HardDrives />
+                      <span>Servidores</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'slas'}
+                      onClick={() => setCurrentView('slas')}
+                    >
+                      <ClipboardText />
+                      <span>SLAs</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'tecnologias'}
+                      onClick={() => setCurrentView('tecnologias')}
+                    >
+                      <Code />
+                      <span>Tecnologias</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
@@ -745,6 +794,47 @@ function App() {
             </SidebarGroup>
 
             <SidebarGroup>
+              <SidebarGroupLabel>Documentação</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'documentacao-apis'}
+                      onClick={() => setCurrentView('documentacao-apis')}
+                    >
+                      <FileText />
+                      <span>Documentação de APIs</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'payloads'}
+                      onClick={() => {
+                        logClick('nav_payloads');
+                        setCurrentView('payloads');
+                      }}
+                    >
+                      <FileText />
+                      <span>Payloads</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'api-catalog-generator'}
+                      onClick={() => {
+                        logClick('nav_api_catalog_generator');
+                        setCurrentView('api-catalog-generator');
+                      }}
+                    >
+                      <BookOpen />
+                      <span>Catálogo de APIs</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
               <SidebarGroupLabel>Configurações e Logs</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -766,15 +856,14 @@ function App() {
                       <span>Tokens de Acesso</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'documentacao-apis'}
-                      onClick={() => setCurrentView('documentacao-apis')}
-                    >
-                      <FileText />
-                      <span>Documentação de APIs</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Observabilidade</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       isActive={currentView === 'logs-traces'}

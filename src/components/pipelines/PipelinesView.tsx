@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Pipeline } from '@/lib/types';
 import { PipelinesDataTable } from './PipelinesDataTable';
 import { PipelineWizard } from './PipelineWizard';
@@ -17,6 +18,7 @@ import {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function PipelinesView() {
+  const { logClick, logEvent, logError } = useLogging('pipelines-view');
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
@@ -30,6 +32,8 @@ export function PipelinesView() {
   const loadPipelines = async () => {
     try {
       setLoading(true);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/pipelines`);
       if (response.ok) {
         const data = await response.json();
@@ -38,6 +42,7 @@ export function PipelinesView() {
         toast.error('Erro ao carregar pipelines');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar pipelines:', error);
       toast.error('Erro ao carregar pipelines');
     } finally {
@@ -53,6 +58,8 @@ export function PipelinesView() {
   const handleEdit = async (pipeline: Pipeline) => {
     try {
       // Buscar dados completos da pipeline incluindo stages
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/pipelines/${pipeline.id}`);
       if (response.ok) {
         const fullPipeline = await response.json();
@@ -66,6 +73,7 @@ export function PipelinesView() {
         toast.error('Erro ao carregar detalhes da pipeline');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar pipeline:', error);
       toast.error('Erro ao carregar pipeline');
     }
@@ -73,6 +81,8 @@ export function PipelinesView() {
 
   const handleDelete = async (id: string) => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/pipelines/${id}`, {
         method: 'DELETE',
       });
@@ -85,6 +95,7 @@ export function PipelinesView() {
         toast.error(error.error || 'Erro ao excluir pipeline');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao excluir pipeline:', error);
       toast.error('Erro ao excluir pipeline');
     } finally {

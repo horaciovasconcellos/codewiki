@@ -1,0 +1,15 @@
+id,sigla,descricao,dataInicio,dataTermino,tipoScript,arquivo,arquivoUrl,arquivoTamanho,arquivoTipo
+aa0e8400-e29b-41d4-a716-446655440101,SCR-AUTO-001,Script de backup automático diário dos bancos de dados,2024-01-15,,Automação,backup-diario.sh,uploads/scripts/backup-diario.sh,2048,application/x-sh
+aa0e8400-e29b-41d4-a716-446655440102,SCR-ADM-001,Script de limpeza de logs antigos do sistema,2024-02-01,,Administração,cleanup-logs.sh,uploads/scripts/cleanup-logs.sh,1536,application/x-sh
+aa0e8400-e29b-41d4-a716-446655440103,SCR-DB-001,Script de otimização de índices do MySQL,2024-01-10,,Banco de Dados,optimize-indexes.sql,uploads/scripts/optimize-indexes.sql,4096,text/x-sql
+aa0e8400-e29b-41d4-a716-446655440104,SCR-INT-001,Script de sincronização com Azure DevOps,2024-03-01,,Integração,sync-azure.py,uploads/scripts/sync-azure.py,8192,text/x-python
+aa0e8400-e29b-41d4-a716-446655440105,SCR-TEST-001,Script de testes de integração automatizados,2024-02-15,,Testes,integration-tests.js,uploads/scripts/integration-tests.js,12288,application/javascript
+aa0e8400-e29b-41d4-a716-446655440106,SCR-BUILD-001,Script de build e deploy para produção,2024-01-05,,Build & Deploy,deploy-prod.sh,uploads/scripts/deploy-prod.sh,3072,application/x-sh
+aa0e8400-e29b-41d4-a716-446655440107,SCR-CICD-001,Pipeline CI/CD completo com validações,2024-02-20,,CI/CD,pipeline-config.yaml,uploads/scripts/pipeline-config.yaml,6144,text/yaml
+aa0e8400-e29b-41d4-a716-446655440108,SCR-IAC-001,Terraform para provisionamento de infraestrutura AWS,2024-03-10,,Infraestrutura (IaC),infrastructure.tf,uploads/scripts/infrastructure.tf,10240,text/plain
+aa0e8400-e29b-41d4-a716-446655440109,SCR-MON-001,Script de monitoramento de saúde dos serviços,2024-01-20,,Monitoramento,health-check.py,uploads/scripts/health-check.py,5120,text/x-python
+aa0e8400-e29b-41d4-a716-446655440110,SCR-SEC-001,Script de auditoria de segurança e vulnerabilidades,2024-02-05,,Segurança,security-audit.ps1,uploads/scripts/security-audit.ps1,7168,application/x-powershell
+aa0e8400-e29b-41d4-a716-446655440111,SCR-GOV-001,Script de compliance e governança de dados,2024-03-15,,Governança,compliance-check.py,uploads/scripts/compliance-check.py,9216,text/x-python
+aa0e8400-e29b-41d4-a716-446655440112,SCR-DATA-001,Script ETL de extração e transformação de dados,2024-01-25,,Dados,etl-pipeline.py,uploads/scripts/etl-pipeline.py,15360,text/x-python
+aa0e8400-e29b-41d4-a716-446655440113,SCR-ERP-001,Script de integração com sistema ERP SAP,2024-02-28,,ERP,sap-integration.js,uploads/scripts/sap-integration.js,11264,application/javascript
+aa0e8400-e29b-41d4-a716-446655440114,SCR-DOC-001,Script de geração automática de documentação API,2024-03-05,,Documentação,generate-api-docs.js,uploads/scripts/generate-api-docs.js,4608,application/javascript

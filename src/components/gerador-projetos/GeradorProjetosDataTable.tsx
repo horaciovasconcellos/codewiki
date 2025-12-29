@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Pencil, Trash, Eye, CloudArrowUp } from '@phosphor-icons/react';
+import { Pencil, Trash, Eye, CloudArrowUp, GitBranch } from '@phosphor-icons/react';
 
 interface GeradorProjetosDataTableProps {
   projetos: ProjetoGerado[];
@@ -11,14 +11,16 @@ interface GeradorProjetosDataTableProps {
   onDelete: (projeto: ProjetoGerado) => void;
   onView: (projeto: ProjetoGerado) => void;
   onIntegrarAzure: (projeto: ProjetoGerado) => void;
+  onCriarRepositorios: (projeto: ProjetoGerado) => void;
 }
 
 export function GeradorProjetosDataTable({ 
   projetos, 
   onEdit, 
   onDelete, 
-  onView,
-  onIntegrarAzure 
+  onView, 
+  onIntegrarAzure, 
+  onCriarRepositorios
 }: GeradorProjetosDataTableProps) {
   return (
     <div className="rounded-md border">
@@ -124,6 +126,31 @@ export function GeradorProjetosDataTable({
                             <TooltipContent>Integrar com Azure DevOps</TooltipContent>
                           </Tooltip>
                         </>
+                      )}
+
+                      {projeto.status === 'Processado' && projeto.repositorios && projeto.repositorios.length > 0 && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => onCriarRepositorios(projeto)}
+                              disabled={projeto.statusRepositorio === 'Y'}
+                              className={projeto.statusRepositorio === 'Y' 
+                                ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed" 
+                                : "bg-green-600 hover:bg-green-700"
+                              }
+                            >
+                              <GitBranch className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {projeto.statusRepositorio === 'Y' 
+                              ? 'Repositórios já criados' 
+                              : 'Criar Repositórios Git'
+                            }
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                       
                       <Tooltip>

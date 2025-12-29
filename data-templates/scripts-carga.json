@@ -1,0 +1,100 @@
+[
+  {
+    "sigla": "SCR-AUTO-001",
+    "descricao": "Script de backup automático diário dos bancos de dados MySQL com compressão e rotação de arquivos antigos",
+    "dataInicio": "2024-01-15",
+    "tipoScript": "Automação",
+    "arquivo": "backup-diario.sh"
+  },
+  {
+    "sigla": "SCR-ADM-001",
+    "descricao": "Script de limpeza de logs antigos do sistema, removendo arquivos com mais de 30 dias",
+    "dataInicio": "2024-02-01",
+    "tipoScript": "Administração",
+    "arquivo": "cleanup-logs.sh"
+  },
+  {
+    "sigla": "SCR-DB-001",
+    "descricao": "Script de otimização de índices do MySQL para melhorar performance das consultas",
+    "dataInicio": "2024-01-10",
+    "tipoScript": "Banco de Dados",
+    "arquivo": "optimize-indexes.sql"
+  },
+  {
+    "sigla": "SCR-INT-001",
+    "descricao": "Script de sincronização com Azure DevOps para importação de work items e sprints",
+    "dataInicio": "2024-03-01",
+    "tipoScript": "Integração",
+    "arquivo": "sync-azure.py"
+  },
+  {
+    "sigla": "SCR-TEST-001",
+    "descricao": "Script de testes de integração automatizados com cobertura de APIs REST",
+    "dataInicio": "2024-02-15",
+    "tipoScript": "Testes",
+    "arquivo": "integration-tests.js"
+  },
+  {
+    "sigla": "SCR-BUILD-001",
+    "descricao": "Script de build e deploy para produção com validações e rollback automático",
+    "dataInicio": "2024-01-05",
+    "tipoScript": "Build & Deploy",
+    "arquivo": "deploy-prod.sh"
+  },
+  {
+    "sigla": "SCR-CICD-001",
+    "descricao": "Pipeline CI/CD completo com validações de qualidade, testes e deploy automatizado",
+    "dataInicio": "2024-02-20",
+    "tipoScript": "CI/CD",
+    "arquivo": "pipeline-config.yaml"
+  },
+  {
+    "sigla": "SCR-IAC-001",
+    "descricao": "Terraform para provisionamento de infraestrutura AWS com VPC, EC2, RDS e S3",
+    "dataInicio": "2024-03-10",
+    "tipoScript": "Infraestrutura (IaC)",
+    "arquivo": "infrastructure.tf"
+  },
+  {
+    "sigla": "SCR-MON-001",
+    "descricao": "Script de monitoramento de saúde dos serviços com alertas via email e Slack",
+    "dataInicio": "2024-01-20",
+    "tipoScript": "Monitoramento",
+    "arquivo": "health-check.py"
+  },
+  {
+    "sigla": "SCR-SEC-001",
+    "descricao": "Script de auditoria de segurança e vulnerabilidades com scan de dependências",
+    "dataInicio": "2024-02-05",
+    "tipoScript": "Segurança",
+    "arquivo": "security-audit.ps1"
+  },
+  {
+    "sigla": "SCR-GOV-001",
+    "descricao": "Script de compliance e governança de dados conforme LGPD e ISO 27001",
+    "dataInicio": "2024-03-15",
+    "tipoScript": "Governança",
+    "arquivo": "compliance-check.py"
+  },
+  {
+    "sigla": "SCR-DATA-001",
+    "descricao": "Script ETL de extração, transformação e carga de dados entre sistemas",
+    "dataInicio": "2024-01-25",
+    "tipoScript": "Dados",
+    "arquivo": "etl-pipeline.py"
+  },
+  {
+    "sigla": "SCR-ERP-001",
+    "descricao": "Script de integração com sistema ERP SAP para sincronização de pedidos e estoque",
+    "dataInicio": "2024-02-28",
+    "tipoScript": "ERP",
+    "arquivo": "sap-integration.js"
+  },
+  {
+    "sigla": "SCR-DOC-001",
+    "descricao": "Script de geração automática de documentação API em formato OpenAPI/Swagger",
+    "dataInicio": "2024-03-05",
+    "tipoScript": "Documentação",
+    "arquivo": "generate-api-docs.js"
+  }
+]

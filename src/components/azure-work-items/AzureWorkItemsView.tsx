@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import {
   Card,
   CardContent,
@@ -56,6 +57,7 @@ interface Projeto {
 }
 
 export function AzureWorkItemsView() {
+  const { logClick, logEvent, logError } = useLogging('azureworkitems-view');
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [projetoSelecionado, setProjetoSelecionado] = useState<string>('');
   const [workItems, setWorkItems] = useState<AzureWorkItem[]>([]);
@@ -108,11 +110,14 @@ export function AzureWorkItemsView() {
 
   const buscarProjetos = async () => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch('http://localhost:3000/api/azure-work-items/projetos');
       if (!response.ok) throw new Error('Erro ao buscar projetos');
       const data = await response.json();
       setProjetos(data);
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao buscar projetos:', error);
       alert('Erro ao buscar projetos');
     }
@@ -123,6 +128,8 @@ export function AzureWorkItemsView() {
 
     setLoading(true);
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(
         `http://localhost:3000/api/azure-work-items?projetoId=${projetoSelecionado}`
       );
@@ -130,6 +137,7 @@ export function AzureWorkItemsView() {
       const data = await response.json();
       setWorkItems(data);
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao buscar work items:', error);
       alert('Erro ao buscar work items');
     } finally {
@@ -152,6 +160,8 @@ export function AzureWorkItemsView() {
 
     setSyncing(true);
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(
         `http://localhost:3000/api/azure-work-items/sync/${projetoSelecionado}`,
         { method: 'POST' }
@@ -168,6 +178,7 @@ export function AzureWorkItemsView() {
       // Recarregar work items
       await buscarWorkItems();
     } catch (error: any) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao sincronizar:', error);
       alert(`Erro ao sincronizar: ${error.message}`);
     } finally {
@@ -177,6 +188,8 @@ export function AzureWorkItemsView() {
   const sincronizarTodosProjetos = async () => {
     setSyncingAll(true);
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(
         'http://localhost:3000/api/azure-work-items/sync-all',
         { method: 'POST' }
@@ -192,14 +205,17 @@ export function AzureWorkItemsView() {
       let message = `Sincronização em massa concluída!\n\n`;
       message += `Total de projetos: ${result.totalProjetos}\n`;
       message += `✓ Sucesso: ${result.totalSuccess}\n`;
+      
       if (result.totalFailed > 0) {
         message += `✗ Falhas: ${result.totalFailed}\n\n`;
-        message += `Detalhes:\n`;
+        message += `Projetos com erro:\n`;
         result.results.filter((r: any) => !r.success).forEach((r: any) => {
-          message += `- ${r.projetoNome}: ${r.error}\n`;
+          const errorMsg = r.error || r.message || 'Erro desconhecido';
+          message += `\n• ${r.projetoNome}:\n  ${errorMsg}\n`;
         });
+        message += `\n⚠️ Verifique se as URLs dos projetos estão corretas e se os projetos existem no Azure DevOps.`;
       } else {
-        message += `\nTodos os projetos foram sincronizados com sucesso!`;
+        message += `\n✓ Todos os projetos foram sincronizados com sucesso!`;
       }
       
       alert(message);
@@ -209,6 +225,7 @@ export function AzureWorkItemsView() {
         await buscarWorkItems();
       }
     } catch (error: any) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao sincronizar todos os projetos:', error);
       alert(`Erro ao sincronizar: ${error.message}`);
     } finally {
@@ -221,6 +238,8 @@ export function AzureWorkItemsView() {
     setLoadingHistorico(true);
 
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(
         `http://localhost:3000/api/azure-work-items/${workItem.id}/historico`
       );
@@ -228,6 +247,7 @@ export function AzureWorkItemsView() {
       const data = await response.json();
       setHistoricoSelecionado(data);
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao buscar histórico:', error);
       alert('Erro ao buscar histórico');
     } finally {
@@ -289,7 +309,7 @@ export function AzureWorkItemsView() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Work Items Azure DevOps</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Sincronizar Azure</h1>
         <p className="text-muted-foreground mt-2">
           Monitore e sincronize Work Items dos projetos no Azure DevOps
         </p>
@@ -350,13 +370,23 @@ export function AzureWorkItemsView() {
           </div>
 
           {projetoAtual && (
-            <div className="p-4 bg-muted rounded-lg space-y-1 text-sm">
+            <div className={`p-4 rounded-lg space-y-1 text-sm ${projetoAtual.urlProjeto ? 'bg-muted' : 'bg-yellow-50 border border-yellow-200'}`}>
               <p><strong>Produto:</strong> {projetoAtual.produto}</p>
               <p><strong>Processo:</strong> {projetoAtual.workItemProcess}</p>
               <p><strong>Time:</strong> {projetoAtual.nomeTime}</p>
               <p><strong>Status:</strong> {projetoAtual.status}</p>
-              {projetoAtual.urlProjeto && (
-                <p><strong>URL:</strong> <a href={projetoAtual.urlProjeto} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{projetoAtual.urlProjeto}</a></p>
+              {projetoAtual.urlProjeto ? (
+                <p><strong>URL:</strong> <a href={projetoAtual.urlProjeto} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">{projetoAtual.urlProjeto}</a></p>
+              ) : (
+                <div className="pt-2">
+                  <p className="text-yellow-700 font-medium flex items-center gap-2">
+                    <Warning size={16} />
+                    URL do projeto não configurada
+                  </p>
+                  <p className="text-yellow-600 text-xs mt-1">
+                    Configure a URL do projeto para sincronizar os work items do Azure DevOps.
+                  </p>
+                </div>
               )}
             </div>
           )}

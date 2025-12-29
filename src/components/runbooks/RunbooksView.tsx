@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { useApi, apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { Runbook } from '@/lib/types';
 import { RunbookWizard } from './RunbookWizard';
@@ -39,6 +40,7 @@ export function RunbooksView({}: RunbooksViewProps) {
       setShowWizard(false);
       setEditingRunbook(undefined);
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('[RunbooksView] Erro ao salvar runbook:', error);
       toast.error(editingRunbook ? 'Erro ao atualizar RunBook' : 'Erro ao criar RunBook');
     }
@@ -52,6 +54,7 @@ export function RunbooksView({}: RunbooksViewProps) {
       await refetch();
       setSelectedRunbook(null);
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('[RunbooksView] Erro ao deletar runbook:', error);
       toast.error('Erro ao deletar RunBook');
     }

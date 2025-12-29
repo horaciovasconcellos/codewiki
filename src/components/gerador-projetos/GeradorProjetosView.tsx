@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -29,6 +30,7 @@ import { GeradorProjetosDataTable } from './GeradorProjetosDataTable';
 import { Badge } from '@/components/ui/badge';
 
 export function GeradorProjetosView() {
+  const { logClick, logEvent, logError } = useLogging('geradorprojetos-view');
   const { data: projetosGerados, refetch } = useApi<ProjetoGerado[]>('/estruturas-projeto', []);
   
   const [showForm, setShowForm] = useState(false);
@@ -39,6 +41,8 @@ export function GeradorProjetosView() {
   const [selectedProjeto, setSelectedProjeto] = useState<ProjetoGerado | null>(null);
   const [showAzureDialog, setShowAzureDialog] = useState(false);
   const [projetoToAzure, setProjetoToAzure] = useState<ProjetoGerado | null>(null);
+  const [showRepositoriesDialog, setShowRepositoriesDialog] = useState(false);
+  const [projetoToCreateRepos, setProjetoToCreateRepos] = useState<ProjetoGerado | null>(null);
 
   const handleSave = async (projeto: ProjetoGerado, gerar: boolean) => {
     try {
@@ -124,6 +128,8 @@ export function GeradorProjetosView() {
       toast.info('Iniciando integração com Azure DevOps...', { duration: 2000 });
 
       // Chamar endpoint de integração automática
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch('/api/azure-devops/integrar-projeto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,12 +164,85 @@ export function GeradorProjetosView() {
       
       refetch();
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('[INTEGRAÇÃO AZURE] ERRO:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast.error(`Erro ao integrar: ${errorMessage}`);
     } finally {
       setShowAzureDialog(false);
       setProjetoToAzure(null);
+    }
+  };
+
+  const handleCriarRepositorios = (projeto: ProjetoGerado) => {
+    const status = projeto.status || 'Pendente';
+    if (status !== 'Processado') {
+      toast.error('Apenas projetos processados podem ter repositórios criados');
+      return;
+    }
+    if (!projeto.repositorios || projeto.repositorios.length === 0) {
+      toast.error('Este projeto não possui repositórios configurados');
+      return;
+    }
+    setProjetoToCreateRepos(projeto);
+    setShowRepositoriesDialog(true);
+  };
+
+  const confirmCriarRepositorios = async () => {
+    if (!projetoToCreateRepos) return;
+
+    try {
+      console.log('[CRIAR REPOSITÓRIOS] Step 1: Iniciando criação de repositórios Git');
+      console.log('[CRIAR REPOSITÓRIOS] Projeto:', projetoToCreateRepos.projeto);
+      console.log('[CRIAR REPOSITÓRIOS] Repositórios:', projetoToCreateRepos.repositorios);
+
+      toast.info('Criando repositórios Git no Azure DevOps...', { duration: 3000 });
+
+      logEvent('api_call_start', 'api_call');
+
+
+      const response = await fetch('/api/azure-devops/criar-repositorios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projetoId: projetoToCreateRepos.id })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Erro ao criar repositórios');
+      }
+
+      console.log('[CRIAR REPOSITÓRIOS] Step 2: Repositórios criados:', result);
+
+      // Verificar quantos já existiam
+      const jaExistentes = result.repositoriosCriados?.filter((r: any) => r.status === 'já existente').length || 0;
+      const novos = result.sucesso - jaExistentes;
+
+      let mensagem = '';
+      if (novos > 0 && jaExistentes > 0) {
+        mensagem = `${novos} repositório(s) criado(s) e ${jaExistentes} já existente(s).\nEstrutura inicial, CODEOWNERS e políticas de branch configuradas.`;
+      } else if (novos > 0) {
+        mensagem = `${novos} repositório(s) criado(s) com sucesso!\nEstrutura inicial, CODEOWNERS e políticas de branch configuradas.`;
+      } else {
+        mensagem = `${jaExistentes} repositório(s) já existente(s). Nenhuma alteração necessária.`;
+      // Marcar repositórios como criados
+      setRepositoriosCriados(prev => new Set(prev).add(projetoToCreateRepos.id));
+      logClick('repositories_created', { projeto_id: projetoToCreateRepos.id, count: result.sucesso });
+
+      }
+
+      toast.success(mensagem, { duration: 6000 });
+
+      refetch();
+    } catch (error) {
+      logError(error as Error, 'error_caught');
+      console.error('[CRIAR REPOSITÓRIOS] ERRO:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast.error(`Erro ao criar repositórios: ${errorMessage}`);
+    } finally {
+      setShowRepositoriesDialog(false);
+      setProjetoToCreateRepos(null);
     }
   };
 
@@ -213,6 +292,7 @@ export function GeradorProjetosView() {
               onDelete={handleDelete}
               onView={handleView}
               onIntegrarAzure={handleIntegrarAzure}
+              onCriarRepositorios={handleCriarRepositorios}
             />
           </CardContent>
         </Card>
@@ -344,6 +424,35 @@ export function GeradorProjetosView() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={confirmIntegracaoAzure}>Integrar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog de Criação de Repositórios */}
+      <AlertDialog open={showRepositoriesDialog} onOpenChange={setShowRepositoriesDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Criar Repositórios Git</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="text-sm text-muted-foreground">
+                <p>
+                  Confirma a criação de {projetoToCreateRepos?.repositorios?.length || 0} repositório(s) Git no Azure DevOps para o projeto "{projetoToCreateRepos?.projeto}"?
+                </p>
+                <p className="mt-2">Cada repositório será criado com:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Estrutura inicial (README.md, docs/, mkdocs.yml)</li>
+                  <li>CODEOWNERS configurado</li>
+                  <li>Templates de Pull Request por branch</li>
+                  <li>Políticas de branch (revisores, builds, etc)</li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCriarRepositorios} className="bg-green-600 hover:bg-green-700">
+              Criar Repositórios
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

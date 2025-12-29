@@ -30,9 +30,21 @@ Este diretório contém arquivos de exemplo para facilitar a carga de dados no s
    - Formato JSON com objetos completos
    - **Recomendado**: Para carga completa de aplicações
 
-5. **exemplo-capacidades-negocio.json**
+6. **exemplo-capacidades-negocio.json**
    - Capacidades estratégicas de negócio
    - Formato JSON com objetos completos
+
+7. **exemplo-scripts.csv**
+   - Scripts de automação, administração e infraestrutura (formato simplificado)
+   - Campos: sigla, descricao, dataInicio, dataTermino, tipoScript
+   - **Limitação**: CSV não suporta upload de arquivos
+   - **Para upload de arquivos**: Use `scripts-carga.json` ou a interface web
+
+8. **scripts-carga.json**
+   - Scripts completos com metadados de arquivo
+   - Suporta: sigla, descrição, datas, tipo, nome do arquivo
+   - Formato JSON com objetos completos
+   - **Recomendado**: Para carga completa de scripts
 
 ## 🚀 Como Usar
 

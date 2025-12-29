@@ -97,6 +97,16 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
   const [subjects, setSubjects] = useState<string[]>([]);
   const [novoSubject, setNovoSubject] = useState('');
 
+  // Templates YAML do Azure DevOps
+  const [templatePullRequest, setTemplatePullRequest] = useState<File | null>(null);
+  const [templateHotfix, setTemplateHotfix] = useState<File | null>(null);
+  const [templateMain, setTemplateMain] = useState<File | null>(null);
+  const [templateDevelop, setTemplateDevelop] = useState<File | null>(null);
+  const [templatePullRequestName, setTemplatePullRequestName] = useState<string>('');
+  const [templateHotfixName, setTemplateHotfixName] = useState<string>('');
+  const [templateMainName, setTemplateMainName] = useState<string>('');
+  const [templateDevelopName, setTemplateDevelopName] = useState<string>('');
+
   const [formData, setFormData] = useState<IntegrationConfig>(config);
 
   // Carregar configurações da API
@@ -144,6 +154,39 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
       }
     };
     loadConfig();
+  }, []);
+
+  // Carregar templates existentes
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const response = await fetch('/api/azure-devops/templates');
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            result.data.forEach((template: any) => {
+              switch (template.template_type) {
+                case 'pullRequest':
+                  setTemplatePullRequestName(template.file_name);
+                  break;
+                case 'hotfix':
+                  setTemplateHotfixName(template.file_name);
+                  break;
+                case 'main':
+                  setTemplateMainName(template.file_name);
+                  break;
+                case 'develop':
+                  setTemplateDevelopName(template.file_name);
+                  break;
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar templates:', error);
+      }
+    };
+    loadTemplates();
   }, []);
 
   useEffect(() => {
@@ -341,6 +384,108 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
       fileInputRef.current.value = '';
     }
     toast.success('Logo da empresa removida');
+  };
+
+  const handleTemplateUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    templateType: 'pullRequest' | 'hotfix' | 'main' | 'develop'
+  ): Promise<void> => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (fileExtension !== 'yaml' && fileExtension !== 'yml' && fileExtension !== 'md') {
+      toast.error('Por favor, selecione apenas arquivos YAML (.yaml, .yml) ou Markdown (.md)');
+      event.target.value = '';
+      return;
+    }
+
+    // Validar tamanho do arquivo (máximo 500KB)
+    if (file.size > 500 * 1024) {
+      toast.error('O arquivo deve ter no máximo 500KB');
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      // Ler o conteúdo do arquivo
+      const content = await file.text();
+      
+      // Validação básica: verificar se o arquivo não está vazio
+      if (!content.trim()) {
+        toast.error('O arquivo está vazio');
+        event.target.value = '';
+        return;
+      }
+
+      // Salvar o arquivo no estado apropriado
+      switch (templateType) {
+        case 'pullRequest':
+          setTemplatePullRequest(file);
+          setTemplatePullRequestName(file.name);
+          break;
+        case 'hotfix':
+          setTemplateHotfix(file);
+          setTemplateHotfixName(file.name);
+          break;
+        case 'main':
+          setTemplateMain(file);
+          setTemplateMainName(file.name);
+          break;
+        case 'develop':
+          setTemplateDevelop(file);
+          setTemplateDevelopName(file.name);
+          break;
+      }
+
+      // Enviar para o servidor
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('templateType', templateType);
+
+      const response = await fetch('/api/azure-devops/templates', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || errorData.message || 'Erro ao enviar template para o servidor';
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      logEvent('template-upload-success', { templateType, fileName: file.name });
+      toast.success(`Template ${templateType} carregado com sucesso!`);
+      
+    } catch (error) {
+      console.error('Erro ao carregar template:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      logError('template-upload-error', error instanceof Error ? error : new Error('Erro desconhecido'));
+      toast.error(`Erro ao carregar template ${templateType}: ${errorMessage}`);
+      event.target.value = '';
+      
+      // Limpar o estado em caso de erro
+      switch (templateType) {
+        case 'pullRequest':
+          setTemplatePullRequest(null);
+          setTemplatePullRequestName('');
+          break;
+        case 'hotfix':
+          setTemplateHotfix(null);
+          setTemplateHotfixName('');
+          break;
+        case 'main':
+          setTemplateMain(null);
+          setTemplateMainName('');
+          break;
+        case 'develop':
+          setTemplateDevelop(null);
+          setTemplateDevelopName('');
+          break;
+      }
+    }
   };
 
   return (
@@ -1092,6 +1237,117 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                       >
                         {showAzureToken ? <EyeSlash /> : <Eye />}
                       </Button>
+                    </div>
+                  </div>
+
+                  <Separator className="my-6" />
+
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Templates de Pipeline YAML</h4>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        Carregue templates YAML para diferentes tipos de pipeline
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="template-pr">Template Pull Request</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="template-pr"
+                            type="file"
+                            accept=".yaml,.yml,.md"
+                            onChange={(e) => handleTemplateUpload(e, 'pullRequest')}
+                            className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                          />
+                        </div>
+                        {templatePullRequestName && (
+                          <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                            ✓ {templatePullRequestName}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Template YAML ou Markdown para pipelines de Pull Request
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="template-hotfix">Template Hotfix</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="template-hotfix"
+                            type="file"
+                            accept=".yaml,.yml,.md"
+                            onChange={(e) => handleTemplateUpload(e, 'hotfix')}
+                            className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                          />
+                        </div>
+                        {templateHotfixName && (
+                          <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                            ✓ {templateHotfixName}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Template YAML ou Markdown para pipelines de Hotfix
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="template-main">Template Main</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="template-main"
+                            type="file"
+                            accept=".yaml,.yml,.md"
+                            onChange={(e) => handleTemplateUpload(e, 'main')}
+                            className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                          />
+                        </div>
+                        {templateMainName && (
+                          <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                            ✓ {templateMainName}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Template YAML ou Markdown para pipelines da branch Main
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="template-develop">Template Develop</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="template-develop"
+                            type="file"
+                            accept=".yaml,.yml,.md"
+                            onChange={(e) => handleTemplateUpload(e, 'develop')}
+                            className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                          />
+                        </div>
+                        {templateDevelopName && (
+                          <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                            ✓ {templateDevelopName}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Template YAML ou Markdown para pipelines da branch Develop
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
+                      <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">
+                        ℹ️ Sobre os Templates
+                      </p>
+                      <div className="text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                        <p>• Os templates carregados serão usados como base para criação de pipelines</p>
+                        <p>• Aceita arquivos YAML (.yaml, .yml) ou Markdown (.md)</p>
+                        <p>• Templates YAML devem seguir o formato válido do Azure DevOps</p>
+                        <p>• Templates Markdown podem conter documentação ou configurações</p>
+                        <p>• Os templates são salvos no banco de dados e associados à configuração</p>
+                        <p>• Você pode atualizar os templates a qualquer momento fazendo novo upload</p>
+                      </div>
                     </div>
                   </div>
                 </div>

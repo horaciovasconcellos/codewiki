@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Aplicacao, Tecnologia, ProcessoNegocio, CapacidadeNegocio } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from '@phosphor-icons/react';
@@ -14,6 +15,7 @@ interface AplicacoesViewProps {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesViewProps) {
+  const { logClick, logEvent, logError } = useLogging('aplicacoes-view');
   const [aplicacoes, setAplicacoes] = useState<Aplicacao[]>([]);
   const [tecnologias, setTecnologias] = useState<Tecnologia[]>([]);
   const [processos, setProcessos] = useState<ProcessoNegocio[]>([]);
@@ -32,6 +34,8 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
       
       // Carregar aplicações
       console.log('Carregando aplicações de:', `${API_URL}/api/aplicacoes`);
+      logEvent('api_call_start', 'api_call');
+
       const resAplicacoes = await fetch(`${API_URL}/api/aplicacoes`);
       if (resAplicacoes.ok) {
         try {
@@ -51,6 +55,8 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
 
       // Carregar tecnologias
       console.log('Carregando tecnologias de:', `${API_URL}/api/tecnologias`);
+      logEvent('api_call_start', 'api_call');
+
       const resTecnologias = await fetch(`${API_URL}/api/tecnologias`);
       if (resTecnologias.ok) {
         try {
@@ -67,6 +73,8 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
       }
 
       // Carregar processos
+      logEvent('api_call_start', 'api_call');
+
       const resProcessos = await fetch(`${API_URL}/api/processos-negocio`);
       if (resProcessos.ok) {
         try {
@@ -80,6 +88,8 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
 
       // Carregar capacidades se não foram passadas por props
       if (!capacidadesProps) {
+        logEvent('api_call_start', 'api_call');
+
         const resCapacidades = await fetch(`${API_URL}/api/capacidades-negocio`);
         if (resCapacidades.ok) {
           try {
@@ -92,6 +102,7 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
         }
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar dados:', error);
       toast.error('Erro ao carregar dados');
     } finally {
@@ -108,6 +119,8 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
     try {
       // Carregar dados completos da aplicação incluindo relacionamentos
       console.log('[AplicacoesView] Carregando dados completos da aplicação:', aplicacao.id);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/aplicacoes/${aplicacao.id}`);
       
       if (!response.ok) {
@@ -139,6 +152,7 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
       setSelectedAplicacao(aplicacaoCompleta);
       setView('wizard');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('[AplicacoesView] Erro ao carregar aplicação:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao carregar dados da aplicação');
     }
@@ -147,6 +161,8 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
   const handleView = async (aplicacao: Aplicacao) => {
     try {
       // Carregar dados completos da aplicação incluindo relacionamentos
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/aplicacoes/${aplicacao.id}`);
       
       if (!response.ok) {
@@ -166,6 +182,7 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
       setSelectedAplicacao(aplicacaoCompleta);
       setView('details');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('[AplicacoesView] Erro ao visualizar aplicação:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao carregar dados da aplicação');
     }
@@ -189,6 +206,9 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
       console.log('[AplicacoesView] URL:', isEditing ? `${API_URL}/api/aplicacoes/${aplicacao.id}` : `${API_URL}/api/aplicacoes`);
       console.log('[AplicacoesView] Body:', JSON.stringify(aplicacao, null, 2));
       
+      logEvent('api_call_start', 'api_call');
+
+      
       const response = await fetch(
         isEditing ? `${API_URL}/api/aplicacoes/${aplicacao.id}` : `${API_URL}/api/aplicacoes`,
         {
@@ -211,6 +231,7 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
       setView('list');
       toast.success(isEditing ? 'Aplicação atualizada com sucesso' : 'Aplicação cadastrada com sucesso');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar aplicação:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao salvar aplicação');
     }
@@ -228,6 +249,8 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
 
     try {
       console.log('[AplicacoesView] Excluindo aplicação:', aplicacao.id);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/aplicacoes/${aplicacao.id}`, {
         method: 'DELETE'
       });
@@ -240,6 +263,7 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
       await loadData();
       toast.success('Aplicação excluída com sucesso');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('[AplicacoesView] Erro ao excluir aplicação:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao excluir aplicação');
     }

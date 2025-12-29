@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Integracao, Comunicacao, Aplicacao } from '@/lib/types';
 import { IntegracaoDataTable } from './IntegracaoDataTable';
 import { IntegracaoForm } from './IntegracaoForm';

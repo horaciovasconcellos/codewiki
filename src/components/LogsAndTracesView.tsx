@@ -409,18 +409,30 @@ export function LogsAndTracesView() {
                                 {log.operation_type}
                               </Badge>
                             </TableCell>
-                            <TableCell className="font-medium">{log.entity_type}</TableCell>
+                            <TableCell className="font-medium">{log.entity_type || '-'}</TableCell>
                             <TableCell className="font-mono text-xs">
                               {log.entity_id?.substring(0, 8) || '-'}
                             </TableCell>
-                            <TableCell>{log.user_login}</TableCell>
+                            <TableCell>
+                              {typeof log.user_login === 'string' 
+                                ? log.user_login 
+                                : log.user_login 
+                                  ? JSON.stringify(log.user_login) 
+                                  : '-'}
+                            </TableCell>
                             <TableCell>
                               <Badge variant={typeof log.status_code === 'number' && log.status_code < 300 ? 'default' : 'destructive'}>
-                                {typeof log.status_code === 'object' ? JSON.stringify(log.status_code) : log.status_code}
+                                {typeof log.status_code === 'object' 
+                                  ? JSON.stringify(log.status_code) 
+                                  : (log.status_code || '-')}
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              {typeof log.duration_ms === 'object' ? JSON.stringify(log.duration_ms) : log.duration_ms}ms
+                              {typeof log.duration_ms === 'object' 
+                                ? JSON.stringify(log.duration_ms) 
+                                : log.duration_ms 
+                                  ? `${log.duration_ms}ms` 
+                                  : '-'}
                             </TableCell>
                             <TableCell>
                               <Dialog>
@@ -668,36 +680,52 @@ export function LogsAndTracesView() {
                             </TableCell>
                             <TableCell>
                               <Badge variant={getSeverityColor(log.severity)}>
-                                {typeof log.severity === 'object' ? JSON.stringify(log.severity) : log.severity}
+                                {typeof log.severity === 'object' 
+                                  ? JSON.stringify(log.severity) 
+                                  : (log.severity || 'info')}
                               </Badge>
                             </TableCell>
                             <TableCell>
                               {'event_type' in log ? (
                                 <Badge variant={getEventTypeColor(log.event_type)}>
-                                  {typeof log.event_type === 'object' ? JSON.stringify(log.event_type) : log.event_type}
+                                  {typeof log.event_type === 'object' 
+                                    ? JSON.stringify(log.event_type) 
+                                    : (log.event_type || '-')}
                                 </Badge>
                               ) : (
                                 <Badge variant="default">API</Badge>
                               )}
                             </TableCell>
                             <TableCell className="max-w-[150px] truncate">
-                              {'screen_name' in log ? log.screen_name : 'route' in log ? log.route : '-'}
+                              {'screen_name' in log 
+                                ? (typeof log.screen_name === 'string' ? log.screen_name : JSON.stringify(log.screen_name))
+                                : 'route' in log 
+                                  ? (typeof log.route === 'string' ? log.route : JSON.stringify(log.route))
+                                  : '-'}
                             </TableCell>
                             <TableCell className="max-w-[200px] truncate">
-                              {'event_name' in log ? log.event_name : 'method' in log ? `${log.method} ${log.route}` : '-'}
+                              {'event_name' in log 
+                                ? (typeof log.event_name === 'string' ? log.event_name : JSON.stringify(log.event_name))
+                                : 'method' in log 
+                                  ? `${log.method} ${typeof log.route === 'string' ? log.route : ''}`
+                                  : '-'}
                             </TableCell>
                             <TableCell className="font-mono text-xs">
-                              {'user_id' in log ? log.user_id : '-'}
+                              {'user_id' in log 
+                                ? (typeof log.user_id === 'string' ? log.user_id : JSON.stringify(log.user_id))
+                                : '-'}
                             </TableCell>
                             <TableCell className="font-mono text-xs max-w-[120px] truncate">
                               <button
                                 onClick={() => {
                                   logClick('view_trace', { trace_id: log.trace_id });
-                                  setSelectedTraceId(log.trace_id);
+                                  setSelectedTraceId(typeof log.trace_id === 'string' ? log.trace_id : JSON.stringify(log.trace_id));
                                 }}
                                 className="hover:underline text-primary"
                               >
-                                {log.trace_id.slice(0, 8)}...
+                                {typeof log.trace_id === 'string' 
+                                  ? `${log.trace_id.slice(0, 8)}...`
+                                  : JSON.stringify(log.trace_id)}
                               </button>
                             </TableCell>
                             <TableCell>

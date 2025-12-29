@@ -1841,6 +1841,746 @@ export class AzureDevOpsService {
     } catch (error) {
       throw new Error(`Erro ao buscar revisões do work item ${workItemId}: ${error.message}`);
     }
-  }}
+  }
+
+  /**
+   * Cria um novo repositório Git no Azure DevOps
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {object} repositoryData - Dados do repositório
+   * @returns {Promise<object>} Repositório criado
+   */
+  async createRepository(projectName, repositoryData) {
+    try {
+      console.log(`[Azure DevOps] Criando repositório: ${repositoryData.name}`);
+      
+      const url = `/${projectName}/_apis/git/repositories?api-version=${this.apiVersion}`;
+      const repository = await this.request('POST', url, repositoryData);
+      
+      console.log(`[Azure DevOps] Repositório criado: ${repository.id}`);
+      return repository;
+    } catch (error) {
+      throw new Error(`Erro ao criar repositório: ${error.message}`);
+    }
+  }
+
+  /**
+   * Lista todos os repositórios Git de um projeto
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @returns {Promise<array>} Lista de repositórios
+   */
+  async getProjectRepositories(projectName) {
+    try {
+      const url = `/${projectName}/_apis/git/repositories?api-version=${this.apiVersion}`;
+      const result = await this.request('GET', url);
+      return result.value || [];
+    } catch (error) {
+      throw new Error(`Erro ao listar repositórios: ${error.message}`);
+    }
+  }
+
+  /**
+   * Deleta um repositório Git do projeto
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {string} repositoryId - ID do repositório a ser deletado
+   * @returns {Promise<void>}
+   */
+  async deleteRepository(projectName, repositoryId) {
+    try {
+      console.log(`[Azure DevOps] Deletando repositório: ${repositoryId}`);
+      
+      const url = `/${projectName}/_apis/git/repositories/${repositoryId}?api-version=${this.apiVersion}`;
+      await this.request('DELETE', url);
+      
+      console.log(`[Azure DevOps] Repositório deletado com sucesso`);
+    } catch (error) {
+      throw new Error(`Erro ao deletar repositório: ${error.message}`);
+    }
+  }
+
+  /**
+   * Inicializa a estrutura do repositório com arquivos e pastas
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {string} repositoryId - ID do repositório
+   * @param {string} repositoryName - Nome do repositório
+   * @param {object} templates - Templates de Azure DevOps
+   * @returns {Promise<object>} Push result
+   */
+  async initializeRepository(projectName, repositoryId, repositoryName, templates) {
+    try {
+      console.log(`[Azure DevOps] Inicializando repositório: ${repositoryName}`);
+
+      // Verificar se o repositório já tem commits
+      try {
+        const refsUrl = `/${projectName}/_apis/git/repositories/${repositoryId}/refs?filter=heads/main&api-version=${this.apiVersion}`;
+        const refs = await this.request('GET', refsUrl);
+        
+        if (refs.value && refs.value.length > 0) {
+          console.log(`[Azure DevOps] Repositório ${repositoryName} já possui commits. Pulando inicialização.`);
+          return { skipped: true, reason: 'Repository already has commits' };
+        }
+      } catch (error) {
+        console.log(`[Azure DevOps] Repositório ${repositoryName} está vazio, procedendo com inicialização...`);
+      }
+
+      // Conteúdo do CODEOWNERS
+      const codeownersContent = `# Default
+* @devops-team
+
+# Segurança
+/docs/security/* @security-team
+
+# Pipelines
+/.azuredevops/* @platform-team
+`;
+
+      // Conteúdo do README.md
+      const readmeContent = `# ${repositoryName}
+
+## Descrição
+Repositório do projeto ${repositoryName}
+
+## Estrutura do Projeto
+- \`.azuredevops/\` - Configurações de Azure DevOps e templates de PR
+- \`docs/\` - Documentação do projeto
+- \`src/\` - Código fonte
+
+## Configuração
+Consulte a documentação em \`docs/\` para instruções de configuração e desenvolvimento.
+
+## Contribuindo
+Veja os templates de Pull Request em \`.azuredevops/pull_request_template/branches/\` para orientações sobre como contribuir.
+`;
+
+      // Conteúdo do mkdocs.yml
+      const mkdocsContent = `site_name: ${repositoryName}
+site_description: Documentação do projeto ${repositoryName}
+site_author: Equipe de Desenvolvimento
+
+theme:
+  name: material
+  language: pt
+  palette:
+    primary: indigo
+    accent: indigo
+
+nav:
+  - Home: index.md
+  - Guia de Desenvolvimento: development.md
+  - API: api.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+`;
+
+      // Conteúdo do index.md em docs/
+      const docsIndexContent = `# ${repositoryName}
+
+Bem-vindo à documentação do projeto ${repositoryName}.
+
+## Visão Geral
+Este projeto foi gerado automaticamente pelo Sistema de Auditoria e Gestão de Desenvolvimento.
+
+## Estrutura
+- [Guia de Desenvolvimento](development.md)
+- [Documentação da API](api.md)
+`;
+
+      // Preparar changes para o push
+      const changes = [
+        // README.md na raiz
+        {
+          changeType: 'add',
+          item: {
+            path: '/README.md'
+          },
+          newContent: {
+            content: Buffer.from(readmeContent).toString('base64'),
+            contentType: 'base64encoded'
+          }
+        },
+        // mkdocs.yml na raiz
+        {
+          changeType: 'add',
+          item: {
+            path: '/mkdocs.yml'
+          },
+          newContent: {
+            content: Buffer.from(mkdocsContent).toString('base64'),
+            contentType: 'base64encoded'
+          }
+        },
+        // docs/index.md
+        {
+          changeType: 'add',
+          item: {
+            path: '/docs/index.md'
+          },
+          newContent: {
+            content: Buffer.from(docsIndexContent).toString('base64'),
+            contentType: 'base64encoded'
+          }
+        },
+        // .azuredevops/CODEOWNERS
+        {
+          changeType: 'add',
+          item: {
+            path: '/.azuredevops/CODEOWNERS'
+          },
+          newContent: {
+            content: Buffer.from(codeownersContent).toString('base64'),
+            contentType: 'base64encoded'
+          }
+        }
+      ];
+
+      // Adicionar templates de PR se disponíveis
+      if (templates.develop) {
+        changes.push({
+          changeType: 'add',
+          item: {
+            path: '/.azuredevops/pull_request_template/branches/develop.md'
+          },
+          newContent: {
+            content: Buffer.from(templates.develop).toString('base64'),
+            contentType: 'base64encoded'
+          }
+        });
+      }
+
+      if (templates.main) {
+        changes.push({
+          changeType: 'add',
+          item: {
+            path: '/.azuredevops/pull_request_template/branches/wip.md'
+          },
+          newContent: {
+            content: Buffer.from(templates.main).toString('base64'),
+            contentType: 'base64encoded'
+          }
+        });
+      }
+
+      if (templates.hotfix) {
+        changes.push({
+          changeType: 'add',
+          item: {
+            path: '/.azuredevops/pull_request_template/branches/hotfix.md'
+          },
+          newContent: {
+            content: Buffer.from(templates.hotfix).toString('base64'),
+            contentType: 'base64encoded'
+          }
+        });
+      }
+
+      if (templates.pullRequest) {
+        changes.push({
+          changeType: 'add',
+          item: {
+            path: '/.azuredevops/pull_request_template/pull_request_template.md'
+          },
+          newContent: {
+            content: Buffer.from(templates.pullRequest).toString('base64'),
+            contentType: 'base64encoded'
+          }
+        });
+      }
+
+      // Criar o push com todos os arquivos
+      const pushData = {
+        refUpdates: [
+          {
+            name: 'refs/heads/main',
+            oldObjectId: '0000000000000000000000000000000000000000'
+          }
+        ],
+        commits: [
+          {
+            comment: 'Initial commit - Repository structure',
+            changes: changes
+          }
+        ]
+      };
+
+      console.log(`[Azure DevOps] Enviando push com ${changes.length} arquivos para ${repositoryName}`);
+
+      const url = `/${projectName}/_apis/git/repositories/${repositoryId}/pushes?api-version=${this.apiVersion}`;
+      const result = await this.request('POST', url, pushData);
+
+      console.log(`[Azure DevOps] Estrutura inicial criada no repositório ${repositoryName}`);
+      return result;
+    } catch (error) {
+      throw new Error(`Erro ao inicializar repositório: ${error.message}`);
+    }
+  }
+
+  /**
+   * Configura as políticas de branch (Branch Policies) para o repositório
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {string} repositoryId - ID do repositório
+   * @returns {Promise<void>}
+   */
+  async configureBranchPolicies(projectName, repositoryId) {
+    try {
+      console.log(`[Azure DevOps] Configurando branch policies para repositório ${repositoryId}`);
+
+      // 1. Commit author email validation - *@bbts.com.br
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: 'bca1b469-a735-4095-a829-8ea9beb98f5e' // Commit author email validation
+        },
+        settings: {
+          authorEmailPatterns: ['*@bbts.com.br'],
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      // 2. Case enforcement
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: '7ed39669-655c-494e-b4a0-a08b4da0fcce' // File name restriction
+        },
+        settings: {
+          enforceConsistentCase: true,
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      // 3. Reserved names
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: '7ed39669-655c-494e-b4a0-a08b4da0fcce' // File name restriction (reused)
+        },
+        settings: {
+          filenamePatterns: [
+            'CON', 'PRN', 'AUX', 'NUL',
+            'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+            'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+          ],
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      // 4. Maximum path length - 260
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: '001a79cf-fda1-4c4e-9e7c-bbb4e3ed7650' // Path length restriction
+        },
+        settings: {
+          maxPathLength: 260,
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      // 5. Maximum file size - 10MB
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: '2e26e725-8201-4edd-8bf5-978563c34a80' // File size restriction
+        },
+        settings: {
+          maximumGitBlobSizeInBytes: 10485760, // 10MB em bytes
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      // 6. Minimum number of reviewers - 2
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' // Minimum number of reviewers
+        },
+        settings: {
+          minimumApproverCount: 2,
+          creatorVoteCounts: false, // Allow requestors to approve their own changes
+          allowDownvotes: false,
+          resetOnSourcePush: true, // Prohibit the most recent pusher from approving
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      // 7. Check for linked work items - Required
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e' // Work item linking
+        },
+        settings: {
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      // 8. Check for comment resolution - Required
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: 'c6a1889d-b943-4856-b76f-9e46bb6b0df2' // Comment requirements
+        },
+        settings: {
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      // 9. Limit merge types - Allow squash merge
+      await this.createPolicy(projectName, {
+        isEnabled: true,
+        isBlocking: true,
+        type: {
+          id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d8f2b5' // Merge strategy
+        },
+        settings: {
+          allowSquash: true,
+          allowRebase: false,
+          allowRebaseMerge: false,
+          allowBasicMerge: false,
+          scope: [
+            {
+              repositoryId: repositoryId,
+              refName: 'refs/heads/main',
+              matchKind: 'exact'
+            }
+          ]
+        }
+      });
+
+      console.log(`[Azure DevOps] Branch policies configuradas com sucesso`);
+    } catch (error) {
+      throw new Error(`Erro ao configurar branch policies: ${error.message}`);
+    }
+  }
+
+  /**
+   * Cria uma política no Azure DevOps
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {object} policyData - Dados da política
+   * @returns {Promise<object>} Política criada
+   */
+  async createPolicy(projectName, policyData) {
+    try {
+      const url = `/${projectName}/_apis/policy/configurations?api-version=${this.apiVersion}`;
+      const policy = await this.request('POST', url, policyData);
+      
+      console.log(`[Azure DevOps] Política criada: ${policy.type.displayName}`);
+      return policy;
+    } catch (error) {
+      // Não lançar erro se a política já existir ou não for suportada
+      console.warn(`[Azure DevOps] Aviso ao criar política: ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Configura as políticas de repositório (Repository Policies)
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {string} repositoryId - ID do repositório
+   * @returns {Promise<void>}
+   */
+  async configureRepositoryPolicies(projectName, repositoryId) {
+    try {
+      console.log(`[Azure DevOps] Configurando repository policies para ${repositoryId}`);
+
+      // Buscar as configurações atuais do repositório
+      const getUrl = `/${projectName}/_apis/git/repositories/${repositoryId}?api-version=${this.apiVersion}`;
+      const repoData = await this.request('GET', getUrl);
+
+      // Atualizar as configurações do repositório com as políticas
+      const updateUrl = `/${projectName}/_apis/git/repositories/${repositoryId}?api-version=${this.apiVersion}`;
+      const updatedRepo = await this.request('PATCH', updateUrl, {
+        id: repositoryId,
+        name: repoData.name,
+        project: {
+          id: repoData.project.id
+        },
+        // Políticas de repositório
+        commitAuthorEmailValidation: {
+          enabled: true,
+          patterns: ['*@bbts.com.br']
+        },
+        caseEnforcement: {
+          enabled: true
+        },
+        reservedNames: {
+          enabled: true
+        },
+        pathLength: {
+          enabled: true,
+          maxLength: 260
+        },
+        fileSize: {
+          enabled: true,
+          maxSizeInBytes: 10485760 // 10MB
+        }
+      });
+
+      console.log(`[Azure DevOps] Repository policies configuradas com sucesso`);
+      return updatedRepo;
+    } catch (error) {
+      console.error(`[Azure DevOps] Erro ao configurar repository policies: ${error.message}`);
+      // Não falhar a operação principal se não conseguir configurar as políticas
+      return null;
+    }
+  }
+
+  // ========== MÉTODOS PARA MÉTRICAS DORA ==========
+
+  /**
+   * Busca commits de um repositório para análise DORA
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {string} repositoryId - ID do repositório
+   * @param {string} branch - Nome da branch (default: 'main')
+   * @param {Date} fromDate - Data inicial (opcional)
+   * @param {Date} toDate - Data final (opcional)
+   * @returns {Promise<object[]>} Array de commits com detalhes
+   */
+  async getCommits(projectName, repositoryId, branch = 'main', fromDate = null, toDate = null) {
+    try {
+      let url = `/${projectName}/_apis/git/repositories/${repositoryId}/commits?searchCriteria.itemVersion.version=${branch}&searchCriteria.$top=1000&api-version=${this.apiVersion}`;
+      
+      if (fromDate) {
+        url += `&searchCriteria.fromDate=${fromDate.toISOString()}`;
+      }
+      if (toDate) {
+        url += `&searchCriteria.toDate=${toDate.toISOString()}`;
+      }
+
+      const result = await this.request('GET', url);
+      return result.value || [];
+    } catch (error) {
+      throw new Error(`Erro ao buscar commits: ${error.message}`);
+    }
+  }
+
+  /**
+   * Busca pipelines de um projeto
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @returns {Promise<object[]>} Array de pipelines
+   */
+  async getPipelines(projectName) {
+    try {
+      const url = `/${projectName}/_apis/pipelines?api-version=${this.apiVersion}`;
+      const result = await this.request('GET', url);
+      return result.value || [];
+    } catch (error) {
+      throw new Error(`Erro ao buscar pipelines: ${error.message}`);
+    }
+  }
+
+  /**
+   * Busca runs de um pipeline específico
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {number} pipelineId - ID do pipeline
+   * @param {Date} fromDate - Data inicial (opcional)
+   * @param {Date} toDate - Data final (opcional)
+   * @returns {Promise<object[]>} Array de pipeline runs
+   */
+  async getPipelineRuns(projectName, pipelineId, fromDate = null, toDate = null) {
+    try {
+      let url = `/${projectName}/_apis/pipelines/${pipelineId}/runs?api-version=${this.apiVersion}`;
+      
+      const result = await this.request('GET', url);
+      let runs = result.value || [];
+
+      // Filtrar por data se fornecido
+      if (fromDate || toDate) {
+        runs = runs.filter(run => {
+          const runDate = new Date(run.createdDate);
+          if (fromDate && runDate < fromDate) return false;
+          if (toDate && runDate > toDate) return false;
+          return true;
+        });
+      }
+
+      return runs;
+    } catch (error) {
+      throw new Error(`Erro ao buscar pipeline runs: ${error.message}`);
+    }
+  }
+
+  /**
+   * Busca builds de um projeto (Build API)
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {Date} minTime - Data inicial (opcional)
+   * @param {Date} maxTime - Data final (opcional)
+   * @param {string} resultFilter - Filtro de resultado (succeeded, failed, etc)
+   * @returns {Promise<object[]>} Array de builds
+   */
+  async getBuilds(projectName, minTime = null, maxTime = null, resultFilter = null) {
+    try {
+      let url = `/${projectName}/_apis/build/builds?api-version=${this.apiVersion}`;
+      
+      if (minTime) {
+        url += `&minTime=${minTime.toISOString()}`;
+      }
+      if (maxTime) {
+        url += `&maxTime=${maxTime.toISOString()}`;
+      }
+      if (resultFilter) {
+        url += `&resultFilter=${resultFilter}`;
+      }
+
+      const result = await this.request('GET', url);
+      return result.value || [];
+    } catch (error) {
+      throw new Error(`Erro ao buscar builds: ${error.message}`);
+    }
+  }
+
+  /**
+   * Busca detalhes de um build específico
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {number} buildId - ID do build
+   * @returns {Promise<object>} Detalhes do build
+   */
+  async getBuild(projectName, buildId) {
+    try {
+      const url = `/${projectName}/_apis/build/builds/${buildId}?api-version=${this.apiVersion}`;
+      return await this.request('GET', url);
+    } catch (error) {
+      throw new Error(`Erro ao buscar detalhes do build: ${error.message}`);
+    }
+  }
+
+  /**
+   * Busca releases de um projeto (Release Management API)
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {Date} minCreatedTime - Data inicial (opcional)
+   * @param {Date} maxCreatedTime - Data final (opcional)
+   * @returns {Promise<object[]>} Array de releases
+   */
+  async getReleases(projectName, minCreatedTime = null, maxCreatedTime = null) {
+    try {
+      // Usar o domínio correto para Release Management API
+      const releaseBaseUrl = `https://vsrm.dev.azure.com/${this.organization}`;
+      let url = `${releaseBaseUrl}/${projectName}/_apis/release/releases?api-version=${this.apiVersion}`;
+      
+      if (minCreatedTime) {
+        url += `&minCreatedTime=${minCreatedTime.toISOString()}`;
+      }
+      if (maxCreatedTime) {
+        url += `&maxCreatedTime=${maxCreatedTime.toISOString()}`;
+      }
+
+      const result = await this.request('GET', url);
+      return result.value || [];
+    } catch (error) {
+      console.warn(`[Azure DevOps] Aviso ao buscar releases: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Busca deployments de releases para cálculo de Deployment Frequency
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {number} releaseId - ID da release
+   * @returns {Promise<object[]>} Array de deployments
+   */
+  async getReleaseDeployments(projectName, releaseId) {
+    try {
+      const releaseBaseUrl = `https://vsrm.dev.azure.com/${this.organization}`;
+      const url = `${releaseBaseUrl}/${projectName}/_apis/release/releases/${releaseId}/environments?api-version=${this.apiVersion}`;
+      
+      const result = await this.request('GET', url);
+      return result.value || [];
+    } catch (error) {
+      console.warn(`[Azure DevOps] Aviso ao buscar deployments: ${error.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * Busca pull requests de um repositório para Lead Time analysis
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {string} repositoryId - ID do repositório
+   * @param {string} status - Status do PR (completed, active, abandoned, all)
+   * @returns {Promise<object[]>} Array de pull requests
+   */
+  async getPullRequests(projectName, repositoryId, status = 'completed') {
+    try {
+      const url = `/${projectName}/_apis/git/repositories/${repositoryId}/pullrequests?searchCriteria.status=${status}&api-version=${this.apiVersion}`;
+      const result = await this.request('GET', url);
+      return result.value || [];
+    } catch (error) {
+      throw new Error(`Erro ao buscar pull requests: ${error.message}`);
+    }
+  }
+}
 
 export default AzureDevOpsService;

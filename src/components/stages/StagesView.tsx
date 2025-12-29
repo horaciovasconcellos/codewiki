@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Stage } from '@/lib/types';
 import { StagesDataTable } from './StagesDataTable';
 import { StageWizard } from './StageWizard';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function StagesView() {
+  const { logClick, logEvent, logError } = useLogging('stages-view');
   const [stages, setStages] = useState<Stage[]>([]);
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
@@ -22,6 +24,8 @@ export function StagesView() {
   const loadStages = async () => {
     try {
       setLoading(true);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/stages`);
       if (response.ok) {
         const data = await response.json();
@@ -30,6 +34,7 @@ export function StagesView() {
         toast.error('Erro ao carregar stages');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar stages:', error);
       toast.error('Erro ao carregar stages');
     } finally {
@@ -45,6 +50,8 @@ export function StagesView() {
   const handleEdit = async (stage: Stage) => {
     try {
       // Buscar dados completos do stage incluindo yamlContent
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/stages/${stage.id}`);
       if (response.ok) {
         const fullStage = await response.json();
@@ -55,6 +62,7 @@ export function StagesView() {
         toast.error('Erro ao carregar detalhes do stage');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar stage:', error);
       toast.error('Erro ao carregar stage');
     }
@@ -66,6 +74,8 @@ export function StagesView() {
     }
 
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/stages/${stage.id}`, {
         method: 'DELETE',
       });
@@ -77,6 +87,7 @@ export function StagesView() {
         toast.error('Erro ao excluir stage');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao excluir stage:', error);
       toast.error('Erro ao excluir stage');
     }

@@ -1,0 +1,218 @@
+# Template de Pipeline para Hotfix
+# Este template é executado para correções urgentes em produção
+
+trigger:
+  branches:
+    include:
+      - hotfix/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  nodeVersion: '18.x'
+  isHotfix: true
+
+stages:
+  # Stage 1: Build Rápido
+  - stage: FastBuild
+    displayName: 'Fast Build'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build Hotfix'
+        steps:
+          - checkout: self
+            fetchDepth: 1  # Shallow clone para velocidade
+            displayName: 'Checkout Hotfix Branch'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run build
+            displayName: 'Build Application'
+
+          # Cache do build
+          - task: Cache@2
+            inputs:
+              key: 'hotfix | "$(Agent.OS)" | package-lock.json'
+              path: $(Pipeline.Workspace)/.npm
+            displayName: 'Cache npm'
+
+  # Stage 2: Testes Críticos
+  - stage: CriticalTests
+    displayName: 'Critical Tests Only'
+    dependsOn: FastBuild
+    jobs:
+      - job: TestJob
+        displayName: 'Run Critical Tests'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          # Apenas testes críticos/smoke tests
+          - script: npm run test:smoke
+            displayName: 'Run Smoke Tests'
+
+          # Testes de integração essenciais
+          - script: npm run test:critical
+            displayName: 'Run Critical Integration Tests'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-results.xml'
+            displayName: 'Publish Test Results'
+
+  # Stage 3: Validação de Segurança Rápida
+  - stage: QuickSecurity
+    displayName: 'Quick Security Check'
+    dependsOn: FastBuild
+    jobs:
+      - job: SecurityJob
+        displayName: 'Security Validation'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm audit --audit-level=critical
+            displayName: 'Check Critical Vulnerabilities'
+
+  # Stage 4: Deploy para Staging (Validação)
+  - stage: DeployStaging
+    displayName: 'Deploy to Staging'
+    dependsOn:
+      - FastBuild
+      - CriticalTests
+      - QuickSecurity
+    jobs:
+      - deployment: DeployStagingJob
+        displayName: 'Deploy to Staging Environment'
+        environment: 'staging-hotfix'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploying hotfix to staging..."
+                  displayName: 'Deploy to Staging'
+
+                - script: |
+                    echo "Running smoke tests on staging..."
+                    # Adicione seus testes de smoke em staging aqui
+                  displayName: 'Validate Staging Deployment'
+
+  # Stage 5: Aprovação Manual
+  - stage: ManualApproval
+    displayName: 'Manual Approval for Production'
+    dependsOn: DeployStaging
+    jobs:
+      - job: WaitForApproval
+        displayName: 'Wait for Manual Approval'
+        pool: server
+        timeoutInMinutes: 4320  # 3 dias
+        steps:
+          - task: ManualValidation@0
+            inputs:
+              notifyUsers: |
+                release-manager@empresa.com
+                tech-lead@empresa.com
+              instructions: |
+                ⚠️ HOTFIX DEPLOYMENT
+                
+                Por favor, revise:
+                1. O hotfix foi testado em staging?
+                2. A correção resolve o problema crítico?
+                3. Não há efeitos colaterais?
+                4. Stakeholders foram notificados?
+                
+                Aprove apenas se todas as verificações foram feitas.
+              onTimeout: 'reject'
+            displayName: 'Approve Hotfix Deployment'
+
+  # Stage 6: Deploy para Produção
+  - stage: DeployProduction
+    displayName: 'Deploy to Production'
+    dependsOn: ManualApproval
+    jobs:
+      - deployment: DeployProdJob
+        displayName: 'Deploy to Production'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Backup antes do deploy
+                - script: |
+                    echo "Creating production backup..."
+                    # Adicione script de backup aqui
+                  displayName: 'Backup Current Production'
+
+                # Deploy
+                - script: echo "Deploying hotfix to production..."
+                  displayName: 'Deploy Hotfix'
+
+                # Smoke test em produção
+                - script: |
+                    echo "Running production smoke tests..."
+                    # Adicione testes de smoke em produção
+                  displayName: 'Production Smoke Tests'
+
+                # Health check
+                - script: |
+                    echo "Checking application health..."
+                    # Adicione health checks aqui
+                  displayName: 'Health Check'
+
+  # Stage 7: Notificação
+  - stage: Notification
+    displayName: 'Send Notifications'
+    dependsOn: DeployProduction
+    condition: always()
+    jobs:
+      - job: NotifyJob
+        displayName: 'Notify Stakeholders'
+        steps:
+          - script: |
+              echo "Hotfix deployment completed!"
+              echo "Branch: $(Build.SourceBranch)"
+              echo "Commit: $(Build.SourceVersion)"
+              echo "Status: $(Agent.JobStatus)"
+            displayName: 'Deployment Summary'
+
+          # Adicionar notificação por email, Slack, Teams, etc.
+          - script: |
+              echo "Sending notifications..."
+              # Implemente notificações aqui
+            displayName: 'Send Notifications'
+
+# Configurações adicionais
+resources:
+  repositories:
+    - repository: self
+      type: git
+
+# Configurar retenção estendida para hotfixes
+options:
+  keepForever: true

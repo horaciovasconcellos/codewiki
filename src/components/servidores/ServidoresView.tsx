@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Servidor } from '@/lib/types';
 import { ServidoresDataTable } from './ServidoresDataTable';
 import { ServidorWizard } from './ServidorWizard';
@@ -11,6 +12,7 @@ import * as XLSX from 'xlsx';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function ServidoresView() {
+  const { logClick, logEvent, logError } = useLogging('servidores-view');
   const [servidores, setServidores] = useState<Servidor[]>([]);
   const [showWizard, setShowWizard] = useState(false);
   const [editingServidor, setEditingServidor] = useState<Servidor | undefined>(undefined);
@@ -23,6 +25,8 @@ export function ServidoresView() {
   const loadServidores = async () => {
     try {
       setLoading(true);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/servidores`);
       if (response.ok) {
         const data = await response.json();
@@ -31,6 +35,7 @@ export function ServidoresView() {
         toast.error('Erro ao carregar servidores');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar servidores:', error);
       toast.error('Erro ao carregar dados');
     } finally {
@@ -41,6 +46,9 @@ export function ServidoresView() {
   const handleSave = async (servidor: Servidor, aplicacoesServidor?: any[]) => {
     try {
       const isEditing = !!servidor.id && servidores.some(s => s.id === servidor.id);
+      
+      logEvent('api_call_start', 'api_call');
+
       
       const response = await fetch(
         isEditing ? `${API_URL}/api/servidores/${servidor.id}` : `${API_URL}/api/servidores`,
@@ -69,6 +77,7 @@ export function ServidoresView() {
       setEditingServidor(undefined);
       toast.success(isEditing ? 'Servidor atualizado com sucesso' : 'Servidor cadastrado com sucesso');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar servidor:', error);
       toast.error(error instanceof Error ? error.message : 'Erro ao salvar servidor');
     }
@@ -93,6 +102,7 @@ export function ServidoresView() {
         });
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar aplicações do servidor:', error);
       toast.error('Erro ao salvar aplicações do servidor');
     }
@@ -109,6 +119,8 @@ export function ServidoresView() {
     }
 
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`${API_URL}/api/servidores/${id}`, {
         method: 'DELETE'
       });
@@ -120,6 +132,7 @@ export function ServidoresView() {
       await loadServidores();
       toast.success('Servidor excluído com sucesso');
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao excluir servidor:', error);
       toast.error('Erro ao excluir servidor');
     }

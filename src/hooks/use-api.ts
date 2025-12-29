@@ -32,7 +32,14 @@ export function useApi<T>(endpoint: string, initialData: T): UseApiResult<T> {
       
       const result = await response.json();
       console.log(`[useApi] Dados recebidos de ${endpoint}:`, Array.isArray(result) ? `${result.length} itens` : result);
-      setData(result);
+      
+      // Se a resposta tem formato { success: true, data: {...} }, extrair apenas o data
+      if (result && typeof result === 'object' && 'success' in result && 'data' in result) {
+        console.log(`[useApi] Desempacotando resposta com formato { success, data }`);
+        setData(result.data);
+      } else {
+        setData(result);
+      }
     } catch (err) {
       console.error(`Erro ao buscar ${endpoint}:`, err);
       setError(err instanceof Error ? err : new Error('Erro desconhecido'));

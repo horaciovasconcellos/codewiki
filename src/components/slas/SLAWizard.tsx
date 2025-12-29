@@ -20,6 +20,7 @@ import { SLAApoioForm } from './forms/SLAApoioForm';
 import { SLAOperacionalForm } from './forms/SLAOperacionalForm';
 import { SLAComponentesForm } from './forms/SLAComponentesForm';
 import { SLAUsuarioForm } from './forms/SLAUsuarioForm';
+import { SLAClienteForm } from './forms/SLAClienteForm';
 import { SLAServicoForm } from './forms/SLAServicoForm';
 
 interface SLAWizardProps {
@@ -107,6 +108,8 @@ export function SLAWizard({ slas, onSave, onCancel, editingSLA }: SLAWizardProps
       case 'SLA Baseado em Componentes':
         return sla.componentes;
       case 'SLA por Usuário':
+        return sla.usuario;
+      case 'SLA por Cliente':
         return sla.usuario;
       case 'SLA por Serviço':
         return sla.servico;
@@ -252,6 +255,9 @@ export function SLAWizard({ slas, onSave, onCancel, editingSLA }: SLAWizardProps
           sla.componentes = t.data;
           break;
         case 'SLA por Usuário':
+          sla.usuario = t.data;
+          break;
+        case 'SLA por Cliente':
           sla.usuario = t.data;
           break;
         case 'SLA por Serviço':
@@ -457,6 +463,13 @@ export function SLAWizard({ slas, onSave, onCancel, editingSLA }: SLAWizardProps
         case 'SLA por Usuário':
           return (
             <SLAUsuarioForm
+              data={tipoAtual.data}
+              onChange={(data) => handleUpdateData(tipoAtual.tipo, data)}
+            />
+          );
+        case 'SLA por Cliente':
+          return (
+            <SLAClienteForm
               data={tipoAtual.data}
               onChange={(data) => handleUpdateData(tipoAtual.tipo, data)}
             />

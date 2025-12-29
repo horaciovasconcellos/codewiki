@@ -38,6 +38,8 @@ export interface AvaliacaoColaborador {
   qualidadeSeguranca: number;
   comportamentoCultura: number;
   evolucaoAprendizado: number;
+  notaFinal?: number;
+  observacoes?: string;
   motivo?: string;
   dataConversa?: string;
 }
@@ -494,6 +496,35 @@ export interface SLA {
   status: 'Ativo' | 'Inativo';
 }
 
+export type TipoScript = 
+  | 'Automação'
+  | 'Administração'
+  | 'Banco de Dados'
+  | 'Integração'
+  | 'Testes'
+  | 'Build & Deploy'
+  | 'CI/CD'
+  | 'Infraestrutura (IaC)'
+  | 'Monitoramento'
+  | 'Segurança'
+  | 'Governança'
+  | 'Dados'
+  | 'ERP'
+  | 'Documentação';
+
+export interface Script {
+  id: string;
+  sigla: string;
+  descricao: string;
+  dataInicio: string;
+  dataTermino?: string;
+  tipoScript: TipoScript;
+  arquivo?: string; // Nome do arquivo
+  arquivoUrl?: string; // URL/path do arquivo
+  arquivoTamanho?: number; // Tamanho em bytes
+  arquivoTipo?: string; // MIME type
+}
+
 export interface AzureDevOpsConfig {
   urlOrganizacao: string;
   apiVersion: string;
@@ -557,9 +588,11 @@ export type WorkItemProcess =
 
 export interface RepositorioProjeto {
   id: string;
+  nome?: string;
   produto: string;
   categoria: CategoriaRepositorio;
   tecnologia: TecnologiaRepositorio;
+  urlProjeto?: string; // URL do repositório criado no Azure DevOps
 }
 
 export interface ProjetoGerado {
@@ -583,6 +616,7 @@ export interface ProjetoGerado {
   status: 'Pendente' | 'Processado';
   urlProjeto?: string;
   aplicacaoBaseId?: string;
+  statusRepositorio?: 'N' | 'Y';
 }
 
 // Azure DevOps Work Items

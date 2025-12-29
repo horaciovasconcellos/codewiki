@@ -18,6 +18,7 @@ type TipoEntidade =
   | 'capacidades-negocio'
   | 'slas'
   | 'runbooks'
+  | 'scripts'
   | 'estruturas-projeto';
 
 interface ArquivoCarga {
@@ -87,6 +88,12 @@ const ENTIDADES_CONFIG = {
     endpoint: '/api/runbooks',
     exemplo: 'runbooks.csv / runbooks.json',
     campos: ['sigla', 'descricaoResumida', 'finalidade', 'tipoRunbook']
+  },
+  'scripts': {
+    label: 'Scripts',
+    endpoint: '/api/scripts',
+    exemplo: 'scripts.csv / scripts.json',
+    campos: ['sigla', 'descricao', 'dataInicio', 'dataTermino', 'tipoScript']
   },
   'estruturas-projeto': {
     label: 'Estruturas de Projeto',
@@ -167,6 +174,13 @@ export function CargaDadosView() {
           'RB-003,Rollback de versão,Procedimento para reverter deploy,Emergencial'
         ];
         break;
+      case 'scripts':
+        exemplos = [
+          'SCR-AUTO-001,Script de backup automático diário,2024-01-15,,Automação',
+          'SCR-DB-001,Script de otimização de índices,2024-01-10,,Banco de Dados',
+          'SCR-CICD-001,Pipeline CI/CD completo,2024-02-20,,CI/CD'
+        ];
+        break;
       case 'estruturas-projeto':
         exemplos = [
           'Azure DevOps,Scrum,Portal Colaboradores,2025-01-15,1,Time Portal,2',
@@ -224,6 +238,7 @@ export function CargaDadosView() {
     if (nome.includes('habilidade')) return 'habilidades';
     if (nome.includes('sla')) return 'slas';
     if (nome.includes('runbook')) return 'runbooks';
+    if (nome.includes('script')) return 'scripts';
     
     return null;
   };
@@ -735,7 +750,9 @@ export function CargaDadosView() {
             <h4 className="font-semibold mb-2 text-primary-foreground">Nomenclatura de Arquivos</h4>
             <p className="mb-2 text-primary-foreground">O sistema detecta automaticamente pelo nome. Clique para baixar exemplo:</p>
             <ul className="space-y-1 pl-4 text-xs text-primary-foreground">
-              {Object.entries(ENTIDADES_CONFIG).map(([key, config]) => (
+              {Object.entries(ENTIDADES_CONFIG)
+                .sort(([, a], [, b]) => a.label.localeCompare(b.label))
+                .map(([key, config]) => (
                 <li key={key} className="list-disc">
                   <button
                     onClick={() => baixarCsvExemplo(key as TipoEntidade)}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { SLA } from '@/lib/types';
 import { SLAWizard } from './SLAWizard';
 import { SLAsTable } from './SLAsTable';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 interface SLAsViewProps {}
 
 export function SLAsView({}: SLAsViewProps) {
+  const { logEvent, logError } = useLogging('slas-view');
   const [slas, setSLAs] = useState<SLA[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -22,11 +24,14 @@ export function SLAsView({}: SLAsViewProps) {
   const loadSLAs = async () => {
     try {
       setLoading(true);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch('/api/slas');
       if (!response.ok) throw new Error('Erro ao carregar SLAs');
       const data = await response.json();
       setSLAs(data);
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar SLAs:', error);
       toast.error('Não foi possível carregar os SLAs');
     } finally {
@@ -39,6 +44,9 @@ export function SLAsView({}: SLAsViewProps) {
       const existe = slas.find(s => s.id === sla.id);
       const url = existe ? `/api/slas/${sla.id}` : '/api/slas';
       const method = existe ? 'PUT' : 'POST';
+
+      logEvent('api_call_start', 'api_call');
+
 
       const response = await fetch(url, {
         method,
@@ -54,6 +62,7 @@ export function SLAsView({}: SLAsViewProps) {
 
       await loadSLAs();
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao salvar SLA:', error);
       toast.error('Não foi possível salvar o SLA');
     }
@@ -61,6 +70,8 @@ export function SLAsView({}: SLAsViewProps) {
 
   const handleSLADelete = async (id: string) => {
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`/api/slas/${id}`, {
         method: 'DELETE'
       });
@@ -71,6 +82,7 @@ export function SLAsView({}: SLAsViewProps) {
 
       await loadSLAs();
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao deletar SLA:', error);
       toast.error('Não foi possível deletar o SLA');
     }

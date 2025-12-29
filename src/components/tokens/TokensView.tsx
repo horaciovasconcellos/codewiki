@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { TokenAcesso } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +13,7 @@ import { Key, Plus } from '@phosphor-icons/react';
 import { StatusToken, HistoricoTokenAcesso } from '@/lib/types';
 
 export function TokensView() {
+  const { logClick, logEvent, logError } = useLogging('tokens-view');
   const [tokens, setTokens] = useLocalStorage<TokenAcesso[]>('tokens-acesso', []);
   const [selectedToken, setSelectedToken] = useState<TokenAcesso | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);

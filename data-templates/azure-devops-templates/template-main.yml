@@ -1,0 +1,321 @@
+# Template de Pipeline para Main Branch
+# Este template é executado quando código é merged na branch principal
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  nodeVersion: '18.x'
+  dockerRegistry: 'myregistry.azurecr.io'
+  imageName: 'sistema-auditoria'
+
+stages:
+  # Stage 1: Build Completo
+  - stage: Build
+    displayName: 'Build Application'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build and Package'
+        steps:
+          - checkout: self
+            fetchDepth: 0
+            displayName: 'Checkout Main Branch'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run build
+            displayName: 'Build Application'
+
+          # Gerar versão
+          - script: |
+              VERSION=$(node -p "require('./package.json').version")
+              echo "##vso[task.setvariable variable=APP_VERSION;isOutput=true]$VERSION"
+              echo "Application Version: $VERSION"
+            name: versionStep
+            displayName: 'Generate Version Number'
+
+          # Publicar artefatos
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(Build.SourcesDirectory)/dist'
+              artifactName: 'app-dist'
+            displayName: 'Publish Build Artifacts'
+
+  # Stage 2: Testes Completos
+  - stage: Test
+    displayName: 'Run All Tests'
+    dependsOn: Build
+    jobs:
+      - job: UnitTestsJob
+        displayName: 'Unit Tests'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run test:unit
+            displayName: 'Run Unit Tests'
+
+          - script: npm run test:coverage
+            displayName: 'Generate Coverage Report'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-results.xml'
+            displayName: 'Publish Test Results'
+
+          - task: PublishCodeCoverageResults@1
+            condition: succeededOrFailed()
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+            displayName: 'Publish Code Coverage'
+
+      - job: IntegrationTestsJob
+        displayName: 'Integration Tests'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run test:integration
+            displayName: 'Run Integration Tests'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/integration-test-results.xml'
+            displayName: 'Publish Integration Test Results'
+
+      - job: E2ETestsJob
+        displayName: 'E2E Tests'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run test:e2e
+            displayName: 'Run E2E Tests'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/e2e-test-results.xml'
+            displayName: 'Publish E2E Test Results'
+
+  # Stage 3: Análise de Qualidade
+  - stage: Quality
+    displayName: 'Quality Analysis'
+    dependsOn: Build
+    jobs:
+      - job: QualityJob
+        displayName: 'Code Quality Checks'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run lint
+            displayName: 'Run Linter'
+
+          - script: npm run type-check
+            displayName: 'TypeScript Type Check'
+
+          - script: npm run prettier:check
+            displayName: 'Check Code Formatting'
+
+          # SonarQube (se configurado)
+          - script: npm run sonar
+            continueOnError: true
+            displayName: 'SonarQube Analysis'
+
+  # Stage 4: Segurança
+  - stage: Security
+    displayName: 'Security Scanning'
+    dependsOn: Build
+    jobs:
+      - job: SecurityJob
+        displayName: 'Security Checks'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm audit --audit-level=moderate
+            displayName: 'NPM Security Audit'
+
+          - script: npm run security:scan
+            continueOnError: true
+            displayName: 'Run Security Scans'
+
+  # Stage 5: Build Docker Image
+  - stage: Docker
+    displayName: 'Build Docker Image'
+    dependsOn:
+      - Build
+      - Test
+      - Quality
+      - Security
+    jobs:
+      - job: DockerJob
+        displayName: 'Build and Push Docker Image'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'AzureContainerRegistry'
+              repository: $(imageName)
+              command: 'buildAndPush'
+              Dockerfile: 'Dockerfile.production'
+              tags: |
+                $(Build.BuildId)
+                latest
+                $(versionStep.APP_VERSION)
+            displayName: 'Build and Push Docker Image'
+
+  # Stage 6: Deploy para Produção
+  - stage: DeployProduction
+    displayName: 'Deploy to Production'
+    dependsOn: Docker
+    jobs:
+      - deployment: DeployProdJob
+        displayName: 'Deploy Production'
+        environment: 'production'
+        strategy:
+          rolling:
+            maxParallel: 1
+            preDeploy:
+              steps:
+                - script: echo "Pre-deployment validations..."
+                  displayName: 'Pre-Deploy Checks'
+
+            deploy:
+              steps:
+                - script: echo "Deploying to production..."
+                  displayName: 'Deploy Application'
+
+                # Blue-Green deployment
+                - script: |
+                    echo "Switching traffic to new version..."
+                    # Implemente lógica de blue-green aqui
+                  displayName: 'Switch Traffic'
+
+            postDeploy:
+              steps:
+                - script: |
+                    echo "Running production smoke tests..."
+                    # Adicione smoke tests
+                  displayName: 'Post-Deploy Validation'
+
+                - script: |
+                    echo "Monitoring application health..."
+                    # Adicione health checks
+                  displayName: 'Health Monitoring'
+
+  # Stage 7: Criar Release Tag
+  - stage: CreateRelease
+    displayName: 'Create Release Tag'
+    dependsOn: DeployProduction
+    jobs:
+      - job: ReleaseJob
+        displayName: 'Create Git Tag'
+        steps:
+          - checkout: self
+            persistCredentials: true
+            displayName: 'Checkout Repository'
+
+          - script: |
+              VERSION=$(node -p "require('./package.json').version")
+              git tag -a "v$VERSION" -m "Release version $VERSION"
+              git push origin "v$VERSION"
+            displayName: 'Create and Push Git Tag'
+
+          # Criar release notes
+          - script: |
+              echo "Generating release notes..."
+              # Implemente geração de release notes
+            displayName: 'Generate Release Notes'
+
+  # Stage 8: Notificações
+  - stage: Notification
+    displayName: 'Send Notifications'
+    dependsOn: DeployProduction
+    condition: always()
+    jobs:
+      - job: NotifyJob
+        displayName: 'Notify Team'
+        steps:
+          - script: |
+              echo "Production deployment completed!"
+              echo "Version: $(versionStep.APP_VERSION)"
+              echo "Build: $(Build.BuildId)"
+              echo "Status: $(Agent.JobStatus)"
+            displayName: 'Deployment Summary'
+
+          - script: |
+              echo "Sending notifications to team..."
+              # Implemente notificações (Slack, Teams, Email)
+            displayName: 'Send Notifications'
+
+# Configurações adicionais
+resources:
+  repositories:
+    - repository: self
+      type: git
+
+# Retenção de builds principais
+options:
+  keepForever: true

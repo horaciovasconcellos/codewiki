@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { ProcessoNegocio } from '@/lib/types';
 import { ProcessoWizard } from './ProcessoWizard';
 import { ProcessosList } from './ProcessosList';
@@ -172,6 +173,7 @@ export function ProcessosView({}: ProcessosViewProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
+        logClick('button_clicked');
                   setSearchTerm('');
                   setFilterMaturidade('all');
                   setFilterComplexidade('all');

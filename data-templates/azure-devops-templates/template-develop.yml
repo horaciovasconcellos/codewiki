@@ -1,0 +1,348 @@
+# Template de Pipeline para Develop Branch
+# Este template é executado quando código é merged na branch de desenvolvimento
+
+trigger:
+  branches:
+    include:
+      - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Debug'
+  nodeVersion: '18.x'
+  dockerRegistry: 'myregistry.azurecr.io'
+  imageName: 'sistema-auditoria-dev'
+
+stages:
+  # Stage 1: Build
+  - stage: Build
+    displayName: 'Build Application'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build Development Version'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Develop Branch'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run build:dev
+            displayName: 'Build Application (Development)'
+
+          # Publicar artefatos
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(Build.SourcesDirectory)/dist'
+              artifactName: 'dev-dist'
+            displayName: 'Publish Build Artifacts'
+
+  # Stage 2: Testes
+  - stage: Test
+    displayName: 'Run Tests'
+    dependsOn: Build
+    jobs:
+      - job: TestJob
+        displayName: 'Unit and Integration Tests'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run test:unit
+            displayName: 'Run Unit Tests'
+
+          - script: npm run test:integration
+            displayName: 'Run Integration Tests'
+
+          - script: npm run test:coverage
+            displayName: 'Generate Coverage Report'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-results.xml'
+              mergeTestResults: true
+            displayName: 'Publish Test Results'
+
+          - task: PublishCodeCoverageResults@1
+            condition: succeededOrFailed()
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+            displayName: 'Publish Code Coverage'
+
+  # Stage 3: Qualidade de Código
+  - stage: Quality
+    displayName: 'Code Quality'
+    dependsOn: Build
+    jobs:
+      - job: QualityJob
+        displayName: 'Quality Checks'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run lint
+            displayName: 'Run Linter'
+
+          - script: npm run type-check
+            displayName: 'TypeScript Type Check'
+
+          - script: npm run prettier:check
+            displayName: 'Check Code Formatting'
+
+  # Stage 4: Análise de Segurança
+  - stage: Security
+    displayName: 'Security Analysis'
+    dependsOn: Build
+    jobs:
+      - job: SecurityJob
+        displayName: 'Security Scanning'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm audit --audit-level=moderate
+            continueOnError: true
+            displayName: 'NPM Security Audit'
+
+          - script: npm run security:scan
+            continueOnError: true
+            displayName: 'Run Security Scans'
+
+  # Stage 5: Build Docker Image (Dev)
+  - stage: Docker
+    displayName: 'Build Docker Image'
+    dependsOn:
+      - Build
+      - Test
+      - Quality
+    jobs:
+      - job: DockerJob
+        displayName: 'Build Dev Docker Image'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'AzureContainerRegistry'
+              repository: $(imageName)
+              command: 'buildAndPush'
+              Dockerfile: 'Dockerfile'
+              tags: |
+                develop-$(Build.BuildId)
+                develop-latest
+            displayName: 'Build and Push Docker Image'
+
+  # Stage 6: Deploy para Dev Environment
+  - stage: DeployDev
+    displayName: 'Deploy to Development'
+    dependsOn: Docker
+    jobs:
+      - deployment: DeployDevJob
+        displayName: 'Deploy to Dev Environment'
+        environment: 'development'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Deploying to development environment..."
+                  displayName: 'Deploy to Dev'
+
+                - script: |
+                    echo "Running smoke tests..."
+                    # Adicione smoke tests aqui
+                  displayName: 'Smoke Tests'
+
+                - script: |
+                    echo "Checking application health..."
+                    # Adicione health checks
+                  displayName: 'Health Check'
+
+  # Stage 7: Testes E2E no Ambiente
+  - stage: E2ETests
+    displayName: 'E2E Tests in Dev Environment'
+    dependsOn: DeployDev
+    jobs:
+      - job: E2EJob
+        displayName: 'Run E2E Tests'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: |
+              export TEST_URL="https://dev.sistema-auditoria.com"
+              npm run test:e2e
+            displayName: 'Run E2E Tests'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/e2e-test-results.xml'
+            displayName: 'Publish E2E Test Results'
+
+  # Stage 8: Performance Tests
+  - stage: Performance
+    displayName: 'Performance Testing'
+    dependsOn: DeployDev
+    jobs:
+      - job: PerformanceJob
+        displayName: 'Run Performance Tests'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - script: |
+              echo "Running performance tests..."
+              # Adicione testes de performance (k6, JMeter, etc.)
+            displayName: 'Performance Tests'
+
+          - script: |
+              echo "Analyzing performance metrics..."
+              # Analise e publique métricas
+            displayName: 'Performance Analysis'
+
+  # Stage 9: Database Migrations (se necessário)
+  - stage: DatabaseMigrations
+    displayName: 'Database Migrations'
+    dependsOn: Test
+    condition: succeeded()
+    jobs:
+      - job: MigrationJob
+        displayName: 'Run Database Migrations'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: |
+              echo "Running database migrations..."
+              npm run migrate:dev
+            displayName: 'Run Migrations'
+
+          - script: |
+              echo "Seeding development data..."
+              npm run seed:dev
+            displayName: 'Seed Development Data'
+
+  # Stage 10: Documentação
+  - stage: Documentation
+    displayName: 'Update Documentation'
+    dependsOn: Build
+    jobs:
+      - job: DocsJob
+        displayName: 'Generate Documentation'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Repository'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(nodeVersion)
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install Dependencies'
+
+          - script: npm run docs:generate
+            displayName: 'Generate API Documentation'
+
+          - script: npm run docs:build
+            displayName: 'Build Documentation Site'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(Build.SourcesDirectory)/docs-site'
+              artifactName: 'documentation'
+            displayName: 'Publish Documentation'
+
+  # Stage 11: Notificações
+  - stage: Notification
+    displayName: 'Send Notifications'
+    dependsOn: DeployDev
+    condition: always()
+    jobs:
+      - job: NotifyJob
+        displayName: 'Notify Development Team'
+        steps:
+          - script: |
+              echo "Development deployment completed!"
+              echo "Branch: $(Build.SourceBranch)"
+              echo "Build: $(Build.BuildId)"
+              echo "Status: $(Agent.JobStatus)"
+            displayName: 'Deployment Summary'
+
+          - script: |
+              echo "Sending notifications to development team..."
+              # Implemente notificações (Slack, Teams, etc.)
+            displayName: 'Send Notifications'
+
+          # Opcional: Criar comment no PR relacionado
+          - script: |
+              echo "Updating related PRs with deployment info..."
+              # Adicione comentários em PRs relacionados
+            displayName: 'Update Pull Requests'
+
+# Configurações adicionais
+resources:
+  repositories:
+    - repository: self
+      type: git
+
+# Configurar schedule para builds noturnos (opcional)
+schedules:
+  - cron: "0 2 * * *"  # 2 AM todos os dias
+    displayName: 'Nightly Build'
+    branches:
+      include:
+        - develop
+    always: true

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLogging } from '@/hooks/use-logging';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +54,7 @@ interface Notificacao {
 }
 
 export function NotificacoesView() {
+  const { logClick, logEvent, logError } = useLogging('notificacoes-view');
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,6 +70,8 @@ export function NotificacoesView() {
   const loadNotificacoes = async () => {
     try {
       setLoading(true);
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch('/api/notificacoes');
       if (response.ok) {
         const data = await response.json();
@@ -76,6 +80,7 @@ export function NotificacoesView() {
         toast.error('Erro ao carregar notificações');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao carregar notificações:', error);
       toast.error('Erro ao conectar com o servidor');
     } finally {
@@ -102,6 +107,7 @@ export function NotificacoesView() {
         n.id === id ? { ...n, lida: true } : n
       ));
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao marcar como lida:', error);
     }
   };
@@ -115,6 +121,8 @@ export function NotificacoesView() {
     if (!notificacaoToDelete) return;
 
     try {
+      logEvent('api_call_start', 'api_call');
+
       const response = await fetch(`/api/notificacoes/${notificacaoToDelete.id}`, {
         method: 'DELETE',
       });
@@ -126,6 +134,7 @@ export function NotificacoesView() {
         toast.error('Erro ao deletar notificação');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao deletar notificação:', error);
       toast.error('Erro ao deletar notificação');
     } finally {
@@ -138,6 +147,9 @@ export function NotificacoesView() {
     try {
       setLoading(true);
       toast.info('Buscando e-mails...');
+      
+      logEvent('api_call_start', 'api_call');
+
       
       const response = await fetch('/api/notificacoes/buscar-emails', {
         method: 'POST',
@@ -152,6 +164,7 @@ export function NotificacoesView() {
         toast.error(error.error || 'Erro ao buscar e-mails');
       }
     } catch (error) {
+      logError(error as Error, 'error_caught');
       console.error('Erro ao buscar e-mails:', error);
       toast.error('Erro ao buscar e-mails');
     } finally {

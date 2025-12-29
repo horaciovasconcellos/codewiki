@@ -28,6 +28,51 @@ const upload = multer({
     }
   }
 });
+
+// Configurar multer para upload de templates YAML/Markdown
+const uploadYaml = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 500 * 1024 // 500KB
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = ['.yaml', '.yml', '.md'];
+    const fileExtension = file.originalname.toLowerCase().slice(file.originalname.lastIndexOf('.'));
+    
+    if (allowedExtensions.includes(fileExtension)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Apenas arquivos YAML (.yaml, .yml) ou Markdown (.md) são permitidos'));
+    }
+  }
+});
+
+// Configurar multer para upload de scripts
+const uploadScript = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/scripts/');
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+  }),
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = ['.sh', '.ps1', '.py', '.js', '.ts', '.sql', '.yaml', '.yml', '.json', '.xml', '.txt'];
+    const fileExtension = file.originalname.toLowerCase().slice(file.originalname.lastIndexOf('.'));
+    
+    if (allowedExtensions.includes(fileExtension)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de arquivo não permitido para scripts'));
+    }
+  }
+});
+
 const PORT = 3000;
 
 // Configuração do MySQL
@@ -40,7 +85,16 @@ const dbConfig = {
   charset: 'utf8mb4',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  multipleStatements: false,
+  typeCast: function(field, next) {
+    if (field.type === 'VAR_STRING' || field.type === 'STRING' || field.type === 'TINY_BLOB' || 
+        field.type === 'MEDIUM_BLOB' || field.type === 'LONG_BLOB' || field.type === 'BLOB') {
+      const value = field.string();
+      return value === null ? null : value;
+    }
+    return next();
+  }
 };
 
 console.log('📋 Configuração do banco:', {
@@ -90,7 +144,14 @@ async function initializeDatabase() {
     pool = mysql.createPool({
       ...dbConfig,
       charset: 'utf8mb4',
-      charsetNumber: 255
+      charsetNumber: 255,
+      supportBigNumbers: true,
+      bigNumberStrings: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      waitForConnections: true,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 0
     });
     
     // Testar conexão
@@ -110,9 +171,12 @@ async function initializeDatabase() {
 // Wrapper para getConnection com charset garantido
 const getUtf8Connection = async () => {
   const connection = await pool.getConnection();
-  await connection.query('SET NAMES utf8mb4');
+  await connection.query('SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
   await connection.query('SET CHARACTER SET utf8mb4');
   await connection.query('SET character_set_connection=utf8mb4');
+  await connection.query('SET character_set_results=utf8mb4');
+  await connection.query('SET character_set_client=utf8mb4');
+  await connection.query('SET collation_connection=utf8mb4_unicode_ci');
   return connection;
 };
 
@@ -120,6 +184,9 @@ const getUtf8Connection = async () => {
 app.use(cors());
 app.use(express.json({ limit: '50mb' })); // Aumentado para 50MB
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Servir arquivos estáticos de uploads
+app.use('/uploads', express.static('uploads'));
 
 // Função de logging para auditoria
 async function logAuditoria({
@@ -315,20 +382,33 @@ async function mapColaborador(row) {
       dataInicio: formatDate(h.data_inicio),
       dataTermino: formatDate(h.data_termino)
     })),
-    avaliacoes: avaliacoes.map(av => ({
-      id: av.id,
-      colaboradorId: av.colaborador_id,
-      dataAvaliacao: formatDate(av.data_avaliacao),
-      resultadosEntregas: parseFloat(av.resultados_entregas),
-      competenciasTecnicas: parseFloat(av.competencias_tecnicas),
-      qualidadeSeguranca: parseFloat(av.qualidade_seguranca),
-      comportamentoCultura: parseFloat(av.comportamento_cultura),
-      evolucaoAprendizado: parseFloat(av.evolucao_aprendizado),
-      motivo: av.motivo,
-      dataConversa: formatDate(av.data_conversa),
-      createdAt: av.created_at,
-      updatedAt: av.updated_at
-    })),
+    avaliacoes: avaliacoes.map(av => {
+      const notas = [
+        parseFloat(av.resultados_entregas),
+        parseFloat(av.competencias_tecnicas),
+        parseFloat(av.qualidade_seguranca),
+        parseFloat(av.comportamento_cultura),
+        parseFloat(av.evolucao_aprendizado)
+      ];
+      const notaFinal = notas.reduce((acc, nota) => acc + nota, 0) / notas.length;
+      
+      return {
+        id: av.id,
+        colaboradorId: av.colaborador_id,
+        dataAvaliacao: formatDate(av.data_avaliacao),
+        resultadosEntregas: parseFloat(av.resultados_entregas),
+        competenciasTecnicas: parseFloat(av.competencias_tecnicas),
+        qualidadeSeguranca: parseFloat(av.qualidade_seguranca),
+        comportamentoCultura: parseFloat(av.comportamento_cultura),
+        evolucaoAprendizado: parseFloat(av.evolucao_aprendizado),
+        notaFinal: notaFinal,
+        observacoes: av.motivo,
+        motivo: av.motivo,
+        dataConversa: formatDate(av.data_conversa),
+        createdAt: av.created_at,
+        updatedAt: av.updated_at
+      };
+    }),
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -783,20 +863,33 @@ app.get('/api/colaboradores/:id/avaliacoes', async (req, res) => {
       [req.params.id]
     );
     
-    const avaliacoes = rows.map(row => ({
-      id: row.id,
-      colaboradorId: row.colaborador_id,
-      dataAvaliacao: row.data_avaliacao,
-      resultadosEntregas: parseFloat(row.resultados_entregas),
-      competenciasTecnicas: parseFloat(row.competencias_tecnicas),
-      qualidadeSeguranca: parseFloat(row.qualidade_seguranca),
-      comportamentoCultura: parseFloat(row.comportamento_cultura),
-      evolucaoAprendizado: parseFloat(row.evolucao_aprendizado),
-      motivo: row.motivo,
-      dataConversa: row.data_conversa,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at
-    }));
+    const avaliacoes = rows.map(row => {
+      const notas = [
+        parseFloat(row.resultados_entregas),
+        parseFloat(row.competencias_tecnicas),
+        parseFloat(row.qualidade_seguranca),
+        parseFloat(row.comportamento_cultura),
+        parseFloat(row.evolucao_aprendizado)
+      ];
+      const notaFinal = notas.reduce((acc, nota) => acc + nota, 0) / notas.length;
+      
+      return {
+        id: row.id,
+        colaboradorId: row.colaborador_id,
+        dataAvaliacao: row.data_avaliacao,
+        resultadosEntregas: parseFloat(row.resultados_entregas),
+        competenciasTecnicas: parseFloat(row.competencias_tecnicas),
+        qualidadeSeguranca: parseFloat(row.qualidade_seguranca),
+        comportamentoCultura: parseFloat(row.comportamento_cultura),
+        evolucaoAprendizado: parseFloat(row.evolucao_aprendizado),
+        notaFinal: notaFinal,
+        observacoes: row.motivo,
+        motivo: row.motivo,
+        dataConversa: row.data_conversa,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+    });
     
     res.json(avaliacoes);
   } catch (error) {
@@ -1334,6 +1427,32 @@ app.get('/api/habilidades', async (req, res) => {
       ORDER BY sigla
     `);
     
+    // Buscar certificações para todas as habilidades
+    const habilidadesIds = rows.map(r => r.id);
+    let certificacoesMap = {};
+    
+    if (habilidadesIds.length > 0) {
+      const [certRows] = await pool.query(
+        `SELECT id, habilidade_id, codigo, descricao, orgao_certificador, url_documentacao 
+         FROM habilidade_certificacoes 
+         WHERE habilidade_id IN (?)`,
+        [habilidadesIds]
+      );
+      
+      certRows.forEach(cert => {
+        if (!certificacoesMap[cert.habilidade_id]) {
+          certificacoesMap[cert.habilidade_id] = [];
+        }
+        certificacoesMap[cert.habilidade_id].push({
+          id: cert.id,
+          codigo: cert.codigo,
+          descricao: cert.descricao,
+          orgaoCertificador: cert.orgao_certificador,
+          urlDocumentacao: cert.url_documentacao
+        });
+      });
+    }
+    
     // Mapear para o formato esperado pelo frontend
     const habilidades = rows.map(row => ({
       id: row.id,
@@ -1342,7 +1461,7 @@ app.get('/api/habilidades', async (req, res) => {
       tipo: row.tipo,
       dominio: row.dominio || row.tipo,
       subcategoria: row.subcategoria || 'Outras',
-      certificacoes: []
+      certificacoes: certificacoesMap[row.id] || []
     }));
     
     res.json(habilidades);
@@ -1372,6 +1491,22 @@ app.get('/api/habilidades/:id', async (req, res) => {
       return res.status(404).json({ error: 'Habilidade não encontrada' });
     }
     
+    // Buscar certificações desta habilidade
+    const [certRows] = await pool.query(
+      `SELECT id, codigo, descricao, orgao_certificador, url_documentacao 
+       FROM habilidade_certificacoes 
+       WHERE habilidade_id = ?`,
+      [req.params.id]
+    );
+    
+    const certificacoes = certRows.map(cert => ({
+      id: cert.id,
+      codigo: cert.codigo,
+      descricao: cert.descricao,
+      orgaoCertificador: cert.orgao_certificador,
+      urlDocumentacao: cert.url_documentacao
+    }));
+    
     const habilidade = {
       id: rows[0].id,
       sigla: rows[0].sigla,
@@ -1379,7 +1514,7 @@ app.get('/api/habilidades/:id', async (req, res) => {
       tipo: rows[0].tipo,
       dominio: rows[0].dominio || rows[0].tipo,
       subcategoria: rows[0].subcategoria || 'Outras',
-      certificacoes: []
+      certificacoes
     };
     
     res.json(habilidade);
@@ -1391,8 +1526,8 @@ app.get('/api/habilidades/:id', async (req, res) => {
 
 app.post('/api/habilidades', async (req, res) => {
   try {
-    // Frontend envia: sigla, descricao, tipo, dominio, subcategoria
-    const { sigla, descricao, tipo, dominio, subcategoria } = req.body;
+    // Frontend envia: sigla, descricao, tipo, dominio, subcategoria, certificacoes
+    const { sigla, descricao, tipo, dominio, subcategoria, certificacoes } = req.body;
     
     if (!sigla || !tipo) {
       return res.status(400).json({ error: 'Sigla e tipo são obrigatórios' });
@@ -1404,7 +1539,23 @@ app.post('/api/habilidades', async (req, res) => {
       [id, sigla, descricao || sigla, tipo, dominio || 'Desenvolvimento & Engenharia', subcategoria || 'Outras']
     );
     
+    // Salvar certificações se houver
+    if (certificacoes && certificacoes.length > 0) {
+      for (const cert of certificacoes) {
+        const certId = uuidv4();
+        await pool.query(
+          'INSERT INTO habilidade_certificacoes (id, habilidade_id, codigo, descricao, orgao_certificador, url_documentacao) VALUES (?, ?, ?, ?, ?, ?)',
+          [certId, id, cert.codigo, cert.descricao, cert.orgaoCertificador, cert.urlDocumentacao || null]
+        );
+      }
+    }
+    
+    // Buscar a habilidade criada com certificações
     const [rows] = await pool.query('SELECT * FROM habilidades WHERE id = ?', [id]);
+    const [certRows] = await pool.query(
+      'SELECT id, codigo, descricao, orgao_certificador, url_documentacao FROM habilidade_certificacoes WHERE habilidade_id = ?',
+      [id]
+    );
     
     const habilidade = {
       id: rows[0].id,
@@ -1413,7 +1564,13 @@ app.post('/api/habilidades', async (req, res) => {
       tipo: rows[0].tipo,
       dominio: rows[0].dominio,
       subcategoria: rows[0].subcategoria,
-      certificacoes: []
+      certificacoes: certRows.map(cert => ({
+        id: cert.id,
+        codigo: cert.codigo,
+        descricao: cert.descricao,
+        orgaoCertificador: cert.orgao_certificador,
+        urlDocumentacao: cert.url_documentacao
+      }))
     };
     
     res.status(201).json(habilidade);
@@ -1425,8 +1582,8 @@ app.post('/api/habilidades', async (req, res) => {
 
 app.put('/api/habilidades/:id', async (req, res) => {
   try {
-    // Frontend envia: sigla, descricao, tipo, dominio, subcategoria
-    const { sigla, descricao, tipo, dominio, subcategoria } = req.body;
+    // Frontend envia: sigla, descricao, tipo, dominio, subcategoria, certificacoes
+    const { sigla, descricao, tipo, dominio, subcategoria, certificacoes } = req.body;
     
     if (!sigla || !tipo) {
       return res.status(400).json({ error: 'Sigla e tipo são obrigatórios' });
@@ -1437,11 +1594,31 @@ app.put('/api/habilidades/:id', async (req, res) => {
       [sigla, descricao || sigla, tipo, dominio || 'Desenvolvimento & Engenharia', subcategoria || 'Outras', req.params.id]
     );
     
+    // Deletar certificações antigas
+    await pool.query('DELETE FROM habilidade_certificacoes WHERE habilidade_id = ?', [req.params.id]);
+    
+    // Inserir novas certificações
+    if (certificacoes && certificacoes.length > 0) {
+      for (const cert of certificacoes) {
+        const certId = cert.id && cert.id.startsWith('cert-') ? uuidv4() : (cert.id || uuidv4());
+        await pool.query(
+          'INSERT INTO habilidade_certificacoes (id, habilidade_id, codigo, descricao, orgao_certificador, url_documentacao) VALUES (?, ?, ?, ?, ?, ?)',
+          [certId, req.params.id, cert.codigo, cert.descricao, cert.orgaoCertificador, cert.urlDocumentacao || null]
+        );
+      }
+    }
+    
     const [rows] = await pool.query('SELECT * FROM habilidades WHERE id = ?', [req.params.id]);
     
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Habilidade não encontrada' });
     }
+    
+    // Buscar certificações atualizadas
+    const [certRows] = await pool.query(
+      'SELECT id, codigo, descricao, orgao_certificador, url_documentacao FROM habilidade_certificacoes WHERE habilidade_id = ?',
+      [req.params.id]
+    );
     
     const habilidade = {
       id: rows[0].id,
@@ -1450,7 +1627,13 @@ app.put('/api/habilidades/:id', async (req, res) => {
       tipo: rows[0].tipo,
       dominio: rows[0].dominio,
       subcategoria: rows[0].subcategoria,
-      certificacoes: []
+      certificacoes: certRows.map(cert => ({
+        id: cert.id,
+        codigo: cert.codigo,
+        descricao: cert.descricao,
+        orgaoCertificador: cert.orgao_certificador,
+        urlDocumentacao: cert.url_documentacao
+      }))
     };
     
     res.json(habilidade);
@@ -4366,6 +4549,228 @@ app.delete('/api/slas/:id', async (req, res) => {
   }
 });
 
+// ==================== SCRIPTS ====================
+
+// GET /api/scripts - Listar todos os scripts
+app.get('/api/scripts', async (req, res) => {
+  let connection;
+  try {
+    connection = await getUtf8Connection();
+    const [rows] = await connection.query('SELECT * FROM scripts ORDER BY sigla');
+    res.json(rows.map(row => ({
+      id: row.id,
+      sigla: row.sigla,
+      descricao: row.descricao,
+      dataInicio: row.data_inicio,
+      dataTermino: row.data_termino,
+      tipoScript: row.tipo_script,
+      arquivo: row.arquivo,
+      arquivoUrl: row.arquivo_url,
+      arquivoTamanho: row.arquivo_tamanho,
+      arquivoTipo: row.arquivo_tipo
+    })));
+  } catch (error) {
+    console.error('Erro ao buscar scripts:', error);
+    res.status(500).json({ error: 'Erro ao buscar scripts', code: 'DATABASE_ERROR' });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// GET /api/scripts/:id - Buscar script por ID
+app.get('/api/scripts/:id', async (req, res) => {
+  let connection;
+  try {
+    connection = await getUtf8Connection();
+    const [rows] = await connection.query('SELECT * FROM scripts WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Script não encontrado', code: 'NOT_FOUND' });
+    }
+    const row = rows[0];
+    res.json({
+      id: row.id,
+      sigla: row.sigla,
+      descricao: row.descricao,
+      dataInicio: row.data_inicio,
+      dataTermino: row.data_termino,
+      tipoScript: row.tipo_script,
+      arquivo: row.arquivo,
+      arquivoUrl: row.arquivo_url,
+      arquivoTamanho: row.arquivo_tamanho,
+      arquivoTipo: row.arquivo_tipo
+    });
+  } catch (error) {
+    console.error('Erro ao buscar script:', error);
+    res.status(500).json({ error: 'Erro ao buscar script', code: 'DATABASE_ERROR' });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// POST /api/scripts - Criar novo script
+app.post('/api/scripts', uploadScript.single('arquivo'), async (req, res) => {
+  let connection;
+  try {
+    connection = await getUtf8Connection();
+    const id = uuidv4();
+    let scriptData;
+
+    // Se foi enviado via FormData com arquivo
+    if (req.file) {
+      scriptData = JSON.parse(req.body.data);
+      const arquivo = req.file;
+      
+      await connection.query(
+        `INSERT INTO scripts (
+          id, sigla, descricao, data_inicio, data_termino, tipo_script,
+          arquivo, arquivo_url, arquivo_tamanho, arquivo_tipo
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          scriptData.sigla,
+          scriptData.descricao,
+          formatDateForMySQL(scriptData.dataInicio),
+          formatDateForMySQL(scriptData.dataTermino),
+          scriptData.tipoScript,
+          arquivo.originalname,
+          arquivo.path,
+          arquivo.size,
+          arquivo.mimetype
+        ]
+      );
+    } else {
+      // Sem arquivo, apenas JSON
+      scriptData = req.body;
+      
+      await connection.query(
+        `INSERT INTO scripts (
+          id, sigla, descricao, data_inicio, data_termino, tipo_script
+        ) VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          scriptData.sigla,
+          scriptData.descricao,
+          formatDateForMySQL(scriptData.dataInicio),
+          formatDateForMySQL(scriptData.dataTermino),
+          scriptData.tipoScript
+        ]
+      );
+    }
+
+    const [rows] = await connection.query('SELECT * FROM scripts WHERE id = ?', [id]);
+    const row = rows[0];
+    res.status(201).json({
+      id: row.id,
+      sigla: row.sigla,
+      descricao: row.descricao,
+      dataInicio: row.data_inicio,
+      dataTermino: row.data_termino,
+      tipoScript: row.tipo_script,
+      arquivo: row.arquivo,
+      arquivoUrl: row.arquivo_url,
+      arquivoTamanho: row.arquivo_tamanho,
+      arquivoTipo: row.arquivo_tipo
+    });
+  } catch (error) {
+    console.error('Erro ao criar script:', error);
+    res.status(500).json({ error: 'Erro ao criar script', code: 'DATABASE_ERROR' });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// PUT /api/scripts/:id - Atualizar script
+app.put('/api/scripts/:id', uploadScript.single('arquivo'), async (req, res) => {
+  let connection;
+  try {
+    connection = await getUtf8Connection();
+    let scriptData;
+
+    // Se foi enviado via FormData com arquivo
+    if (req.file) {
+      scriptData = JSON.parse(req.body.data);
+      const arquivo = req.file;
+      
+      await connection.query(
+        `UPDATE scripts SET
+          sigla = ?, descricao = ?, data_inicio = ?, data_termino = ?, tipo_script = ?,
+          arquivo = ?, arquivo_url = ?, arquivo_tamanho = ?, arquivo_tipo = ?
+        WHERE id = ?`,
+        [
+          scriptData.sigla,
+          scriptData.descricao,
+          formatDateForMySQL(scriptData.dataInicio),
+          formatDateForMySQL(scriptData.dataTermino),
+          scriptData.tipoScript,
+          arquivo.originalname,
+          arquivo.path,
+          arquivo.size,
+          arquivo.mimetype,
+          req.params.id
+        ]
+      );
+    } else {
+      // Sem arquivo, apenas JSON
+      scriptData = req.body;
+      
+      await connection.query(
+        `UPDATE scripts SET
+          sigla = ?, descricao = ?, data_inicio = ?, data_termino = ?, tipo_script = ?
+        WHERE id = ?`,
+        [
+          scriptData.sigla,
+          scriptData.descricao,
+          formatDateForMySQL(scriptData.dataInicio),
+          formatDateForMySQL(scriptData.dataTermino),
+          scriptData.tipoScript,
+          req.params.id
+        ]
+      );
+    }
+
+    const [rows] = await connection.query('SELECT * FROM scripts WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Script não encontrado', code: 'NOT_FOUND' });
+    }
+    const row = rows[0];
+    res.json({
+      id: row.id,
+      sigla: row.sigla,
+      descricao: row.descricao,
+      dataInicio: row.data_inicio,
+      dataTermino: row.data_termino,
+      tipoScript: row.tipo_script,
+      arquivo: row.arquivo,
+      arquivoUrl: row.arquivo_url,
+      arquivoTamanho: row.arquivo_tamanho,
+      arquivoTipo: row.arquivo_tipo
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar script:', error);
+    res.status(500).json({ error: 'Erro ao atualizar script', code: 'DATABASE_ERROR' });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// DELETE /api/scripts/:id - Deletar script
+app.delete('/api/scripts/:id', async (req, res) => {
+  let connection;
+  try {
+    connection = await getUtf8Connection();
+    const [result] = await connection.query('DELETE FROM scripts WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Script não encontrado', code: 'NOT_FOUND' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error('Erro ao deletar script:', error);
+    res.status(500).json({ error: 'Erro ao deletar script', code: 'DATABASE_ERROR' });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
 // ==================== RUNBOOKS ====================
 
 // GET /api/runbooks - Listar todos os runbooks
@@ -4665,6 +5070,7 @@ app.get('/api/estruturas-projeto', async (req, res) => {
         status: row.status || 'Pendente',
         urlProjeto: row.url_projeto,
         aplicacaoBaseId: row.aplicacao_base_id,
+        statusRepositorio: row.status_repositorio || 'N',
       };
     });
     
@@ -4746,8 +5152,8 @@ app.post('/api/estruturas-projeto', async (req, res) => {
       `INSERT INTO estruturas_projeto (
         id, produto, work_item_process, projeto, data_inicial, iteracao,
         incluir_query, incluir_maven, incluir_liquibase, criar_time_sustentacao,
-        repositorios, pat_token, estruturas_geradas, nome_time, numero_semanas, iteracao_mensal, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        repositorios, pat_token, estruturas_geradas, nome_time, numero_semanas, iteracao_mensal, status, status_repositorio
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         estrutura.produto,
@@ -4765,7 +5171,8 @@ app.post('/api/estruturas-projeto', async (req, res) => {
         estrutura.nomeTime || null,
         estrutura.numeroSemanas || 2,
         estrutura.iteracaoMensal || false,
-        estrutura.status || 'Pendente'
+        estrutura.status || 'Pendente',
+        'N'
       ]
     );
     
@@ -4809,7 +5216,8 @@ app.put('/api/estruturas-projeto/:id', async (req, res) => {
         estruturas_geradas = ?,
         status = ?,
         url_projeto = ?,
-        aplicacao_base_id = ?
+        aplicacao_base_id = ?,
+        status_repositorio = ?
       WHERE id = ?`,
       [
         estrutura.produto,
@@ -4830,6 +5238,7 @@ app.put('/api/estruturas-projeto/:id', async (req, res) => {
         estrutura.status || 'Pendente',
         estrutura.urlProjeto || null,
         estrutura.aplicacaoBaseId || null,
+        estrutura.statusRepositorio || 'N',
         req.params.id,
       ]
     );
@@ -5277,6 +5686,257 @@ app.post('/api/azure-devops/integrar-projeto', async (req, res) => {
   }
 });
 
+// POST /api/azure-devops/criar-repositorios - Criar repositórios com estrutura completa
+app.post('/api/azure-devops/criar-repositorios', async (req, res) => {
+  try {
+    const { projetoId } = req.body;
+
+    console.log(`[CRIAR REPOSITÓRIOS] Iniciando criação de repositórios para projeto ${projetoId}`);
+
+    // 1. Buscar configurações do Azure DevOps
+    const [configRows] = await pool.query(
+      "SELECT chave, valor FROM configuracoes WHERE chave = 'integration-config'"
+    );
+    
+    if (configRows.length === 0) {
+      return res.status(400).json({
+        error: 'Configurações de integração não encontradas',
+        message: 'Configure as integrações nas Configurações'
+      });
+    }
+
+    const integrationConfig = JSON.parse(configRows[0].valor);
+    const azureConfig = integrationConfig.azureDevOps;
+
+    if (!azureConfig || !azureConfig.urlOrganizacao || !azureConfig.personalAccessToken) {
+      return res.status(400).json({
+        error: 'Configurações do Azure DevOps incompletas',
+        message: 'Configure a URL da organização e o token PAT nas Configurações de Integração'
+      });
+    }
+
+    // Extrair o nome da organização da URL
+    const urlMatch = azureConfig.urlOrganizacao.match(/dev\.azure\.com\/([^\/]+)/);
+    const organization = urlMatch ? urlMatch[1] : azureConfig.urlOrganizacao;
+    const pat = azureConfig.personalAccessToken;
+
+    // 2. Buscar dados do projeto
+    const [projetos] = await pool.query('SELECT * FROM estruturas_projeto WHERE id = ?', [projetoId]);
+    
+    if (projetos.length === 0) {
+      return res.status(404).json({ error: 'Projeto não encontrado' });
+    }
+
+    const projeto = projetos[0];
+    const projectName = projeto.projeto;
+
+    console.log(`[CRIAR REPOSITÓRIOS] Projeto: ${projectName}`);
+
+    // 3. Buscar templates salvos
+    const [templates] = await pool.query(
+      'SELECT template_type, template_content, file_name FROM azure_devops_templates ORDER BY template_type'
+    );
+
+    if (templates.length === 0) {
+      return res.status(400).json({
+        error: 'Templates não encontrados',
+        message: 'Configure os templates de Azure DevOps nas Configurações'
+      });
+    }
+
+    console.log(`[CRIAR REPOSITÓRIOS] Templates encontrados: ${templates.length}`);
+
+    // Organizar templates por tipo
+    const templatesMap = {};
+    templates.forEach(t => {
+      // Converter BLOB para string se necessário
+      let content = t.template_content;
+      if (Buffer.isBuffer(content)) {
+        console.log(`[CRIAR REPOSITÓRIOS] Convertendo Buffer para string: ${t.template_type}`);
+        content = content.toString('utf-8');
+      }
+      console.log(`[CRIAR REPOSITÓRIOS] Template ${t.template_type} - tipo: ${typeof content}, tamanho: ${content?.length || 0}`);
+      templatesMap[t.template_type] = content;
+    });
+
+    // 4. Criar instância do serviço Azure
+    const azureService = new AzureDevOpsService(organization, pat);
+
+    // 5. Buscar repositórios do projeto
+    let repositorios = projeto.repositorios;
+    
+    // Se vier como string, fazer parse; se já for objeto/array, usar direto
+    if (typeof repositorios === 'string') {
+      repositorios = JSON.parse(repositorios);
+    } else if (!repositorios) {
+      repositorios = [];
+    }
+    
+    console.log(`[CRIAR REPOSITÓRIOS] Repositórios a criar: ${repositorios.length}`);
+
+    const repositoriosCriados = [];
+    const erros = [];
+
+    // 6. Criar cada repositório
+    for (const repo of repositorios) {
+      try {
+        // Gerar nome do repositório: Grupo-Tipo-Linguagem em minúsculas
+        const repoName = `${repo.produto}-${repo.categoria}-${repo.tecnologia}`.toLowerCase();
+        console.log(`[CRIAR REPOSITÓRIOS] Criando repositório: ${repoName}`);
+
+        let repository;
+        let isNewRepository = false;
+        
+        try {
+          // Tentar criar repositório
+          repository = await azureService.createRepository(projectName, {
+            name: repoName
+          });
+          console.log(`[CRIAR REPOSITÓRIOS] Repositório criado: ${repository.id}`);
+          isNewRepository = true;
+        } catch (createError) {
+          // Se já existe, buscar o repositório existente
+          if (createError.message.includes('already exists') || createError.message.includes('409')) {
+            console.log(`[CRIAR REPOSITÓRIOS] Repositório ${repoName} já existe, verificando se já foi inicializado...`);
+            const repos = await azureService.getProjectRepositories(projectName);
+            repository = repos.find(r => r.name === repoName);
+            
+            if (!repository) {
+              throw new Error(`Repositório ${repoName} não encontrado após erro de duplicação`);
+            }
+            console.log(`[CRIAR REPOSITÓRIOS] Repositório existente encontrado: ${repository.id}`);
+            
+            // Verificar se já tem commits (estrutura inicializada)
+            try {
+              const refsUrl = `/${projectName}/_apis/git/repositories/${repository.id}/refs?filter=heads/main&api-version=7.1`;
+              const refsResponse = await fetch(`https://dev.azure.com/horaciovasconcellos${refsUrl}`, {
+                headers: {
+                  'Authorization': `Basic ${Buffer.from(`:${pat}`).toString('base64')}`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              const refs = await refsResponse.json();
+              
+              if (refs.value && refs.value.length > 0) {
+                console.log(`[CRIAR REPOSITÓRIOS] Repositório ${repoName} já foi inicializado anteriormente. Pulando...`);
+                repositoriosCriados.push({
+                  nome: repoName,
+                  id: repository.id,
+                  url: repository.webUrl,
+                  status: 'já existente'
+                });
+                continue; // Pular para o próximo repositório
+              }
+            } catch (refError) {
+              console.log(`[CRIAR REPOSITÓRIOS] Não foi possível verificar refs, prosseguindo com inicialização...`);
+            }
+          } else {
+            throw createError;
+          }
+        }
+
+        // Criar estrutura inicial no repositório (apenas se for novo ou vazio)
+        if (isNewRepository || repository) {
+          await azureService.initializeRepository(
+            projectName,
+            repository.id,
+            repoName,
+            templatesMap
+          );
+
+          console.log(`[CRIAR REPOSITÓRIOS] Estrutura inicial criada para ${repoName}`);
+
+          // Configurar branch policies
+          await azureService.configureBranchPolicies(
+            projectName,
+            repository.id
+          );
+
+          console.log(`[CRIAR REPOSITÓRIOS] Branch policies configuradas para ${repoName}`);
+
+          // Configurar repository policies
+          await azureService.configureRepositoryPolicies(
+            projectName,
+            repository.id
+          );
+
+          console.log(`[CRIAR REPOSITÓRIOS] Repository policies configuradas para ${repoName}`);
+        }
+
+        repositoriosCriados.push({
+          nome: repoName,
+          id: repository.id,
+          url: repository.webUrl
+        });
+
+      } catch (error) {
+        console.error(`[CRIAR REPOSITÓRIOS] Erro ao criar ${repo.produto}-${repo.categoria}-${repo.tecnologia}:`, error);
+        erros.push({
+          nome: `${repo.produto}-${repo.categoria}-${repo.tecnologia}`.toLowerCase(),
+          erro: error.message
+        });
+      }
+    }
+
+    console.log(`[CRIAR REPOSITÓRIOS] Concluído. Criados: ${repositoriosCriados.length}, Erros: ${erros.length}`);
+
+    // 7. Atualizar status_repositorio no banco de dados
+    if (repositoriosCriados.length > 0) {
+      try {
+        await pool.query(
+          'UPDATE estruturas_projeto SET status_repositorio = ? WHERE id = ?',
+          ['Y', projetoId]
+        );
+        console.log(`[CRIAR REPOSITÓRIOS] Status do repositório atualizado para 'Y' no projeto ${projetoId}`);
+      } catch (updateError) {
+        console.error('[CRIAR REPOSITÓRIOS] Erro ao atualizar status_repositorio:', updateError);
+        // Não falhar a operação se não conseguir atualizar o status
+      }
+    }
+
+    // 8. Excluir o repositório default criado pelo Azure DevOps (geralmente tem o nome do projeto)
+    // IMPORTANTE: Só excluir se houver outros repositórios criados
+    if (repositoriosCriados.length > 0) {
+      try {
+        console.log(`[CRIAR REPOSITÓRIOS] Verificando repositório default...`);
+        const allRepos = await azureService.getProjectRepositories(projectName);
+        const defaultRepo = allRepos.find(r => r.name === projectName);
+        
+        if (defaultRepo && allRepos.length > 1) { // Só excluir se houver mais de um repositório
+          console.log(`[CRIAR REPOSITÓRIOS] Repositório default encontrado: ${defaultRepo.name} (${defaultRepo.id})`);
+          console.log(`[CRIAR REPOSITÓRIOS] Excluindo repositório default...`);
+          await azureService.deleteRepository(projectName, defaultRepo.id);
+          console.log(`[CRIAR REPOSITÓRIOS] Repositório default excluído com sucesso`);
+        } else if (defaultRepo) {
+          console.log(`[CRIAR REPOSITÓRIOS] Repositório default encontrado, mas é o único repositório. Mantendo...`);
+        } else {
+          console.log(`[CRIAR REPOSITÓRIOS] Nenhum repositório default encontrado`);
+        }
+      } catch (deleteError) {
+        console.error(`[CRIAR REPOSITÓRIOS] Erro ao excluir repositório default:`, deleteError);
+        // Não falhar a operação se não conseguir deletar o default
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Repositórios criados com sucesso',
+      repositoriosCriados,
+      erros,
+      total: repositorios.length,
+      sucesso: repositoriosCriados.length
+    });
+
+  } catch (error) {
+    console.error('[CRIAR REPOSITÓRIOS] Erro:', error);
+    res.status(500).json({
+      error: 'Erro ao criar repositórios',
+      message: error.message,
+      code: 'CREATE_REPOSITORIES_ERROR'
+    });
+  }
+});
+
 // GET /api/azure-devops/consultar-projeto/:projectName/:teamName - Consultar configuração do projeto
 app.get('/api/azure-devops/consultar-projeto/:projectName/:teamName', async (req, res) => {
   try {
@@ -5411,6 +6071,232 @@ app.get('/api/azure-devops/project/:projectName', async (req, res) => {
       message: error.message,
       code: 'AZURE_DEVOPS_ERROR'
     });
+  }
+});
+
+// POST /api/azure-devops/templates - Upload de templates YAML
+app.post('/api/azure-devops/templates', uploadYaml.single('file'), async (req, res) => {
+  let connection;
+  try {
+    const { templateType } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        error: 'Arquivo não fornecido',
+        code: 'NO_FILE'
+      });
+    }
+
+    if (!templateType) {
+      return res.status(400).json({
+        error: 'Tipo de template não fornecido',
+        code: 'NO_TEMPLATE_TYPE'
+      });
+    }
+
+    const validTypes = ['pullRequest', 'hotfix', 'main', 'develop'];
+    if (!validTypes.includes(templateType)) {
+      return res.status(400).json({
+        error: 'Tipo de template inválido',
+        validTypes,
+        code: 'INVALID_TEMPLATE_TYPE'
+      });
+    }
+
+    // Converter o buffer para string
+    const templateContent = file.buffer.toString('utf-8');
+
+    // Validação básica do conteúdo
+    if (!templateContent.trim()) {
+      return res.status(400).json({
+        error: 'Arquivo está vazio',
+        code: 'EMPTY_FILE'
+      });
+    }
+
+    connection = await pool.getConnection();
+
+    // Verificar se já existe um template deste tipo
+    const [existing] = await connection.execute(
+      'SELECT id FROM azure_devops_templates WHERE template_type = ?',
+      [templateType]
+    );
+
+    if (existing.length > 0) {
+      // Atualizar template existente
+      await connection.execute(
+        `UPDATE azure_devops_templates 
+         SET template_content = ?, 
+             file_name = ?, 
+             updated_at = NOW() 
+         WHERE template_type = ?`,
+        [templateContent, file.originalname, templateType]
+      );
+
+      console.log(`[API] Template ${templateType} atualizado - ${file.originalname}`);
+    } else {
+      // Inserir novo template
+      await connection.execute(
+        `INSERT INTO azure_devops_templates 
+         (id, template_type, template_content, file_name, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, NOW(), NOW())`,
+        [uuidv4(), templateType, templateContent, file.originalname]
+      );
+
+      console.log(`[API] Template ${templateType} criado - ${file.originalname}`);
+    }
+
+    res.json({
+      success: true,
+      message: 'Template salvo com sucesso',
+      data: {
+        templateType,
+        fileName: file.originalname,
+        size: file.size
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao salvar template:', error);
+    res.status(500).json({
+      error: 'Erro ao salvar template',
+      message: error.message,
+      code: 'TEMPLATE_SAVE_ERROR'
+    });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// GET /api/azure-devops/templates - Listar todos os templates
+app.get('/api/azure-devops/templates', async (req, res) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    const [templates] = await connection.execute(
+      `SELECT id, template_type, file_name, 
+              CHAR_LENGTH(template_content) as content_size,
+              created_at, updated_at 
+       FROM azure_devops_templates 
+       ORDER BY template_type`
+    );
+
+    res.json({
+      success: true,
+      data: templates
+    });
+  } catch (error) {
+    console.error('Erro ao buscar templates:', error);
+    res.status(500).json({
+      error: 'Erro ao buscar templates',
+      message: error.message,
+      code: 'TEMPLATE_FETCH_ERROR'
+    });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// GET /api/azure-devops/templates/:templateType - Buscar template específico
+app.get('/api/azure-devops/templates/:templateType', async (req, res) => {
+  let connection;
+  try {
+    const { templateType } = req.params;
+
+    const validTypes = ['pullRequest', 'hotfix', 'main', 'develop'];
+    if (!validTypes.includes(templateType)) {
+      return res.status(400).json({
+        error: 'Tipo de template inválido',
+        validTypes,
+        code: 'INVALID_TEMPLATE_TYPE'
+      });
+    }
+
+    connection = await pool.getConnection();
+
+    const [templates] = await connection.execute(
+      `SELECT id, template_type, template_content, file_name, 
+              created_at, updated_at 
+       FROM azure_devops_templates 
+       WHERE template_type = ?`,
+      [templateType]
+    );
+
+    if (templates.length === 0) {
+      return res.status(404).json({
+        error: 'Template não encontrado',
+        code: 'TEMPLATE_NOT_FOUND'
+      });
+    }
+
+    const template = templates[0];
+    
+    // Converter BLOB para string se necessário
+    if (Buffer.isBuffer(template.template_content)) {
+      template.template_content = template.template_content.toString('utf-8');
+    }
+
+    res.json({
+      success: true,
+      data: template
+    });
+  } catch (error) {
+    console.error('Erro ao buscar template:', error);
+    res.status(500).json({
+      error: 'Erro ao buscar template',
+      message: error.message,
+      code: 'TEMPLATE_FETCH_ERROR'
+    });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// DELETE /api/azure-devops/templates/:templateType - Deletar template
+app.delete('/api/azure-devops/templates/:templateType', async (req, res) => {
+  let connection;
+  try {
+    const { templateType } = req.params;
+
+    const validTypes = ['pullRequest', 'hotfix', 'main', 'develop'];
+    if (!validTypes.includes(templateType)) {
+      return res.status(400).json({
+        error: 'Tipo de template inválido',
+        validTypes,
+        code: 'INVALID_TEMPLATE_TYPE'
+      });
+    }
+
+    connection = await pool.getConnection();
+
+    const [result] = await connection.execute(
+      'DELETE FROM azure_devops_templates WHERE template_type = ?',
+      [templateType]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        error: 'Template não encontrado',
+        code: 'TEMPLATE_NOT_FOUND'
+      });
+    }
+
+    console.log(`[API] Template ${templateType} deletado`);
+
+    res.json({
+      success: true,
+      message: 'Template deletado com sucesso'
+    });
+  } catch (error) {
+    console.error('Erro ao deletar template:', error);
+    res.status(500).json({
+      error: 'Erro ao deletar template',
+      message: error.message,
+      code: 'TEMPLATE_DELETE_ERROR'
+    });
+  } finally {
+    if (connection) connection.release();
   }
 });
 
@@ -7503,10 +8389,12 @@ async function startServer() {
         const urlMatch = projeto.urlProjeto.match(/dev\.azure\.com\/([^\/]+)\/([^\/]+)/);
         
         if (!urlMatch) {
-          throw new Error('URL do projeto inválida');
+          throw new Error('URL do projeto inválida. Formato esperado: https://dev.azure.com/{organization}/{project}');
         }
         
-        const projectName = urlMatch[2];
+        const projectName = decodeURIComponent(urlMatch[2]);
+        
+        console.log(`[Azure Sync] Sincronizando projeto: ${projectName} (ID: ${projetoId})`);
         
         // Instanciar serviço do Azure DevOps com configurações globais
         const azureService = new AzureDevOpsService(azureOrganization, azurePat);
@@ -7717,6 +8605,11 @@ async function startServer() {
           [syncError.message, syncLogId]
         );
         
+        // Melhorar mensagem de erro para projetos não encontrados
+        if (syncError.message.includes('does not exist') || syncError.message.includes('ProjectDoesNotExist')) {
+          throw new Error(`Projeto não encontrado no Azure DevOps. Verifique se a URL do projeto está correta e se o projeto existe na organização configurada.`);
+        }
+        
         throw syncError;
       }
       
@@ -7918,6 +8811,801 @@ async function startServer() {
       });
       
       res.status(500).json({ error: 'Erro ao buscar projetos: ' + error.message });
+    }
+  });
+
+  // ===== ENDPOINTS MÉTRICAS DORA =====
+
+  /**
+   * GET /api/dora-metrics/unified - Buscar métricas DORA unificadas de todos os projetos
+   * 
+   * Retorna métricas consolidadas de todos os projetos com URL configurada
+   * 
+   * IMPORTANTE: Esta rota deve vir ANTES da rota com :projetoId para evitar que "unified" 
+   * seja interpretado como um ID de projeto
+   */
+  app.get('/api/dora-metrics/unified', async (req, res) => {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    try {
+      const { startDate, endDate } = req.query;
+
+      // Buscar todos os projetos com URL configurada
+      const [projetos] = await pool.execute(
+        `SELECT id, projeto, url_projeto as urlProjeto
+        FROM estruturas_projeto
+        WHERE url_projeto IS NOT NULL AND url_projeto != ''
+        ORDER BY projeto`
+      );
+
+      if (projetos.length === 0) {
+        return res.json({
+          success: true,
+          data: {
+            totalProjetos: 0,
+            periodo: { inicio: startDate, fim: endDate },
+            metricas: {}
+          }
+        });
+      }
+
+      const unifiedMetrics = {
+        totalProjetos: projetos.length,
+        periodo: {
+          inicio: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          fim: endDate || new Date().toISOString()
+        },
+        totais: {
+          deploymentsCount: 0,
+          commitsCount: 0,
+          bugCommitsCount: 0,
+          featureCommitsCount: 0,
+          pullRequestsCount: 0,
+          leadTimeAvgMinutes: 0,
+          deploymentFrequencyPerDay: 0
+        },
+        projetos: []
+      };
+
+      // Buscar métricas de cada projeto
+      for (const projeto of projetos) {
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/dora-metrics/${projeto.id}?startDate=${unifiedMetrics.periodo.inicio}&endDate=${unifiedMetrics.periodo.fim}`
+          );
+
+          if (response.ok) {
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+              unifiedMetrics.projetos.push(result.data);
+              
+              // Acumular totais
+              unifiedMetrics.totais.deploymentsCount += result.data.totais.deploymentsCount || 0;
+              unifiedMetrics.totais.commitsCount += result.data.totais.commitsCount || 0;
+              unifiedMetrics.totais.bugCommitsCount += result.data.totais.bugCommitsCount || 0;
+              unifiedMetrics.totais.featureCommitsCount += result.data.totais.featureCommitsCount || 0;
+              unifiedMetrics.totais.pullRequestsCount += result.data.totais.pullRequestsCount || 0;
+            }
+          }
+        } catch (error) {
+          console.warn(`[DORA Unified] Erro ao buscar métricas do projeto ${projeto.projeto}:`, error.message);
+        }
+      }
+
+      // Calcular médias gerais
+      const projetosComDados = unifiedMetrics.projetos.length;
+      if (projetosComDados > 0) {
+        let totalLeadTime = 0;
+        let totalDeployFreq = 0;
+
+        for (const proj of unifiedMetrics.projetos) {
+          totalLeadTime += proj.totais.leadTimeAvgMinutes || 0;
+          totalDeployFreq += proj.totais.deploymentFrequencyPerDay || 0;
+        }
+
+        unifiedMetrics.totais.leadTimeAvgMinutes = Math.round(totalLeadTime / projetosComDados);
+        unifiedMetrics.totais.leadTimeAvgHours = Math.round((unifiedMetrics.totais.leadTimeAvgMinutes / 60) * 10) / 10;
+        unifiedMetrics.totais.deploymentFrequencyPerDay = Math.round((totalDeployFreq / projetosComDados) * 100) / 100;
+      }
+
+      const durationMs = Date.now() - startTime;
+      await logAuditoria(pool, {
+        operationType: 'READ',
+        entityType: 'dora_metrics_unified',
+        statusCode: 200,
+        durationMs,
+        ...requestInfo
+      });
+
+      res.json({
+        success: true,
+        data: unifiedMetrics
+      });
+
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      console.error('Erro ao buscar métricas DORA unificadas:', error);
+      
+      await logAuditoria(pool, {
+        operationType: 'READ',
+        entityType: 'dora_metrics_unified',
+        statusCode: 500,
+        durationMs,
+        errorMessage: error.message,
+        ...requestInfo
+      });
+      
+      res.status(500).json({ error: 'Erro ao buscar métricas DORA unificadas: ' + error.message });
+    }
+  });
+
+  /**
+   * GET /api/dora-metrics/:projetoId - Buscar métricas DORA de um projeto
+   * 
+   * Retorna as 4 métricas principais do framework DORA:
+   * - Deployment Frequency (Frequência de Deploy)
+   * - Lead Time for Changes (Tempo de Entrega)
+   * - Change Failure Rate (Taxa de Falha em Mudanças)
+   * - Time to Restore Service (Tempo para Restaurar Serviço)
+   * 
+   * Além de métricas adicionais:
+   * - Quantidade de Commits (total e por tipo: bug/feature)
+   * - Análise de Commits por idade (Aging)
+   */
+  app.get('/api/dora-metrics/:projetoId', async (req, res) => {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    try {
+      const { projetoId } = req.params;
+      const { startDate, endDate } = req.query;
+
+      // Buscar informações do projeto
+      const [projetos] = await pool.execute(
+        `SELECT id, projeto, url_projeto as urlProjeto
+        FROM estruturas_projeto
+        WHERE id = ?`,
+        [projetoId]
+      );
+
+      if (projetos.length === 0) {
+        return res.status(404).json({ error: 'Projeto não encontrado' });
+      }
+
+      const projeto = projetos[0];
+
+      if (!projeto.urlProjeto) {
+        return res.status(400).json({ error: 'Projeto não possui URL configurada' });
+      }
+
+      // Extrair nome do projeto da URL
+      const urlMatch = projeto.urlProjeto.match(/dev\.azure\.com\/([^\/]+)\/([^\/]+)/);
+      if (!urlMatch) {
+        return res.status(400).json({ error: 'URL do projeto inválida' });
+      }
+
+      const [, organization, projectName] = urlMatch;
+
+      // Buscar configurações do Azure DevOps da tabela configuracoes (padrão da tela de configurações)
+      const [configRows] = await pool.execute(
+        "SELECT valor FROM configuracoes WHERE chave = 'integration-config' LIMIT 1"
+      );
+
+      if (configRows.length === 0 || !configRows[0].valor) {
+        return res.status(500).json({ 
+          error: 'Configuração do Azure DevOps não encontrada',
+          message: 'Configure as integrações na tela de Configurações'
+        });
+      }
+
+      const integrationConfig = JSON.parse(configRows[0].valor);
+      const azureConfig = integrationConfig.azureDevOps;
+
+      if (!azureConfig || !azureConfig.personalAccessToken) {
+        return res.status(500).json({ 
+          error: 'PAT do Azure DevOps não configurado',
+          message: 'Configure o Personal Access Token na tela de Configurações'
+        });
+      }
+
+      // Extrair organização da URL configurada
+      const orgMatch = azureConfig.urlOrganizacao.match(/dev\.azure\.com\/([^\/]+)/);
+      const configuredOrg = orgMatch ? orgMatch[1] : organization;
+
+      const azureService = new AzureDevOpsService(configuredOrg, azureConfig.personalAccessToken);
+
+      // Definir período de análise
+      const fromDate = startDate ? new Date(startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 dias atrás
+      const toDate = endDate ? new Date(endDate) : new Date();
+
+      // Buscar repositórios do projeto
+      const repositories = await azureService.getProjectRepositories(decodeURIComponent(projectName));
+
+      const metrics = {
+        projetoId,
+        projetoNome: projeto.projeto,
+        periodo: {
+          inicio: fromDate.toISOString(),
+          fim: toDate.toISOString()
+        },
+        repositorios: [],
+        totais: {
+          deploymentsCount: 0,
+          commitsCount: 0,
+          bugCommitsCount: 0,
+          featureCommitsCount: 0,
+          pullRequestsCount: 0,
+          leadTimeAvgMinutes: 0,
+          deploymentFrequencyPerDay: 0
+        }
+      };
+
+      // Analisar cada repositório
+      for (const repo of repositories) {
+        try {
+          console.log(`[DORA] Analisando repositório: ${repo.name}`);
+
+          // 1. Buscar commits da branch main
+          const commits = await azureService.getCommits(
+            decodeURIComponent(projectName),
+            repo.id,
+            'main',
+            fromDate,
+            toDate
+          );
+
+          // Classificar commits por tipo (bug, feature, outros)
+          const bugCommits = commits.filter(c => 
+            c.comment && (
+              c.comment.toLowerCase().includes('bug') ||
+              c.comment.toLowerCase().includes('fix') ||
+              c.comment.toLowerCase().includes('hotfix')
+            )
+          );
+
+          const featureCommits = commits.filter(c => 
+            c.comment && (
+              c.comment.toLowerCase().includes('feature') ||
+              c.comment.toLowerCase().includes('feat')
+            )
+          );
+
+          // 2. Buscar Pull Requests completos
+          const pullRequests = await azureService.getPullRequests(
+            decodeURIComponent(projectName),
+            repo.id,
+            'completed'
+          );
+
+          // Filtrar PRs por período
+          const filteredPRs = pullRequests.filter(pr => {
+            const completedDate = new Date(pr.closedDate);
+            return completedDate >= fromDate && completedDate <= toDate;
+          });
+
+          // Calcular Lead Time médio (tempo desde criação até merge)
+          let totalLeadTimeMinutes = 0;
+          let prWithLeadTime = 0;
+
+          for (const pr of filteredPRs) {
+            if (pr.creationDate && pr.closedDate) {
+              const created = new Date(pr.creationDate);
+              const closed = new Date(pr.closedDate);
+              const leadTimeMs = closed.getTime() - created.getTime();
+              totalLeadTimeMinutes += leadTimeMs / (1000 * 60);
+              prWithLeadTime++;
+            }
+          }
+
+          const leadTimeAvg = prWithLeadTime > 0 ? totalLeadTimeMinutes / prWithLeadTime : 0;
+
+          // 3. Análise de Commits por Idade (Aging)
+          const now = new Date();
+          const commitsAging = {
+            '0-7dias': 0,
+            '8-14dias': 0,
+            '15-30dias': 0,
+            'mais30dias': 0
+          };
+
+          for (const commit of commits) {
+            const commitDate = new Date(commit.author.date);
+            const ageInDays = (now.getTime() - commitDate.getTime()) / (1000 * 60 * 60 * 24);
+
+            if (ageInDays <= 7) {
+              commitsAging['0-7dias']++;
+            } else if (ageInDays <= 14) {
+              commitsAging['8-14dias']++;
+            } else if (ageInDays <= 30) {
+              commitsAging['15-30dias']++;
+            } else {
+              commitsAging['mais30dias']++;
+            }
+          }
+
+          // Adicionar métricas do repositório
+          metrics.repositorios.push({
+            repositorioId: repo.id,
+            repositorioNome: repo.name,
+            commits: {
+              total: commits.length,
+              bugs: bugCommits.length,
+              features: featureCommits.length,
+              aging: commitsAging
+            },
+            pullRequests: {
+              total: filteredPRs.length,
+              leadTimeAvgMinutes: Math.round(leadTimeAvg),
+              leadTimeAvgHours: Math.round(leadTimeAvg / 60 * 10) / 10
+            }
+          });
+
+          // Atualizar totais
+          metrics.totais.commitsCount += commits.length;
+          metrics.totais.bugCommitsCount += bugCommits.length;
+          metrics.totais.featureCommitsCount += featureCommits.length;
+          metrics.totais.pullRequestsCount += filteredPRs.length;
+          metrics.totais.leadTimeAvgMinutes += totalLeadTimeMinutes;
+
+        } catch (repoError) {
+          console.error(`[DORA] Erro ao analisar repositório ${repo.name}:`, repoError.message);
+        }
+      }
+
+      // 4. Buscar informações de Deployments (Builds e Releases)
+      try {
+        const builds = await azureService.getBuilds(
+          decodeURIComponent(projectName),
+          fromDate,
+          toDate,
+          'succeeded'
+        );
+
+        metrics.totais.deploymentsCount = builds.length;
+
+        // Calcular Deployment Frequency (deploys por dia)
+        const periodInDays = (toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24);
+        metrics.totais.deploymentFrequencyPerDay = periodInDays > 0 
+          ? Math.round((builds.length / periodInDays) * 100) / 100 
+          : 0;
+
+      } catch (buildError) {
+        console.warn(`[DORA] Aviso ao buscar builds: ${buildError.message}`);
+      }
+
+      // Calcular Lead Time médio geral
+      if (metrics.totais.pullRequestsCount > 0) {
+        metrics.totais.leadTimeAvgMinutes = Math.round(
+          metrics.totais.leadTimeAvgMinutes / metrics.totais.pullRequestsCount
+        );
+        metrics.totais.leadTimeAvgHours = Math.round(
+          (metrics.totais.leadTimeAvgMinutes / 60) * 10
+        ) / 10;
+      }
+
+      const durationMs = Date.now() - startTime;
+      await logAuditoria(pool, {
+        operationType: 'READ',
+        entityType: 'dora_metrics',
+        entityId: projetoId,
+        statusCode: 200,
+        durationMs,
+        ...requestInfo
+      });
+
+      res.json({
+        success: true,
+        data: metrics
+      });
+
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      console.error('Erro ao buscar métricas DORA:', error);
+      
+      await logAuditoria(pool, {
+        operationType: 'READ',
+        entityType: 'dora_metrics',
+        entityId: req.params.projetoId,
+        statusCode: 500,
+        durationMs,
+        errorMessage: error.message,
+        ...requestInfo
+      });
+      
+      res.status(500).json({ error: 'Erro ao buscar métricas DORA: ' + error.message });
+    }
+  });
+
+  // ===== ENDPOINTS REPORTBOOK =====
+
+  // GET /api/reports - Listar todos os relatórios
+  app.get('/api/reports', async (req, res) => {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    try {
+      const { status } = req.query;
+      
+      let query = `
+        SELECT 
+          r.id, r.nome, r.descricao, r.filtros, r.agrupamentos,
+          r.status, r.query, r.created_at as createdAt, r.updated_at as updatedAt,
+          COUNT(DISTINCT rc.id) as totalColunas
+        FROM reports r
+        LEFT JOIN report_columns rc ON r.id = rc.report_id
+        WHERE 1=1
+      `;
+      const params = [];
+      
+      if (status) {
+        query += ' AND r.status = ?';
+        params.push(status);
+      }
+      
+      query += ' GROUP BY r.id ORDER BY r.updated_at DESC';
+      
+      const [reports] = await pool.execute(query, params);
+      
+      const durationMs = Date.now() - startTime;
+      await logAuditoria(pool, {
+        operationType: 'READ',
+        entityType: 'reports',
+        statusCode: 200,
+        durationMs,
+        ...requestInfo
+      });
+      
+      res.json(reports);
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      console.error('Erro ao buscar relatórios:', error);
+      
+      await logAuditoria(pool, {
+        operationType: 'READ',
+        entityType: 'reports',
+        statusCode: 500,
+        durationMs,
+        errorMessage: error.message,
+        ...requestInfo
+      });
+      
+      res.status(500).json({ error: 'Erro ao buscar relatórios: ' + error.message });
+    }
+  });
+
+  // GET /api/reports/:id - Buscar relatório por ID
+  app.get('/api/reports/:id', async (req, res) => {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    try {
+      const [reports] = await pool.execute(
+        `SELECT id, nome, descricao, filtros, agrupamentos, status, query,
+         created_at as createdAt, updated_at as updatedAt
+         FROM reports WHERE id = ?`,
+        [req.params.id]
+      );
+      
+      if (reports.length === 0) {
+        return res.status(404).json({ error: 'Relatório não encontrado' });
+      }
+      
+      // Buscar colunas
+      const [columns] = await pool.execute(
+        `SELECT id, report_id as reportId, column_name as columnName, data_type as dataType,
+         order_direction as orderDirection, description, query,
+         created_at as createdAt, updated_at as updatedAt
+         FROM report_columns WHERE report_id = ? ORDER BY created_at`,
+        [req.params.id]
+      );
+      
+      const report = { ...reports[0], columns };
+      
+      const durationMs = Date.now() - startTime;
+      await logAuditoria(pool, {
+        operationType: 'READ',
+        entityType: 'reports',
+        entityId: req.params.id,
+        statusCode: 200,
+        durationMs,
+        ...requestInfo
+      });
+      
+      res.json(report);
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      console.error('Erro ao buscar relatório:', error);
+      
+      await logAuditoria(pool, {
+        operationType: 'READ',
+        entityType: 'reports',
+        entityId: req.params.id,
+        statusCode: 500,
+        durationMs,
+        errorMessage: error.message,
+        ...requestInfo
+      });
+      
+      res.status(500).json({ error: 'Erro ao buscar relatório: ' + error.message });
+    }
+  });
+
+  // POST /api/reports - Criar novo relatório
+  app.post('/api/reports', async (req, res) => {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    try {
+      const { nome, descricao, filtros, agrupamentos, status, query, columns } = req.body;
+      
+      const reportId = uuidv4();
+      
+      await pool.execute(
+        `INSERT INTO reports (id, nome, descricao, filtros, agrupamentos, status, query)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [reportId, nome, descricao, filtros, agrupamentos, status || 'Especificacao', query]
+      );
+      
+      // Inserir colunas se fornecidas
+      if (columns && columns.length > 0) {
+        for (const col of columns) {
+          await pool.execute(
+            `INSERT INTO report_columns (id, report_id, column_name, data_type, order_direction, description, query)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [uuidv4(), reportId, col.columnName, col.dataType, col.orderDirection || 'ASC', col.description, col.query]
+          );
+        }
+      }
+      
+      const durationMs = Date.now() - startTime;
+      await logAuditoria(pool, {
+        operationType: 'CREATE',
+        entityType: 'reports',
+        entityId: reportId,
+        statusCode: 201,
+        durationMs,
+        newValues: JSON.stringify({ nome, status }),
+        ...requestInfo
+      });
+      
+      res.status(201).json({ id: reportId, message: 'Relatório criado com sucesso' });
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      console.error('Erro ao criar relatório:', error);
+      
+      await logAuditoria(pool, {
+        operationType: 'CREATE',
+        entityType: 'reports',
+        statusCode: 500,
+        durationMs,
+        errorMessage: error.message,
+        ...requestInfo
+      });
+      
+      res.status(500).json({ error: 'Erro ao criar relatório: ' + error.message });
+    }
+  });
+
+  // PUT /api/reports/:id - Atualizar relatório
+  app.put('/api/reports/:id', async (req, res) => {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    try {
+      const { nome, descricao, filtros, agrupamentos, status, query, columns } = req.body;
+      
+      await pool.execute(
+        `UPDATE reports SET nome = ?, descricao = ?, filtros = ?, agrupamentos = ?, status = ?, query = ?
+         WHERE id = ?`,
+        [nome, descricao, filtros, agrupamentos, status, query, req.params.id]
+      );
+      
+      // Atualizar colunas - deletar e reinserir
+      if (columns) {
+        await pool.execute('DELETE FROM report_columns WHERE report_id = ?', [req.params.id]);
+        
+        for (const col of columns) {
+          await pool.execute(
+            `INSERT INTO report_columns (id, report_id, column_name, data_type, order_direction, description, query)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [col.id || uuidv4(), req.params.id, col.columnName, col.dataType, col.orderDirection || 'ASC', col.description, col.query]
+          );
+        }
+      }
+      
+      const durationMs = Date.now() - startTime;
+      await logAuditoria(pool, {
+        operationType: 'UPDATE',
+        entityType: 'reports',
+        entityId: req.params.id,
+        statusCode: 200,
+        durationMs,
+        newValues: JSON.stringify({ nome, status }),
+        ...requestInfo
+      });
+      
+      res.json({ message: 'Relatório atualizado com sucesso' });
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      console.error('Erro ao atualizar relatório:', error);
+      
+      await logAuditoria(pool, {
+        operationType: 'UPDATE',
+        entityType: 'reports',
+        entityId: req.params.id,
+        statusCode: 500,
+        durationMs,
+        errorMessage: error.message,
+        ...requestInfo
+      });
+      
+      res.status(500).json({ error: 'Erro ao atualizar relatório: ' + error.message });
+    }
+  });
+
+  // DELETE /api/reports/:id - Deletar relatório
+  app.delete('/api/reports/:id', async (req, res) => {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    try {
+      await pool.execute('DELETE FROM reports WHERE id = ?', [req.params.id]);
+      
+      const durationMs = Date.now() - startTime;
+      await logAuditoria(pool, {
+        operationType: 'DELETE',
+        entityType: 'reports',
+        entityId: req.params.id,
+        statusCode: 200,
+        durationMs,
+        ...requestInfo
+      });
+      
+      res.json({ message: 'Relatório deletado com sucesso' });
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      console.error('Erro ao deletar relatório:', error);
+      
+      await logAuditoria(pool, {
+        operationType: 'DELETE',
+        entityType: 'reports',
+        entityId: req.params.id,
+        statusCode: 500,
+        durationMs,
+        errorMessage: error.message,
+        ...requestInfo
+      });
+      
+      res.status(500).json({ error: 'Erro ao deletar relatório: ' + error.message });
+    }
+  });
+
+  // POST /api/reports/analyze-similarity - Analisar similaridade de relatórios
+  app.post('/api/reports/analyze-similarity', async (req, res) => {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    try {
+      const { columns, filtros, agrupamentos } = req.body;
+      
+      if (!columns || columns.length === 0) {
+        return res.status(400).json({ error: 'Colunas são obrigatórias para análise' });
+      }
+      
+      // Buscar todos os relatórios com suas colunas
+      const [reports] = await pool.execute(`
+        SELECT 
+          r.id, r.nome, r.descricao, r.filtros, r.agrupamentos, r.status, r.query,
+          GROUP_CONCAT(DISTINCT rc.column_name) as columns
+        FROM reports r
+        LEFT JOIN report_columns rc ON r.id = rc.report_id
+        GROUP BY r.id
+      `);
+      
+      // Funções auxiliares para similaridade
+      const tokenize = (text) => {
+        if (!text) return new Set();
+        return new Set(text.toLowerCase().split(/\W+/).filter(t => t.length > 2));
+      };
+      
+      const jaccardSimilarity = (set1, set2) => {
+        const intersection = new Set([...set1].filter(x => set2.has(x)));
+        const union = new Set([...set1, ...set2]);
+        return union.size === 0 ? 0 : intersection.size / union.size;
+      };
+      
+      const cosineSimilarity = (text1, text2) => {
+        const tokens1 = tokenize(text1);
+        const tokens2 = tokenize(text2);
+        const intersection = new Set([...tokens1].filter(x => tokens2.has(x)));
+        const denominator = Math.sqrt(tokens1.size * tokens2.size);
+        return denominator === 0 ? 0 : intersection.size / denominator;
+      };
+      
+      // Analisar similaridade para cada relatório
+      const results = reports.map(report => {
+        const reportColumns = new Set((report.columns || '').split(',').map(c => c.trim()).filter(c => c));
+        const inputColumns = new Set(columns.map(c => c.toLowerCase()));
+        
+        const reportFiltros = tokenize(report.filtros);
+        const inputFiltros = tokenize(filtros);
+        
+        const reportAgrupamentos = tokenize(report.agrupamentos);
+        const inputAgrupamentos = tokenize(agrupamentos);
+        
+        // Calcular métricas
+        const columnsSimilarity = jaccardSimilarity(inputColumns, reportColumns);
+        const filtrosSimilarity = jaccardSimilarity(inputFiltros, reportFiltros);
+        const agrupamentosSimilarity = jaccardSimilarity(inputAgrupamentos, reportAgrupamentos);
+        const textSimilarity = cosineSimilarity(
+          `${columns.join(' ')} ${filtros} ${agrupamentos}`,
+          `${report.columns} ${report.filtros} ${report.agrupamentos}`
+        );
+        
+        // Score ponderado: Colunas 40%, Filtros 30%, Agrupamentos 20%, Texto 10%
+        const weightedScore = (
+          columnsSimilarity * 0.40 +
+          filtrosSimilarity * 0.30 +
+          agrupamentosSimilarity * 0.20 +
+          textSimilarity * 0.10
+        );
+        
+        return {
+          report: {
+            id: report.id,
+            nome: report.nome,
+            descricao: report.descricao,
+            status: report.status,
+            totalColunas: report.columns ? report.columns.split(',').length : 0
+          },
+          similarity: {
+            columns: Math.round(columnsSimilarity * 100),
+            filtros: Math.round(filtrosSimilarity * 100),
+            agrupamentos: Math.round(agrupamentosSimilarity * 100),
+            text: Math.round(textSimilarity * 100),
+            weighted: Math.round(weightedScore * 100)
+          }
+        };
+      })
+      .filter(r => r.similarity.weighted > 0) // Apenas resultados com alguma similaridade
+      .sort((a, b) => b.similarity.weighted - a.similarity.weighted) // Ordenar por score
+      .slice(0, 10); // Top 10 resultados
+      
+      const durationMs = Date.now() - startTime;
+      await logAuditoria(pool, {
+        operationType: 'ANALYZE',
+        entityType: 'reports_similarity',
+        statusCode: 200,
+        durationMs,
+        ...requestInfo
+      });
+      
+      res.json({
+        success: true,
+        totalAnalyzed: reports.length,
+        results,
+        algorithms: {
+          jaccard: 'Medida de interseção entre conjuntos (Colunas, Filtros, Agrupamentos)',
+          cosine: 'Similaridade textual entre descrições',
+          weighted: 'Score ponderado: Colunas 40%, Filtros 30%, Agrupamentos 20%, Texto 10%'
+        }
+      });
+    } catch (error) {
+      const durationMs = Date.now() - startTime;
+      console.error('Erro ao analisar similaridade:', error);
+      
+      await logAuditoria(pool, {
+        operationType: 'ANALYZE',
+        entityType: 'reports_similarity',
+        statusCode: 500,
+        durationMs,
+        errorMessage: error.message,
+        ...requestInfo
+      });
+      
+      res.status(500).json({ error: 'Erro ao analisar similaridade: ' + error.message });
     }
   });
 
@@ -8801,9 +10489,135 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     console.log('  PUT    /api/adrs/:id                 [Atualizar ADR]');
     console.log('  DELETE /api/adrs/:id                 [Excluir ADR]');
     console.log('  GET    /health');
+    console.log('  GET    /api/dashboard/aging-chart    [Aging Chart - Histograma de Work Items]');
     console.log('');
   });
 }
+
+// GET /api/dashboard/aging-chart - Aging Chart (histograma de work items por faixa de aging)
+app.get('/api/dashboard/aging-chart', async (req, res) => {
+  try {
+    console.log('[AGING CHART] Calculando aging de work items...');
+
+    // Primeiro, tentar buscar da tabela principal azure_work_items
+    const queryPrincipal = `
+      SELECT 
+        work_item_id,
+        projeto_nome,
+        created_date as data_criacao,
+        DATEDIFF(NOW(), created_date) as dias_desde_criacao
+      FROM azure_work_items
+      WHERE created_date IS NOT NULL
+        AND DATEDIFF(NOW(), created_date) >= 0
+    `;
+
+    let [workItems] = await pool.query(queryPrincipal);
+    
+    console.log(`[AGING CHART] ${workItems.length} work items encontrados na tabela principal`);
+
+    // Se não houver dados na tabela principal, buscar do histórico
+    if (workItems.length === 0) {
+      console.log('[AGING CHART] Tentando buscar do histórico...');
+      const query = `
+        SELECT 
+          h.work_item_id,
+          h.projeto_nome,
+          MIN(h.data_alteracao) as data_criacao,
+          DATEDIFF(NOW(), MIN(h.data_alteracao)) as dias_desde_criacao
+        FROM azure_work_items_historico h
+        WHERE h.campo_alterado = 'System.CreatedDate' 
+          OR h.campo_alterado = 'created'
+        GROUP BY h.work_item_id, h.projeto_nome
+        HAVING dias_desde_criacao >= 0
+      `;
+
+      [workItems] = await pool.query(query);
+      console.log(`[AGING CHART] ${workItems.length} work items encontrados no histórico`);
+    }
+
+    // Se ainda não houver, buscar todos do histórico pela data mais antiga
+    let items = workItems;
+    if (items.length === 0) {
+      const fallbackQuery = `
+        SELECT 
+          h.work_item_id,
+          h.projeto_nome,
+          MIN(h.data_alteracao) as data_criacao,
+          DATEDIFF(NOW(), MIN(h.data_alteracao)) as dias_desde_criacao
+        FROM azure_work_items_historico h
+        GROUP BY h.work_item_id, h.projeto_nome
+        HAVING dias_desde_criacao >= 0
+      `;
+      [items] = await pool.query(fallbackQuery);
+    }
+
+    console.log(`[AGING CHART] ${items.length} work items encontrados`);
+
+    // Definir os bins (faixas de aging)
+    const bins = [
+      { label: '0-5 dias', min: 0, max: 5, count: 0 },
+      { label: '6-15 dias', min: 6, max: 15, count: 0 },
+      { label: '16-30 dias', min: 16, max: 30, count: 0 },
+      { label: '31-45 dias', min: 31, max: 45, count: 0 },
+      { label: '46-60 dias', min: 46, max: 60, count: 0 },
+      { label: '61-90 dias', min: 61, max: 90, count: 0 },
+      { label: '> 90 dias', min: 91, max: Infinity, count: 0 }
+    ];
+
+    // Distribuir work items nos bins
+    items.forEach(item => {
+      const dias = item.dias_desde_criacao;
+      const bin = bins.find(b => dias >= b.min && dias <= b.max);
+      if (bin) {
+        bin.count++;
+      }
+    });
+
+    console.log('[AGING CHART] Distribuição por faixa:', bins);
+
+    // Calcular estatísticas adicionais
+    const totalItems = items.length;
+    const avgAge = totalItems > 0 
+      ? items.reduce((sum, item) => sum + item.dias_desde_criacao, 0) / totalItems 
+      : 0;
+    const maxAge = totalItems > 0 
+      ? Math.max(...items.map(item => item.dias_desde_criacao)) 
+      : 0;
+    const minAge = totalItems > 0 
+      ? Math.min(...items.map(item => item.dias_desde_criacao)) 
+      : 0;
+
+    // Contar projetos únicos
+    const projetos = [...new Set(items.map(item => item.projeto_nome))];
+
+    res.json({
+      success: true,
+      data: {
+        histogram: bins.map(bin => ({
+          faixa: bin.label,
+          quantidade: bin.count,
+          percentual: totalItems > 0 ? ((bin.count / totalItems) * 100).toFixed(1) : '0.0'
+        })),
+        stats: {
+          total: totalItems,
+          mediaIdade: Math.round(avgAge),
+          idadeMaxima: maxAge,
+          idadeMinima: minAge,
+          totalProjetos: projetos.length,
+          projetos: projetos
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('[AGING CHART] Erro:', error);
+    res.status(500).json({
+      error: 'Erro ao calcular aging chart',
+      message: error.message,
+      code: 'AGING_CHART_ERROR'
+    });
+  }
+});
 
 startServer();
 
