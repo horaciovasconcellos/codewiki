@@ -7,83 +7,15 @@ docs_dir: docs
 repo_name: sistema-de-auditoria
 
 nav:
-  - "Início":
+  - "🏠 Início":
       - "Bem-vindo": "index.md"
-      - "Licença": "LICENSE.md"
-      
-  - "Primeiros Passos":
-      - "Início Rápido": "QUICKSTART.md"
-      - "Manual de Instalação": "MANUAL_INSTALACAO.md"
-      - "Guia de Deployment": "DEPLOYMENT_GUIDE.md"
-      - "Primeiros Passos Detalhados": "primeiros-passos.md"
-      
-  - "Docker":
-      - "Setup do Docker": "DOCKER_SETUP.md"
-      - "Guia Docker": "DOCKER_GUIDE.md"
-      - "Migração Docker": "DOCKER_MIGRATION.md"
-      - "Container MkDocs": "MKDOCS_CONTAINER.md"
-      
-  - "Configuração":
-      - "Configuração Banco de Dados": "CONFIGURACAO_BD.md"
-      - "Configurações Board Azure": "CONFIGURACOES_BOARD_AZURE.md"
-      - "Volumes": "VOLUMES.md"
-      
-  - "Desenvolvimento":
-      - "Desenvolvimento": "desenvolvimento.md"
-      - "Estrutura Aplicações": "ESTRUTURA_APLICACOES.md"
-      - "Estrutura Capacidades de Negócio": "ESTRUTURA_CAPACIDADES_NEGOCIO.md"
-      - "Estrutura Tecnologias": "ESTRUTURA_TECNOLOGIAS.md"
-      - "Estrutura Tipos de Afastamento": "ESTRUTURA_TIPOS_AFASTAMENTO.md"
-      - "Debug Tecnologias": "DEBUG-TECNOLOGIAS.md"
-      
-  - "API":
-      - "📘 Referência Completa": "API-REFERENCIA-COMPLETA.md"
-      - "APIs Microsoft Azure DevOps": "APIS_MICROSOFT_AZURE_DEVOPS.md"
-      - "API Habilidades Exemplo": "API_HABILIDADES_EXEMPLO.md"
-      - "Exemplo POST Tipo Afastamento": "EXEMPLO_POST_TIPO_AFASTAMENTO.md"
-      
-  - "Funcionalidades":
-      - "Visão Geral": "funcionalidades.md"
-      - "Sistema de Logging": "LOGGING_IMPLEMENTATION.md"
-      - "Status Logging": "STATUS_LOGGING.md"
-      - "Integrador Log Visual": "INTEGRADOR_LOG_VISUAL.md"
-      - "Identificador de Tecnologias": "IDENTIFICADOR_TECNOLOGIAS.md"
-      - "Implementação Comunicações": "RESUMO_IMPLEMENTACAO_COMUNICACOES.md"
-      
-  - "DevSecOps":
-      - "Pipeline Database": "PIPELINE-DATABASE.md"
-      - "Pipeline Wizard e Stages": "PIPELINE-WIZARD-STAGES.md"
-      - "Importação de Stages YAML": "STAGES-YAML-IMPORT.md"
-      
-  - "Azure":
-      - "Dashboard DORA": "DASHBOARD-DORA.md"
-      - "Templates Azure DevOps": "README-AZURE-DEVOPS-TEMPLATES.md"
-      - "Quick Start Azure Templates": "QUICK-START-AZURE-TEMPLATES.md"
-      - "Troubleshooting Azure Templates": "TROUBLESHOOTING-AZURE-TEMPLATES.md"
-      - "Sincronização Work Items": "azure-devops-workitems-sync.md"
-      
-  - "ReportBook":
-      - "Sistema ADR": "SISTEMA-ADR.md"
-      - "Resumo Implementação ADR": "RESUMO-IMPLEMENTACAO-ADR.md"
-      - "Melhorias UI ADR": "MELHORIAS-UI-ADR.md"
-      - "Guia de Carga de ADRs": "GUIA-CARGA-ADRS.md"
-      
-  - "Integrações Externas":
-      - "Fix Colaboradores e Habilidades": "FIX-COLABORADORES-HABILIDADES-AVALIACOES.md"
-      
-  - "Documentação":
-      - "Catálogo de APIs (Auto-Update)": "CATALOGO-APIS-AUTO-UPDATE.md"
-      
-  - "Observabilidade":
-      - "Logging - Auditoria Completa": "LOGGING-AUDIT-REPORT.md"
-      - "Logging - Implementação Completa": "LOGGING-IMPLEMENTATION-COMPLETE.md"
-      - "Logging - Referência Rápida": "LOGGING-QUICK-REFERENCE.md"
-      - "Logging - Resumo de Sucesso": "LOGGING-SUCCESS-SUMMARY.md"
-      
-  - "Documentação de Telas":
-      - "� Sumário Executivo": "TELAS-SUMARIO-EXECUTIVO.md"
-      - "�📑 Índice Geral": "TELAS-INDICE.md"
+      - "Constituição": "constitution.md"
+  
+  - "📚 Documentação de Telas":
+      - "📑 Índice Geral": "TELAS-INDICE.md"
       - "📋 Resumo Completo": "TELAS-RESUMO-COMPLETO.md"
+      - "📄 Sumário Executivo": "TELAS-SUMARIO-EXECUTIVO.md"
+      - "✅ Entrega da Documentação": "ENTREGA-DOCUMENTACAO-TELAS.md"
       - "Core":
           - "Dashboard": "TELA-DASHBOARD.md"
           - "Logs and Traces": "TELA-LOGS-TRACES.md"
@@ -91,48 +23,65 @@ nav:
           - "Aplicações": "TELA-APLICACOES.md"
       - "DevOps":
           - "Gerador de Projetos": "TELA-GERADOR-PROJETOS.md"
-      - "Documentação":
+      - "Análise":
           - "ReportBook": "TELA-REPORTBOOK.md"
-      
-  - "Features":
-      - "Status de Repositórios Persistido": "FEATURE-STATUS-REPOSITORIO.md"
-      
-  - "Banco de Dados":
-      - "Liquibase Database Migration": "LIQUIBASE_DATABASE_MIGRATION.md"
-      - "Liquibase Quickstart": "LIQUIBASE_QUICKSTART.md"
-      
-  - "Azure DevOps":
-      - "Criação de Projeto Passo a Passo": "CRIACAO_PROJETO_PASSO_A_PASSO.md"
-      - "Fluxo Criação Projeto": "FLUXO_CRIACAO_PROJETO.md"
-      - "Mudanças Criação Projeto": "MUDANCAS_CRIACAO_PROJETO.md"
-      - "Debug Azure DevOps": "DEBUG_AZURE_DEVOPS.md"
-      
-  - "Produção":
-      - "Production Deploy": "PRODUCTION_DEPLOY.md"
-      - "Production Cleanup": "PRODUCTION_CLEANUP.md"
-      - "Revisão de Produção": "RESUMO_REVISAO_PRODUCAO.md"
-      
-  - "Testes e Debug":
-      - "Guia Completo de Testes": "GUIA_COMPLETO_TESTES.md"
-      - "Testes Identificador Tecnologias": "TESTES_IDENTIFICADOR_TECNOLOGIAS.md"
-      - "Resumo Identificador Tecnologias": "RESUMO_IDENTIFICADOR_TECNOLOGIAS.md"
-      - "Instruções de Carga": "INSTRUCOES-CARGA.md"
+  
+  - "📊 Métricas e Dashboards":
+      - "DORA Dashboard": "DASHBOARD-DORA.md"
+  
+  - "🔧 Features Implementadas":
+      - "Status de Repositório": "FEATURE-STATUS-REPOSITORIO.md"
+      - "Fix Colaboradores/Habilidades": "FIX-COLABORADORES-HABILIDADES-AVALIACOES.md"
+  
+  - "🤖 Sistema ADR":
+      - "Visão Geral": "SISTEMA-ADR.md"
+      - "Resumo de Implementação": "RESUMO-IMPLEMENTACAO-ADR.md"
       - "Guia de Carga de ADRs": "GUIA-CARGA-ADRS.md"
-      
-  - "Documentação Técnica":
-      - "Implementação MkDocs": "MKDOCS_IMPLEMENTACAO.md"
-      - "Atualizações Documentação": "ATUALIZACOES_DOCUMENTACAO.md"
-      - "Índice Geral": "INDICE_GERAL.md"
-      - "Resumo Unificação": "RESUMO_UNIFICACAO.md"
-      
-  - "Release":
-      - "Release Notes": "RELEASE_NOTES.md"
-      - "Changelog": "CHANGELOG.md"
-      - "Leia-me (PT-BR)": "LEIAME.md"
-      
-  - "Segurança":
-      - "Segurança da Informação": "SECURITY.md"
-      - "Requisitos (PRD)": "PRD.md"
+      - "Melhorias de UI": "MELHORIAS-UI-ADR.md"
+  
+  - "⚙️ Pipelines":
+      - "Pipeline Database": "PIPELINE-DATABASE.md"
+      - "Pipeline Wizard Stages": "PIPELINE-WIZARD-STAGES.md"
+      - "Stages YAML Import": "STAGES-YAML-IMPORT.md"
+  
+  - "☁️ Azure DevOps":
+      - "Templates": "README-AZURE-DEVOPS-TEMPLATES.md"
+      - "Quick Start": "QUICK-START-AZURE-TEMPLATES.md"
+      - "Troubleshooting": "TROUBLESHOOTING-AZURE-TEMPLATES.md"
+      - "Work Items Sync": "azure-devops-workitems-sync.md"
+  
+  - "📜 Scripts":
+      - "Documentação": "SCRIPTS-README.md"
+  
+  - "📝 Logging e Auditoria":
+      - "Quick Reference": "LOGGING-QUICK-REFERENCE.md"
+      - "Implementação Completa": "LOGGING-IMPLEMENTATION-COMPLETE.md"
+      - "Relatório de Auditoria": "LOGGING-AUDIT-REPORT.md"
+      - "Resumo de Sucesso": "LOGGING-SUCCESS-SUMMARY.md"
+  
+  - "🔗 API":
+      - "Referência Completa": "API-REFERENCIA-COMPLETA.md"
+      - "Catálogo de APIs":
+          - "Visão Geral": "api-catalog/index.md"
+          - "Auto Update": "CATALOGO-APIS-AUTO-UPDATE.md"
+          - "Payloads":
+              - "AZ PPP": "api-catalog/PAYLOADAZPPP.md"
+              - "OrdSPL Clara": "api-catalog/PAYLOADORDSPLCLARA.md"
+  
+  - "📚 Runbooks":
+      - "Índice": "runbooks/index.md"
+      - "Status": "runbooks/STATUS.md"
+      - "Banco de Dados":
+          - "MySQL":
+              - "01 - Backup e Recovery": "runbooks/database/mysql-01-backup-recovery.md"
+          - "Oracle":
+              - "01 - Backup e Recovery": "runbooks/database/oracle-01-backup-recovery.md"
+              - "02 - Performance Tuning": "runbooks/database/oracle-02-performance-tuning.md"
+              - "03 - Instalação": "runbooks/database/oracle-03-installation.md"
+              - "04 - Patching e Upgrade": "runbooks/database/oracle-04-patching-upgrade.md"
+              - "05 - Segurança e Auditoria": "runbooks/database/oracle-05-security-audit.md"
+              - "06 - Data Guard e HA": "runbooks/database/oracle-06-data-guard-ha.md"
+
 
 copyright:  >
    Copyright &copy; 2024 Documentação

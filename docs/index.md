@@ -7,8 +7,23 @@
 ---
 
 ## 📋 Visão Geral
-
 O Sistema de Auditoria é uma aplicação web completa para gestão de aplicações, tecnologias, processos de negócio, colaboradores e contratos. Este guia descreve como executar o sistema em ambientes de **Desenvolvimento (Dev)** e **Produção (Prod)**.
+
+## O Poder do Vibe Coding (FAAFO)
+O uso de agentes de codificação leva a imensos aumentos de produtividade e a uma produção de software muito mais rápida [3]. Os benefícios dessa transformação são resumidos no acrônimo FAAFO:
+
+- [x] Fast (Rápido): Entregar funcionalidades em minutos que antes levariam semanas.
+- [x] Ambitious (Ambicioso): Ser capaz de realizar grandes aspirações e metas.
+- [x] Autonomous (Autônomo): Um único desenvolvedor com vários agentes pode operar como uma equipe.
+- [x] Fun (Divertido): Eliminação do trabalho tedioso de digitar código, liberando a criatividade.
+- [x] Optionality (Opcionalidade): A possibilidade de realizar experimentos paralelos e explorar múltiplas abordagens, pois o custo da experimentação é baixo.
+
+
+A IA é vista como um "leading indicator" (indicador principal) do impacto da IA no mercado de trabalho [13]. Pesquisas indicam que 80% dos trabalhadores americanos podem ter pelo menos 10% de suas tarefas impactadas pela IA, sendo os trabalhadores do conhecimento de altos salários (como analistas financeiros, advogados e desenvolvedores) os mais expostos [14, 15].
+
+
+Embora a IA se destaque em tarefas de "nó folha" (tarefas tipicamente júnior), a demanda geral por programadores deve aumentar à medida que a programação se torna mais fácil, seguindo o padrão da Revolução da Web [16-18]. O papel dos desenvolvedores está evoluindo; aqueles que usam IA substituirão aqueles que não a usam [19].
+
 
 ---
 
@@ -16,30 +31,30 @@ O Sistema de Auditoria é uma aplicação web completa para gestão de aplicaç�
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  FRONTEND (React)                    │
-│           Vite + TypeScript + TailwindCSS            │
-│                  Porta: 3000 / 5173                  │
+│                  FRONTEND (React)                   │
+│           Vite + TypeScript + TailwindCSS           │
+│                  Porta: 3000 / 5173                 │
 └──────────────────────┬──────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│              BACKEND (Node.js/Express)               │
-│              API REST + Logging                      │
-│                  Porta: 3000                         │
+│              BACKEND (Node.js/Express)              │
+│              API REST + Logging                     │
+│                  Porta: 3000                        │
 └──────────────────────┬──────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│                 MYSQL MASTER                         │
-│            Banco de Dados Principal                  │
-│                  Porta: 3306                         │
+│                 MYSQL MASTER                        │
+│            Banco de Dados Principal                 │
+│                  Porta: 3306                        │
 └──────────────────────┬──────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│                 MYSQL SLAVE                          │
-│            Réplica (Leitura)                         │
-│                  Porta: 3307                         │
+│                 MYSQL SLAVE                         │
+│            Réplica (Leitura)                        │
+│                  Porta: 3307                        │
 └─────────────────────────────────────────────────────┘
 ```
 
