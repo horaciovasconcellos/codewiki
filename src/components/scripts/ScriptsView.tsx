@@ -23,13 +23,18 @@ export function ScriptsView({}: ScriptsViewProps) {
 
   const loadScripts = async () => {
     try {
+      console.log('[ScriptsView] loadScripts - Iniciando...');
       setLoading(true);
       logEvent('api_call_start', 'api_call');
 
       const response = await fetch('/api/scripts');
+      console.log('[ScriptsView] loadScripts - Response status:', response.status);
       if (!response.ok) throw new Error('Erro ao carregar scripts');
       const data = await response.json();
+      console.log('[ScriptsView] loadScripts - Data recebida:', data.length, 'scripts');
+      console.log('[ScriptsView] loadScripts - Primeiros 3 scripts:', data.slice(0, 3));
       setScripts(data);
+      console.log('[ScriptsView] loadScripts - Estado atualizado!');
     } catch (error) {
       logError(error as Error, 'error_caught');
       console.error('Erro ao carregar scripts:', error);
@@ -43,12 +48,9 @@ export function ScriptsView({}: ScriptsViewProps) {
     try {
       const existe = scripts.find(s => s.id === script.id);
       
-      console.log('[ScriptsView] handleScriptSave - existe:', existe?.id);
-      console.log('[ScriptsView] handleScriptSave - arquivo:', arquivo?.name);
-      console.log('[ScriptsView] handleScriptSave - script:', script);
-      
       // Se há arquivo, fazer upload via FormData
-      if (arquivo) {
+      if (arquivo && arquivo instanceof File) {
+        console.log('[ScriptsView] BRANCH: Com arquivo (FormData)');
         const formData = new FormData();
         formData.append('arquivo', arquivo);
         formData.append('data', JSON.stringify(script));
@@ -71,6 +73,7 @@ export function ScriptsView({}: ScriptsViewProps) {
           throw new Error('Erro ao salvar script');
         }
       } else {
+        console.log('[ScriptsView] BRANCH: Sem arquivo (JSON)');
         // Sem arquivo, enviar apenas JSON
         const url = existe ? `/api/scripts/${script.id}` : '/api/scripts';
         const method = existe ? 'PUT' : 'POST';
@@ -91,13 +94,18 @@ export function ScriptsView({}: ScriptsViewProps) {
           console.error('[ScriptsView] Erro na resposta:', errorData);
           throw new Error('Erro ao salvar script');
         }
+        
+        const result = await response.json();
+        console.log('[ScriptsView] Sucesso! Resultado:', result);
       }
 
       toast.success(`Script ${existe ? 'atualizado' : 'criado'} com sucesso`);
+      console.log('[ScriptsView] Fechando formulário e recarregando lista');
       setShowForm(false);
       setEditingScript(null);
 
       await loadScripts();
+      console.log('[ScriptsView] Lista recarregada com sucesso');
     } catch (error) {
       logError(error as Error, 'error_caught');
       console.error('Erro ao salvar script:', error);

@@ -47,6 +47,9 @@ interface ScriptsTableProps {
 }
 
 export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTableProps) {
+  console.log('[ScriptsTable] Renderizando com', scripts.length, 'scripts');
+  console.log('[ScriptsTable] Loading:', loading);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -106,6 +109,9 @@ export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTabl
     const matchesTipo = tipoFilter === 'all' || script.tipoScript === tipoFilter;
     return matchesSearch && matchesTipo;
   });
+  
+  console.log('[ScriptsTable] Filtrados:', filteredScripts.length, 'scripts');
+  console.log('[ScriptsTable] Busca:', searchTerm, 'Tipo:', tipoFilter);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -177,8 +183,8 @@ export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTabl
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Sigla</TableHead>
-                <TableHead>Descrição</TableHead>
+                <TableHead style={{minWidth: '150px', display: 'table-cell !important', visibility: 'visible !important'}}>Sigla</TableHead>
+                <TableHead style={{minWidth: '300px', display: 'table-cell !important', visibility: 'visible !important'}}>Descrição</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Data Início</TableHead>
                 <TableHead>Data Término</TableHead>

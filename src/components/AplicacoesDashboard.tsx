@@ -74,91 +74,117 @@ export function AplicacoesDashboard() {
         </CardContent>
       </Card>
 
-      {/* Gráficos lado a lado */}
+      {/* Cards informativos lado a lado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Por Tipo de Aplicação */}
-        {stats.porTipo.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Por Tipo de Aplicação</CardTitle>
-              <CardDescription>Distribuição por tipo</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={stats.porTipo}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ tipo, quantidade, percent }) => 
-                      `${tipo}: ${quantidade} (${(percent * 100).toFixed(0)}%)`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="quantidade"
-                  >
-                    {stats.porTipo.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS.tipo[index % COLORS.tipo.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Por Fase do Ciclo de Vida */}
-        {stats.porFase.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Por Fase do Ciclo de Vida</CardTitle>
-              <CardDescription>Status de desenvolvimento</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={stats.porFase}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="fase" angle={-45} textAnchor="end" height={100} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="quantidade" fill="#8b5cf6">
-                    {stats.porFase.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS.fase[index % COLORS.fase.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Por Criticidade do Negócio */}
-      {stats.porCriticidade.length > 0 && (
+        {/* Card 1: Por Tipo de Aplicação e Fase do Ciclo de Vida */}
         <Card>
           <CardHeader>
-            <CardTitle>Por Criticidade do Negócio</CardTitle>
-            <CardDescription>Importância para o negócio</CardDescription>
+            <CardTitle className="text-base">Distribuição de Aplicações</CardTitle>
+            <CardDescription>Por tipo e fase do ciclo de vida</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats.porCriticidade} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="criticidade" type="category" width={120} />
-                <Tooltip />
-                <Bar dataKey="quantidade" fill="#ec4899">
-                  {stats.porCriticidade.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS.criticidade[index % COLORS.criticidade.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent className="space-y-6">
+            {/* Por Tipo de Aplicação */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Por Tipo de Aplicação</h4>
+              <div className="space-y-2">
+                {stats.porTipo.map((item, index) => {
+                  const total = stats.porTipo.reduce((sum, i) => sum + Number(i.quantidade || 0), 0);
+                  const percentual = ((Number(item.quantidade || 0) / total) * 100).toFixed(1);
+                  return (
+                    <div key={item.tipo} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: COLORS.tipo[index % COLORS.tipo.length] }}
+                        />
+                        <span className="text-sm">{item.tipo}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold">{item.quantidade}</span>
+                        <span className="text-xs text-muted-foreground w-12 text-right">({percentual}%)</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Por Fase do Ciclo de Vida */}
+            <div className="pt-4 border-t">
+              <h4 className="text-sm font-semibold mb-3 text-muted-foreground">Por Fase do Ciclo de Vida</h4>
+              <div className="space-y-2">
+                {stats.porFase.map((item, index) => {
+                  const total = stats.porFase.reduce((sum, i) => sum + Number(i.quantidade || 0), 0);
+                  const percentual = ((Number(item.quantidade || 0) / total) * 100).toFixed(1);
+                  return (
+                    <div key={item.fase} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: COLORS.fase[index % COLORS.fase.length] }}
+                        />
+                        <span className="text-sm">{item.fase}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold">{item.quantidade}</span>
+                        <span className="text-xs text-muted-foreground w-12 text-right">({percentual}%)</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </CardContent>
         </Card>
-      )}
+
+        {/* Card 2: Por Criticidade do Negócio */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Criticidade do Negócio</CardTitle>
+            <CardDescription>Importância das aplicações para o negócio</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {stats.porCriticidade.map((item, index) => {
+                const total = stats.porCriticidade.reduce((sum, i) => sum + Number(i.quantidade || 0), 0);
+                const percentual = ((Number(item.quantidade || 0) / total) * 100).toFixed(1);
+                const largura = ((Number(item.quantidade || 0) / total) * 100).toFixed(1);
+                return (
+                  <div key={item.criticidade} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: COLORS.criticidade[index % COLORS.criticidade.length] }}
+                        />
+                        <span>{item.criticidade}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{item.quantidade}</span>
+                        <span className="text-xs text-muted-foreground w-12 text-right">({percentual}%)</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full transition-all" 
+                        style={{ 
+                          width: `${largura}%`,
+                          backgroundColor: COLORS.criticidade[index % COLORS.criticidade.length]
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 pt-4 border-t text-center">
+              <p className="text-xs text-muted-foreground">
+                Total: {stats.porCriticidade.reduce((sum, i) => sum + Number(i.quantidade || 0), 0)} aplicações
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

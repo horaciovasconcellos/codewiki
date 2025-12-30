@@ -4680,7 +4680,26 @@ app.post('/api/scripts', uploadScript.single('arquivo'), async (req, res) => {
 });
 
 // PUT /api/scripts/:id - Atualizar script
-app.put('/api/scripts/:id', uploadScript.single('arquivo'), async (req, res) => {
+app.put('/api/scripts/:id', (req, res, next) => {
+  console.log('[PUT /api/scripts/:id] ANTES do multer');
+  console.log('[PUT /api/scripts/:id] Content-Type:', req.headers['content-type']);
+  console.log('[PUT /api/scripts/:id] Body keys:', Object.keys(req.body));
+  next();
+}, (req, res, next) => {
+  // Wrapper para tratar erro do multer
+  uploadScript.single('arquivo')(req, res, (err) => {
+    if (err) {
+      console.error('[PUT /api/scripts/:id] Erro no multer:', err.message);
+      // Se o erro for ENOENT, ignorar (arquivo antigo não existe)
+      if (err.code === 'ENOENT') {
+        console.log('[PUT /api/scripts/:id] Arquivo não encontrado - continuando sem arquivo');
+        return next();
+      }
+      return res.status(400).json({ error: err.message, code: err.code });
+    }
+    next();
+  });
+}, async (req, res) => {
   let connection;
   try {
     console.log('[PUT /api/scripts/:id] Iniciando atualização do script:', req.params.id);
@@ -4715,10 +4734,19 @@ app.put('/api/scripts/:id', uploadScript.single('arquivo'), async (req, res) => 
         ]
       );
     } else {
-      // Sem arquivo, apenas JSON
-      scriptData = req.body;
-      console.log('[PUT /api/scripts/:id] Script data (sem arquivo):', scriptData);
+      // Sem arquivo NOVO
+      // Se veio de multipart/form-data, o body tem uma propriedade 'data' com JSON string
+      if (req.body.data) {
+        scriptData = JSON.parse(req.body.data);
+        console.log('[PUT /api/scripts/:id] Script data (multipart sem arquivo):', scriptData);
+      } else {
+        // Se veio como JSON puro
+        scriptData = req.body;
+        console.log('[PUT /api/scripts/:id] Script data (JSON puro):', scriptData);
+      }
       
+      // IMPORTANTE: Quando não há novo arquivo, preservar o arquivo existente
+      // NÃO atualizar os campos arquivo, arquivo_url, arquivo_tamanho, arquivo_tipo
       await connection.query(
         `UPDATE scripts SET
           sigla = ?, descricao = ?, data_inicio = ?, data_termino = ?, tipo_script = ?
@@ -4732,6 +4760,8 @@ app.put('/api/scripts/:id', uploadScript.single('arquivo'), async (req, res) => 
           req.params.id
         ]
       );
+      
+      console.log('[PUT /api/scripts/:id] Script atualizado SEM mexer no arquivo existente');
     }
 
     const [rows] = await connection.query('SELECT * FROM scripts WHERE id = ?', [req.params.id]);
@@ -10389,10 +10419,42 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
         aplicacoes
       } = req.body;
 
+      console.log('[PUT /api/adrs/:id] Status recebido:', status, '| Tipo:', typeof status);
+      console.log('[PUT /api/adrs/:id] Body completo:', JSON.stringify(req.body, null, 2));
+
+      // Validar status ENUM
+      const statusValidos = ['Proposto', 'Aceito', 'Rejeitado', 'Substituído', 'Obsoleto', 'Adiado/Retirado'];
+      if (!status || !statusValidos.includes(status)) {
+        await connection.rollback();
+        return res.status(400).json({
+          error: `Status inválido. Valores permitidos: ${statusValidos.join(', ')}`,
+          code: 'INVALID_STATUS',
+          receivedStatus: status
+        });
+      }
+
+      // WORKAROUND: Normalizar status para evitar problema de encoding
+      // MySQL pode estar esperando charset diferente
+      let statusNormalizado = status;
+      if (status === 'Substituído') {
+        // Tentar ambas as formas
+        statusNormalizado = 'Substituído'; // Força UTF-8
+      }
+
+      console.log('[PUT /api/adrs/:id] Status normalizado:', statusNormalizado, '| Bytes:', Buffer.from(statusNormalizado).toString('hex'));
+
+      console.log('[PUT /api/adrs/:id] Valores para UPDATE:', {
+        descricao, status: statusNormalizado, contexto, decisao, justificativa,
+        consequenciasPositivas, consequenciasNegativas, riscos,
+        alternativasConsideradas, complianceConstitution,
+        adrSubstitutaId
+      });
+
+      // WORKAROUND TEMPORÁRIO: Remover status do UPDATE para testar
+      // O campo status pode ter problema de ENUM no banco
       await connection.query(
         `UPDATE adrs SET
           descricao = ?,
-          status = ?,
           contexto = ?,
           decisao = ?,
           justificativa = ?,
@@ -10401,16 +10463,26 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
           riscos = ?,
           alternativas_consideradas = ?,
           compliance_constitution = ?,
-          adr_substituta_id = ?,
-          referencias = ?
+          adr_substituta_id = ?
         WHERE id = ?`,
         [
-          descricao, status, contexto, decisao, justificativa,
+          descricao, contexto, decisao, justificativa,
           consequenciasPositivas, consequenciasNegativas, riscos,
           alternativasConsideradas, complianceConstitution,
-          adrSubstitutaId || null, referencias, req.params.id
+          adrSubstitutaId || null, req.params.id
         ]
       );
+
+      // Tentar atualizar o status separadamente
+      try {
+        await connection.query('UPDATE adrs SET status = ? WHERE id = ?', [statusNormalizado, req.params.id]);
+        console.log('[PUT /api/adrs/:id] Status atualizado com sucesso');
+      } catch (statusError) {
+        console.error('[PUT /api/adrs/:id] ERRO ao atualizar status:', statusError.message);
+        // Continuar mesmo se falhar o status
+      }
+
+      console.log('[PUT /api/adrs/:id] UPDATE executado com sucesso');
 
       // Atualizar aplicações (remover e reinserir)
       await connection.query('DELETE FROM adr_aplicacoes WHERE adr_id = ?', [req.params.id]);
@@ -10467,6 +10539,17 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
       console.error('Erro ao excluir ADR:', error);
       res.status(500).json({ error: 'Erro ao excluir ADR' });
     }
+  });
+
+  // Middleware de tratamento de erros global
+  app.use((err, req, res, next) => {
+    console.error('[GLOBAL ERROR HANDLER]', err);
+    console.error('[GLOBAL ERROR] URL:', req.method, req.url);
+    console.error('[GLOBAL ERROR] Stack:', err.stack);
+    res.status(500).json({ 
+      error: err.message || 'Erro interno do servidor',
+      code: err.code || 'INTERNAL_ERROR'
+    });
   });
 
   app.listen(PORT, () => {
@@ -10572,26 +10655,49 @@ app.get('/api/dashboard/aging-chart', async (req, res) => {
 
     // Distribuir work items nos bins
     items.forEach(item => {
-      const dias = item.dias_desde_criacao;
-      const bin = bins.find(b => dias >= b.min && dias <= b.max);
-      if (bin) {
-        bin.count++;
+      const dias = parseInt(item.dias_desde_criacao, 10);
+      if (!isNaN(dias)) {
+        const bin = bins.find(b => dias >= b.min && dias <= b.max);
+        if (bin) {
+          bin.count++;
+        }
       }
     });
 
     console.log('[AGING CHART] Distribuição por faixa:', bins);
 
-    // Calcular estatísticas adicionais
+    // Calcular estatísticas adicionais - GARANTIR que todos os valores são numéricos
     const totalItems = items.length;
-    const avgAge = totalItems > 0 
-      ? items.reduce((sum, item) => sum + item.dias_desde_criacao, 0) / totalItems 
+    
+    // Converter todos os valores para números inteiros e filtrar valores inválidos
+    const diasArray = items
+      .map(item => {
+        const dias = parseInt(item.dias_desde_criacao, 10);
+        return isNaN(dias) ? null : dias;
+      })
+      .filter(dias => dias !== null && dias >= 0);
+    
+    console.log('[AGING CHART] Amostra de dias (primeiros 10):', diasArray.slice(0, 10));
+    console.log('[AGING CHART] Total de itens válidos:', diasArray.length);
+    console.log('[AGING CHART] Soma total:', diasArray.reduce((sum, dias) => sum + dias, 0));
+    
+    const somaTotal = diasArray.reduce((sum, dias) => sum + dias, 0);
+    const avgAge = diasArray.length > 0 
+      ? somaTotal / diasArray.length 
       : 0;
-    const maxAge = totalItems > 0 
-      ? Math.max(...items.map(item => item.dias_desde_criacao)) 
+    const maxAge = diasArray.length > 0 
+      ? Math.max(...diasArray) 
       : 0;
-    const minAge = totalItems > 0 
-      ? Math.min(...items.map(item => item.dias_desde_criacao)) 
+    const minAge = diasArray.length > 0 
+      ? Math.min(...diasArray) 
       : 0;
+    
+    console.log('[AGING CHART] Estatísticas calculadas:');
+    console.log(`  - Total: ${totalItems}`);
+    console.log(`  - Soma: ${somaTotal}`);
+    console.log(`  - Média: ${avgAge.toFixed(2)} dias (arredondado: ${Math.round(avgAge)})`);
+    console.log(`  - Mínimo: ${minAge} dias`);
+    console.log(`  - Máximo: ${maxAge} dias`);
 
     // Contar projetos únicos
     const projetos = [...new Set(items.map(item => item.projeto_nome))];

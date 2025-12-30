@@ -311,73 +311,6 @@ export function DashboardView({
           {/* Dashboard de Aplicações com Gráficos Detalhados */}
           <AplicacoesDashboard />
 
-          {/* Cards de Estatísticas Detalhadas */}
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* Card de Runbooks Detalhado */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <BookOpen className="text-orange-600" size={20} />
-                  Runbooks - Detalhamento
-                </CardTitle>
-                <CardDescription className="text-xs">Análise dos runbooks cadastrados</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center pb-2 border-b">
-                    <span className="text-sm font-medium">Total de Runbooks</span>
-                    <span className="text-2xl font-bold text-orange-600">{runbooksCount}</span>
-                  </div>
-                  {Object.entries(runbooksPorTipo).map(([tipo, quantidade]) => (
-                    <div key={tipo} className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">{tipo}</span>
-                      <span className="font-semibold">{quantidade}</span>
-                    </div>
-                  ))}
-                  {runbooksCount === 0 && (
-                    <p className="text-xs text-muted-foreground italic">Nenhum runbook cadastrado ainda.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Card de Habilidades Detalhado */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Certificate className="text-violet-600" size={20} />
-                  Habilidades - Detalhamento
-                </CardTitle>
-                <CardDescription className="text-xs">Análise das habilidades cadastradas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center pb-2 border-b">
-                    <span className="text-sm font-medium">Total de Habilidades</span>
-                    <span className="text-2xl font-bold text-violet-600">{habilidadesCount}</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-xs font-medium text-muted-foreground">Por Subcategoria:</div>
-                    {Object.entries(habilidadesPorSubcategoria).slice(0, 5).map(([subcategoria, quantidade]) => (
-                      <div key={subcategoria} className="flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground truncate flex-1">{subcategoria}</span>
-                        <span className="font-semibold ml-2">{quantidade}</span>
-                      </div>
-                    ))}
-                    {Object.keys(habilidadesPorSubcategoria).length > 5 && (
-                      <div className="text-xs text-muted-foreground italic">
-                        +{Object.keys(habilidadesPorSubcategoria).length - 5} categorias...
-                      </div>
-                    )}
-                  </div>
-                  {habilidadesCount === 0 && (
-                    <p className="text-xs text-muted-foreground italic">Nenhuma habilidade cadastrada ainda.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Aging Chart - Histograma de Atraso de Work Items */}
           {/* Verificar se há dados reais: total > 0 E (histogram vazio OU todas as quantidades são 0) */}
           {(!agingData || 
@@ -441,17 +374,20 @@ export function DashboardView({
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={agingData.histogram}>
+                  <ResponsiveContainer width="100%" height={350}>
+                    <BarChart data={agingData.histogram} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis 
                         dataKey="faixa" 
-                        fontSize={11}
-                        label={{ value: 'Faixa de Dias', position: 'insideBottom', offset: -5, fontSize: 12 }}
+                        fontSize={12}
+                        angle={-20}
+                        textAnchor="end"
+                        height={80}
+                        label={{ value: 'Faixa de Dias', position: 'insideBottom', offset: -10, fontSize: 13 }}
                       />
                       <YAxis 
-                        fontSize={11}
-                        label={{ value: 'Quantidade', angle: -90, position: 'insideLeft', fontSize: 12 }}
+                        fontSize={12}
+                        label={{ value: 'Quantidade', angle: -90, position: 'insideLeft', fontSize: 13 }}
                       />
                       <Tooltip 
                         formatter={(value: number, name: string, props: any) => {
