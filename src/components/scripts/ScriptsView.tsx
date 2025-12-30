@@ -43,6 +43,10 @@ export function ScriptsView({}: ScriptsViewProps) {
     try {
       const existe = scripts.find(s => s.id === script.id);
       
+      console.log('[ScriptsView] handleScriptSave - existe:', existe?.id);
+      console.log('[ScriptsView] handleScriptSave - arquivo:', arquivo?.name);
+      console.log('[ScriptsView] handleScriptSave - script:', script);
+      
       // Se há arquivo, fazer upload via FormData
       if (arquivo) {
         const formData = new FormData();
@@ -52,6 +56,7 @@ export function ScriptsView({}: ScriptsViewProps) {
         const url = existe ? `/api/scripts/${script.id}` : '/api/scripts';
         const method = existe ? 'PUT' : 'POST';
 
+        console.log('[ScriptsView] Enviando com arquivo - URL:', url, 'Method:', method);
         logEvent('api_call_start', 'api_call');
 
         const response = await fetch(url, {
@@ -59,12 +64,19 @@ export function ScriptsView({}: ScriptsViewProps) {
           body: formData
         });
 
-        if (!response.ok) throw new Error('Erro ao salvar script');
+        console.log('[ScriptsView] Response status:', response.status);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('[ScriptsView] Erro na resposta:', errorData);
+          throw new Error('Erro ao salvar script');
+        }
       } else {
         // Sem arquivo, enviar apenas JSON
         const url = existe ? `/api/scripts/${script.id}` : '/api/scripts';
         const method = existe ? 'PUT' : 'POST';
 
+        console.log('[ScriptsView] Enviando sem arquivo - URL:', url, 'Method:', method);
+        console.log('[ScriptsView] Body JSON:', JSON.stringify(script));
         logEvent('api_call_start', 'api_call');
 
         const response = await fetch(url, {
@@ -73,7 +85,12 @@ export function ScriptsView({}: ScriptsViewProps) {
           body: JSON.stringify(script)
         });
 
-        if (!response.ok) throw new Error('Erro ao salvar script');
+        console.log('[ScriptsView] Response status:', response.status);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('[ScriptsView] Erro na resposta:', errorData);
+          throw new Error('Erro ao salvar script');
+        }
       }
 
       toast.success(`Script ${existe ? 'atualizado' : 'criado'} com sucesso`);

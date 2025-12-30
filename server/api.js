@@ -4683,12 +4683,17 @@ app.post('/api/scripts', uploadScript.single('arquivo'), async (req, res) => {
 app.put('/api/scripts/:id', uploadScript.single('arquivo'), async (req, res) => {
   let connection;
   try {
+    console.log('[PUT /api/scripts/:id] Iniciando atualização do script:', req.params.id);
+    console.log('[PUT /api/scripts/:id] req.file:', req.file ? 'SIM' : 'NÃO');
+    console.log('[PUT /api/scripts/:id] req.body:', req.body);
+    
     connection = await getUtf8Connection();
     let scriptData;
 
     // Se foi enviado via FormData com arquivo
     if (req.file) {
       scriptData = JSON.parse(req.body.data);
+      console.log('[PUT /api/scripts/:id] Script data (com arquivo):', scriptData);
       const arquivo = req.file;
       
       await connection.query(
@@ -4712,6 +4717,7 @@ app.put('/api/scripts/:id', uploadScript.single('arquivo'), async (req, res) => 
     } else {
       // Sem arquivo, apenas JSON
       scriptData = req.body;
+      console.log('[PUT /api/scripts/:id] Script data (sem arquivo):', scriptData);
       
       await connection.query(
         `UPDATE scripts SET
