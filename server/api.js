@@ -5099,6 +5099,7 @@ app.get('/api/estruturas-projeto', async (req, res) => {
         incluirLiquibase: row.incluir_liquibase === 1,
         criarTimeSustentacao: row.criar_time_sustentacao === 1,
         iteracaoMensal: row.iteracao_mensal === 1,
+        innerSourceProject: row.inner_source_project === 1,
         repositorios,
         patToken: row.pat_token,
         estruturasGeradas,
@@ -5183,13 +5184,14 @@ app.post('/api/estruturas-projeto', async (req, res) => {
     const id = estrutura.id || uuidv4();
     
     console.log('[API] POST /api/estruturas-projeto - Criando estrutura:', estrutura.produto, estrutura.projeto);
+    console.log('[API] InnerSource Project:', estrutura.innerSourceProject);
     
     await pool.query(
       `INSERT INTO estruturas_projeto (
         id, produto, work_item_process, projeto, data_inicial, iteracao,
         incluir_query, incluir_maven, incluir_liquibase, criar_time_sustentacao,
-        repositorios, pat_token, estruturas_geradas, nome_time, numero_semanas, iteracao_mensal, status, status_repositorio
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        repositorios, pat_token, estruturas_geradas, nome_time, numero_semanas, iteracao_mensal, status, status_repositorio, inner_source_project, aplicacao_base_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         estrutura.produto,
@@ -5208,9 +5210,68 @@ app.post('/api/estruturas-projeto', async (req, res) => {
         estrutura.numeroSemanas || 2,
         estrutura.iteracaoMensal || false,
         estrutura.status || 'Pendente',
-        'N'
+        'N',
+        estrutura.innerSourceProject || false,
+        null
       ]
     );
+    
+    // Se o projeto for InnerSource, criar registro na tabela innersource_projects
+    if (estrutura.innerSourceProject === true) {
+      console.log('[API] Criando registro InnerSource automático para projeto:', estrutura.projeto);
+      
+      const innerSourceId = `innersource-${id}`;
+      
+      // Determinar URL do projeto
+      let urlProjeto = `https://dev.azure.com/organization/${estrutura.produto}/${estrutura.projeto}`;
+      
+      if (estrutura.repositorios && estrutura.repositorios.length > 0) {
+        const repo = estrutura.repositorios[0];
+        if (repo.url) {
+          urlProjeto = repo.url;
+        } else if (repo.nome) {
+          urlProjeto = `https://github.com/${estrutura.produto}/${repo.nome}`;
+        }
+      }
+      
+      const ownerData = JSON.stringify({
+        login: estrutura.produto || 'unknown',
+        avatar_url: null
+      });
+      
+      const metadataData = JSON.stringify({
+        produto: estrutura.produto,
+        projeto: estrutura.projeto,
+        dataInicial: estrutura.dataInicial,
+        nomeTime: estrutura.nomeTime
+      });
+      
+      await pool.query(
+        `INSERT INTO innersource_projects (
+          id, nome, full_nome, html_url, descricao, 
+          stargazers_count, watchers_count, language, forks_count, open_issues_count,
+          license, owner, metadata, estrutura_projeto_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          innerSourceId,
+          estrutura.projeto,
+          `${estrutura.produto}/${estrutura.projeto}`,
+          urlProjeto,
+          `Projeto InnerSource criado automaticamente: ${estrutura.projeto}`,
+          0, // stargazers_count
+          0, // watchers_count
+          null, // language
+          0, // forks_count
+          0, // open_issues_count
+          null, // license
+          ownerData,
+          metadataData,
+          id // estrutura_projeto_id
+        ]
+      );
+      
+      console.log('[API] Registro InnerSource criado com ID:', innerSourceId);
+    }
     
     res.status(201).json({ id, ...estrutura });
   } catch (error) {
@@ -5233,6 +5294,14 @@ app.put('/api/estruturas-projeto/:id', async (req, res) => {
       dataInicial = dataInicial.split('T')[0];
     }
     
+    // Verificar estado anterior do inner_source_project
+    const [existingRows] = await pool.query(
+      'SELECT inner_source_project FROM estruturas_projeto WHERE id = ?',
+      [req.params.id]
+    );
+    
+    const existingInnerSource = existingRows.length > 0 ? existingRows[0].inner_source_project : false;
+    
     const [result] = await pool.query(
       `UPDATE estruturas_projeto SET
         produto = ?, 
@@ -5253,7 +5322,8 @@ app.put('/api/estruturas-projeto/:id', async (req, res) => {
         status = ?,
         url_projeto = ?,
         aplicacao_base_id = ?,
-        status_repositorio = ?
+        status_repositorio = ?,
+        inner_source_project = ?
       WHERE id = ?`,
       [
         estrutura.produto,
@@ -5275,6 +5345,7 @@ app.put('/api/estruturas-projeto/:id', async (req, res) => {
         estrutura.urlProjeto || null,
         estrutura.aplicacaoBaseId || null,
         estrutura.statusRepositorio || 'N',
+        estrutura.innerSourceProject || false,
         req.params.id,
       ]
     );
@@ -5283,6 +5354,69 @@ app.put('/api/estruturas-projeto/:id', async (req, res) => {
     
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Estrutura não encontrada', code: 'NOT_FOUND' });
+    }
+    
+    // Sincronizar com InnerSource Projects
+    const innerSourceAtivado = estrutura.innerSourceProject === true;
+    
+    if (innerSourceAtivado && !existingInnerSource) {
+      // Checkbox foi marcado agora - criar registro InnerSource
+      console.log('[API] InnerSource ativado - criando registro para:', estrutura.projeto);
+      
+      const innerSourceId = `innersource-${req.params.id}`;
+      
+      // Determinar URL do projeto
+      let urlProjeto = `https://dev.azure.com/organization/${estrutura.produto}/${estrutura.projeto}`;
+      
+      if (estrutura.repositorios && estrutura.repositorios.length > 0) {
+        const repo = estrutura.repositorios[0];
+        if (repo.url) {
+          urlProjeto = repo.url;
+        } else if (repo.nome) {
+          urlProjeto = `https://github.com/${estrutura.produto}/${repo.nome}`;
+        }
+      }
+      
+      const ownerData = JSON.stringify({
+        login: estrutura.produto || 'unknown',
+        avatar_url: null
+      });
+      
+      const metadataData = JSON.stringify({
+        produto: estrutura.produto,
+        projeto: estrutura.projeto,
+        dataInicial: estrutura.dataInicial,
+        nomeTime: estrutura.nomeTime
+      });
+      
+      await pool.query(
+        `INSERT INTO innersource_projects (
+          id, nome, full_nome, html_url, descricao, 
+          stargazers_count, watchers_count, language, forks_count, open_issues_count,
+          license, owner, metadata, estrutura_projeto_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          innerSourceId,
+          estrutura.projeto,
+          `${estrutura.produto}/${estrutura.projeto}`,
+          urlProjeto,
+          `Projeto InnerSource: ${estrutura.projeto}`,
+          0, 0, null, 0, 0, null,
+          ownerData,
+          metadataData,
+          req.params.id
+        ]
+      );
+      
+      console.log('[API] Registro InnerSource criado:', innerSourceId);
+    } else if (!innerSourceAtivado && existingInnerSource) {
+      // Checkbox foi desmarcado - remover registro InnerSource
+      console.log('[API] InnerSource desativado - removendo registro');
+      await pool.query(
+        'DELETE FROM innersource_projects WHERE estrutura_projeto_id = ?',
+        [req.params.id]
+      );
+      console.log('[API] Registro InnerSource removido');
     }
     
     res.json({ id: req.params.id, ...estrutura });
@@ -5319,6 +5453,20 @@ app.delete('/api/estruturas-projeto/:id', async (req, res) => {
         code: 'PROCESSED_PROJECT',
         projeto: estrutura.projeto
       });
+    }
+    
+    // Deletar registro InnerSource associado (se existir)
+    console.log('[API] Verificando registro InnerSource associado...');
+    const [innerSourceRows] = await pool.query(
+      'SELECT id FROM innersource_projects WHERE estrutura_projeto_id = ?',
+      [req.params.id]
+    );
+    
+    if (innerSourceRows.length > 0) {
+      const innerSourceId = innerSourceRows[0].id;
+      console.log('[API] Deletando registro InnerSource associado:', innerSourceId);
+      await pool.query('DELETE FROM innersource_projects WHERE id = ?', [innerSourceId]);
+      console.log('[API] Registro InnerSource deletado com sucesso');
     }
     
     // Se status for Pendente, permitir exclusão
@@ -10540,6 +10688,689 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
       res.status(500).json({ error: 'Erro ao excluir ADR' });
     }
   });
+
+  // ===========================
+  // INNERSOURCE PROJECTS ROUTES
+  // ===========================
+
+  // GET - Listar todos os projetos InnerSource
+  app.get('/api/innersource-projects', async (req, res) => {
+    try {
+      const [rows] = await pool.query(`
+        SELECT * FROM innersource_projects 
+        ORDER BY nome ASC
+      `);
+      
+      // Parse JSON fields with error handling
+      const projects = rows.map(row => {
+        let owner = row.owner;
+        let metadata = row.metadata;
+        
+        try {
+          owner = typeof row.owner === 'string' ? JSON.parse(row.owner) : row.owner;
+        } catch (e) {
+          console.error('Error parsing owner JSON:', e);
+          owner = {};
+        }
+        
+        try {
+          metadata = typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata;
+        } catch (e) {
+          console.error('Error parsing metadata JSON:', e);
+          metadata = {};
+        }
+        
+        return {
+          ...row,
+          owner,
+          _InnerSourceMetadata: metadata
+        };
+      });
+      
+      res.json(projects);
+    } catch (err) {
+      console.error('Erro ao listar projetos InnerSource:', err);
+      res.status(500).json({ error: 'Erro ao listar projetos InnerSource' });
+    }
+  });
+
+  // GET - Buscar projeto InnerSource por ID
+  app.get('/api/innersource-projects/:id', async (req, res) => {
+    try {
+      const [rows] = await pool.query(
+        'SELECT * FROM innersource_projects WHERE id = ?',
+        [req.params.id]
+      );
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Projeto InnerSource não encontrado' });
+      }
+      
+      // Parse JSON fields with error handling
+      let owner = rows[0].owner;
+      let metadata = rows[0].metadata;
+      
+      try {
+        owner = typeof rows[0].owner === 'string' ? JSON.parse(rows[0].owner) : rows[0].owner;
+      } catch (e) {
+        console.error('Error parsing owner JSON:', e);
+        owner = {};
+      }
+      
+      try {
+        metadata = typeof rows[0].metadata === 'string' ? JSON.parse(rows[0].metadata) : rows[0].metadata;
+      } catch (e) {
+        console.error('Error parsing metadata JSON:', e);
+        metadata = {};
+      }
+      
+      const project = {
+        ...rows[0],
+        owner,
+        _InnerSourceMetadata: metadata
+      };
+      
+      res.json(project);
+    } catch (err) {
+      console.error('Erro ao buscar projeto InnerSource:', err);
+      res.status(500).json({ error: 'Erro ao buscar projeto InnerSource' });
+    }
+  });
+
+  // POST - Criar novo projeto InnerSource
+  app.post('/api/innersource-projects', async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const project = req.body;
+      const id = project.id || uuidv4();
+
+      await connection.query(`
+        INSERT INTO innersource_projects (
+          id, nome, full_nome, html_url, descricao,
+          stargazers_count, watchers_count, language,
+          forks_count, open_issues_count, license,
+          owner, metadata
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        id,
+        project.nome,
+        project.full_nome,
+        project.html_url,
+        project.descricao || null,
+        project.stargazers_count || 0,
+        project.watchers_count || 0,
+        project.language || null,
+        project.forks_count || 0,
+        project.open_issues_count || 0,
+        project.license || null,
+        JSON.stringify(project.owner),
+        JSON.stringify(project._InnerSourceMetadata)
+      ]);
+
+      await connection.commit();
+      res.status(201).json({ id, message: 'Projeto InnerSource criado com sucesso' });
+    } catch (err) {
+      await connection.rollback();
+      console.error('Erro ao criar projeto InnerSource:', err);
+      res.status(500).json({ error: 'Erro ao criar projeto InnerSource' });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // PUT - Atualizar projeto InnerSource
+  app.put('/api/innersource-projects/:id', async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const project = req.body;
+
+      await connection.query(`
+        UPDATE innersource_projects SET
+          nome = ?,
+          full_nome = ?,
+          html_url = ?,
+          descricao = ?,
+          stargazers_count = ?,
+          watchers_count = ?,
+          language = ?,
+          forks_count = ?,
+          open_issues_count = ?,
+          license = ?,
+          owner = ?,
+          metadata = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `, [
+        project.nome,
+        project.full_nome,
+        project.html_url,
+        project.descricao || null,
+        project.stargazers_count || 0,
+        project.watchers_count || 0,
+        project.language || null,
+        project.forks_count || 0,
+        project.open_issues_count || 0,
+        project.license || null,
+        JSON.stringify(project.owner),
+        JSON.stringify(project._InnerSourceMetadata),
+        req.params.id
+      ]);
+
+      await connection.commit();
+      res.json({ message: 'Projeto InnerSource atualizado com sucesso' });
+    } catch (err) {
+      await connection.rollback();
+      console.error('Erro ao atualizar projeto InnerSource:', err);
+      res.status(500).json({ error: 'Erro ao atualizar projeto InnerSource' });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // DELETE - Excluir projeto InnerSource
+  app.delete('/api/innersource-projects/:id', async (req, res) => {
+    try {
+      await pool.query('DELETE FROM innersource_projects WHERE id = ?', [req.params.id]);
+      res.json({ message: 'Projeto InnerSource excluído com sucesso' });
+    } catch (err) {
+      console.error('Erro ao excluir projeto InnerSource:', err);
+      res.status(500).json({ error: 'Erro ao excluir projeto InnerSource' });
+    }
+  });
+
+  // ==================== SPACE DASHBOARD ====================
+  
+  // GET /api/space-dashboard - Buscar métricas SPACE do Azure DevOps
+  app.get('/api/space-dashboard', async (req, res) => {
+    try {
+      const { projectName, startDate, endDate, sprint } = req.query;
+
+      if (!projectName) {
+        return res.status(400).json({ error: 'Nome do projeto é obrigatório' });
+      }
+
+      console.log('[SPACE] Buscando métricas para projeto:', projectName, 'período:', startDate, '-', endDate);
+
+      // Buscar configurações do Azure DevOps
+      const [configRows] = await pool.query(
+        'SELECT chave, valor FROM configuracoes WHERE chave LIKE "azure_%"'
+      );
+      
+      const config = {};
+      configRows.forEach(row => {
+        config[row.chave] = row.valor;
+      });
+
+      // Inicializar Azure DevOps Service
+      const azureService = new AzureDevOpsService(
+        config.azure_organization || 'your-org',
+        config.azure_pat_token || ''
+      );
+
+      // Buscar dados agregados (mock de exemplo - deve ser integrado com Azure DevOps APIs)
+      const dashboardData = await generateSpaceDashboard(
+        azureService,
+        projectName,
+        startDate,
+        endDate,
+        sprint
+      );
+
+      res.json(dashboardData);
+    } catch (error) {
+      console.error('[SPACE] Erro ao gerar dashboard:', error);
+      res.status(500).json({ error: 'Erro ao buscar métricas SPACE', code: 'DASHBOARD_ERROR' });
+    }
+  });
+
+  // Função auxiliar para gerar dashboard SPACE com dados reais do Azure DevOps
+  async function generateSpaceDashboard(azureService, projectName, startDate, endDate, sprint) {
+    console.log('[SPACE] Buscando dados do projeto:', projectName);
+    console.log('[SPACE] Período:', startDate, 'até', endDate);
+    
+    try {
+      // Buscar ID do projeto no banco
+      const [projectRows] = await pool.query(
+        'SELECT id FROM estruturas_projeto WHERE projeto = ? AND status = "Processado"',
+        [projectName]
+      );
+      
+      if (projectRows.length === 0) {
+        console.error('[SPACE] Projeto não encontrado no banco:', projectName);
+        return generateEmptyDashboard(projectName, startDate, endDate, sprint, 'Projeto não encontrado ou não está processado');
+      }
+      
+      const projetoId = projectRows[0].id;
+      console.log('[SPACE] Projeto ID encontrado:', projetoId);
+      
+      // Buscar work items do banco de dados local (sincronizados do Azure DevOps)
+      let query = `
+        SELECT 
+          work_item_id as id,
+          title,
+          work_item_type as type,
+          state,
+          priority,
+          area_path as areaPath,
+          iteration_path as iterationPath,
+          created_date as createdDate,
+          closed_date as closedDate,
+          changed_date as changedDate,
+          assigned_to as assignedTo,
+          story_points as storyPoints,
+          activity,
+          effort,
+          remaining_work as remainingWork,
+          completed_work as completedWork
+        FROM azure_work_items
+        WHERE projeto_id = ?
+      `;
+      
+      const params = [projetoId];
+      
+      // Filtrar por período se fornecido
+      if (startDate && endDate) {
+        query += ` AND created_date BETWEEN ? AND ?`;
+        params.push(startDate, endDate);
+      }
+      
+      const [workItemRows] = await pool.query(query, params);
+      const workItemCount = workItemRows?.length || 0;
+      console.log('[SPACE] Work items encontrados no banco:', workItemCount);
+      
+      // Se não houver work items, retornar dashboard vazio com mensagem
+      if (workItemCount === 0) {
+        console.warn('[SPACE] Nenhum work item encontrado para o projeto:', projectName);
+        return generateEmptyDashboard(projectName, startDate, endDate, sprint, 'Nenhum work item sincronizado para este projeto. Faça a sincronização na tela de Sincronização Azure DevOps.');
+      }
+      
+      // Converter para formato esperado pelas funções de cálculo
+      const workItems = workItemRows.map(row => ({
+        id: row.id,
+        title: row.title || 'Sem título',
+        type: row.type || 'Unknown',
+        state: row.state || 'Unknown',
+        priority: row.priority || 999,
+        tags: '', // Tags não estão na tabela, usar vazio
+        createdDate: row.createdDate,
+        closedDate: row.closedDate,
+        changedDate: row.changedDate,
+        assignedTo: row.assignedTo,
+        areaPath: row.areaPath,
+        iterationPath: row.iterationPath,
+        storyPoints: row.storyPoints,
+        activity: row.activity,
+        effort: row.effort,
+        remainingWork: row.remainingWork,
+        completedWork: row.completedWork,
+        reason: '' // Reason não está na tabela
+      }));
+      
+      console.log('[SPACE] Work items carregados e convertidos:', workItems.length);
+      
+      // S - Satisfaction (dados da tabela - não integrado com Azure DevOps)
+      const satisfaction = {
+        enps: 45, // TODO: Importar de pesquisas externas
+        enpsTrend: [
+          { date: '2024-10-01', score: 38 },
+          { date: '2024-11-01', score: 42 },
+          { date: '2024-12-01', score: 45 }
+        ],
+        teamMood: 'positive',
+        comments: [
+          'Dados de satisfação devem ser importados de pesquisas externas',
+          'Configure integração com Microsoft Forms ou Viva Insights'
+        ],
+        lastUpdate: new Date().toISOString()
+      };
+
+      // P - Performance (Azure Boards)
+      const performance = await calculatePerformanceMetrics(workItems, projectName);
+
+      // A - Activity (Calculado dos work items)
+      const activity = await calculateActivityMetrics(workItems, startDate, endDate);
+
+      // C - Communication (Azure Boards - itens bloqueados)
+      const communication = await calculateCommunicationMetrics(workItems);
+
+      // E - Efficiency (Azure Boards - Lead/Cycle Time)
+      const efficiency = await calculateEfficiencyMetrics(workItems, startDate, endDate);
+
+      return {
+        satisfaction,
+        performance,
+        activity,
+        communication,
+        efficiency,
+        period: {
+          startDate,
+          endDate,
+          sprint
+        }
+      };
+    } catch (error) {
+      console.error('[SPACE] Erro ao buscar dados do Azure:', error);
+      console.error('[SPACE] Detalhes do erro:', error.message);
+      // Retornar dashboard vazio em caso de erro
+      return generateEmptyDashboard(projectName, startDate, endDate, sprint, `Erro ao buscar dados: ${error.message}`);
+    }
+  }
+
+  // Calcular métricas de Performance
+  async function calculatePerformanceMetrics(workItems, projectName) {
+    if (!workItems || workItems.length === 0) {
+      console.log('[SPACE Performance] Nenhum work item para calcular');
+      return {
+        workItemsPlanned: 0,
+        workItemsDelivered: 0,
+        deliveryRate: 0,
+        criticalBugs: 0,
+        criticalBugsReopened: 0,
+        releaseSuccessRate: 0,
+        releases: []
+      };
+    }
+
+    console.log('[SPACE Performance] Analisando', workItems.length, 'work items');
+    
+    // Contar por estado
+    const byState = {};
+    const byType = {};
+    workItems.forEach(wi => {
+      const state = wi.state || 'Unknown';
+      const type = wi.workItemType || 'Unknown';
+      byState[state] = (byState[state] || 0) + 1;
+      byType[type] = (byType[type] || 0) + 1;
+    });
+    
+    console.log('[SPACE Performance] Work items por estado:', byState);
+    console.log('[SPACE Performance] Work items por tipo:', byType);
+
+    // Estados que consideramos "entregue"
+    const deliveredStates = ['Done', 'Closed', 'Resolved'];
+    const delivered = workItems.filter(wi => deliveredStates.includes(wi.state)).length;
+    const planned = workItems.length;
+    
+    // Bugs críticos abertos (Priority 1 ou 2)
+    const criticalBugs = workItems.filter(wi => {
+      const isBug = wi.workItemType === 'Bug';
+      const isCritical = wi.priority && wi.priority <= 2;
+      const isOpen = !deliveredStates.includes(wi.state);
+      return isBug && isCritical && isOpen;
+    });
+    
+    console.log('[SPACE Performance] Entregues:', delivered, 'de', planned);
+    console.log('[SPACE Performance] Bugs críticos abertos:', criticalBugs.length);
+
+    return {
+      workItemsPlanned: planned,
+      workItemsDelivered: delivered,
+      deliveryRate: planned > 0 ? Math.round((delivered / planned) * 100) : 0,
+      criticalBugs: criticalBugs.length,
+      criticalBugsReopened: 0,
+      releaseSuccessRate: 0,
+      releases: []
+    };
+  }
+
+  // Calcular métricas de Activity
+  async function calculateActivityMetrics(workItems, startDate, endDate) {
+    if (!workItems || workItems.length === 0) {
+      console.log('[SPACE Activity] Nenhum work item para calcular');
+      return {
+        pullRequestsCreated: 0,
+        pullRequestsMerged: 0,
+        commits: 0,
+        workItemsMovements: 0,
+        prTrend: [],
+        commitTrend: []
+      };
+    }
+
+    console.log('[SPACE Activity] Analisando', workItems.length, 'work items');
+    
+    // Contar movimentações (itens que foram alterados no período)
+    const movements = workItems.filter(wi => {
+      if (!wi.changedDate) return false;
+      const changed = new Date(wi.changedDate);
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return changed >= start && changed <= end;
+    }).length;
+
+    console.log('[SPACE Activity] Movimentações no período:', movements);
+
+    return {
+      pullRequestsCreated: 0,
+      pullRequestsMerged: 0,
+      commits: 0,
+      workItemsMovements: movements,
+      prTrend: [],
+      commitTrend: []
+    };
+  }
+
+  // Calcular métricas de Communication
+  async function calculateCommunicationMetrics(workItems) {
+    if (!workItems || workItems.length === 0) {
+      console.log('[SPACE Communication] Nenhum work item para calcular');
+      return {
+        avgPrReviewTime: 0,
+        avgReviewersPerPr: 0,
+        prsWithComments: 0,
+        totalPrs: 0,
+        blockedItems: 0,
+        blockedItemsList: []
+      };
+    }
+
+    console.log('[SPACE Communication] Analisando', workItems.length, 'work items');
+
+    // Buscar itens bloqueados (estado = Blocked ou tag Blocked)
+    const blocked = workItems.filter(wi => {
+      const stateBlocked = wi.state === 'Blocked';
+      const tagBlocked = wi.tags && (
+        wi.tags.includes('Blocked') || 
+        wi.tags.includes('blocked') ||
+        wi.tags.toLowerCase().includes('blocked')
+      );
+      return stateBlocked || tagBlocked;
+    });
+
+    console.log('[SPACE Communication] Itens bloqueados:', blocked.length);
+
+    const blockedItemsList = blocked.map(wi => {
+      const createdDate = wi.createdDate ? new Date(wi.createdDate) : new Date();
+      const blockedDays = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      return {
+        id: wi.id?.toString() || 'N/A',
+        title: wi.title || 'Sem título',
+        blockedDays: blockedDays,
+        reason: wi.reason || wi.tags || 'Não especificado'
+      };
+    });
+
+    return {
+      avgPrReviewTime: 0,
+      avgReviewersPerPr: 0,
+      prsWithComments: 0,
+      totalPrs: 0,
+      blockedItems: blocked.length,
+      blockedItemsList: blockedItemsList.slice(0, 10)
+    };
+  }
+
+  // Calcular métricas de Efficiency
+  async function calculateEfficiencyMetrics(workItems, startDate, endDate) {
+    if (!workItems || workItems.length === 0) {
+      console.log('[SPACE Efficiency] Nenhum work item para calcular');
+      return {
+        leadTime: 0,
+        cycleTime: 0,
+        wipByState: {},
+        agingItems: [],
+        cumulativeFlow: []
+      };
+    }
+
+    console.log('[SPACE Efficiency] Analisando', workItems.length, 'work items');
+
+    // WIP por estado - contagem atual
+    const wipByState = {};
+    workItems.forEach(wi => {
+      const state = wi.state || 'Unknown';
+      wipByState[state] = (wipByState[state] || 0) + 1;
+    });
+
+    console.log('[SPACE Efficiency] WIP por estado:', wipByState);
+
+    // Lead Time e Cycle Time apenas para itens concluídos
+    const deliveredStates = ['Done', 'Closed', 'Resolved'];
+    const completedItems = workItems.filter(wi => 
+      deliveredStates.includes(wi.state) && wi.createdDate && wi.closedDate
+    );
+
+    console.log('[SPACE Efficiency] Itens concluídos com datas:', completedItems.length);
+
+    let totalLeadTime = 0;
+    let validLeadTimeCount = 0;
+    
+    completedItems.forEach(wi => {
+      try {
+        const created = new Date(wi.createdDate);
+        const closed = new Date(wi.closedDate);
+        
+        if (!isNaN(created.getTime()) && !isNaN(closed.getTime())) {
+          const leadTime = (closed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+          if (leadTime >= 0) {
+            totalLeadTime += leadTime;
+            validLeadTimeCount++;
+          }
+        }
+      } catch (e) {
+        console.error('[SPACE Efficiency] Erro ao calcular lead time:', e);
+      }
+    });
+
+    const avgLeadTime = validLeadTimeCount > 0 ? totalLeadTime / validLeadTimeCount : 0;
+    const avgCycleTime = avgLeadTime * 0.6; // Aproximação: 60% do lead time
+
+    console.log('[SPACE Efficiency] Lead Time médio:', avgLeadTime.toFixed(2), 'dias');
+    console.log('[SPACE Efficiency] Cycle Time médio:', avgCycleTime.toFixed(2), 'dias');
+
+    // Itens envelhecendo (não concluídos há mais de 7 dias)
+    const now = Date.now();
+    const agingItems = workItems
+      .filter(wi => !deliveredStates.includes(wi.state))
+      .map(wi => {
+        let age = 0;
+        if (wi.createdDate) {
+          try {
+            const created = new Date(wi.createdDate);
+            if (!isNaN(created.getTime())) {
+              age = Math.floor((now - created.getTime()) / (1000 * 60 * 60 * 24));
+            }
+          } catch (e) {
+            console.error('[SPACE Efficiency] Erro ao calcular idade:', e);
+          }
+        }
+        
+        return {
+          id: wi.id?.toString() || 'N/A',
+          title: wi.title || 'Sem título',
+          state: wi.state || 'Unknown',
+          age: age
+        };
+      })
+      .filter(item => item.age > 7)
+      .sort((a, b) => b.age - a.age);
+
+    console.log('[SPACE Efficiency] Itens envelhecendo (>7 dias):', agingItems.length);
+
+    return {
+      leadTime: avgLeadTime,
+      cycleTime: avgCycleTime,
+      wipByState: wipByState,
+      agingItems: agingItems.slice(0, 10),
+      cumulativeFlow: generateCFD(startDate, endDate)
+    };
+  }
+
+  // Fallback para dados mock
+
+
+  // Dashboard vazio para projetos sem work items
+  function generateEmptyDashboard(projectName, startDate, endDate, sprint, errorMessage = null) {
+    console.log('[SPACE] Gerando dashboard vazio para:', projectName);
+    if (errorMessage) {
+      console.error('[SPACE] Motivo:', errorMessage);
+    }
+    
+    const message = errorMessage 
+      ? `Erro: ${errorMessage}` 
+      : `Nenhum work item encontrado para o projeto "${projectName}" no período selecionado. Verifique se o projeto existe no Azure DevOps e possui work items criados.`;
+    
+    return {
+      isEmpty: true,
+      projectName,
+      message,
+      satisfaction: {
+        enps: 0,
+        enpsTrend: [],
+        teamMood: 'neutral',
+        comments: [message],
+        lastUpdate: new Date().toISOString()
+      },
+      performance: {
+        workItemsPlanned: 0,
+        workItemsDelivered: 0,
+        deliveryRate: 0,
+        criticalBugs: 0,
+        criticalBugsReopened: 0,
+        releaseSuccessRate: 0,
+        releases: [],
+        message: 'Nenhum dado disponível'
+      },
+      activity: {
+        pullRequestsCreated: 0,
+        pullRequestsMerged: 0,
+        commits: 0,
+        workItemsMovements: 0,
+        prTrend: [],
+        commitTrend: [],
+        message: 'Nenhum dado disponível'
+      },
+      communication: {
+        avgPrReviewTime: 0,
+        avgReviewersPerPr: 0,
+        prsWithComments: 0,
+        totalPrs: 0,
+        blockedItems: 0,
+        blockedItemsList: [],
+        message: 'Nenhum dado disponível'
+      },
+      efficiency: {
+        leadTime: 0,
+        cycleTime: 0,
+        wipByState: {},
+        agingItems: [],
+        cumulativeFlow: [],
+        message: 'Nenhum dado disponível'
+      },
+      period: { startDate, endDate, sprint }
+    };
+  }
+
+  // Gerar CFD vazio (não mock - apenas estrutura)
+  function generateCFD(startDate, endDate) {
+    console.log('[SPACE CFD] Gerando estrutura vazia de CFD');
+    return [];
+  }
 
   // Middleware de tratamento de erros global
   app.use((err, req, res, next) => {

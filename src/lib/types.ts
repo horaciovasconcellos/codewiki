@@ -604,6 +604,7 @@ export interface ProjetoGerado {
   dataInicial: string;
   numeroSemanas: number;
   iteracao: number;
+  innerSourceProject?: boolean;
   incluirQuery: boolean;
   incluirMaven: boolean;
   incluirLiquibase: boolean;
@@ -1235,4 +1236,46 @@ export interface ADRAplicacao {
   createdAt?: string;
   updatedAt?: string;
   aplicacao?: Aplicacao;
+}
+
+// InnerSource Projects
+export interface InnerSourceOwner {
+  login: string;
+  avatar_url: string;
+  html_url: string;
+  type: string;
+}
+
+export interface InnerSourceMetadata {
+  logo?: string;
+  topics?: string[];
+  participation?: {
+    contributors_count?: number;
+    commits_last_year?: number;
+    pull_requests_count?: number;
+  };
+  description_extended?: string;
+  documentation?: string;
+  contribution_guidelines?: string;
+  maturity?: 'emerging' | 'growing' | 'mature' | 'graduated';
+  contact?: string;
+  last_sync?: string;
+}
+
+export interface InnerSourceProject {
+  id: string;
+  nome: string;
+  full_nome: string;
+  html_url: string;
+  descricao?: string;
+  stargazers_count: number;
+  watchers_count: number;
+  language?: string;
+  forks_count: number;
+  open_issues_count: number;
+  license?: string;
+  owner: InnerSourceOwner;
+  _InnerSourceMetadata: InnerSourceMetadata;
+  createdAt?: string;
+  updatedAt?: string;
 }

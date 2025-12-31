@@ -55,6 +55,7 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
   const [dataInicial, setDataInicial] = useState(getNextMonday());
   const [numeroSemanas, setNumeroSemanas] = useState('2');
   const [iteracao, setIteracao] = useState('1');
+  const [innerSourceProject, setInnerSourceProject] = useState(false);
   const [incluirQuery, setIncluirQuery] = useState(false);
   const [incluirMaven, setIncluirMaven] = useState(false);
   const [incluirLiquibase, setIncluirLiquibase] = useState(false);
@@ -81,9 +82,14 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       setNomeProjeto(projeto.projeto);
       setWorkItemProcess(projeto.workItemProcess);
       setNomeTime(projeto.nomeTime);
-      setDataInicial(projeto.dataInicial);
+      // Converter data ISO para formato yyyy-MM-dd
+      const dataFormatada = projeto.dataInicial.includes('T') 
+        ? projeto.dataInicial.split('T')[0] 
+        : projeto.dataInicial;
+      setDataInicial(dataFormatada);
       setNumeroSemanas(projeto.numeroSemanas ? String(projeto.numeroSemanas) : '2');
       setIteracao(String(projeto.iteracao));
+      setInnerSourceProject(projeto.innerSourceProject || false);
       setIncluirQuery(projeto.incluirQuery);
       setIncluirMaven(projeto.incluirMaven);
       setIncluirLiquibase(projeto.incluirLiquibase);
@@ -223,6 +229,7 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       dataInicial,
       numeroSemanas: parseInt(numeroSemanas, 10),
       iteracao: parseInt(iteracao, 10),
+      innerSourceProject,
       incluirQuery,
       incluirMaven,
       incluirLiquibase,
@@ -269,7 +276,8 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* Primeira linha: Projeto, Processo e Nome do Time */}
+          <div className="grid grid-cols-3 gap-4">
             {/* Projeto */}
             <div className="space-y-2">
               <Label htmlFor="projeto">Projeto *</Label>
@@ -307,7 +315,10 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                 placeholder="Time - Nome do Projeto"
               />
             </div>
+          </div>
 
+          {/* Segunda linha: Data Inicial, Número de Semanas e Iteração */}
+          <div className="grid grid-cols-3 gap-4">
             {/* Data Inicial */}
             <div className="space-y-2">
               <Label htmlFor="dataInicial">Data Inicial (Próxima Segunda) *</Label>
@@ -343,6 +354,12 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                 placeholder="1"
               />
             </div>
+          </div>
+
+          {/* Checkbox InnerSource Project */}
+          <div className="flex items-center space-x-2">
+            <Checkbox id="innerSourceProject" checked={innerSourceProject} onCheckedChange={(v) => setInnerSourceProject(v === true)} />
+            <label htmlFor="innerSourceProject" className="text-sm cursor-pointer">InnerSource Project</label>
           </div>
 
           <Separator />

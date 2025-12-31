@@ -94,6 +94,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
   const [emailCaixa, setEmailCaixa] = useState('');
   const [endpointBasico, setEndpointBasico] = useState('');
   const [endpointShared, setEndpointShared] = useState('');
+  const [innerSourceGrupo, setInnerSourceGrupo] = useState('');
   const [subjects, setSubjects] = useState<string[]>([]);
   const [novoSubject, setNovoSubject] = useState('');
 
@@ -143,6 +144,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
             setEmailCaixa(emailConfig.emailCaixa || '');
             setEndpointBasico(emailConfig.endpointBasico || '');
             setEndpointShared(emailConfig.endpointShared || '');
+            setInnerSourceGrupo(emailConfig.innerSourceGrupo || '');
             setSubjects(emailConfig.subjects || []);
           }
         }
@@ -281,6 +283,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
             emailCaixa,
             endpointBasico,
             endpointShared,
+            innerSourceGrupo,
             subjects
           }
         })
@@ -636,6 +639,21 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                           Caminho do endpoint para caixa compartilhada
                         </p>
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="innersource-grupo">InnerSource Grupo</Label>
+                      <Input
+                        id="innersource-grupo"
+                        type="email"
+                        placeholder="grupo@empresa.com"
+                        value={innerSourceGrupo}
+                        onChange={(e) => setInnerSourceGrupo(e.target.value)}
+                        pattern="^[a-zA-Z0-9]+([._%+-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+$"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        E-mail do grupo InnerSource para notificações
+                      </p>
                     </div>
                   </div>
                 </div>

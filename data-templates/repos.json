@@ -1,0 +1,119 @@
+[
+  {
+    "id": "innersource-001",
+    "nome": "frontend-library",
+    "full_nome": "myorg/frontend-library",
+    "html_url": "https://github.com/myorg/frontend-library",
+    "descricao": "Biblioteca de componentes React compartilhados",
+    "stargazers_count": 45,
+    "watchers_count": 12,
+    "language": "TypeScript",
+    "forks_count": 8,
+    "open_issues_count": 3,
+    "license": "MIT",
+    "owner": {
+      "login": "myorg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/123456",
+      "html_url": "https://github.com/myorg",
+      "type": "Organization"
+    },
+    "_InnerSourceMetadata": {
+      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+      "topics": [
+        "react",
+        "typescript",
+        "components",
+        "ui-library"
+      ],
+      "participation": {
+        "contributors_count": 15,
+        "commits_last_year": 234,
+        "pull_requests_count": 67
+      },
+      "description_extended": "Esta biblioteca fornece componentes React reutilizáveis seguindo os padrões de design da organização. Inclui documentação detalhada, exemplos de uso e testes automatizados.",
+      "documentation": "https://myorg.github.io/frontend-library",
+      "contribution_guidelines": "https://github.com/myorg/frontend-library/blob/main/CONTRIBUTING.md",
+      "maturity": "mature",
+      "contact": "slack://frontend-team",
+      "last_sync": "2025-12-31T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "innersource-002",
+    "nome": "api-gateway",
+    "full_nome": "myorg/api-gateway",
+    "html_url": "https://github.com/myorg/api-gateway",
+    "descricao": "Gateway de API centralizado para microsserviços",
+    "stargazers_count": 28,
+    "watchers_count": 9,
+    "language": "Java",
+    "forks_count": 5,
+    "open_issues_count": 7,
+    "license": "Apache-2.0",
+    "owner": {
+      "login": "myorg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/123456",
+      "html_url": "https://github.com/myorg",
+      "type": "Organization"
+    },
+    "_InnerSourceMetadata": {
+      "logo": "",
+      "topics": [
+        "java",
+        "spring-boot",
+        "api-gateway",
+        "microservices"
+      ],
+      "participation": {
+        "contributors_count": 8,
+        "commits_last_year": 156,
+        "pull_requests_count": 42
+      },
+      "description_extended": "Gateway centralizado que gerencia autenticação, roteamento e rate limiting para todos os microsserviços da organização.",
+      "documentation": "https://confluence.myorg.com/api-gateway",
+      "contribution_guidelines": "https://github.com/myorg/api-gateway/wiki/Contributing",
+      "maturity": "growing",
+      "contact": "teams://backend-platform",
+      "last_sync": "2025-12-31T09:30:00.000Z"
+    }
+  },
+  {
+    "id": "innersource-003",
+    "nome": "data-pipeline",
+    "full_nome": "myorg/data-pipeline",
+    "html_url": "https://github.com/myorg/data-pipeline",
+    "descricao": "Pipeline de processamento de dados em larga escala",
+    "stargazers_count": 62,
+    "watchers_count": 18,
+    "language": "Python",
+    "forks_count": 12,
+    "open_issues_count": 5,
+    "license": "MIT",
+    "owner": {
+      "login": "myorg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/123456",
+      "html_url": "https://github.com/myorg",
+      "type": "Organization"
+    },
+    "_InnerSourceMetadata": {
+      "logo": "",
+      "topics": [
+        "python",
+        "data-engineering",
+        "etl",
+        "apache-spark"
+      ],
+      "participation": {
+        "contributors_count": 22,
+        "commits_last_year": 389,
+        "pull_requests_count": 94
+      },
+      "description_extended": "Sistema de ETL distribuído usando Apache Spark para processamento de grandes volumes de dados. Suporta múltiplas fontes de dados e destinos.",
+      "documentation": "https://myorg.github.io/data-pipeline",
+      "contribution_guidelines": "https://github.com/myorg/data-pipeline/blob/main/CONTRIBUTING.md",
+      "maturity": "graduated",
+      "contact": "slack://data-engineering",
+      "last_sync": "2025-12-31T11:00:00.000Z"
+    }
+  }
+]

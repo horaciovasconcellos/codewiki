@@ -29,10 +29,12 @@ import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupCon
 import { IntegracaoView } from '@/components/integracoes/IntegracaoView';
 import { DocumentacaoAPIsView } from '@/components/DocumentacaoAPIsView';
 import { GeradorProjetosView } from '@/components/gerador-projetos/GeradorProjetosView';
+import { InnerSourceView } from '@/components/innersource/InnerSourceView';
 import { CargaDadosView } from '@/components/carga/CargaDadosView';
 import { CargaLockfilesView } from '@/components/carga/CargaLockfilesView';
 import { AzureWorkItemsView } from '@/components/azure-work-items/AzureWorkItemsView';
 import { DoraDashboardView } from '@/components/dora/DoraDashboardView';
+import SpaceDashboardView from '@/components/space-dashboard/SpaceDashboardView';
 import { ApiCatalogGeneratorView } from '@/components/ApiCatalogGeneratorView';
 import { ReportBookView } from '@/components/reportbook/ReportBookView';
 import { SimilarityAnalyzer } from '@/components/reportbook/SimilarityAnalyzer';
@@ -403,10 +405,14 @@ function App() {
         return <ConfiguracaoIntegracoesView />;
       case 'gerador-projetos':
         return <GeradorProjetosView />;
+      case 'innersource':
+        return <InnerSourceView />;
       case 'azure-work-items':
         return <AzureWorkItemsView />;
       case 'dora-dashboard':
         return <DoraDashboardView />;
+      case 'space-dashboard':
+        return <SpaceDashboardView />;
       case 'reportbook':
         return <ReportBookView />;
       case 'similarity-analyzer':
@@ -537,6 +543,18 @@ function App() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton
+                      isActive={currentView === 'space-dashboard'}
+                      onClick={() => {
+                        logClick('nav_space_dashboard');
+                        setCurrentView('space-dashboard');
+                      }}
+                    >
+                      <ChartBar />
+                      <span>Dashboard SPACE</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
                       isActive={currentView === 'gerador-projetos'}
                       onClick={() => {
                         logClick('nav_gerador_projetos');
@@ -545,6 +563,18 @@ function App() {
                     >
                       <FolderPlus />
                       <span>Gerador de Projetos</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'innersource'}
+                      onClick={() => {
+                        logClick('nav_innersource');
+                        setCurrentView('innersource');
+                      }}
+                    >
+                      <ShareNetwork />
+                      <span>Projetos InnerSource</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
