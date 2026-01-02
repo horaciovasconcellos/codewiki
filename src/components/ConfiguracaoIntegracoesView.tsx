@@ -95,8 +95,17 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
   const [endpointBasico, setEndpointBasico] = useState('');
   const [endpointShared, setEndpointShared] = useState('');
   const [innerSourceGrupo, setInnerSourceGrupo] = useState('');
-  const [subjects, setSubjects] = useState<string[]>([]);
-  const [novoSubject, setNovoSubject] = useState('');
+  
+  // Filtros de Assunto (Subjects)
+  interface FilterSubject {
+    id: string;
+    aplicacaoId: string;
+    aplicacaoSigla?: string;
+    subject: string;
+  }
+  const [filterSubjects, setFilterSubjects] = useState<FilterSubject[]>([]);
+  const [novoFilterSubject, setNovoFilterSubject] = useState({ aplicacaoId: '', subject: '' });
+  const [aplicacoes, setAplicacoes] = useState<any[]>([]);
 
   // Templates YAML do Azure DevOps
   const [templatePullRequest, setTemplatePullRequest] = useState<File | null>(null);
@@ -109,6 +118,22 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
   const [templateDevelopName, setTemplateDevelopName] = useState<string>('');
 
   const [formData, setFormData] = useState<IntegrationConfig>(config);
+
+  // Carregar aplicações
+  useEffect(() => {
+    const loadAplicacoes = async () => {
+      try {
+        const response = await fetch('/api/aplicacoes');
+        if (response.ok) {
+          const data = await response.json();
+          setAplicacoes(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar aplicações:', error);
+      }
+    };
+    loadAplicacoes();
+  }, []);
 
   // Carregar configurações da API
   useEffect(() => {
@@ -145,7 +170,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
             setEndpointBasico(emailConfig.endpointBasico || '');
             setEndpointShared(emailConfig.endpointShared || '');
             setInnerSourceGrupo(emailConfig.innerSourceGrupo || '');
-            setSubjects(emailConfig.subjects || []);
+            setFilterSubjects(emailConfig.filterSubjects || []);
           }
         }
       } catch (error) {
@@ -284,7 +309,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
             endpointBasico,
             endpointShared,
             innerSourceGrupo,
-            subjects
+            filterSubjects
           }
         })
       });
@@ -304,25 +329,39 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
     }
   };
 
-  const handleAddSubject = () => {
-    if (!novoSubject.trim()) {
+  const handleAddFilterSubject = () => {
+    if (!novoFilterSubject.aplicacaoId) {
+      toast.error('Selecione uma aplicação');
+      return;
+    }
+    
+    if (!novoFilterSubject.subject.trim()) {
       toast.error('Digite um subject antes de adicionar');
       return;
     }
     
-    if (subjects.includes(novoSubject.trim())) {
+    // Verificar se já existe um subject igual
+    if (filterSubjects.some(fs => fs.subject.toLowerCase() === novoFilterSubject.subject.trim().toLowerCase())) {
       toast.error('Este subject já foi adicionado');
       return;
     }
     
-    setSubjects([...subjects, novoSubject.trim()]);
-    setNovoSubject('');
-    toast.success('Subject adicionado');
+    const aplicacao = aplicacoes.find(a => a.id === novoFilterSubject.aplicacaoId);
+    const newFilter: FilterSubject = {
+      id: `fs-${Date.now()}`,
+      aplicacaoId: novoFilterSubject.aplicacaoId,
+      aplicacaoSigla: aplicacao?.sigla,
+      subject: novoFilterSubject.subject.trim()
+    };
+    
+    setFilterSubjects([...filterSubjects, newFilter]);
+    setNovoFilterSubject({ aplicacaoId: '', subject: '' });
+    toast.success('Filtro de assunto adicionado');
   };
 
-  const handleRemoveSubject = (subject: string) => {
-    setSubjects(subjects.filter(s => s !== subject));
-    toast.success('Subject removido');
+  const handleRemoveFilterSubject = (id: string) => {
+    setFilterSubjects(filterSubjects.filter(fs => fs.id !== id));
+    toast.success('Filtro de assunto removido');
   };
 
   const handleResetTheme = () => {
@@ -663,45 +702,72 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                 <div>
                   <h4 className="text-sm font-semibold mb-3">Filtros de Assunto (Subjects)</h4>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Adicione um ou mais subjects para filtrar os e-mails
+                    Configure os subjects por aplicação para filtrar os e-mails
                   </p>
                   
                   <div className="space-y-4">
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Ex: [Notificação] Sistema"
-                        value={novoSubject}
-                        onChange={(e) => setNovoSubject(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddSubject();
-                          }
-                        }}
-                      />
-                      <Button onClick={handleAddSubject} variant="outline">
-                        Adicionar
-                      </Button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-aplicacao">Aplicação</Label>
+                        <Select
+                          value={novoFilterSubject.aplicacaoId}
+                          onValueChange={(value) => setNovoFilterSubject({ ...novoFilterSubject, aplicacaoId: value })}
+                        >
+                          <SelectTrigger id="filter-aplicacao">
+                            <SelectValue placeholder="Selecione a aplicação" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {aplicacoes.map((app) => (
+                              <SelectItem key={app.id} value={app.id}>
+                                {app.sigla} - {app.descricao}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="filter-subject">Subject</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="filter-subject"
+                            placeholder="Ex: [Notificação] Sistema"
+                            value={novoFilterSubject.subject}
+                            onChange={(e) => setNovoFilterSubject({ ...novoFilterSubject, subject: e.target.value })}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddFilterSubject();
+                              }
+                            }}
+                          />
+                          <Button onClick={handleAddFilterSubject} variant="outline">
+                            Adicionar
+                          </Button>
+                        </div>
+                      </div>
                     </div>
 
-                    {subjects.length > 0 && (
+                    {filterSubjects.length > 0 && (
                       <div className="border rounded-lg">
                         <table className="w-full">
                           <thead className="border-b bg-muted/50">
                             <tr>
+                              <th className="text-left p-3 text-sm font-medium">Aplicação</th>
                               <th className="text-left p-3 text-sm font-medium">Subject</th>
                               <th className="text-center p-3 text-sm font-medium w-24">Ações</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {subjects.map((subject, index) => (
-                              <tr key={index} className="border-b last:border-0">
-                                <td className="p-3 text-sm">{subject}</td>
+                            {filterSubjects.map((filter) => (
+                              <tr key={filter.id} className="border-b last:border-0">
+                                <td className="p-3 text-sm font-medium">{filter.aplicacaoSigla}</td>
+                                <td className="p-3 text-sm">{filter.subject}</td>
                                 <td className="p-3 text-center">
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleRemoveSubject(subject)}
+                                    onClick={() => handleRemoveFilterSubject(filter.id)}
                                   >
                                     <Trash className="h-4 w-4 text-destructive" />
                                   </Button>
@@ -713,10 +779,10 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                       </div>
                     )}
 
-                    {subjects.length === 0 && (
+                    {filterSubjects.length === 0 && (
                       <div className="text-center py-8 border rounded-lg bg-muted/20">
                         <p className="text-sm text-muted-foreground">
-                          Nenhum subject configurado. Adicione um subject para filtrar os e-mails.
+                          Nenhum filtro de assunto configurado. Adicione filtros para segmentar os e-mails por aplicação.
                         </p>
                       </div>
                     )}

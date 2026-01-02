@@ -1279,3 +1279,22 @@ export interface InnerSourceProject {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface DocumentacaoProjeto {
+  id: string;
+  titulo: string;
+  slug: string;
+  descricao: string;
+  conteudo: string;
+  categoria: 'Arquitetura' | 'Desenvolvimento' | 'Infraestrutura' | 'Segurança' | 'Processos' | 'API' | 'Outros';
+  tags: string[];
+  versao: string;
+  autor: string;
+  aplicacaoId?: string;
+  aplicacaoNome?: string;
+  status: 'Rascunho' | 'Em Revisão' | 'Publicado' | 'Arquivado';
+  dataPublicacao?: string;
+  dataUltimaAtualizacao: string;
+  createdAt: string;
+  updatedAt: string;
+}

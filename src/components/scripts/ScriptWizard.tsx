@@ -121,7 +121,12 @@ export function ScriptWizard({ scripts, onSave, onCancel, editingScript }: Scrip
       arquivo: arquivo ? arquivo.name : arquivoAtual,
     };
 
-    onSave(script, arquivo || undefined);
+    console.log('[ScriptWizard] handleSubmit - Script:', script);
+    console.log('[ScriptWizard] handleSubmit - Arquivo:', arquivo ? `${arquivo.name} (${arquivo.size} bytes)` : 'Nenhum');
+
+    // Enviar arquivo apenas se for um objeto File
+    const arquivoParaEnviar = arquivo instanceof File ? arquivo : undefined;
+    onSave(script, arquivoParaEnviar);
   };
 
   return (

@@ -21,10 +21,12 @@ import { NotificacoesView } from '@/components/notificacoes/NotificacoesView';
 import { DashboardView } from '@/components/DashboardView';
 import { LogsAndTracesView } from '@/components/LogsAndTracesView';
 import { ADRsView } from '@/components/adr/ADRsView';
+import { DocumentacaoProjetosView } from '@/components/documentacao-projetos/DocumentacaoProjetosView';
+import { PesquisaPeriodoView } from '@/components/pesquisa/PesquisaPeriodoView';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
-import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope } from '@phosphor-icons/react';
+import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope, MagnifyingGlass } from '@phosphor-icons/react';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarTrigger } from '@/components/ui/sidebar';
 import { IntegracaoView } from '@/components/integracoes/IntegracaoView';
 import { DocumentacaoAPIsView } from '@/components/DocumentacaoAPIsView';
@@ -66,7 +68,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -399,6 +401,10 @@ function App() {
         return <ApiCatalogGeneratorView />;
       case 'documentacao-apis':
         return <DocumentacaoAPIsView />;
+      case 'documentacao-projetos':
+        return <DocumentacaoProjetosView />;
+      case 'pesquisa-periodo':
+        return <PesquisaPeriodoView />;
       case 'tokens-acesso':
         return <TokensView />;
       case 'configuracoes':
@@ -487,6 +493,26 @@ function App() {
                     >
                       <ChartBar />
                       <span>Dashboard</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Pesquisa</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'pesquisa-periodo'}
+                      onClick={() => {
+                        logClick('nav_pesquisa_periodo');
+                        setCurrentView('pesquisa-periodo');
+                      }}
+                    >
+                      <MagnifyingGlass />
+                      <span>Pesquisa por Período</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
@@ -834,6 +860,18 @@ function App() {
                     >
                       <FileText />
                       <span>Documentação de APIs</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'documentacao-projetos'}
+                      onClick={() => {
+                        logClick('nav_documentacao_projetos');
+                        setCurrentView('documentacao-projetos');
+                      }}
+                    >
+                      <BookOpen />
+                      <span>Documentação de Projetos</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>

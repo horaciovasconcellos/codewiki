@@ -51,6 +51,9 @@ interface Notificacao {
   de: string;
   para: string;
   lida: boolean;
+  aplicacaoId?: string;
+  aplicacaoSigla?: string;
+  email?: string;
 }
 
 export function NotificacoesView() {
@@ -235,21 +238,23 @@ export function NotificacoesView() {
                     <TableRow>
                       <TableHead className="w-[50px]"></TableHead>
                       <TableHead>Data</TableHead>
+                      <TableHead>Aplicação</TableHead>
                       <TableHead>De</TableHead>
                       <TableHead>Assunto</TableHead>
+                      <TableHead>E-mail</TableHead>
                       <TableHead className="w-[70px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8">
+                        <TableCell colSpan={7} className="text-center py-8">
                           Carregando notificações...
                         </TableCell>
                       </TableRow>
                     ) : filteredNotificacoes.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                           Nenhuma notificação encontrada
                         </TableCell>
                       </TableRow>
@@ -267,11 +272,25 @@ export function NotificacoesView() {
                           <TableCell className="font-mono text-sm">
                             {formatarData(notificacao.data)}
                           </TableCell>
+                          <TableCell className="text-sm font-medium">
+                            {notificacao.aplicacaoSigla ? (
+                              <Badge variant="outline">{notificacao.aplicacaoSigla}</Badge>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-sm">
                             {notificacao.de}
                           </TableCell>
                           <TableCell className="max-w-md truncate">
                             {notificacao.subject}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {notificacao.email ? (
+                              <span className="text-xs text-muted-foreground">{notificacao.email}</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -323,6 +342,20 @@ export function NotificacoesView() {
             {selectedNotificacao && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-semibold">Aplicação:</span>
+                    <p className="text-muted-foreground">
+                      {selectedNotificacao.aplicacaoSigla ? (
+                        <Badge variant="outline">{selectedNotificacao.aplicacaoSigla}</Badge>
+                      ) : (
+                        'Não associada'
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-semibold">E-mail Associado:</span>
+                    <p className="text-muted-foreground">{selectedNotificacao.email || 'Não informado'}</p>
+                  </div>
                   <div>
                     <span className="font-semibold">De:</span>
                     <p className="text-muted-foreground">{selectedNotificacao.de}</p>

@@ -47,18 +47,25 @@ export function ScriptsView({}: ScriptsViewProps) {
   const handleScriptSave = async (script: Script, arquivo?: File) => {
     try {
       const existe = scripts.find(s => s.id === script.id);
+      const url = existe ? `/api/scripts/${script.id}` : '/api/scripts';
+      const method = existe ? 'PUT' : 'POST';
+
+      console.log('[ScriptsView] handleScriptSave - Início');
+      console.log('[ScriptsView] Script existe?', existe ? 'SIM' : 'NÃO');
+      console.log('[ScriptsView] URL:', url, '| Method:', method);
+      console.log('[ScriptsView] Arquivo recebido?', arquivo ? `SIM: ${arquivo.name} (${arquivo.size} bytes, ${arquivo.type})` : 'NÃO');
       
-      // Se há arquivo, fazer upload via FormData
+      // Se há arquivo File, fazer upload via FormData
       if (arquivo && arquivo instanceof File) {
-        console.log('[ScriptsView] BRANCH: Com arquivo (FormData)');
+        console.log('[ScriptsView] ✅ BRANCH: Com arquivo (FormData)');
         const formData = new FormData();
         formData.append('arquivo', arquivo);
         formData.append('data', JSON.stringify(script));
 
-        const url = existe ? `/api/scripts/${script.id}` : '/api/scripts';
-        const method = existe ? 'PUT' : 'POST';
-
-        console.log('[ScriptsView] Enviando com arquivo - URL:', url, 'Method:', method);
+        console.log('[ScriptsView] FormData criado com:');
+        console.log('[ScriptsView] - arquivo:', arquivo.name);
+        console.log('[ScriptsView] - data:', JSON.stringify(script));
+        
         logEvent('api_call_start', 'api_call');
 
         const response = await fetch(url, {
@@ -69,17 +76,16 @@ export function ScriptsView({}: ScriptsViewProps) {
         console.log('[ScriptsView] Response status:', response.status);
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          console.error('[ScriptsView] Erro na resposta:', errorData);
-          throw new Error('Erro ao salvar script');
+          console.error('[ScriptsView] ❌ Erro na resposta:', errorData);
+          throw new Error(errorData.error || 'Erro ao salvar script');
         }
+        
+        const result = await response.json();
+        console.log('[ScriptsView] ✅ Sucesso! Resultado:', result);
       } else {
-        console.log('[ScriptsView] BRANCH: Sem arquivo (JSON)');
-        // Sem arquivo, enviar apenas JSON
-        const url = existe ? `/api/scripts/${script.id}` : '/api/scripts';
-        const method = existe ? 'PUT' : 'POST';
-
-        console.log('[ScriptsView] Enviando sem arquivo - URL:', url, 'Method:', method);
-        console.log('[ScriptsView] Body JSON:', JSON.stringify(script));
+        console.log('[ScriptsView] ℹ️ BRANCH: Sem arquivo novo (JSON)');
+        // Sem arquivo novo, enviar apenas JSON
+        console.log('[ScriptsView] Body JSON:', JSON.stringify(script, null, 2));
         logEvent('api_call_start', 'api_call');
 
         const response = await fetch(url, {
@@ -91,12 +97,12 @@ export function ScriptsView({}: ScriptsViewProps) {
         console.log('[ScriptsView] Response status:', response.status);
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          console.error('[ScriptsView] Erro na resposta:', errorData);
-          throw new Error('Erro ao salvar script');
+          console.error('[ScriptsView] ❌ Erro na resposta:', errorData);
+          throw new Error(errorData.error || 'Erro ao salvar script');
         }
         
         const result = await response.json();
-        console.log('[ScriptsView] Sucesso! Resultado:', result);
+        console.log('[ScriptsView] ✅ Sucesso! Resultado:', result);
       }
 
       toast.success(`Script ${existe ? 'atualizado' : 'criado'} com sucesso`);

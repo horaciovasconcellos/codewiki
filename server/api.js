@@ -5,6 +5,8 @@ import mysql from 'mysql2/promise';
 import { v4 as uuidv4 } from 'uuid';
 import { ulid } from 'ulid';
 import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
 import AzureDevOpsService from './azure-devops-service.js';
 
 const app = express();
@@ -51,7 +53,12 @@ const uploadYaml = multer({
 const uploadScript = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, 'uploads/scripts/');
+      const dir = 'uploads/scripts/';
+      // Garantir que o diretório existe
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      cb(null, dir);
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -70,6 +77,17 @@ const uploadScript = multer({
     } else {
       cb(new Error('Tipo de arquivo não permitido para scripts'));
     }
+  }
+});
+
+// Garantir que os diretórios de upload existam
+const uploadsDir = 'uploads';
+const scriptsDir = path.join(uploadsDir, 'scripts');
+
+[uploadsDir, scriptsDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`✅ Diretório criado: ${dir}`);
   }
 });
 
@@ -4557,7 +4575,11 @@ app.get('/api/scripts', async (req, res) => {
   try {
     connection = await getUtf8Connection();
     const [rows] = await connection.query('SELECT * FROM scripts ORDER BY sigla');
-    res.json(rows.map(row => ({
+    console.log('[GET /api/scripts] Total de scripts encontrados:', rows.length);
+    if (rows.length > 0) {
+      console.log('[GET /api/scripts] Primeiro script (raw):', rows[0]);
+    }
+    const resultado = rows.map(row => ({
       id: row.id,
       sigla: row.sigla,
       descricao: row.descricao,
@@ -4568,7 +4590,11 @@ app.get('/api/scripts', async (req, res) => {
       arquivoUrl: row.arquivo_url,
       arquivoTamanho: row.arquivo_tamanho,
       arquivoTipo: row.arquivo_tipo
-    })));
+    }));
+    if (resultado.length > 0) {
+      console.log('[GET /api/scripts] Primeiro script (mapeado):', resultado[0]);
+    }
+    res.json(resultado);
   } catch (error) {
     console.error('Erro ao buscar scripts:', error);
     res.status(500).json({ error: 'Erro ao buscar scripts', code: 'DATABASE_ERROR' });
@@ -4611,13 +4637,20 @@ app.get('/api/scripts/:id', async (req, res) => {
 app.post('/api/scripts', uploadScript.single('arquivo'), async (req, res) => {
   let connection;
   try {
+    console.log('[POST /api/scripts] ====== INÍCIO ======');
+    console.log('[POST /api/scripts] Content-Type:', req.headers['content-type']);
+    console.log('[POST /api/scripts] req.file:', req.file ? `${req.file.originalname} (${req.file.size} bytes)` : 'NÃO');
+    console.log('[POST /api/scripts] req.body keys:', Object.keys(req.body));
+    
     connection = await getUtf8Connection();
     const id = uuidv4();
     let scriptData;
 
     // Se foi enviado via FormData com arquivo
     if (req.file) {
+      console.log('[POST /api/scripts] ✅ BRANCH: Com arquivo');
       scriptData = JSON.parse(req.body.data);
+      console.log('[POST /api/scripts] scriptData:', scriptData);
       const arquivo = req.file;
       
       await connection.query(
@@ -4638,9 +4671,12 @@ app.post('/api/scripts', uploadScript.single('arquivo'), async (req, res) => {
           arquivo.mimetype
         ]
       );
+      console.log('[POST /api/scripts] ✅ Inserido COM arquivo');
     } else {
       // Sem arquivo, apenas JSON
+      console.log('[POST /api/scripts] ℹ️ BRANCH: Sem arquivo');
       scriptData = req.body;
+      console.log('[POST /api/scripts] scriptData:', scriptData);
       
       await connection.query(
         `INSERT INTO scripts (
@@ -4655,11 +4691,12 @@ app.post('/api/scripts', uploadScript.single('arquivo'), async (req, res) => {
           scriptData.tipoScript
         ]
       );
+      console.log('[POST /api/scripts] ✅ Inserido SEM arquivo');
     }
 
     const [rows] = await connection.query('SELECT * FROM scripts WHERE id = ?', [id]);
     const row = rows[0];
-    res.status(201).json({
+    const result = {
       id: row.id,
       sigla: row.sigla,
       descricao: row.descricao,
@@ -4670,9 +4707,12 @@ app.post('/api/scripts', uploadScript.single('arquivo'), async (req, res) => {
       arquivoUrl: row.arquivo_url,
       arquivoTamanho: row.arquivo_tamanho,
       arquivoTipo: row.arquivo_tipo
-    });
+    };
+    console.log('[POST /api/scripts] ✅ Retornando:', result);
+    console.log('[POST /api/scripts] ====== FIM ======');
+    res.status(201).json(result);
   } catch (error) {
-    console.error('Erro ao criar script:', error);
+    console.error('[POST /api/scripts] ❌ ERRO:', error);
     res.status(500).json({ error: 'Erro ao criar script', code: 'DATABASE_ERROR' });
   } finally {
     if (connection) connection.release();
@@ -8163,6 +8203,413 @@ async function startServer() {
     }
   });
 
+  // ==================== DOCUMENTAÇÃO DE PROJETOS ====================
+  
+  // GET /api/documentacao-projetos - Listar todas as documentações
+  app.get('/api/documentacao-projetos', async (req, res) => {
+    try {
+      const { categoria, status, search } = req.query;
+      
+      let query = `
+        SELECT 
+          d.*,
+          a.sigla as aplicacao_nome
+        FROM documentacao_projetos d
+        LEFT JOIN aplicacoes a ON d.aplicacao_id = a.id
+        WHERE 1=1
+      `;
+      const params = [];
+      
+      if (categoria) {
+        query += ' AND d.categoria = ?';
+        params.push(categoria);
+      }
+      
+      if (status) {
+        query += ' AND d.status = ?';
+        params.push(status);
+      }
+      
+      if (search) {
+        query += ' AND (MATCH(d.titulo, d.descricao, d.conteudo) AGAINST (? IN NATURAL LANGUAGE MODE) OR d.tags LIKE ?)';
+        params.push(search, `%${search}%`);
+      }
+      
+      query += ' ORDER BY d.data_ultima_atualizacao DESC';
+      
+      const [rows] = await pool.query(query, params);
+      
+      // Formatar dados para camelCase e parsear JSON
+      const docs = rows.map(row => ({
+        id: row.id,
+        titulo: row.titulo,
+        slug: row.slug,
+        descricao: row.descricao,
+        conteudo: row.conteudo,
+        categoria: row.categoria,
+        tags: typeof row.tags === 'string' ? JSON.parse(row.tags || '[]') : row.tags,
+        versao: row.versao,
+        autor: row.autor,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        status: row.status,
+        dataPublicacao: row.data_publicacao,
+        dataUltimaAtualizacao: row.data_ultima_atualizacao,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+      
+      res.json(docs);
+    } catch (error) {
+      console.error('Erro ao buscar documentações:', error);
+      res.status(500).json({ error: 'Erro ao buscar documentações' });
+    }
+  });
+
+  // GET /api/documentacao-projetos/:id - Buscar documentação por ID
+  app.get('/api/documentacao-projetos/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const [rows] = await pool.query(
+        `SELECT 
+          d.*,
+          a.sigla as aplicacao_nome
+        FROM documentacao_projetos d
+        LEFT JOIN aplicacoes a ON d.aplicacao_id = a.id
+        WHERE d.id = ?`,
+        [id]
+      );
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Documentação não encontrada' });
+      }
+      
+      const doc = {
+        id: rows[0].id,
+        titulo: rows[0].titulo,
+        slug: rows[0].slug,
+        descricao: rows[0].descricao,
+        conteudo: rows[0].conteudo,
+        categoria: rows[0].categoria,
+        tags: JSON.parse(rows[0].tags || '[]'),
+        versao: rows[0].versao,
+        autor: rows[0].autor,
+        projeto: rows[0].projeto,
+        status: rows[0].status,
+        dataPublicacao: rows[0].data_publicacao,
+        dataUltimaAtualizacao: rows[0].data_ultima_atualizacao,
+        createdAt: rows[0].created_at,
+        updatedAt: rows[0].updated_at
+      };
+      
+      res.json(doc);
+    } catch (error) {
+      console.error('Erro ao buscar documentação:', error);
+      res.status(500).json({ error: 'Erro ao buscar documentação' });
+    }
+  });
+
+  // GET /api/documentacao-projetos/slug/:slug - Buscar documentação por slug
+  app.get('/api/documentacao-projetos/slug/:slug', async (req, res) => {
+    try {
+      const { slug } = req.params;
+      
+      const [rows] = await pool.query(
+        `SELECT 
+          d.*,
+          a.sigla as aplicacao_nome
+        FROM documentacao_projetos d
+        LEFT JOIN aplicacoes a ON d.aplicacao_id = a.id
+        WHERE d.slug = ?`,
+        [slug]
+      );
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Documentação não encontrada' });
+      }
+      
+      const doc = {
+        id: rows[0].id,
+        titulo: rows[0].titulo,
+        slug: rows[0].slug,
+        descricao: rows[0].descricao,
+        conteudo: rows[0].conteudo,
+        categoria: rows[0].categoria,
+        tags: JSON.parse(rows[0].tags || '[]'),
+        versao: rows[0].versao,
+        autor: rows[0].autor,
+        projeto: rows[0].projeto,
+        status: rows[0].status,
+        dataPublicacao: rows[0].data_publicacao,
+        dataUltimaAtualizacao: rows[0].data_ultima_atualizacao,
+        createdAt: rows[0].created_at,
+        updatedAt: rows[0].updated_at
+      };
+      
+      res.json(doc);
+    } catch (error) {
+      console.error('Erro ao buscar documentação:', error);
+      res.status(500).json({ error: 'Erro ao buscar documentação' });
+    }
+  });
+
+  // POST /api/documentacao-projetos - Criar nova documentação
+  app.post('/api/documentacao-projetos', async (req, res) => {
+    try {
+      const {
+        titulo,
+        slug,
+        descricao,
+        conteudo,
+        categoria,
+        tags,
+        versao,
+        autor,
+        aplicacaoId,
+        status
+      } = req.body;
+      
+      const id = uuidv4();
+      const tagsJson = JSON.stringify(tags || []);
+      const dataPublicacao = status === 'Publicado' ? new Date() : null;
+      
+      await pool.query(
+        `INSERT INTO documentacao_projetos (
+          id, titulo, slug, descricao, conteudo, categoria, tags,
+          versao, autor, aplicacao_id, status, data_publicacao
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [id, titulo, slug, descricao, conteudo, categoria, tagsJson, versao, autor, aplicacaoId, status, dataPublicacao]
+      );
+      
+      const [rows] = await pool.query(
+        `SELECT 
+          d.*,
+          a.sigla as aplicacao_nome
+        FROM documentacao_projetos d
+        LEFT JOIN aplicacoes a ON d.aplicacao_id = a.id
+        WHERE d.id = ?`,
+        [id]
+      );
+      
+      const doc = {
+        id: rows[0].id,
+        titulo: rows[0].titulo,
+        slug: rows[0].slug,
+        descricao: rows[0].descricao,
+        conteudo: rows[0].conteudo,
+        categoria: rows[0].categoria,
+        tags: typeof rows[0].tags === 'string' ? JSON.parse(rows[0].tags || '[]') : rows[0].tags,
+        versao: rows[0].versao,
+        autor: rows[0].autor,
+        aplicacaoId: rows[0].aplicacao_id,
+        aplicacaoNome: rows[0].aplicacao_nome,
+        status: rows[0].status,
+        dataPublicacao: rows[0].data_publicacao,
+        dataUltimaAtualizacao: rows[0].data_ultima_atualizacao,
+        createdAt: rows[0].created_at,
+        updatedAt: rows[0].updated_at
+      };
+      
+      res.status(201).json(doc);
+    } catch (error) {
+      console.error('Erro ao criar documentação:', error);
+      res.status(500).json({ error: 'Erro ao criar documentação' });
+    }
+  });
+
+  // PUT /api/documentacao-projetos/:id - Atualizar documentação
+  app.put('/api/documentacao-projetos/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const {
+        titulo,
+        slug,
+        descricao,
+        conteudo,
+        categoria,
+        tags,
+        versao,
+        autor,
+        aplicacaoId,
+        status
+      } = req.body;
+      
+      // Verificar se existe
+      const [existing] = await pool.query('SELECT * FROM documentacao_projetos WHERE id = ?', [id]);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: 'Documentação não encontrada' });
+      }
+      
+      const tagsJson = JSON.stringify(tags || []);
+      const dataPublicacao = status === 'Publicado' && existing[0].status !== 'Publicado' 
+        ? new Date() 
+        : existing[0].data_publicacao;
+      
+      await pool.query(
+        `UPDATE documentacao_projetos SET
+          titulo = ?, slug = ?, descricao = ?, conteudo = ?, categoria = ?,
+          tags = ?, versao = ?, autor = ?, aplicacao_id = ?, status = ?,
+          data_publicacao = ?, data_ultima_atualizacao = NOW()
+        WHERE id = ?`,
+        [titulo, slug, descricao, conteudo, categoria, tagsJson, versao, autor, aplicacaoId, status, dataPublicacao, id]
+      );
+      
+      const [rows] = await pool.query(
+        `SELECT 
+          d.*,
+          a.sigla as aplicacao_nome
+        FROM documentacao_projetos d
+        LEFT JOIN aplicacoes a ON d.aplicacao_id = a.id
+        WHERE d.id = ?`,
+        [id]
+      );
+      
+      const doc = {
+        id: rows[0].id,
+        titulo: rows[0].titulo,
+        slug: rows[0].slug,
+        descricao: rows[0].descricao,
+        conteudo: rows[0].conteudo,
+        categoria: rows[0].categoria,
+        tags: typeof rows[0].tags === 'string' ? JSON.parse(rows[0].tags || '[]') : rows[0].tags,
+        versao: rows[0].versao,
+        autor: rows[0].autor,
+        aplicacaoId: rows[0].aplicacao_id,
+        aplicacaoNome: rows[0].aplicacao_nome,
+        status: rows[0].status,
+        dataPublicacao: rows[0].data_publicacao,
+        dataUltimaAtualizacao: rows[0].data_ultima_atualizacao,
+        createdAt: rows[0].created_at,
+        updatedAt: rows[0].updated_at
+      };
+      
+      res.json(doc);
+    } catch (error) {
+      console.error('Erro ao atualizar documentação:', error);
+      res.status(500).json({ error: 'Erro ao atualizar documentação' });
+    }
+  });
+
+  // DELETE /api/documentacao-projetos/:id - Deletar documentação
+  app.delete('/api/documentacao-projetos/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const [result] = await pool.query('DELETE FROM documentacao_projetos WHERE id = ?', [id]);
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Documentação não encontrada' });
+      }
+      
+      res.json({ message: 'Documentação deletada com sucesso' });
+    } catch (error) {
+      console.error('Erro ao deletar documentação:', error);
+      res.status(500).json({ error: 'Erro ao deletar documentação' });
+    }
+  });
+
+  // ==================== PESQUISA POR PERÍODO ====================
+  
+  // GET /api/pesquisa/afastamentos - Buscar colaboradores ativos com afastamentos no período
+  app.get('/api/pesquisa/afastamentos', async (req, res) => {
+    try {
+      const { dataInicio, dataFim } = req.query;
+      
+      if (!dataInicio || !dataFim) {
+        return res.status(400).json({ error: 'dataInicio e dataFim são obrigatórios' });
+      }
+      
+      const query = `
+        SELECT 
+          c.id as colaborador_id,
+          c.nome as colaborador_nome,
+          ta.descricao as tipo_afastamento,
+          a.inicial_provavel as data_inicial,
+          a.final_provavel as data_final,
+          CASE 
+            WHEN a.final_provavel >= CURDATE() THEN 'Ativo'
+            ELSE 'Finalizado'
+          END as status
+        FROM afastamentos a
+        INNER JOIN colaboradores c ON a.colaborador_id = c.id
+        INNER JOIN tipos_afastamento ta ON a.tipo_afastamento_id = ta.id
+        WHERE c.data_demissao IS NULL
+          AND (
+            (a.inicial_provavel BETWEEN ? AND ?)
+            OR (a.final_provavel BETWEEN ? AND ?)
+            OR (a.inicial_provavel <= ? AND a.final_provavel >= ?)
+          )
+        ORDER BY a.inicial_provavel, c.nome
+      `;
+      
+      const [rows] = await pool.query(query, [
+        dataInicio, dataFim,
+        dataInicio, dataFim,
+        dataInicio, dataFim
+      ]);
+      
+      const resultados = rows.map(row => ({
+        colaboradorId: row.colaborador_id,
+        colaboradorNome: row.colaborador_nome,
+        tipoAfastamento: row.tipo_afastamento,
+        dataInicial: row.data_inicial,
+        dataFinal: row.data_final,
+        status: row.status
+      }));
+      
+      res.json(resultados);
+    } catch (error) {
+      console.error('Erro ao buscar afastamentos:', error);
+      res.status(500).json({ error: 'Erro ao buscar afastamentos' });
+    }
+  });
+
+  // GET /api/pesquisa/contratos-tecnologias - Buscar contratos de tecnologias com vencimento no período
+  app.get('/api/pesquisa/contratos-tecnologias', async (req, res) => {
+    try {
+      const { dataInicio, dataFim } = req.query;
+      
+      if (!dataInicio || !dataFim) {
+        return res.status(400).json({ error: 'dataInicio e dataFim são obrigatórios' });
+      }
+      
+      const query = `
+        SELECT 
+          t.id as tecnologia_id,
+          t.sigla as tecnologia_sigla,
+          t.nome as tecnologia_nome,
+          tc.numero_contrato,
+          tc.vigencia_inicial,
+          tc.vigencia_termino,
+          tc.valor_contrato,
+          tc.status
+        FROM tecnologia_contratos tc
+        INNER JOIN tecnologias t ON tc.tecnologia_id = t.id
+        WHERE tc.vigencia_termino BETWEEN ? AND ?
+        ORDER BY tc.vigencia_termino, t.sigla
+      `;
+      
+      const [rows] = await pool.query(query, [dataInicio, dataFim]);
+      
+      const resultados = rows.map(row => ({
+        tecnologiaId: row.tecnologia_id,
+        tecnologiaSigla: row.tecnologia_sigla,
+        tecnologiaNome: row.tecnologia_nome,
+        numeroContrato: row.numero_contrato,
+        vigenciaInicial: row.vigencia_inicial,
+        vigenciaTermino: row.vigencia_termino,
+        valorContrato: parseFloat(row.valor_contrato),
+        status: row.status
+      }));
+      
+      res.json(resultados);
+    } catch (error) {
+      console.error('Erro ao buscar contratos de tecnologias:', error);
+      res.status(500).json({ error: 'Erro ao buscar contratos de tecnologias' });
+    }
+  });
+
   // ==================== NOTIFICAÇÕES ====================
   
   // GET /api/notificacoes - Listar todas as notificações
@@ -8176,7 +8623,10 @@ async function startServer() {
           subject,
           conteudo,
           lido as lida,
-          '' as para
+          '' as para,
+          aplicacao_id as aplicacaoId,
+          aplicacao_sigla as aplicacaoSigla,
+          email
         FROM notificacoes 
         ORDER BY data_recebimento DESC
       `);
@@ -8305,10 +8755,10 @@ async function startServer() {
       // Buscar e-mails não lidos da caixa
       let messagesQuery = `/users/${emailConfig.emailCaixa}/messages?$filter=isRead eq false and receivedDateTime ge ${filterDate}`;
       
-      // Adicionar filtros de assunto se configurados (múltiplos subjects com OR)
-      if (emailConfig.subjects && Array.isArray(emailConfig.subjects) && emailConfig.subjects.length > 0) {
-        const subjectFilters = emailConfig.subjects
-          .map(subject => `contains(subject,'${subject.replace(/'/g, "''")}')`)
+      // Adicionar filtros de assunto se configurados usando filterSubjects (com aplicação)
+      if (emailConfig.filterSubjects && Array.isArray(emailConfig.filterSubjects) && emailConfig.filterSubjects.length > 0) {
+        const subjectFilters = emailConfig.filterSubjects
+          .map(fs => `contains(subject,'${fs.subject.replace(/'/g, "''")}')`)
           .join(' or ');
         messagesQuery += ` and (${subjectFilters})`;
       }
@@ -8326,12 +8776,20 @@ async function startServer() {
       const emailsEncontrados = [];
 
       for (const message of messages.value || []) {
+        // Encontrar a aplicação correspondente ao subject
+        const filterMatch = emailConfig.filterSubjects?.find(fs => 
+          message.subject && message.subject.includes(fs.subject)
+        );
+
         const email = {
           id: uuidv4(),
           de: message.from?.emailAddress?.address || 'Desconhecido',
           subject: message.subject || 'Sem assunto',
           conteudo: (message.body?.content || message.bodyPreview || 'Sem conteúdo').substring(0, 5000),
-          data_recebimento: new Date(message.receivedDateTime)
+          data_recebimento: new Date(message.receivedDateTime),
+          aplicacao_id: filterMatch?.aplicacaoId || null,
+          aplicacao_sigla: filterMatch?.aplicacaoSigla || null,
+          email: emailConfig.emailCaixa || null
         };
 
         emailsEncontrados.push(email);
@@ -8348,8 +8806,8 @@ async function startServer() {
         
         if (existing.length === 0) {
           await pool.query(
-            'INSERT INTO notificacoes (id, data_recebimento, de, subject, conteudo, lido) VALUES (?, ?, ?, ?, ?, FALSE)',
-            [email.id, email.data_recebimento, email.de, email.subject, email.conteudo]
+            'INSERT INTO notificacoes (id, data_recebimento, de, subject, conteudo, lido, aplicacao_id, aplicacao_sigla, email) VALUES (?, ?, ?, ?, ?, FALSE, ?, ?, ?)',
+            [email.id, email.data_recebimento, email.de, email.subject, email.conteudo, email.aplicacao_id, email.aplicacao_sigla, email.email]
           );
           notificacoesInseridas++;
         }

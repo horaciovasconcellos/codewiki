@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Eye, Trash, MagnifyingGlass, FileText, PencilSimple } from '@phosphor-icons/react';
+import { Eye, Trash, MagnifyingGlass, FileText, PencilSimple, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +52,8 @@ export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTabl
   
   const [searchTerm, setSearchTerm] = useState('');
   const [tipoFilter, setTipoFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [scriptToDelete, setScriptToDelete] = useState<Script | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -110,8 +112,28 @@ export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTabl
     return matchesSearch && matchesTipo;
   });
   
+  // Paginação
+  const totalPages = Math.ceil(filteredScripts.length / pageSize);
+  const paginatedScripts = filteredScripts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+  
   console.log('[ScriptsTable] Filtrados:', filteredScripts.length, 'scripts');
   console.log('[ScriptsTable] Busca:', searchTerm, 'Tipo:', tipoFilter);
+  console.log('[ScriptsTable] Página:', currentPage, 'de', totalPages, '| Tamanho:', pageSize);
+  
+  // Log detalhado dos arquivos
+  if (filteredScripts.length > 0) {
+    console.log('[ScriptsTable] Scripts com arquivos:');
+    filteredScripts.forEach(s => {
+      if (s.arquivo) {
+        console.log(`  - ${s.sigla}: arquivo="${s.arquivo}", url="${s.arquivoUrl}", tamanho=${s.arquivoTamanho}`);
+      } else {
+        console.log(`  - ${s.sigla}: SEM ARQUIVO`);
+      }
+    });
+  }
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -151,11 +173,17 @@ export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTabl
             <Input
               placeholder="Buscar por sigla ou descrição..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="pl-10"
             />
           </div>
-          <Select value={tipoFilter} onValueChange={setTipoFilter}>
+          <Select value={tipoFilter} onValueChange={(value) => {
+            setTipoFilter(value);
+            setCurrentPage(1);
+          }}>
             <SelectTrigger className="w-[250px]">
               <SelectValue placeholder="Filtrar por tipo" />
             </SelectTrigger>
@@ -179,12 +207,19 @@ export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTabl
           </Select>
         </div>
 
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div>
+            Mostrando {paginatedScripts.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, filteredScripts.length)} de {filteredScripts.length} scripts
+            {searchTerm && ` (filtrados de ${scripts.length} total)`}
+          </div>
+        </div>
+
         <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead style={{minWidth: '150px', display: 'table-cell !important', visibility: 'visible !important'}}>Sigla</TableHead>
-                <TableHead style={{minWidth: '300px', display: 'table-cell !important', visibility: 'visible !important'}}>Descrição</TableHead>
+                <TableHead style={{minWidth: '150px'}}>Sigla</TableHead>
+                <TableHead style={{minWidth: '300px'}}>Descrição</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Data Início</TableHead>
                 <TableHead>Data Término</TableHead>
@@ -193,14 +228,14 @@ export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTabl
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredScripts.length === 0 ? (
+              {paginatedScripts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground">
                     Nenhum script encontrado
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredScripts.map((script) => (
+                paginatedScripts.map((script) => (
                   <TableRow key={script.id}>
                     <TableCell className="font-medium">{script.sigla}</TableCell>
                     <TableCell className="max-w-md truncate">{script.descricao}</TableCell>
@@ -262,9 +297,52 @@ export function ScriptsTable({ scripts, loading, onEdit, onDelete }: ScriptsTabl
           </Table>
         </div>
 
-        <div className="text-sm text-muted-foreground">
-          Total: {filteredScripts.length} script(s)
-        </div>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Itens por página:</span>
+              <Select 
+                value={pageSize.toString()} 
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <CaretLeft size={16} />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <CaretRight size={16} />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Dialog de confirmação de exclusão */}
