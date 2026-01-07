@@ -33,6 +33,18 @@ interface CardStyles {
   padding: string;
 }
 
+interface ScreenStyles {
+  backgroundColor: string;
+  contentMaxWidth: string;
+  contentPadding: string;
+  headerBackgroundColor: string;
+  headerTextColor: string;
+  headerHeight: string;
+  footerBackgroundColor: string;
+  footerTextColor: string;
+  spacing: string;
+}
+
 interface ConfiguracaoIntegracoesViewProps {}
 
 export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps) {
@@ -78,6 +90,18 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
     padding: '24px'
   });
   
+  const [screenStyles, setScreenStyles] = useState<ScreenStyles>({
+    backgroundColor: '#f8fafc',
+    contentMaxWidth: '1400px',
+    contentPadding: '24px',
+    headerBackgroundColor: '#ffffff',
+    headerTextColor: '#0f172a',
+    headerHeight: '64px',
+    footerBackgroundColor: '#f1f5f9',
+    footerTextColor: '#64748b',
+    spacing: '16px'
+  });
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [showAzureToken, setShowAzureToken] = useState(false);
@@ -85,6 +109,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
   const [tempSystemName, setTempSystemName] = useState(systemName);
   const [tempThemeColors, setTempThemeColors] = useState<ThemeColors>(themeColors);
   const [tempCardStyles, setTempCardStyles] = useState<CardStyles>(cardStyles);
+  const [tempScreenStyles, setTempScreenStyles] = useState<ScreenStyles>(screenStyles);
 
   // Notificações via Microsoft Graph API
   const [tenantId, setTenantId] = useState('');
@@ -157,6 +182,10 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
           if (data['card-styles']) {
             setCardStyles(data['card-styles']);
             setTempCardStyles(data['card-styles']);
+          }
+          if (data['screen-styles']) {
+            setScreenStyles(data['screen-styles']);
+            setTempScreenStyles(data['screen-styles']);
           }
           if (data['company-logo']) {
             setCompanyLogo(data['company-logo']);
@@ -261,6 +290,21 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
     }
   }, [tempCardStyles]);
 
+  useEffect(() => {
+    if (tempScreenStyles) {
+      const root = document.documentElement;
+      root.style.setProperty('--screen-bg', tempScreenStyles.backgroundColor);
+      root.style.setProperty('--content-max-width', tempScreenStyles.contentMaxWidth);
+      root.style.setProperty('--content-padding', tempScreenStyles.contentPadding);
+      root.style.setProperty('--header-bg', tempScreenStyles.headerBackgroundColor);
+      root.style.setProperty('--header-text', tempScreenStyles.headerTextColor);
+      root.style.setProperty('--header-height', tempScreenStyles.headerHeight);
+      root.style.setProperty('--footer-bg', tempScreenStyles.footerBackgroundColor);
+      root.style.setProperty('--footer-text', tempScreenStyles.footerTextColor);
+      root.style.setProperty('--screen-spacing', tempScreenStyles.spacing);
+    }
+  }, [tempScreenStyles]);
+
   const handleSave = async () => {
     try {
       // Salvar cada configuração
@@ -286,6 +330,12 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ valor: tempCardStyles })
+      });
+      
+      await fetch('/api/configuracoes/screen-styles', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor: tempScreenStyles })
       });
       
       if (companyLogo) {
@@ -318,6 +368,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
       setSystemName(tempSystemName);
       setThemeColors(tempThemeColors);
       setCardStyles(tempCardStyles);
+      setScreenStyles(tempScreenStyles);
       
       // Disparar evento para atualizar App.tsx
       window.dispatchEvent(new CustomEvent('configuracoes-updated'));
@@ -392,6 +443,22 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
     };
     setTempCardStyles(defaultCardStyles);
     toast.info('Estilos dos cards restaurados para o padrão');
+  };
+
+  const handleResetScreens = () => {
+    const defaultScreenStyles: ScreenStyles = {
+      backgroundColor: '#f8fafc',
+      contentMaxWidth: '1400px',
+      contentPadding: '24px',
+      headerBackgroundColor: '#ffffff',
+      headerTextColor: '#0f172a',
+      headerHeight: '64px',
+      footerBackgroundColor: '#f1f5f9',
+      footerTextColor: '#64748b',
+      spacing: '16px'
+    };
+    setTempScreenStyles(defaultScreenStyles);
+    toast.info('Estilos das telas restaurados para o padrão');
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1161,6 +1228,257 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                 <div className="mt-4 p-4 bg-muted rounded-lg">
                   <p className="text-sm text-muted-foreground">
                     <strong>Dica:</strong> Use cores hexadecimais (#ffffff) ou RGBA (rgba(255, 255, 255, 1)). As alterações serão aplicadas em todos os componentes Card do sistema.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Palette />
+                      Estilos das Telas
+                    </CardTitle>
+                    <CardDescription>
+                      Configure a aparência geral das páginas, headers, footers e espaçamentos do sistema
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetScreens}
+                  >
+                    Restaurar Padrão
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="screen-bg">Cor de Fundo da Página</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="screen-bg"
+                        placeholder="#f8fafc"
+                        value={tempScreenStyles.backgroundColor}
+                        onChange={(e) => setTempScreenStyles({...tempScreenStyles, backgroundColor: e.target.value})}
+                      />
+                      <div 
+                        className="w-12 h-10 rounded border border-border shrink-0" 
+                        style={{backgroundColor: tempScreenStyles.backgroundColor}}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Cor de fundo principal das páginas</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="content-max-width">Largura Máxima do Conteúdo</Label>
+                    <Select 
+                      value={tempScreenStyles.contentMaxWidth} 
+                      onValueChange={(value) => setTempScreenStyles({...tempScreenStyles, contentMaxWidth: value})}
+                    >
+                      <SelectTrigger id="content-max-width">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1200px">Estreito (1200px)</SelectItem>
+                        <SelectItem value="1400px">Padrão (1400px)</SelectItem>
+                        <SelectItem value="1600px">Largo (1600px)</SelectItem>
+                        <SelectItem value="1920px">Muito largo (1920px)</SelectItem>
+                        <SelectItem value="100%">Largura total (100%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Largura máxima da área de conteúdo</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="content-padding">Espaçamento do Conteúdo</Label>
+                    <Select 
+                      value={tempScreenStyles.contentPadding} 
+                      onValueChange={(value) => setTempScreenStyles({...tempScreenStyles, contentPadding: value})}
+                    >
+                      <SelectTrigger id="content-padding">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="12px">Pequeno (12px)</SelectItem>
+                        <SelectItem value="16px">Médio (16px)</SelectItem>
+                        <SelectItem value="24px">Grande (24px)</SelectItem>
+                        <SelectItem value="32px">Muito grande (32px)</SelectItem>
+                        <SelectItem value="48px">Extra grande (48px)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Espaçamento lateral do conteúdo</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="screen-spacing">Espaçamento Entre Elementos</Label>
+                    <Select 
+                      value={tempScreenStyles.spacing} 
+                      onValueChange={(value) => setTempScreenStyles({...tempScreenStyles, spacing: value})}
+                    >
+                      <SelectTrigger id="screen-spacing">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="8px">Compacto (8px)</SelectItem>
+                        <SelectItem value="12px">Pequeno (12px)</SelectItem>
+                        <SelectItem value="16px">Médio (16px)</SelectItem>
+                        <SelectItem value="24px">Grande (24px)</SelectItem>
+                        <SelectItem value="32px">Muito grande (32px)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Espaço entre seções e elementos</p>
+                  </div>
+                </div>
+
+                <Separator className="my-6" />
+
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold">Configurações do Header</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="header-bg">Cor de Fundo do Header</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="header-bg"
+                          placeholder="#ffffff"
+                          value={tempScreenStyles.headerBackgroundColor}
+                          onChange={(e) => setTempScreenStyles({...tempScreenStyles, headerBackgroundColor: e.target.value})}
+                        />
+                        <div 
+                          className="w-12 h-10 rounded border border-border shrink-0" 
+                          style={{backgroundColor: tempScreenStyles.headerBackgroundColor}}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Cor de fundo do cabeçalho</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="header-text">Cor do Texto do Header</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="header-text"
+                          placeholder="#0f172a"
+                          value={tempScreenStyles.headerTextColor}
+                          onChange={(e) => setTempScreenStyles({...tempScreenStyles, headerTextColor: e.target.value})}
+                        />
+                        <div 
+                          className="w-12 h-10 rounded border border-border shrink-0" 
+                          style={{backgroundColor: tempScreenStyles.headerTextColor}}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Cor do texto do cabeçalho</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="header-height">Altura do Header</Label>
+                      <Select 
+                        value={tempScreenStyles.headerHeight} 
+                        onValueChange={(value) => setTempScreenStyles({...tempScreenStyles, headerHeight: value})}
+                      >
+                        <SelectTrigger id="header-height">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="48px">Compacto (48px)</SelectItem>
+                          <SelectItem value="56px">Pequeno (56px)</SelectItem>
+                          <SelectItem value="64px">Médio (64px)</SelectItem>
+                          <SelectItem value="72px">Grande (72px)</SelectItem>
+                          <SelectItem value="80px">Muito grande (80px)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">Altura do cabeçalho</p>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="my-6" />
+
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold">Configurações do Footer</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="footer-bg">Cor de Fundo do Footer</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="footer-bg"
+                          placeholder="#f1f5f9"
+                          value={tempScreenStyles.footerBackgroundColor}
+                          onChange={(e) => setTempScreenStyles({...tempScreenStyles, footerBackgroundColor: e.target.value})}
+                        />
+                        <div 
+                          className="w-12 h-10 rounded border border-border shrink-0" 
+                          style={{backgroundColor: tempScreenStyles.footerBackgroundColor}}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Cor de fundo do rodapé</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="footer-text">Cor do Texto do Footer</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="footer-text"
+                          placeholder="#64748b"
+                          value={tempScreenStyles.footerTextColor}
+                          onChange={(e) => setTempScreenStyles({...tempScreenStyles, footerTextColor: e.target.value})}
+                        />
+                        <div 
+                          className="w-12 h-10 rounded border border-border shrink-0" 
+                          style={{backgroundColor: tempScreenStyles.footerTextColor}}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Cor do texto do rodapé</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-6 rounded-lg border" 
+                  style={{
+                    backgroundColor: tempScreenStyles.backgroundColor,
+                    padding: tempScreenStyles.contentPadding
+                  }}
+                >
+                  <div 
+                    className="p-4 rounded mb-4" 
+                    style={{
+                      backgroundColor: tempScreenStyles.headerBackgroundColor,
+                      color: tempScreenStyles.headerTextColor,
+                      height: tempScreenStyles.headerHeight,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <strong>Preview do Header</strong>
+                  </div>
+                  
+                  <div style={{ marginTop: tempScreenStyles.spacing, marginBottom: tempScreenStyles.spacing }}>
+                    <h3 className="font-semibold mb-2">Preview do Conteúdo da Tela</h3>
+                    <p className="text-sm opacity-80">
+                      Esta é uma prévia de como as páginas aparecerão com as configurações atuais. 
+                      Os espaçamentos, cores e dimensões serão aplicados em todas as telas do sistema.
+                    </p>
+                  </div>
+
+                  <div 
+                    className="p-4 rounded mt-4" 
+                    style={{
+                      backgroundColor: tempScreenStyles.footerBackgroundColor,
+                      color: tempScreenStyles.footerTextColor,
+                      textAlign: 'center'
+                    }}
+                  >
+                    <small>Preview do Footer</small>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Dica:</strong> As configurações de tela afetam o layout geral do sistema. Teste as alterações em diferentes páginas antes de salvar definitivamente.
                   </p>
                 </div>
               </CardContent>

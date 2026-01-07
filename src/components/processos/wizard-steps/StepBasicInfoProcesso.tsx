@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 interface StepBasicInfoProcessoProps {
   identificacao: string;
   setIdentificacao: (value: string) => void;
+  nome: string;
+  setNome: (value: string) => void;
   descricao: string;
   setDescricao: (value: string) => void;
   nivelMaturidade: NivelMaturidade;
@@ -24,6 +26,8 @@ interface StepBasicInfoProcessoProps {
 export function StepBasicInfoProcesso({
   identificacao,
   setIdentificacao,
+  nome,
+  setNome,
   descricao,
   setDescricao,
   nivelMaturidade,
@@ -39,7 +43,7 @@ export function StepBasicInfoProcesso({
 }: StepBasicInfoProcessoProps) {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="identificacao">
             Sigla <span className="text-destructive">*</span>
@@ -52,7 +56,23 @@ export function StepBasicInfoProcesso({
             maxLength={12}
           />
           <p className="text-xs text-muted-foreground">
-            Formato: 6 caracteres alfanuméricos, hífen, 5 dígitos (ex: ABC123-12345)
+            Formato: 6 alfanuméricos-5 dígitos
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="nome">
+            Nome do Processo <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            placeholder="Ex: Gestão de Contratos"
+            maxLength={100}
+          />
+          <p className="text-xs text-muted-foreground">
+            Nome descritivo do processo
           </p>
         </div>
 
@@ -66,6 +86,9 @@ export function StepBasicInfoProcesso({
             onChange={(e) => setAreaResponsavel(e.target.value)}
             placeholder="Ex: Tecnologia da Informação"
           />
+          <p className="text-xs text-muted-foreground">
+            Área gestora do processo
+          </p>
         </div>
       </div>
 
@@ -77,16 +100,16 @@ export function StepBasicInfoProcesso({
           id="descricao"
           value={descricao}
           onChange={(e) => setDescricao(e.target.value)}
-          placeholder="Descreva o processo de negócio"
-          maxLength={50}
-          rows={3}
+          placeholder="Descreva o processo de negócio detalhadamente"
+          maxLength={500}
+          rows={4}
         />
         <p className="text-xs text-muted-foreground">
-          {descricao.length}/50 caracteres
+          {descricao.length}/500 caracteres
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label htmlFor="nivel-maturidade">Nível de Maturidade</Label>
           <Select value={nivelMaturidade} onValueChange={(value) => setNivelMaturidade(value as NivelMaturidade)}>
@@ -137,24 +160,24 @@ export function StepBasicInfoProcesso({
             </SelectContent>
           </Select>
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="duracao-media">
-          Duração Média (horas) <span className="text-destructive">*</span>
-        </Label>
-        <Input
-          id="duracao-media"
-          type="number"
-          value={duracaoMedia || ''}
-          onChange={(e) => setDuracaoMedia(Number(e.target.value) || 0)}
-          placeholder="Ex: 4"
-          min="0.1"
-          step="0.5"
-        />
-        <p className="text-xs text-muted-foreground">
-          Tempo médio para execução do processo
-        </p>
+        <div className="space-y-2">
+          <Label htmlFor="duracao-media">
+            Duração Média (horas) <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="duracao-media"
+            type="number"
+            value={duracaoMedia || ''}
+            onChange={(e) => setDuracaoMedia(Number(e.target.value) || 0)}
+            placeholder="Ex: 4"
+            min="0.1"
+            step="0.5"
+          />
+          <p className="text-xs text-muted-foreground">
+            Tempo médio de execução
+          </p>
+        </div>
       </div>
     </div>
   );

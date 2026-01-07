@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Aplicacao } from '@/lib/types';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Eye, Pencil, Trash, FileXls, FilePdf, FileText, CaretUp, CaretDown } from '@phosphor-icons/react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Eye, Pencil, Trash, FileXls, FilePdf, FileText, CaretUp, CaretDown, CaretUpDown, MagnifyingGlass } from '@phosphor-icons/react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -22,8 +24,11 @@ type SortField = 'sigla' | 'descricao';
 type SortDirection = 'asc' | 'desc';
 
 export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDelete }: AplicacoesListProps) {
+  const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('sigla');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -34,8 +39,27 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
     }
   };
 
-  const sortedAplicacoes = useMemo(() => {
-    return [...aplicacoes].sort((a, b) => {
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <CaretUpDown size={16} className="ml-1 text-muted-foreground" />;
+    }
+    return sortDirection === 'asc' 
+      ? <CaretUp size={16} className="ml-1" />
+      : <CaretDown size={16} className="ml-1" />;
+  };
+
+  const filteredAndSortedAplicacoes = useMemo(() => {
+    let result = aplicacoes.filter(app => {
+      const matchesSearch = 
+        app.sigla.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (app.tipoAplicacao && app.tipoAplicacao.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (app.cloudProvider && app.cloudProvider.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      return matchesSearch;
+    });
+
+    result.sort((a, b) => {
       let comparison = 0;
       
       if (sortField === 'sigla') {
@@ -46,7 +70,15 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
       
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [aplicacoes, sortField, sortDirection]);
+
+    return result;
+  }, [aplicacoes, searchTerm, sortField, sortDirection]);
+
+  const totalPages = Math.ceil(filteredAndSortedAplicacoes.length / pageSize);
+  const paginatedAplicacoes = filteredAndSortedAplicacoes.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const exportToPDF = () => {
     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
@@ -67,10 +99,10 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
       minute: '2-digit'
     });
     doc.text(`Gerado em: ${dataAtual}`, 14, 22);
-    doc.text(`Total de aplicações: ${sortedAplicacoes.length}`, 14, 27);
+    doc.text(`Total de aplicações: ${filteredAndSortedAplicacoes.length}`, 14, 27);
 
     // Preparar dados para a tabela
-    const tableData = sortedAplicacoes.map(app => [
+    const tableData = filteredAndSortedAplicacoes.map(app => [
       app.sigla,
       app.descricao.length > 80 ? app.descricao.substring(0, 80) + '...' : app.descricao,
       app.urlDocumentacao || 'N/A',
@@ -872,7 +904,8 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
           <div>
             <CardTitle>Aplicações Cadastradas</CardTitle>
             <CardDescription>
-              {aplicacoes.length} {aplicacoes.length === 1 ? 'aplicação cadastrada' : 'aplicações cadastradas'}
+              {filteredAndSortedAplicacoes.length} {filteredAndSortedAplicacoes.length === 1 ? 'aplicação encontrada' : 'aplicações encontradas'}
+              {searchTerm && ` (filtrado de ${aplicacoes.length} total)`}
             </CardDescription>
           </div>
           <div className="flex gap-2">
@@ -908,43 +941,78 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
         </div>
       </CardHeader>
       <CardContent>
-        {aplicacoes.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="text-lg mb-2">Nenhuma aplicação cadastrada</p>
-            <p className="text-sm">Clique em "Nova Aplicação" para começar</p>
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+              <Input
+                placeholder="Buscar por sigla, descrição, tipo ou provider..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-10"
+              />
+            </div>
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('');
+                  setCurrentPage(1);
+                }}
+              >
+                Limpar busca
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div>
+              Mostrando {paginatedAplicacoes.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, filteredAndSortedAplicacoes.length)} de {filteredAndSortedAplicacoes.length} aplicações
+            </div>
+          </div>
+        </div>
+
+        {filteredAndSortedAplicacoes.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground mt-4">
+            <p className="text-lg mb-2">{searchTerm ? 'Nenhuma aplicação encontrada' : 'Nenhuma aplicação cadastrada'}</p>
+            <p className="text-sm">{searchTerm ? 'Tente ajustar os termos de busca' : 'Clique em "Nova Aplicação" para começar'}</p>
           </div>
         ) : (
-          <div className="border rounded-lg">
+          <div className="border rounded-lg mt-4">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[180px]">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-semibold hover:bg-transparent"
                       onClick={() => handleSort('sigla')}
-                      className="flex items-center gap-1 hover:text-foreground transition-colors"
                     >
                       Sigla
-                      {sortField === 'sigla' && (
-                        sortDirection === 'asc' ? <CaretUp size={16} weight="fill" /> : <CaretDown size={16} weight="fill" />
-                      )}
-                    </button>
+                      {getSortIcon('sigla')}
+                    </Button>
                   </TableHead>
                   <TableHead>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-semibold hover:bg-transparent"
                       onClick={() => handleSort('descricao')}
-                      className="flex items-center gap-1 hover:text-foreground transition-colors"
                     >
                       Descrição
-                      {sortField === 'descricao' && (
-                        sortDirection === 'asc' ? <CaretUp size={16} weight="fill" /> : <CaretDown size={16} weight="fill" />
-                      )}
-                    </button>
+                      {getSortIcon('descricao')}
+                    </Button>
                   </TableHead>
                   <TableHead className="w-[120px] text-center">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedAplicacoes.map((aplicacao) => (
+                {paginatedAplicacoes.map((aplicacao) => (
                   <TableRow key={aplicacao.id}>
                     <TableCell className="font-semibold align-top">{aplicacao.sigla}</TableCell>
                     <TableCell>
@@ -1007,6 +1075,53 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
                 ))}
               </TableBody>
             </Table>
+          </div>
+        )}
+
+        {totalPages > 1 && filteredAndSortedAplicacoes.length > 0 && (
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Itens por página:</span>
+              <Select 
+                value={pageSize.toString()} 
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </Button>
+              <span className="text-sm">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Próxima
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>

@@ -3745,7 +3745,8 @@ app.delete('/api/aplicacoes/:id/tecnologias/:tecnologiaId', async (req, res) => 
 function mapProcessoNegocio(row) {
   return {
     id: row.id,
-    identificacao: row.identificacao || row.nome,
+    identificacao: row.identificacao,
+    nome: row.nome || row.identificacao,
     descricao: row.descricao,
     nivelMaturidade: row.nivel_maturidade || 'Inicial',
     areaResponsavel: row.area_responsavel || '',
@@ -3782,18 +3783,19 @@ app.get('/api/processos-negocio/:id', async (req, res) => {
 });
 
 app.post('/api/processos-negocio', async (req, res) => {
-  const { identificacao, descricao, nivelMaturidade, areaResponsavel, frequencia, duracaoMedia, complexidade, normas } = req.body;
+  const { identificacao, nome, descricao, nivelMaturidade, areaResponsavel, frequencia, duracaoMedia, complexidade, normas } = req.body;
   
   try {
     const id = uuidv4();
     await pool.query(
       `INSERT INTO processos_negocio (
-        id, identificacao, descricao, nivel_maturidade, area_responsavel, 
+        id, identificacao, nome, descricao, nivel_maturidade, area_responsavel, 
         frequencia, duracao_media, complexidade, normas
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id, 
-        identificacao, 
+        identificacao,
+        nome || '',
         descricao,
         nivelMaturidade || 'Inicial',
         areaResponsavel || '',
@@ -3813,7 +3815,7 @@ app.post('/api/processos-negocio', async (req, res) => {
 });
 
 app.put('/api/processos-negocio/:id', async (req, res) => {
-  const { identificacao, descricao, nivelMaturidade, areaResponsavel, frequencia, duracaoMedia, complexidade, normas } = req.body;
+  const { identificacao, nome, descricao, nivelMaturidade, areaResponsavel, frequencia, duracaoMedia, complexidade, normas } = req.body;
   
   try {
     const [existing] = await pool.query('SELECT * FROM processos_negocio WHERE id = ?', [req.params.id]);
@@ -3824,6 +3826,7 @@ app.put('/api/processos-negocio/:id', async (req, res) => {
     await pool.query(
       `UPDATE processos_negocio SET 
         identificacao = ?, 
+        nome = ?,
         descricao = ?,
         nivel_maturidade = ?,
         area_responsavel = ?,
@@ -3834,6 +3837,7 @@ app.put('/api/processos-negocio/:id', async (req, res) => {
       WHERE id = ?`,
       [
         identificacao !== undefined ? identificacao : existing[0].identificacao,
+        nome !== undefined ? nome : existing[0].nome,
         descricao !== undefined ? descricao : existing[0].descricao,
         nivelMaturidade !== undefined ? nivelMaturidade : existing[0].nivel_maturidade,
         areaResponsavel !== undefined ? areaResponsavel : existing[0].area_responsavel,

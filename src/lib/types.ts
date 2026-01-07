@@ -199,6 +199,7 @@ export interface NormaProcesso {
 export interface ProcessoNegocio {
   id: string;
   identificacao: string;
+  nome: string;
   descricao: string;
   nivelMaturidade: NivelMaturidade;
   areaResponsavel: string;

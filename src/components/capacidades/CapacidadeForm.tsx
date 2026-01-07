@@ -94,7 +94,7 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[1664px] h-[910px] max-w-[95vw] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {capacidadeToEdit ? 'Editar Capacidade de Negócio' : 'Nova Capacidade de Negócio'}
@@ -184,7 +184,7 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
                   value={alinhamentoObjetivos}
                   onChange={(e) => setAlinhamentoObjetivos(e.target.value)}
                   placeholder="Descreva como esta capacidade se alinha aos objetivos estratégicos da organização"
-                  rows={4}
+                  rows={8}
                 />
               </div>
 
@@ -195,7 +195,7 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
                   value={beneficiosEsperados}
                   onChange={(e) => setBeneficiosEsperados(e.target.value)}
                   placeholder="Liste os benefícios esperados com o desenvolvimento desta capacidade"
-                  rows={4}
+                  rows={8}
                 />
               </div>
 
@@ -206,7 +206,7 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
                   value={estadoFuturoDesejado}
                   onChange={(e) => setEstadoFuturoDesejado(e.target.value)}
                   placeholder="Descreva o estado futuro desejado para esta capacidade"
-                  rows={4}
+                  rows={8}
                 />
               </div>
 
@@ -217,7 +217,7 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
                   value={gapEstadoAtualFuturo}
                   onChange={(e) => setGapEstadoAtualFuturo(e.target.value)}
                   placeholder="Identifique as lacunas entre o estado atual e o estado futuro desejado"
-                  rows={4}
+                  rows={8}
                 />
               </div>
             </div>

@@ -19,6 +19,7 @@ interface ProcessoWizardProps {
 export function ProcessoWizard({ processo, processos, onSave, onCancel }: ProcessoWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [identificacao, setIdentificacao] = useState(processo?.identificacao || '');
+  const [nome, setNome] = useState(processo?.nome || '');
   const [descricao, setDescricao] = useState(processo?.descricao || '');
   const [nivelMaturidade, setNivelMaturidade] = useState<NivelMaturidade>(processo?.nivelMaturidade || 'Inicial');
   const [areaResponsavel, setAreaResponsavel] = useState(processo?.areaResponsavel || '');
@@ -52,12 +53,20 @@ export function ProcessoWizard({ processo, processos, onSave, onCancel }: Proces
           toast.error('Sigla deve seguir o formato: 6 caracteres alfanuméricos, hífen, 5 dígitos (ex: ABC123-12345)');
           return false;
         }
+        if (!nome || !nome.trim()) {
+          toast.error('Informe o nome do processo');
+          return false;
+        }
+        if (nome.length > 100) {
+          toast.error('Nome deve ter até 100 caracteres');
+          return false;
+        }
         if (!descricao || !descricao.trim()) {
           toast.error('Informe a descrição do processo');
           return false;
         }
-        if (descricao.length > 50) {
-          toast.error('Descrição deve ter até 50 caracteres');
+        if (descricao.length > 500) {
+          toast.error('Descrição deve ter até 500 caracteres');
           return false;
         }
         if (!areaResponsavel || !areaResponsavel.trim()) {
@@ -99,6 +108,7 @@ export function ProcessoWizard({ processo, processos, onSave, onCancel }: Proces
     const processoData: ProcessoNegocio = {
       id: processo?.id || crypto.randomUUID(),
       identificacao,
+      nome,
       descricao,
       nivelMaturidade,
       areaResponsavel,
@@ -171,6 +181,8 @@ export function ProcessoWizard({ processo, processos, onSave, onCancel }: Proces
               <StepBasicInfoProcesso
                 identificacao={identificacao}
                 setIdentificacao={setIdentificacao}
+                nome={nome}
+                setNome={setNome}
                 descricao={descricao}
                 setDescricao={setDescricao}
                 nivelMaturidade={nivelMaturidade}
@@ -194,6 +206,7 @@ export function ProcessoWizard({ processo, processos, onSave, onCancel }: Proces
             {currentStep === 3 && (
               <StepReviewProcesso
                 identificacao={identificacao}
+                nome={nome}
                 descricao={descricao}
                 nivelMaturidade={nivelMaturidade}
                 areaResponsavel={areaResponsavel}

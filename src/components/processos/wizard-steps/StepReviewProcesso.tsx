@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 interface StepReviewProcessoProps {
   identificacao: string;
+  nome: string;
   descricao: string;
   nivelMaturidade: NivelMaturidade;
   areaResponsavel: string;
@@ -17,6 +18,7 @@ interface StepReviewProcessoProps {
 
 export function StepReviewProcesso({
   identificacao,
+  nome,
   descricao,
   nivelMaturidade,
   areaResponsavel,
@@ -42,6 +44,13 @@ export function StepReviewProcesso({
               <p className="text-sm text-muted-foreground">Área Responsável</p>
               <p className="font-medium">{areaResponsavel}</p>
             </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Nome do Processo</p>
+            <p className="font-medium text-lg">{nome}</p>
           </div>
 
           <Separator />
