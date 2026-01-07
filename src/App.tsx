@@ -30,6 +30,7 @@ import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, T
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarTrigger } from '@/components/ui/sidebar';
 import { IntegracaoView } from '@/components/integracoes/IntegracaoView';
 import { DocumentacaoAPIsView } from '@/components/DocumentacaoAPIsView';
+import { DocumentacaoSDDView } from '@/components/sdd/DocumentacaoSDDView';
 import { GeradorProjetosView } from '@/components/gerador-projetos/GeradorProjetosView';
 import { InnerSourceView } from '@/components/innersource/InnerSourceView';
 import { CargaDadosView } from '@/components/carga/CargaDadosView';
@@ -68,7 +69,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -401,6 +402,8 @@ function App() {
         return <ApiCatalogGeneratorView />;
       case 'documentacao-apis':
         return <DocumentacaoAPIsView />;
+      case 'documentacao-sdd':
+        return <DocumentacaoSDDView />;
       case 'documentacao-projetos':
         return <DocumentacaoProjetosView />;
       case 'pesquisa-periodo':
@@ -860,6 +863,15 @@ function App() {
                     >
                       <FileText />
                       <span>Documentação de APIs</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'documentacao-sdd'}
+                      onClick={() => setCurrentView('documentacao-sdd')}
+                    >
+                      <Code />
+                      <span>Documentação SDD</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>

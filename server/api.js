@@ -12024,6 +12024,466 @@ app.get('/api/dashboard/aging-chart', async (req, res) => {
   }
 });
 
+// ===== DOCUMENTAÇÃO SDD =====
+
+// GET /api/sdd/projetos - Listar todos os projetos SDD
+app.get('/api/sdd/projetos', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        p.*,
+        a.nome as aplicacao_nome,
+        a.sigla as aplicacao_sigla
+      FROM projetos_sdd p
+      LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
+      ORDER BY p.updated_at DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Erro ao buscar projetos SDD:', error);
+    res.status(500).json({ error: 'Erro ao buscar projetos SDD' });
+  }
+});
+
+// GET /api/sdd/projetos/:id - Buscar projeto específico
+app.get('/api/sdd/projetos/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        p.*,
+        a.nome as aplicacao_nome,
+        a.sigla as aplicacao_sigla
+      FROM projetos_sdd p
+      LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
+      WHERE p.id = ?
+    `, [req.params.id]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Projeto não encontrado' });
+    }
+    
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao buscar projeto SDD:', error);
+    res.status(500).json({ error: 'Erro ao buscar projeto SDD' });
+  }
+});
+
+// POST /api/sdd/projetos - Criar novo projeto
+app.post('/api/sdd/projetos', async (req, res) => {
+  try {
+    const { aplicacao_id, nome_projeto, ia_selecionada, constituicao, gerador_projetos } = req.body;
+    
+    if (!nome_projeto || !ia_selecionada) {
+      return res.status(400).json({ error: 'Nome do projeto e IA são obrigatórios' });
+    }
+    
+    const id = uuidv4();
+    
+    await pool.query(`
+      INSERT INTO projetos_sdd (id, aplicacao_id, nome_projeto, ia_selecionada, constituicao, gerador_projetos)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [id, aplicacao_id || null, nome_projeto, ia_selecionada, constituicao || null, gerador_projetos || false]);
+    
+    const [rows] = await pool.query(`
+      SELECT 
+        p.*,
+        a.nome as aplicacao_nome,
+        a.sigla as aplicacao_sigla
+      FROM projetos_sdd p
+      LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
+      WHERE p.id = ?
+    `, [id]);
+    
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao criar projeto SDD:', error);
+    res.status(500).json({ error: 'Erro ao criar projeto SDD' });
+  }
+});
+
+// PUT /api/sdd/projetos/:id - Atualizar projeto
+app.put('/api/sdd/projetos/:id', async (req, res) => {
+  try {
+    const { aplicacao_id, nome_projeto, ia_selecionada, constituicao, gerador_projetos } = req.body;
+    
+    await pool.query(`
+      UPDATE projetos_sdd
+      SET aplicacao_id = ?, nome_projeto = ?, ia_selecionada = ?, constituicao = ?, gerador_projetos = ?
+      WHERE id = ?
+    `, [aplicacao_id || null, nome_projeto, ia_selecionada, constituicao || null, gerador_projetos, req.params.id]);
+    
+    const [rows] = await pool.query(`
+      SELECT 
+        p.*,
+        a.nome as aplicacao_nome,
+        a.sigla as aplicacao_sigla
+      FROM projetos_sdd p
+      LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
+      WHERE p.id = ?
+    `, [req.params.id]);
+    
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar projeto SDD:', error);
+    res.status(500).json({ error: 'Erro ao atualizar projeto SDD' });
+  }
+});
+
+// DELETE /api/sdd/projetos/:id - Deletar projeto
+app.delete('/api/sdd/projetos/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM projetos_sdd WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao deletar projeto SDD:', error);
+    res.status(500).json({ error: 'Erro ao deletar projeto SDD' });
+  }
+});
+
+// GET /api/sdd/requisitos/:projetoId - Listar requisitos de um projeto
+app.get('/api/sdd/requisitos/:projetoId', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        r.*,
+        COUNT(t.id) as tarefas_count,
+        SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END) as tarefas_done_count
+      FROM requisitos_sdd r
+      LEFT JOIN tarefas_sdd t ON r.id = t.requisito_id
+      WHERE r.projeto_id = ?
+      GROUP BY r.id
+      ORDER BY r.sequencia
+    `, [req.params.projetoId]);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Erro ao buscar requisitos:', error);
+    res.status(500).json({ error: 'Erro ao buscar requisitos' });
+  }
+});
+
+// POST /api/sdd/requisitos - Criar novo requisito
+app.post('/api/sdd/requisitos', async (req, res) => {
+  try {
+    const { projeto_id, nome, descricao, status } = req.body;
+    
+    if (!projeto_id || !nome) {
+      return res.status(400).json({ error: 'Projeto e nome são obrigatórios' });
+    }
+    
+    // Gerar sequência
+    const [maxSeq] = await pool.query(`
+      SELECT sequencia FROM requisitos_sdd WHERE projeto_id = ? ORDER BY sequencia DESC LIMIT 1
+    `, [projeto_id]);
+    
+    let nextNum = 1;
+    if (maxSeq.length > 0) {
+      const match = maxSeq[0].sequencia.match(/REQ-(\d+)/);
+      if (match) {
+        nextNum = parseInt(match[1]) + 1;
+      }
+    }
+    
+    const sequencia = `REQ-${String(nextNum).padStart(3, '0')}`;
+    const id = uuidv4();
+    
+    await pool.query(`
+      INSERT INTO requisitos_sdd (id, projeto_id, sequencia, nome, descricao, status)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [id, projeto_id, sequencia, nome, descricao || null, status || 'BACKLOG']);
+    
+    const [rows] = await pool.query('SELECT * FROM requisitos_sdd WHERE id = ?', [id]);
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao criar requisito:', error);
+    res.status(500).json({ error: 'Erro ao criar requisito' });
+  }
+});
+
+// PUT /api/sdd/requisitos/:id - Atualizar requisito
+app.put('/api/sdd/requisitos/:id', async (req, res) => {
+  try {
+    const { nome, descricao, status } = req.body;
+    
+    // Buscar status atual
+    const [current] = await pool.query('SELECT status FROM requisitos_sdd WHERE id = ?', [req.params.id]);
+    
+    if (current.length === 0) {
+      return res.status(404).json({ error: 'Requisito não encontrado' });
+    }
+    
+    const statusAnterior = current[0].status !== status ? current[0].status : null;
+    
+    await pool.query(`
+      UPDATE requisitos_sdd
+      SET nome = ?, descricao = ?, status = ?, status_anterior = ?
+      WHERE id = ?
+    `, [nome, descricao || null, status, statusAnterior, req.params.id]);
+    
+    const [rows] = await pool.query('SELECT * FROM requisitos_sdd WHERE id = ?', [req.params.id]);
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar requisito:', error);
+    res.status(500).json({ error: 'Erro ao atualizar requisito' });
+  }
+});
+
+// PUT /api/sdd/requisitos/:id/restaurar-status - Restaurar status anterior
+app.put('/api/sdd/requisitos/:id/restaurar-status', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT status_anterior FROM requisitos_sdd WHERE id = ?', [req.params.id]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Requisito não encontrado' });
+    }
+    
+    if (!rows[0].status_anterior) {
+      return res.status(400).json({ error: 'Não há status anterior para restaurar' });
+    }
+    
+    await pool.query(`
+      UPDATE requisitos_sdd
+      SET status = ?, status_anterior = NULL
+      WHERE id = ?
+    `, [rows[0].status_anterior, req.params.id]);
+    
+    const [updated] = await pool.query('SELECT * FROM requisitos_sdd WHERE id = ?', [req.params.id]);
+    res.json(updated[0]);
+  } catch (error) {
+    console.error('Erro ao restaurar status:', error);
+    res.status(500).json({ error: 'Erro ao restaurar status' });
+  }
+});
+
+// DELETE /api/sdd/requisitos/:id - Deletar requisito
+app.delete('/api/sdd/requisitos/:id', async (req, res) => {
+  try {
+    // Verificar se há tarefas não finalizadas
+    const [tarefas] = await pool.query(`
+      SELECT COUNT(*) as count FROM tarefas_sdd WHERE requisito_id = ? AND status != 'DONE'
+    `, [req.params.id]);
+    
+    if (tarefas[0].count > 0) {
+      return res.status(400).json({ error: 'Não é possível excluir requisito com tarefas não finalizadas' });
+    }
+    
+    await pool.query('DELETE FROM requisitos_sdd WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao deletar requisito:', error);
+    res.status(500).json({ error: 'Erro ao deletar requisito' });
+  }
+});
+
+// GET /api/sdd/tarefas/:requisitoId - Listar tarefas de um requisito
+app.get('/api/sdd/tarefas/:requisitoId', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        t.*,
+        r.sequencia as requisito_sequencia,
+        DATEDIFF(COALESCE(t.data_termino, CURDATE()), t.data_inicio) as dias_decorridos
+      FROM tarefas_sdd t
+      JOIN requisitos_sdd r ON t.requisito_id = r.id
+      WHERE t.requisito_id = ?
+      ORDER BY t.created_at
+    `, [req.params.requisitoId]);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Erro ao buscar tarefas:', error);
+    res.status(500).json({ error: 'Erro ao buscar tarefas' });
+  }
+});
+
+// POST /api/sdd/tarefas - Criar nova tarefa
+app.post('/api/sdd/tarefas', async (req, res) => {
+  try {
+    const { requisito_id, descricao, data_inicio } = req.body;
+    
+    if (!requisito_id || !descricao) {
+      return res.status(400).json({ error: 'Requisito e descrição são obrigatórios' });
+    }
+    
+    // Verificar se requisito está em "PRONTO P/DEV"
+    const [requisito] = await pool.query('SELECT status FROM requisitos_sdd WHERE id = ?', [requisito_id]);
+    
+    if (requisito.length === 0) {
+      return res.status(404).json({ error: 'Requisito não encontrado' });
+    }
+    
+    if (requisito[0].status !== 'PRONTO P/DEV') {
+      return res.status(400).json({ error: 'Tarefas só podem ser criadas para requisitos com status "PRONTO P/DEV"' });
+    }
+    
+    const id = uuidv4();
+    const dataInicio = data_inicio || new Date().toISOString().split('T')[0];
+    
+    await pool.query(`
+      INSERT INTO tarefas_sdd (id, requisito_id, descricao, data_inicio, status)
+      VALUES (?, ?, ?, ?, 'TO DO')
+    `, [id, requisito_id, descricao, dataInicio]);
+    
+    const [rows] = await pool.query('SELECT * FROM tarefas_sdd WHERE id = ?', [id]);
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao criar tarefa:', error);
+    res.status(500).json({ error: 'Erro ao criar tarefa' });
+  }
+});
+
+// PUT /api/sdd/tarefas/:id - Atualizar tarefa
+app.put('/api/sdd/tarefas/:id', async (req, res) => {
+  try {
+    const { descricao, data_termino, status } = req.body;
+    
+    const [current] = await pool.query('SELECT requisito_id, data_inicio, status FROM tarefas_sdd WHERE id = ?', [req.params.id]);
+    
+    if (current.length === 0) {
+      return res.status(404).json({ error: 'Tarefa não encontrada' });
+    }
+    
+    // Validar data de término
+    if (data_termino && data_termino < current[0].data_inicio) {
+      return res.status(400).json({ error: 'Data de término não pode ser anterior à data de início' });
+    }
+    
+    // Se marcar como DONE, preencher data de término automaticamente
+    let finalDataTermino = data_termino;
+    if (status === 'DONE' && !data_termino) {
+      finalDataTermino = new Date().toISOString().split('T')[0];
+    }
+    
+    await pool.query(`
+      UPDATE tarefas_sdd
+      SET descricao = ?, data_termino = ?, status = ?
+      WHERE id = ?
+    `, [descricao, finalDataTermino || null, status, req.params.id]);
+    
+    // Se marcar como DONE, verificar se todas as tarefas do requisito estão concluídas
+    if (status === 'DONE') {
+      const [tarefasPendentes] = await pool.query(`
+        SELECT COUNT(*) as count FROM tarefas_sdd WHERE requisito_id = ? AND status != 'DONE'
+      `, [current[0].requisito_id]);
+      
+      if (tarefasPendentes[0].count === 0) {
+        await pool.query(`
+          UPDATE requisitos_sdd SET status = 'DONE' WHERE id = ?
+        `, [current[0].requisito_id]);
+      }
+    }
+    
+    const [rows] = await pool.query('SELECT * FROM tarefas_sdd WHERE id = ?', [req.params.id]);
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar tarefa:', error);
+    res.status(500).json({ error: 'Erro ao atualizar tarefa' });
+  }
+});
+
+// DELETE /api/sdd/tarefas/:id - Deletar tarefa
+app.delete('/api/sdd/tarefas/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM tarefas_sdd WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao deletar tarefa:', error);
+    res.status(500).json({ error: 'Erro ao deletar tarefa' });
+  }
+});
+
+// GET /api/sdd/decisoes/:projetoId - Listar decisões arquiteturais de um projeto
+app.get('/api/sdd/decisoes/:projetoId', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        d.*,
+        a.titulo as adr_titulo
+      FROM decisoes_arquiteturais_sdd d
+      LEFT JOIN adrs a ON d.adr_id = a.id
+      WHERE d.projeto_id = ?
+      ORDER BY d.created_at DESC
+    `, [req.params.projetoId]);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Erro ao buscar decisões arquiteturais:', error);
+    res.status(500).json({ error: 'Erro ao buscar decisões arquiteturais' });
+  }
+});
+
+// POST /api/sdd/decisoes - Criar nova decisão arquitetural
+app.post('/api/sdd/decisoes', async (req, res) => {
+  try {
+    const { projeto_id, adr_id, data_inicio, data_termino, status } = req.body;
+    
+    if (!projeto_id || !adr_id) {
+      return res.status(400).json({ error: 'Projeto e ADR são obrigatórios' });
+    }
+    
+    const id = uuidv4();
+    const dataInicio = data_inicio || new Date().toISOString().split('T')[0];
+    
+    await pool.query(`
+      INSERT INTO decisoes_arquiteturais_sdd (id, projeto_id, adr_id, data_inicio, data_termino, status)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [id, projeto_id, adr_id, dataInicio, data_termino || null, status || 'Proposta']);
+    
+    const [rows] = await pool.query(`
+      SELECT 
+        d.*,
+        a.titulo as adr_titulo
+      FROM decisoes_arquiteturais_sdd d
+      LEFT JOIN adrs a ON d.adr_id = a.id
+      WHERE d.id = ?
+    `, [id]);
+    
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao criar decisão arquitetural:', error);
+    res.status(500).json({ error: 'Erro ao criar decisão arquitetural' });
+  }
+});
+
+// PUT /api/sdd/decisoes/:id - Atualizar decisão arquitetural
+app.put('/api/sdd/decisoes/:id', async (req, res) => {
+  try {
+    const { data_termino, status } = req.body;
+    
+    await pool.query(`
+      UPDATE decisoes_arquiteturais_sdd
+      SET data_termino = ?, status = ?
+      WHERE id = ?
+    `, [data_termino || null, status, req.params.id]);
+    
+    const [rows] = await pool.query(`
+      SELECT 
+        d.*,
+        a.titulo as adr_titulo
+      FROM decisoes_arquiteturais_sdd d
+      LEFT JOIN adrs a ON d.adr_id = a.id
+      WHERE d.id = ?
+    `, [req.params.id]);
+    
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar decisão arquitetural:', error);
+    res.status(500).json({ error: 'Erro ao atualizar decisão arquitetural' });
+  }
+});
+
+// DELETE /api/sdd/decisoes/:id - Deletar decisão arquitetural
+app.delete('/api/sdd/decisoes/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM decisoes_arquiteturais_sdd WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao deletar decisão arquitetural:', error);
+    res.status(500).json({ error: 'Erro ao deletar decisão arquitetural' });
+  }
+});
+
 startServer();
 
 export default app;

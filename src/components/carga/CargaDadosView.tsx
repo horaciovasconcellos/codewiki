@@ -731,32 +731,33 @@ export function CargaDadosView() {
       {/* Guia de Uso */}
       <Card className="bg-primary border-primary">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-primary-foreground">
+          <CardTitle className="flex items-center gap-2" style={{color: 'var(--card-text)'}}>
             <DownloadSimple className="w-5 h-5" />
             Guia de Uso
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-primary-foreground">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm" style={{color: 'var(--card-text)'}}>
           <div>
-            <h4 className="font-semibold mb-2 text-primary-foreground">Formatos de Arquivo</h4>
-            <ul className="space-y-1 pl-4 text-primary-foreground">
+            <h4 className="font-semibold mb-2" style={{color: 'var(--card-text)'}}>Formatos de Arquivo</h4>
+            <ul className="space-y-1 pl-4" style={{color: 'var(--card-text)'}}>
               <li className="list-disc"><strong>CSV</strong>: Primeira linha = cabeçalho, demais = dados</li>
               <li className="list-disc"><strong>JSON</strong>: Array de objetos ou objeto único</li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2 text-primary-foreground">Nomenclatura de Arquivos</h4>
-            <p className="mb-2 text-primary-foreground">O sistema detecta automaticamente pelo nome. Clique para baixar exemplo:</p>
-            <ul className="space-y-1 pl-4 text-xs text-primary-foreground">
+            <h4 className="font-semibold mb-2" style={{color: 'var(--card-text)'}}>Nomenclatura de Arquivos</h4>
+            <p className="mb-2" style={{color: 'var(--card-text)'}}>O sistema detecta automaticamente pelo nome. Clique para baixar exemplo:</p>
+            <ul className="space-y-1 pl-4 text-xs" style={{color: 'var(--card-text)'}}>
               {Object.entries(ENTIDADES_CONFIG)
                 .sort(([, a], [, b]) => a.label.localeCompare(b.label))
                 .map(([key, config]) => (
                 <li key={key} className="list-disc">
                   <button
                     onClick={() => baixarCsvExemplo(key as TipoEntidade)}
-                    className="hover:underline cursor-pointer text-left text-primary-foreground hover:text-primary-foreground/80"
+                    className="hover:underline cursor-pointer text-left hover:opacity-80"
+                    style={{color: 'var(--card-text)'}}
                   >
                     <strong>{config.label}</strong>: {config.exemplo}
                   </button>
@@ -766,8 +767,8 @@ export function CargaDadosView() {
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2 text-primary-foreground">Campos Obrigatórios (Exemplos)</h4>
-            <ul className="space-y-1 pl-4 text-xs text-primary-foreground">
+            <h4 className="font-semibold mb-2" style={{color: 'var(--card-text)'}}>Campos Obrigatórios (Exemplos)</h4>
+            <ul className="space-y-1 pl-4 text-xs" style={{color: 'var(--card-text)'}}>
               <li className="list-disc">Tecnologias: nome, versao, plataforma</li>
               <li className="list-disc">Colaboradores: nome, email, cargo</li>
               <li className="list-disc">Aplicações: nome, stack, status</li>
@@ -775,8 +776,8 @@ export function CargaDadosView() {
           </div>
 
           <div>
-            <h4 className="font-semibold mb-2 text-primary-foreground">Dicas</h4>
-            <ul className="space-y-1 pl-4 text-xs text-primary-foreground">
+            <h4 className="font-semibold mb-2" style={{color: 'var(--card-text)'}}>Dicas</h4>
+            <ul className="space-y-1 pl-4 text-xs" style={{color: 'var(--card-text)'}}>
               <li className="list-disc">Valide os arquivos antes do upload</li>
               <li className="list-disc">Múltiplos arquivos podem ser carregados juntos</li>
               <li className="list-disc">Processamento em lote para eficiência</li>
