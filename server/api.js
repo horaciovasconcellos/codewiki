@@ -91,7 +91,7 @@ const scriptsDir = path.join(uploadsDir, 'scripts');
   }
 });
 
-const PORT = 3000;
+const PORT = process.env.API_PORT || process.env.PORT || 3000;
 
 // Configuração do MySQL
 const dbConfig = {
