@@ -90,12 +90,7 @@ export function GeradorProjetosView() {
       toast.success('Projeto excluído com sucesso!');
       refetch();
     } catch (error: any) {
-      // Verificar se é erro de projeto processado
-      if (error?.response?.data?.code === 'PROCESSED_PROJECT') {
-        toast.error('Não é permitido excluir projetos já integrados ao Azure DevOps');
-      } else {
-        toast.error('Erro ao excluir projeto');
-      }
+      toast.error('Erro ao excluir projeto');
       console.error(error);
     } finally {
       setShowDeleteDialog(false);

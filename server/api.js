@@ -5256,7 +5256,7 @@ app.post('/api/estruturas-projeto', async (req, res) => {
         estrutura.status || 'Pendente',
         'N',
         estrutura.innerSourceProject || false,
-        null
+        estrutura.aplicacaoBaseId || null
       ]
     );
     
@@ -5474,7 +5474,7 @@ app.put('/api/estruturas-projeto/:id', async (req, res) => {
 // DELETE /api/estruturas-projeto/:id - Deletar estrutura
 app.delete('/api/estruturas-projeto/:id', async (req, res) => {
   try {
-    // Verificar se o projeto já foi processado
+    // Verificar se o projeto existe
     const [rows] = await pool.query(
       'SELECT id, projeto, status FROM estruturas_projeto WHERE id = ?',
       [req.params.id]
@@ -5489,15 +5489,8 @@ app.delete('/api/estruturas-projeto/:id', async (req, res) => {
     
     const estrutura = rows[0];
     
-    // Não permitir exclusão se já foi processado
-    if (estrutura.status === 'Processado') {
-      console.log(`[API] Tentativa de excluir projeto processado: ${estrutura.projeto}`);
-      return res.status(403).json({ 
-        error: 'Não é permitido excluir projetos que já foram integrados ao Azure DevOps', 
-        code: 'PROCESSED_PROJECT',
-        projeto: estrutura.projeto
-      });
-    }
+    // [MODO TESTE] Permitir exclusão de projetos processados para testes
+    console.log(`[API] Excluindo projeto: ${estrutura.projeto} (Status: ${estrutura.status})`);
     
     // Deletar registro InnerSource associado (se existir)
     console.log('[API] Verificando registro InnerSource associado...');
@@ -5513,7 +5506,7 @@ app.delete('/api/estruturas-projeto/:id', async (req, res) => {
       console.log('[API] Registro InnerSource deletado com sucesso');
     }
     
-    // Se status for Pendente, permitir exclusão
+    // Excluir estrutura do projeto
     const [result] = await pool.query('DELETE FROM estruturas_projeto WHERE id = ?', [req.params.id]);
     console.log(`[API] Projeto ${estrutura.projeto} excluído com sucesso`);
     res.status(204).send();
@@ -5889,7 +5882,171 @@ app.post('/api/azure-devops/integrar-projeto', async (req, res) => {
       console.error(`[AZURE INTEGRAÇÃO] Step 13: Stack:`, error.stack);
     }
 
-    // 14. Gerar URL do projeto
+    // 14. Verificar se projeto tem SPEC-KIT associado e criar PBIs
+    let pbisCreated = 0;
+    let tasksCreated = 0;
+    
+    // Helper para truncar títulos longos (máximo 255 caracteres)
+    const truncateTitle = (title, maxLength = 255) => {
+      if (title.length <= maxLength) return title;
+      return title.substring(0, 253) + '...';
+    };
+    
+    try {
+      console.log(`[AZURE INTEGRAÇÃO] Step 14: Verificando projeto SPEC-KIT associado...`);
+      console.log(`[AZURE INTEGRAÇÃO] Step 14: Buscando por aplicacao_id='${projeto.aplicacao_base_id}' e nome_projeto='${projeto.projeto}'`);
+      
+      // Buscar projeto SDD pelo aplicacao_id e nome_projeto
+      const [projetosSDDRows] = await pool.query(
+        `SELECT * FROM projetos_sdd 
+         WHERE aplicacao_id = ? 
+         AND nome_projeto = ? 
+         AND gerador_projetos = 1
+         LIMIT 1`,
+        [projeto.aplicacao_base_id, projeto.projeto]
+      );
+      
+      console.log(`[AZURE INTEGRAÇÃO] Step 14: Projetos SPEC-KIT encontrados: ${projetosSDDRows.length}`);
+      
+      if (projetosSDDRows.length > 0) {
+        const projetoSDD = projetosSDDRows[0];
+        console.log(`[AZURE INTEGRAÇÃO] Projeto SPEC-KIT encontrado: ID=${projetoSDD.id}, Nome='${projetoSDD.nome_projeto}'`);
+        
+        // Primeiro, buscar TODOS os requisitos para debug
+        const [todosRequisitosRows] = await pool.query(
+          `SELECT * FROM requisitos_sdd WHERE projeto_id = ? ORDER BY sequencia`,
+          [projetoSDD.id]
+        );
+        console.log(`[AZURE INTEGRAÇÃO] Total de requisitos no projeto: ${todosRequisitosRows.length}`);
+        
+        if (todosRequisitosRows.length > 0) {
+          console.log(`[AZURE INTEGRAÇÃO] Status dos requisitos:`);
+          todosRequisitosRows.forEach(req => {
+            console.log(`[AZURE INTEGRAÇÃO]   - ${req.sequencia}: ${req.nome} (Status: ${req.status})`);
+          });
+        }
+        
+        // Buscar APENAS requisitos com status = 'PRONTO P/DEV'
+        const [requisitosRows] = await pool.query(
+          `SELECT * FROM requisitos_sdd 
+           WHERE projeto_id = ? 
+           AND status = 'PRONTO P/DEV'
+           ORDER BY sequencia`,
+          [projetoSDD.id]
+        );
+        
+        console.log(`[AZURE INTEGRAÇÃO] Requisitos com status 'PRONTO P/DEV' encontrados: ${requisitosRows.length}`);
+        
+        for (const requisito of requisitosRows) {
+          try {
+            console.log(`[AZURE INTEGRAÇÃO] ========================================`);
+            console.log(`[AZURE INTEGRAÇÃO] Processando Requisito: ${requisito.sequencia} - ${requisito.nome}`);
+            console.log(`[AZURE INTEGRAÇÃO] Status: ${requisito.status}`);
+            console.log(`[AZURE INTEGRAÇÃO] Descrição: ${requisito.descricao ? requisito.descricao.substring(0, 50) + '...' : 'Sem descrição'}`);
+            
+            // Criar PBI (Product Backlog Item)
+            // REGRA: Title = "SEQUENCIA - NOME" | Description = descricao
+            const pbiTitle = truncateTitle(`${requisito.sequencia} - ${requisito.nome}`);
+            
+            const pbiData = {
+              title: pbiTitle,
+              description: requisito.descricao || '',
+              state: 'New', // Status 'PRONTO P/DEV' mapeado para 'New'
+              areaPath: areaPath,
+              iterationPath: `${projectName}${iterationPath}\\Sprint 1`,
+              priority: 2,
+              tags: 'PRONTO P/DEV'
+            };
+            
+            console.log(`[AZURE INTEGRAÇÃO] Dados do PBI a ser criado:`, JSON.stringify(pbiData, null, 2));
+            console.log(`[AZURE INTEGRAÇÃO] Chamando azureService.createWorkItem...`);
+            
+            const pbi = await azureService.createWorkItem(projectName, 'Product Backlog Item', pbiData);
+            pbisCreated++;
+            console.log(`[AZURE INTEGRAÇÃO] ✅ PBI criado com sucesso: ID=${pbi.id}, Title='${pbiTitle}'`);
+            
+            // Buscar todas as tarefas para debug
+            const [todasTarefasRows] = await pool.query(
+              `SELECT * FROM tarefas_sdd 
+               WHERE requisito_id = ? 
+               ORDER BY data_inicio`,
+              [requisito.id]
+            );
+            
+            console.log(`[AZURE INTEGRAÇÃO] Total de tarefas no requisito: ${todasTarefasRows.length}`);
+            if (todasTarefasRows.length > 0) {
+              console.log(`[AZURE INTEGRAÇÃO] Status das tarefas:`);
+              todasTarefasRows.forEach((t, idx) => {
+                console.log(`[AZURE INTEGRAÇÃO]   ${idx + 1}. ${t.descricao.substring(0, 40)}... (Status: ${t.status}, Data: ${t.data_inicio})`);
+              });
+            }
+            
+            // Buscar APENAS tarefas com status = 'TO DO', ordenadas por data_inicio
+            const [tarefasRows] = await pool.query(
+              `SELECT * FROM tarefas_sdd 
+               WHERE requisito_id = ? 
+               AND status = 'TO DO'
+               ORDER BY data_inicio`,
+              [requisito.id]
+            );
+            
+            console.log(`[AZURE INTEGRAÇÃO] Tarefas com status 'TO DO' encontradas: ${tarefasRows.length}`);
+            
+            // Criar tasks associadas ao PBI
+            for (let taskIndex = 0; taskIndex < tarefasRows.length; taskIndex++) {
+              const tarefa = tarefasRows[taskIndex];
+              const taskSequencia = taskIndex + 1; // Sequência ordenada pela data de início
+              
+              try {
+                console.log(`[AZURE INTEGRAÇÃO]   Criando Task ${taskSequencia} de ${tarefasRows.length}...`);
+                
+                // REGRA: Title = "SEQUENCIA_REQUISITO - SEQUENCIA_ORDENADA : DESCRICAO"
+                // Description = descricao da tarefa
+                const taskTitle = truncateTitle(`${requisito.sequencia} - ${taskSequencia} : ${tarefa.descricao}`);
+                
+                const taskData = {
+                  title: taskTitle,
+                  description: tarefa.descricao || '',
+                  state: 'New', // Status 'TO DO' mapeado para 'New'
+                  areaPath: areaPath,
+                  iterationPath: `${projectName}${iterationPath}\\Sprint 1`,
+                  parentId: pbi.id // Associar ao PBI
+                };
+                
+                console.log(`[AZURE INTEGRAÇÃO]   Dados da Task:`, JSON.stringify(taskData, null, 2));
+                
+                const task = await azureService.createWorkItem(projectName, 'Task', taskData);
+                tasksCreated++;
+                console.log(`[AZURE INTEGRAÇÃO]   ✅ Task criada com sucesso: ID=${task.id}, Title='${taskTitle}'`);
+              } catch (taskError) {
+                console.error(`[AZURE INTEGRAÇÃO]   ❌ Erro ao criar task ${requisito.sequencia}.${taskSequencia}:`, taskError.message);
+                console.error(`[AZURE INTEGRAÇÃO]   Stack:`, taskError.stack);
+              }
+            }
+            
+          } catch (pbiError) {
+            console.error(`[AZURE INTEGRAÇÃO] ❌ Erro ao criar PBI para requisito ${requisito.sequencia}:`, pbiError.message);
+            console.error(`[AZURE INTEGRAÇÃO] Stack:`, pbiError.stack);
+          }
+        }
+        
+        console.log(`[AZURE INTEGRAÇÃO] ========================================`);
+        console.log(`[AZURE INTEGRAÇÃO] ✅ Criados ${pbisCreated} PBIs e ${tasksCreated} Tasks do SPEC-KIT`);
+      } else {
+        console.log(`[AZURE INTEGRAÇÃO] ⚠️ Nenhum projeto SPEC-KIT associado encontrado`);
+        console.log(`[AZURE INTEGRAÇÃO] Verifique se:`);
+        console.log(`[AZURE INTEGRAÇÃO]   1. O projeto SPEC-KIT existe`);
+        console.log(`[AZURE INTEGRAÇÃO]   2. O aplicacao_id='${projeto.aplicacao_base_id}' está correto`);
+        console.log(`[AZURE INTEGRAÇÃO]   3. O nome_projeto='${projeto.projeto}' está correto`);
+        console.log(`[AZURE INTEGRAÇÃO]   4. O campo gerador_projetos=1 está ativado`);
+      }
+    } catch (sddError) {
+      console.error(`[AZURE INTEGRAÇÃO] ❌ Erro crítico ao processar SPEC-KIT:`, sddError.message);
+      console.error(`[AZURE INTEGRAÇÃO] Stack completo:`, sddError.stack);
+      // Não interromper a integração por erro no SPEC-KIT
+    }
+
+    // 15. Gerar URL do projeto
     const projectUrl = `https://dev.azure.com/${organization}/${projectName}`;
 
     console.log(`[AZURE INTEGRAÇÃO] Integração concluída com sucesso!`);
@@ -5901,7 +6058,9 @@ app.post('/api/azure-devops/integrar-projeto', async (req, res) => {
       projectUrl,
       projectId: azureProject.id,
       teamId: defaultTeam.id,
-      iterations: iterations.length
+      iterations: iterations.length,
+      pbisCreated,
+      tasksCreated
     });
 
   } catch (error) {

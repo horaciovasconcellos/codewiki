@@ -89,7 +89,7 @@ export function ProjetoSDDDetail({ projeto: initialProjeto, onBack }: ProjetoSDD
                 {projeto.constituicao && (
                   <div className="col-span-2">
                     <Label className="text-sm font-semibold">Constituição</Label>
-                    <div className="mt-2 prose prose-sm max-w-none">
+                    <div className="mt-2 prose prose-sm max-w-none max-h-[6rem] overflow-y-auto border rounded-md p-3 bg-muted/30">
                       <ReactMarkdown>{projeto.constituicao}</ReactMarkdown>
                     </div>
                   </div>

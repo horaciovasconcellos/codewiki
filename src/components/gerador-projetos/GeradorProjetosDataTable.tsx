@@ -159,16 +159,12 @@ export function GeradorProjetosDataTable({
                             variant="ghost"
                             size="sm"
                             onClick={() => onDelete(projeto)}
-                            disabled={projeto.status === 'Processado'}
-                            className={projeto.status === 'Processado' ? 'opacity-50 cursor-not-allowed' : ''}
                           >
                             <Trash className="h-4 w-4 text-destructive" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          {projeto.status === 'Processado' 
-                            ? 'Não é possível excluir projetos integrados ao Azure DevOps' 
-                            : 'Excluir'}
+                          Excluir projeto
                         </TooltipContent>
                       </Tooltip>
                     </div>

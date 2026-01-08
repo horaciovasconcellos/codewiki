@@ -1763,6 +1763,126 @@ export class AzureDevOpsService {
   }
 
   /**
+   * Cria um work item no Azure DevOps
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {string} workItemType - Tipo do work item ('Product Backlog Item', 'Task', 'Bug', 'Epic', etc)
+   * @param {object} fields - Campos do work item
+   * @returns {Promise<object>} Work item criado
+   */
+  async createWorkItem(projectName, workItemType, fields) {
+    try {
+      console.log(`[Azure DevOps] Criando work item: ${workItemType} - ${fields.title}`);
+      
+      // Montar o array de operações JSON Patch
+      const patchDocument = [];
+      
+      // Adicionar campos obrigatórios e opcionais
+      if (fields.title) {
+        patchDocument.push({
+          op: 'add',
+          path: '/fields/System.Title',
+          value: fields.title
+        });
+      }
+      
+      if (fields.description) {
+        patchDocument.push({
+          op: 'add',
+          path: '/fields/System.Description',
+          value: fields.description
+        });
+      }
+      
+      if (fields.state) {
+        patchDocument.push({
+          op: 'add',
+          path: '/fields/System.State',
+          value: fields.state
+        });
+      }
+      
+      if (fields.areaPath) {
+        patchDocument.push({
+          op: 'add',
+          path: '/fields/System.AreaPath',
+          value: fields.areaPath
+        });
+      }
+      
+      if (fields.iterationPath) {
+        patchDocument.push({
+          op: 'add',
+          path: '/fields/System.IterationPath',
+          value: fields.iterationPath
+        });
+      }
+      
+      if (fields.priority) {
+        patchDocument.push({
+          op: 'add',
+          path: '/fields/Microsoft.VSTS.Common.Priority',
+          value: fields.priority
+        });
+      }
+      
+      if (fields.tags) {
+        patchDocument.push({
+          op: 'add',
+          path: '/fields/System.Tags',
+          value: fields.tags
+        });
+      }
+      
+      // Se for uma Task, adicionar link para o parent (PBI)
+      if (workItemType === 'Task' && fields.parentId) {
+        patchDocument.push({
+          op: 'add',
+          path: '/relations/-',
+          value: {
+            rel: 'System.LinkTypes.Hierarchy-Reverse',
+            url: `${this.baseUrl}/_apis/wit/workItems/${fields.parentId}`,
+            attributes: {
+              comment: 'Making a new link for the dependency'
+            }
+          }
+        });
+      }
+      
+      const url = `/${projectName}/_apis/wit/workitems/$${workItemType}?api-version=${this.apiVersion}`;
+      
+      // Fazer request com Content-Type JSON Patch
+      const options = {
+        method: 'POST',
+        headers: {
+          'Authorization': this.authHeader,
+          'Content-Type': 'application/json-patch+json',
+          'Accept': 'application/json',
+          'User-Agent': 'Sistema-Auditoria/1.0'
+        },
+        body: JSON.stringify(patchDocument)
+      };
+      
+      const fullUrl = url.startsWith('http') ? url : `${this.baseUrl}${url}`;
+      
+      const response = await fetch(fullUrl, options);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[Azure DevOps API Error] Status: ${response.status}`);
+        console.error(`[Azure DevOps API Error] Response:`, errorText);
+        throw new Error(`Azure DevOps API error (${response.status}): ${errorText}`);
+      }
+      
+      const workItem = await response.json();
+      console.log(`[Azure DevOps] Work item criado: ${workItem.id}`);
+      return workItem;
+    } catch (error) {
+      throw new Error(`Erro ao criar work item: ${error.message}`);
+    }
+  }
+
+  /**
    * Consulta work items usando WIQL (Work Item Query Language)
    * 
    * @param {string} projectName - Nome do projeto

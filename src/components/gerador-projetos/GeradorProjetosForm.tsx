@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ProjetoGerado, Aplicacao, WorkItemProcess } from '@/lib/types';
+import { ProjetoSDD } from '@/types/sdd';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,8 +44,13 @@ const getNextMonday = (): string => {
 };
 
 export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjetosFormProps) {
+  const { data: projetosSDDData } = useApi<ProjetoSDD[]>('/sdd/projetos', []);
   const { data: aplicacoes } = useApi<Aplicacao[]>('/aplicacoes', []);
   
+  // Filtrar apenas projetos SPEC-KIT que têm gerador_projetos=true E aplicacao_id definido
+  const projetosSDD = projetosSDDData?.filter(p => p.gerador_projetos && p.aplicacao_id) || [];
+  
+  const [projetoSddId, setProjetoSddId] = useState('');
   const [aplicacaoBaseId, setAplicacaoBaseId] = useState('');
   const [nomeProjeto, setNomeProjeto] = useState('');
   const [workItemProcess, setWorkItemProcess] = useState<WorkItemProcess>('Scrum');
@@ -80,6 +86,16 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       }
       
       setNomeProjeto(projeto.projeto);
+      
+      // Tentar encontrar o projeto SDD correspondente
+      if (projetosSDD && projeto.aplicacaoBaseId && projeto.projeto) {
+        const projetoSdd = projetosSDD.find(
+          p => p.aplicacao_id === projeto.aplicacaoBaseId && p.nome_projeto === projeto.projeto
+        );
+        if (projetoSdd) {
+          setProjetoSddId(projetoSdd.id);
+        }
+      }
       setWorkItemProcess(projeto.workItemProcess);
       setNomeTime(projeto.nomeTime);
       // Converter data ISO para formato yyyy-MM-dd
@@ -108,21 +124,43 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       }));
       setRepositorios(repos);
     }
-  }, [projeto, aplicacoes]);
-
-  useEffect(() => {
-    if (nomeProjeto.trim()) {
-      setNomeTime(`Time - ${nomeProjeto}`);
-    } else {
-      setNomeTime('');
-    }
-  }, [nomeProjeto]);
+  }, [projeto, aplicacoes, projetosSDD]);
 
   useEffect(() => {
     if (!criarTimeSustentacao) {
       setIteracaoMensal(false);
     }
   }, [criarTimeSustentacao]);
+
+  // Auto-preencher Nome do Time quando digitar nome do projeto (apenas modo manual)
+  useEffect(() => {
+    if (!projetoSddId && nomeProjeto.trim()) {
+      setNomeTime(`Time - ${nomeProjeto}`);
+    }
+  }, [nomeProjeto, projetoSddId]);
+
+  // Handler para quando selecionar um projeto SPEC-KIT
+  const handleProjetoSddChange = (projetoId: string) => {
+    // Se selecionou MANUAL, limpar tudo
+    if (projetoId === 'MANUAL') {
+      setProjetoSddId('');
+      setAplicacaoBaseId('');
+      setNomeProjeto('');
+      setNomeTime('');
+      return;
+    }
+    
+    setProjetoSddId(projetoId);
+    const projetoSdd = projetosSDD.find(p => p.id === projetoId);
+    if (projetoSdd) {
+      // Preencher aplicação base e nome do projeto automaticamente
+      if (projetoSdd.aplicacao_id) {
+        setAplicacaoBaseId(projetoSdd.aplicacao_id);
+      }
+      setNomeProjeto(projetoSdd.nome_projeto);
+      setNomeTime(`Time - ${projetoSdd.nome_projeto}`);
+    }
+  };
 
   const handleAddRepositorio = () => {
     if (projetoJaProcessado) {
@@ -181,8 +219,13 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
   };
 
   const validateForm = (): boolean => {
-    if (!aplicacaoBaseId) {
-      toast.error('Aplicação Base é obrigatória');
+    // projetoSddId é opcional - permite criar projeto sem SPEC-KIT associado
+    if (projetoSddId && !aplicacaoBaseId) {
+      toast.error('Aplicação Base é obrigatória quando um projeto SPEC-KIT é selecionado');
+      return false;
+    }
+    if (!projetoSddId && !aplicacaoBaseId) {
+      toast.error('Selecione um projeto SPEC-KIT ou uma Aplicação Base');
       return false;
     }
     if (!nomeProjeto.trim()) {
@@ -259,36 +302,76 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       </CardHeader>
       <CardContent>
         <form className="space-y-6">
-          {/* Aplicação Base */}
+          {/* Projeto SPEC-KIT */}
           <div className="space-y-2">
-            <Label htmlFor="aplicacaoBase">Aplicação Base *</Label>
-            <Select value={aplicacaoBaseId} onValueChange={setAplicacaoBaseId}>
+            <Label htmlFor="projetoSdd">Projeto SPEC-KIT (Opcional)</Label>
+            <Select value={projetoSddId || 'MANUAL'} onValueChange={handleProjetoSddChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione a aplicação base" />
+                <SelectValue placeholder="Selecione um projeto SPEC-KIT ou deixe em branco" />
               </SelectTrigger>
               <SelectContent>
-                {aplicacoes && aplicacoes.map((app) => (
-                  <SelectItem key={app.id} value={app.id}>
-                    {app.sigla}
-                  </SelectItem>
-                ))}
+                <SelectItem value="MANUAL">Nenhum (preencher manualmente)</SelectItem>
+                {projetosSDD && projetosSDD.length > 0 ? (
+                  projetosSDD.map((proj) => (
+                    <SelectItem key={proj.id} value={proj.id}>
+                      {proj.aplicacao_sigla ? `${proj.aplicacao_sigla} - ${proj.nome_projeto}` : proj.nome_projeto}
+                    </SelectItem>
+                  ))
+                ) : null}
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground">
+              Selecione um projeto SPEC-KIT com "Gerador de Projetos" ativado ou deixe em branco para preencher manualmente
+            </p>
           </div>
 
-          {/* Primeira linha: Projeto, Processo e Nome do Time */}
-          <div className="grid grid-cols-3 gap-4">
-            {/* Projeto */}
-            <div className="space-y-2">
-              <Label htmlFor="projeto">Projeto *</Label>
-              <Input
-                id="projeto"
-                value={nomeProjeto}
-                onChange={(e) => setNomeProjeto(e.target.value)}
-                placeholder="Ex: Sistema de Vendas"
-              />
+          {/* Informações do Projeto - Editar ou Visualizar */}
+          {projetoSddId ? (
+            /* Projeto SPEC-KIT selecionado - apenas visualizar */
+            <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-md">
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Aplicação Base</Label>
+                <p className="text-sm font-medium">
+                  {aplicacoes?.find(a => a.id === aplicacaoBaseId)?.sigla || '-'}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Nome do Projeto</Label>
+                <p className="text-sm font-medium">{nomeProjeto || '-'}</p>
+              </div>
             </div>
+          ) : (
+            /* Sem SPEC-KIT - permitir edição manual */
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="aplicacaoBase">Aplicação Base *</Label>
+                <Select value={aplicacaoBaseId} onValueChange={setAplicacaoBaseId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a aplicação base" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {aplicacoes && aplicacoes.map((app) => (
+                      <SelectItem key={app.id} value={app.id}>
+                        {app.sigla}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="projeto">Nome do Projeto *</Label>
+                <Input
+                  id="projeto"
+                  value={nomeProjeto}
+                  onChange={(e) => setNomeProjeto(e.target.value)}
+                  placeholder="Ex: Sistema de Vendas"
+                />
+              </div>
+            </div>
+          )}
 
+          {/* Linha única: Processo, Nome do Time, Data Inicial, Número de Semanas e Iteração */}
+          <div className="grid grid-cols-5 gap-4">
             {/* Processo */}
             <div className="space-y-2">
               <Label htmlFor="processo">Processo *</Label>
@@ -315,13 +398,10 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                 placeholder="Time - Nome do Projeto"
               />
             </div>
-          </div>
 
-          {/* Segunda linha: Data Inicial, Número de Semanas e Iteração */}
-          <div className="grid grid-cols-3 gap-4">
             {/* Data Inicial */}
             <div className="space-y-2">
-              <Label htmlFor="dataInicial">Data Inicial (Próxima Segunda) *</Label>
+              <Label htmlFor="dataInicial">Data Inicial *</Label>
               <Input
                 id="dataInicial"
                 type="date"
@@ -332,7 +412,7 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
 
             {/* Número de Semanas */}
             <div className="space-y-2">
-              <Label htmlFor="numeroSemanas">Número de Semanas (1-8) *</Label>
+              <Label htmlFor="numeroSemanas">Semanas (1-8) *</Label>
               <Input
                 id="numeroSemanas"
                 type="number"

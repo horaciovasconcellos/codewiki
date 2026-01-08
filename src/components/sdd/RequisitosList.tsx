@@ -81,6 +81,8 @@ export function RequisitosList({ projetoId }: RequisitosListProps) {
   const handleEdit = (requisito: RequisitoSDD) => {
     setEditingRequisito(requisito);
     setShowForm(true);
+    // Fechar todos os requisitos expandidos
+    setExpandedRequisitos(new Set());
   };
 
   const handleDelete = async (id: string) => {
@@ -132,7 +134,11 @@ export function RequisitosList({ projetoId }: RequisitosListProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Requisitos / Histórias de Usuário</CardTitle>
-            <Button onClick={() => setShowForm(true)}>
+            <Button onClick={() => {
+              setShowForm(true);
+              // Fechar todos os requisitos expandidos
+              setExpandedRequisitos(new Set());
+            }}>
               <Plus className="w-4 h-4 mr-2" />
               Novo Requisito
             </Button>

@@ -185,8 +185,8 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
     };
 
     try {
-      for (let i = 0; i < sortedAplicacoes.length; i++) {
-        const app = sortedAplicacoes[i];
+      for (let i = 0; i < filteredAndSortedAplicacoes.length; i++) {
+        const app = filteredAndSortedAplicacoes[i];
         
         console.log('Processando aplicação:', app.sigla, app.id);
         
@@ -818,7 +818,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
         doc.setFontSize(8);
         doc.setFont('helvetica', 'italic');
         doc.setTextColor(128, 128, 128);
-        doc.text(`Página ${i + 1} de ${sortedAplicacoes.length}`, 105, 285, { align: 'center' });
+        doc.text(`Página ${i + 1} de ${filteredAndSortedAplicacoes.length}`, 105, 285, { align: 'center' });
       }
 
       // Salvar PDF
@@ -834,7 +834,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
 
   const exportToExcel = () => {
     // Preparar dados para exportação - apenas os 7 campos solicitados
-    const dados = sortedAplicacoes.map(app => ({
+    const dados = filteredAndSortedAplicacoes.map(app => ({
       'Sigla': app.sigla,
       'Descrição': app.descricao,
       'URL Documentação': app.urlDocumentacao,
