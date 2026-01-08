@@ -90,7 +90,7 @@ export function DocumentacaoSDDView() {
         <div className="flex items-center gap-4">
           <SidebarTrigger />
           <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight">Documentação SDD</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Spec-Kit</h1>
             <p className="text-muted-foreground mt-2">
               Spec-Driven Development - Documentação estruturada e rastreável dos seus projetos
             </p>

@@ -618,6 +618,15 @@ function App() {
                       <span>Sincronizar Azure</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'documentacao-sdd'}
+                      onClick={() => setCurrentView('documentacao-sdd')}
+                    >
+                      <Code />
+                      <span>Spec-Kit</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -863,15 +872,6 @@ function App() {
                     >
                       <FileText />
                       <span>Documentação de APIs</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'documentacao-sdd'}
-                      onClick={() => setCurrentView('documentacao-sdd')}
-                    >
-                      <Code />
-                      <span>Documentação SDD</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
