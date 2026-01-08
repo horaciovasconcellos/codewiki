@@ -112,7 +112,9 @@ export function DocumentacaoSDDView() {
                 <div>
                   <CardTitle>Lista de Projetos SDD</CardTitle>
                   <CardDescription>
-                    Gerencie a documentação dos seus projetos com integração a ferramentas de IA
+                    Gerencie a documentação dos seus projetos com integração a ferramentas de IA.
+                    <br />
+                    <strong>Dica:</strong> Clique no ícone do olho 👁️ para acessar Requisitos, Tarefas e ADRs do projeto.
                   </CardDescription>
                 </div>
                 <Button onClick={handleNew}>

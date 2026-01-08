@@ -14,12 +14,21 @@ interface DecisaoADRFormProps {
   onSave: () => void;
 }
 
+// Função para converter data ISO ou MySQL para formato yyyy-MM-dd
+const formatDateForInput = (date: string | undefined): string => {
+  if (!date) return '';
+  // Se já está no formato correto (yyyy-MM-dd), retorna
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+  // Converte ISO ou MySQL timestamp para yyyy-MM-dd
+  return date.split('T')[0];
+};
+
 export function DecisaoADRForm({ projetoId, decisao, onClose, onSave }: DecisaoADRFormProps) {
   const [adrs, setAdrs] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     adr_id: decisao?.adr_id || '',
-    data_inicio: decisao?.data_inicio || new Date().toISOString().split('T')[0],
-    data_termino: decisao?.data_termino || '',
+    data_inicio: formatDateForInput(decisao?.data_inicio) || new Date().toISOString().split('T')[0],
+    data_termino: formatDateForInput(decisao?.data_termino),
     status: decisao?.status || ('Proposta' as StatusADR),
   });
   const [saving, setSaving] = useState(false);
@@ -94,7 +103,7 @@ export function DecisaoADRForm({ projetoId, decisao, onClose, onSave }: DecisaoA
               <SelectContent>
                 {adrs.map((adr) => (
                   <SelectItem key={adr.id} value={adr.id}>
-                    {adr.titulo}
+                    {adr.sequencia} - {adr.descricao}
                   </SelectItem>
                 ))}
               </SelectContent>

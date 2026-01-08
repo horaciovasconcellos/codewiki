@@ -10,7 +10,8 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Pencil, Trash2, Eye } from '@phosphor-icons/react';
+import { Pencil, Trash, Eye, Printer, Download } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 
 interface ProjetosSDDDataTableProps {
   projetos: ProjetoSDD[];
@@ -141,7 +142,7 @@ export function ProjetosSDDDataTable({
                         onClick={() => onDelete(projeto)}
                         title="Excluir"
                       >
-                        <Trash2 size={16} />
+                        <Trash size={16} />
                       </Button>
                     </div>
                   </TableCell>

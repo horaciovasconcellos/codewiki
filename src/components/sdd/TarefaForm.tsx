@@ -15,11 +15,20 @@ interface TarefaFormProps {
   onSave: () => void;
 }
 
+// Função para converter data ISO ou MySQL para formato yyyy-MM-dd
+const formatDateForInput = (date: string | undefined): string => {
+  if (!date) return '';
+  // Se já está no formato correto (yyyy-MM-dd), retorna
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+  // Converte ISO ou MySQL timestamp para yyyy-MM-dd
+  return date.split('T')[0];
+};
+
 export function TarefaForm({ requisitoId, tarefa, onClose, onSave }: TarefaFormProps) {
   const [formData, setFormData] = useState({
     descricao: tarefa?.descricao || '',
-    data_inicio: tarefa?.data_inicio || new Date().toISOString().split('T')[0],
-    data_termino: tarefa?.data_termino || '',
+    data_inicio: formatDateForInput(tarefa?.data_inicio) || new Date().toISOString().split('T')[0],
+    data_termino: formatDateForInput(tarefa?.data_termino),
     status: tarefa?.status || ('TO DO' as StatusTarefa),
   });
   const [saving, setSaving] = useState(false);

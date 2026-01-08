@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,9 +62,11 @@ export function RequisitosList({ projetoId }: RequisitosListProps) {
       const response = await fetch(`/api/sdd/requisitos/${projetoId}`);
       if (!response.ok) throw new Error('Erro ao carregar requisitos');
       const data = await response.json();
-      setRequisitos(data);
+      setRequisitos(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error('Erro ao carregar requisitos:', error);
       toast.error('Erro ao carregar requisitos');
+      setRequisitos([]);
     } finally {
       setLoading(false);
     }
@@ -155,8 +157,8 @@ export function RequisitosList({ projetoId }: RequisitosListProps) {
               </TableHeader>
               <TableBody>
                 {requisitos.map((requisito) => (
-                  <>
-                    <TableRow key={requisito.id}>
+                  <Fragment key={requisito.id}>
+                    <TableRow>
                       <TableCell>
                         <Button
                           variant="ghost"
@@ -229,7 +231,7 @@ export function RequisitosList({ projetoId }: RequisitosListProps) {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </TableBody>
             </Table>

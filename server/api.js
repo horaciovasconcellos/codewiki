@@ -12032,7 +12032,7 @@ app.get('/api/sdd/projetos', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT 
         p.*,
-        a.nome as aplicacao_nome,
+        a.descricao as aplicacao_nome,
         a.sigla as aplicacao_sigla
       FROM projetos_sdd p
       LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
@@ -12051,7 +12051,7 @@ app.get('/api/sdd/projetos/:id', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT 
         p.*,
-        a.nome as aplicacao_nome,
+        a.descricao as aplicacao_nome,
         a.sigla as aplicacao_sigla
       FROM projetos_sdd p
       LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
@@ -12088,7 +12088,7 @@ app.post('/api/sdd/projetos', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT 
         p.*,
-        a.nome as aplicacao_nome,
+        a.descricao as aplicacao_nome,
         a.sigla as aplicacao_sigla
       FROM projetos_sdd p
       LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
@@ -12116,7 +12116,7 @@ app.put('/api/sdd/projetos/:id', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT 
         p.*,
-        a.nome as aplicacao_nome,
+        a.descricao as aplicacao_nome,
         a.sigla as aplicacao_sigla
       FROM projetos_sdd p
       LEFT JOIN aplicacoes a ON p.aplicacao_id = a.id
@@ -12399,7 +12399,7 @@ app.get('/api/sdd/decisoes/:projetoId', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT 
         d.*,
-        a.titulo as adr_titulo
+        a.descricao as adr_titulo
       FROM decisoes_arquiteturais_sdd d
       LEFT JOIN adrs a ON d.adr_id = a.id
       WHERE d.projeto_id = ?
@@ -12433,7 +12433,7 @@ app.post('/api/sdd/decisoes', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT 
         d.*,
-        a.titulo as adr_titulo
+        a.descricao as adr_titulo
       FROM decisoes_arquiteturais_sdd d
       LEFT JOIN adrs a ON d.adr_id = a.id
       WHERE d.id = ?
@@ -12460,7 +12460,7 @@ app.put('/api/sdd/decisoes/:id', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT 
         d.*,
-        a.titulo as adr_titulo
+        a.descricao as adr_titulo
       FROM decisoes_arquiteturais_sdd d
       LEFT JOIN adrs a ON d.adr_id = a.id
       WHERE d.id = ?

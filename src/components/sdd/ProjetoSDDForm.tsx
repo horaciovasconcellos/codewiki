@@ -16,24 +16,6 @@ interface ProjetoSDDFormProps {
 }
 
 const IA_OPTIONS: { value: IAType; label: string }[] = [
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ProjetoSDD, IAType } from '@/types/sdd';
-
-interface ProjetoSDDFormProps {
-  projeto?: ProjetoSDD;
-  onClose: () => void;
-  onSave: () => void;
-}
-
-const IA_OPTIONS: { value: IAType; label: string }[] = [
   { value: 'claude', label: 'Claude' },
   { value: 'gemini', label: 'Gemini' },
   { value: 'copilot', label: 'Copilot' },
@@ -55,9 +37,9 @@ const IA_OPTIONS: { value: IAType; label: string }[] = [
 export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps) {
   const [aplicacoes, setAplicacoes] = useState<any[]>([]);
   const [formData, setFormData] = useState({
-    aplicacao_id: projeto?.aplicacao_id || '',
+    aplicacao_id: projeto?.aplicacao_id || null,
     nome_projeto: projeto?.nome_projeto || '',
-    ia_selecionada: projeto?.ia_selecionada || ('' as IAType),
+    ia_selecionada: projeto?.ia_selecionada || 'claude',
     constituicao: projeto?.constituicao || '',
     gerador_projetos: projeto?.gerador_projetos || false,
   });
@@ -72,9 +54,11 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
       const response = await fetch('/api/aplicacoes');
       if (!response.ok) throw new Error('Erro ao carregar aplicações');
       const data = await response.json();
+      console.log('Aplicações carregadas:', data.length);
       setAplicacoes(data);
     } catch (error) {
       console.error('Erro ao carregar aplicações:', error);
+      toast.error('Erro ao carregar aplicações');
     }
   };
 
@@ -135,21 +119,30 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
             <div className="space-y-2">
               <Label htmlFor="aplicacao">Aplicação</Label>
               <Select
-                value={formData.aplicacao_id}
-                onValueChange={(value) => setFormData({ ...formData, aplicacao_id: value })}
+                value={formData.aplicacao_id?.toString() || '0'}
+                onValueChange={(value) => {
+                  console.log('Selecionando aplicação:', value);
+                  const newId = value === '0' ? null : value;
+                  console.log('Novo ID (string):', newId);
+                  setFormData({ ...formData, aplicacao_id: newId });
+                  console.log('FormData atualizado');
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma aplicação (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma</SelectItem>
+                  <SelectItem value="0">Nenhuma</SelectItem>
                   {aplicacoes.map((app) => (
-                    <SelectItem key={app.id} value={app.id}>
-                      {app.sigla} - {app.nome}
+                    <SelectItem key={app.id} value={app.id.toString()}>
+                      {app.sigla} - {app.descricao}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Selecionado: {formData.aplicacao_id || 'Nenhuma'}
+              </p>
             </div>
           </div>
 
@@ -211,4 +204,3 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
     </Card>
   );
 }
-

@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { ArrowLeft, Edit, FileText, ListTodo, CheckSquare, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Edit, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ProjetoSDD } from '@/types/sdd';
 import { ProjetoSDDForm } from './ProjetoSDDForm';
 import { RequisitosList } from './RequisitosList';
-import { DecisoesArquiteturaisList } from './DecisoesArquiteturaisList';
 import ReactMarkdown from 'react-markdown';
 
 interface ProjetoSDDDetailProps {
@@ -58,47 +57,52 @@ export function ProjetoSDDDetail({ projeto: initialProjeto, onBack }: ProjetoSDD
       </header>
 
       <div className="flex-1 overflow-auto p-6">
-        <Tabs defaultValue="requisitos" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="requisitos" className="flex items-center gap-2">
-              <ListTodo className="w-4 h-4" />
-              Requisitos
-            </TabsTrigger>
-            <TabsTrigger value="decisoes" className="flex items-center gap-2">
-              <Lightbulb className="w-4 h-4" />
-              Decisões Arquiteturais
-            </TabsTrigger>
-            <TabsTrigger value="constituicao" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Constituição
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="requisitos">
-            <RequisitosList projetoId={projeto.id} />
-          </TabsContent>
-
-          <TabsContent value="decisoes">
-            <DecisoesArquiteturaisList projetoId={projeto.id} />
-          </TabsContent>
-
-          <TabsContent value="constituicao">
-            <Card>
-              <CardHeader>
-                <CardTitle>Constituição do Projeto</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {projeto.constituicao ? (
-                  <div className="prose max-w-none">
-                    <ReactMarkdown>{projeto.constituicao}</ReactMarkdown>
+        <div className="space-y-6">
+          {/* Bloco 1: Projeto SDD */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Projeto SDD
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-semibold">Nome do Projeto</Label>
+                  <p className="text-sm">{projeto.nome_projeto}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold">IA Selecionada</Label>
+                  <p className="text-sm">{projeto.ia_selecionada}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold">Aplicação</Label>
+                  <p className="text-sm">
+                    {projeto.aplicacao_nome ? `${projeto.aplicacao_sigla} - ${projeto.aplicacao_nome}` : 'Sem aplicação'}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold">Gerador de Projetos</Label>
+                  <p className="text-sm">{projeto.gerador_projetos ? 'Ativo' : 'Inativo'}</p>
+                </div>
+                {projeto.constituicao && (
+                  <div className="col-span-2">
+                    <Label className="text-sm font-semibold">Constituição</Label>
+                    <div className="mt-2 prose prose-sm max-w-none">
+                      <ReactMarkdown>{projeto.constituicao}</ReactMarkdown>
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-muted-foreground italic">Nenhuma constituição definida</p>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bloco 2: Requisitos / Histórias de Usuário */}
+          <RequisitosList projetoId={projeto.id} />
+
+          {/* Bloco 3: Tarefas aparece dentro dos requisitos expandidos */}
+        </div>
       </div>
 
       {showEditForm && (

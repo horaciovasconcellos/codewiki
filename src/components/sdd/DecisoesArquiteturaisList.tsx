@@ -31,10 +31,13 @@ export function DecisoesArquiteturaisList({ projetoId }: DecisoesArquiteturaisLi
   const loadDecisoes = async () => {
     try {
       const response = await fetch(`/api/sdd/decisoes/${projetoId}`);
+      if (!response.ok) throw new Error('Erro ao carregar decisões');
       const data = await response.json();
-      setDecisoes(data);
+      setDecisoes(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error('Erro ao carregar decisões:', error);
       toast.error('Erro ao carregar decisões arquiteturais');
+      setDecisoes([]);
     }
   };
 
