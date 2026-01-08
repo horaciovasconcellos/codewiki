@@ -6007,7 +6007,7 @@ app.post('/api/azure-devops/integrar-projeto', async (req, res) => {
                 const taskData = {
                   title: taskTitle,
                   description: tarefa.descricao || '',
-                  state: 'New', // Status 'TO DO' mapeado para 'New'
+                  state: 'To Do', // Status 'TO DO' mapeado para 'To Do'
                   areaPath: areaPath,
                   iterationPath: `${projectName}${iterationPath}\\Sprint 1`,
                   parentId: pbi.id // Associar ao PBI

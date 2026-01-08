@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProjetoSDD, IAType } from '@/types/sdd';
+import { Upload } from 'lucide-react';
 
 interface ProjetoSDDFormProps {
   projeto?: ProjetoSDD;
@@ -44,6 +45,7 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
     gerador_projetos: projeto?.gerador_projetos || false,
   });
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadAplicacoes();
@@ -59,6 +61,36 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
     } catch (error) {
       console.error('Erro ao carregar aplicações:', error);
       toast.error('Erro ao carregar aplicações');
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Verificar se é arquivo Markdown
+    if (!file.name.endsWith('.md') && !file.name.endsWith('.markdown')) {
+      toast.error('Por favor, selecione um arquivo Markdown (.md ou .markdown)');
+      return;
+    }
+
+    // Verificar tamanho do arquivo (máx 500KB)
+    if (file.size > 500 * 1024) {
+      toast.error('Arquivo muito grande. Tamanho máximo: 500KB');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      setFormData({ ...formData, constituicao: text });
+      toast.success('Arquivo Markdown carregado com sucesso');
+    } catch (error) {
+      toast.error('Erro ao ler arquivo');
+    }
+
+    // Limpar input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -166,16 +198,38 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="constituicao">Constituição</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="constituicao">Constituição</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-8"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Anexar Markdown
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".md,.markdown"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </div>
             <Textarea
               id="constituicao"
               value={formData.constituicao}
               onChange={(e) => setFormData({ ...formData, constituicao: e.target.value })}
               placeholder="Suporte a Markdown. Descreva a constituição do projeto..."
               rows={10}
-              className="font-mono text-sm"
+              className="font-mono text-sm resize-none overflow-y-auto"
+              style={{ minHeight: '15rem', maxHeight: '15rem' }}
             />
-            <p className="text-xs text-muted-foreground">Suporte a Markdown</p>
+            <p className="text-xs text-muted-foreground">
+              Suporte a Markdown. Você pode digitar ou anexar um arquivo .md (máx 500KB)
+            </p>
           </div>
 
           <div className="flex items-center space-x-2">

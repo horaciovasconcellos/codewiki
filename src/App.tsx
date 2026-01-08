@@ -560,26 +560,11 @@ function App() {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      isActive={currentView === 'dora-dashboard'}
-                      onClick={() => {
-                        logClick('nav_dora_dashboard');
-                        setCurrentView('dora-dashboard');
-                      }}
+                      isActive={currentView === 'documentacao-sdd'}
+                      onClick={() => setCurrentView('documentacao-sdd')}
                     >
-                      <ChartLineUp />
-                      <span>Dashboard DORA</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'space-dashboard'}
-                      onClick={() => {
-                        logClick('nav_space_dashboard');
-                        setCurrentView('space-dashboard');
-                      }}
-                    >
-                      <ChartBar />
-                      <span>Dashboard SPACE</span>
+                      <Code />
+                      <span>Spec-Kit</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
@@ -620,11 +605,26 @@ function App() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      isActive={currentView === 'documentacao-sdd'}
-                      onClick={() => setCurrentView('documentacao-sdd')}
+                      isActive={currentView === 'dora-dashboard'}
+                      onClick={() => {
+                        logClick('nav_dora_dashboard');
+                        setCurrentView('dora-dashboard');
+                      }}
                     >
-                      <Code />
-                      <span>Spec-Kit</span>
+                      <ChartLineUp />
+                      <span>Dashboard DORA</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'space-dashboard'}
+                      onClick={() => {
+                        logClick('nav_space_dashboard');
+                        setCurrentView('space-dashboard');
+                      }}
+                    >
+                      <ChartBar />
+                      <span>Dashboard SPACE</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
