@@ -18,6 +18,7 @@ Documentação abrangente de todos os endpoints da API REST do Sistema de Audito
 - [SLAs](#slas)
 - [Runbooks](#runbooks)
 - [Estruturas de Projeto (Gerador)](#estruturas-de-projeto)
+- [InnerSource](#innersource)
 - [Azure DevOps](#azure-devops)
 - [Servidores](#servidores)
 - [Stages (Pipeline)](#stages)
@@ -29,6 +30,7 @@ Documentação abrangente de todos os endpoints da API REST do Sistema de Audito
 - [Métricas DORA](#metricas-dora)
 - [Reports (ReportBook)](#reports)
 - [Payloads](#payloads)
+- [Spec-Kit (SDD)](#spec-kit-sdd)
 - [Configurações](#configuracoes)
 - [Logs de Auditoria](#logs-de-auditoria)
 - [Dashboard](#dashboard)
@@ -322,6 +324,42 @@ Documentação abrangente de todos os endpoints da API REST do Sistema de Audito
 
 ---
 
+## 🌐 InnerSource
+
+**InnerSource**: Projetos colaborativos internos inspirados em práticas Open Source.
+
+| Método | Endpoint | Descrição | Payload |
+|--------|----------|-----------|---------|
+| `GET` | `/api/innersource-projects` | Lista todos projetos InnerSource | Array completo |
+| `GET` | `/api/innersource-projects/:id` | Busca projeto específico | Objeto com metadata |
+| `POST` | `/api/innersource-projects` | Cria projeto InnerSource | `{ nome, full_nome, html_url, descricao, language, owner{}, _InnerSourceMetadata{} }` |
+| `PUT` | `/api/innersource-projects/:id` | Atualiza projeto | Objeto completo |
+| `DELETE` | `/api/innersource-projects/:id` | Remove projeto | - |
+
+**Estrutura InnerSourceMetadata**:
+```json
+{
+  "maturity": "discovery | growing | sustaining | retiring",
+  "topics": ["javascript", "library"],
+  "participation": {
+    "contributors_count": 10,
+    "commits_last_year": 150,
+    "pull_requests_count": 40
+  }
+}
+```
+
+**Campos principais**:
+- `nome`: Nome do repositório
+- `full_nome`: Nome completo (org/repo)
+- `html_url`: URL do repositório
+- `descricao`: Descrição do projeto
+- `language`: Linguagem principal
+- `owner`: Dados do proprietário (login, avatar_url, html_url, type)
+- `_InnerSourceMetadata`: Metadados de maturidade e participação
+
+---
+
 ## ☁️ Azure DevOps
 
 ### Criação e Configuração de Projetos
@@ -486,6 +524,84 @@ Documentação abrangente de todos os endpoints da API REST do Sistema de Audito
 
 ---
 
+## 📐 Spec-Kit (SDD)
+
+**Spec-Driven Development**: Sistema de documentação estruturada e rastreável de projetos com requisitos e tarefas.
+
+### Projetos SDD
+
+| Método | Endpoint | Descrição | Payload |
+|--------|----------|-----------|---------|
+| `GET` | `/api/sdd/projetos` | Lista todos projetos SDD | Array com aplicação associada |
+| `GET` | `/api/sdd/projetos/:id` | Busca projeto específico | Objeto completo |
+| `POST` | `/api/sdd/projetos` | Cria novo projeto | `{ aplicacao_id?, nome_projeto, ia_selecionada, constituicao?, gerador_projetos? }` |
+| `PUT` | `/api/sdd/projetos/:id` | Atualiza projeto | Objeto completo |
+| `DELETE` | `/api/sdd/projetos/:id` | Remove projeto | - |
+
+**Campos principais**:
+- `aplicacao_id`: ID da aplicação associada (opcional)
+- `nome_projeto`: Nome do projeto (obrigatório)
+- `ia_selecionada`: IA utilizada - valores disponíveis: `claude`, `gemini`, `copilot`, `cursor-agent`, `windsurf`, `qwen`, `opencode`, `codex`, `kilocode`, `auggie`, `roo`, `codebuddy`, `amp`, `shai`, `q`, `bobouqoder` (obrigatório)
+- `constituicao`: Texto markdown com as instruções do projeto (opcional)
+- `gerador_projetos`: Se foi gerado via Gerador de Projetos (boolean)
+
+### Requisitos / Histórias de Usuário
+
+| Método | Endpoint | Descrição | Payload |
+|--------|----------|-----------|---------|
+| `GET` | `/api/sdd/requisitos/:projetoId` | Lista requisitos do projeto | Array com contadores de tarefas |
+| `POST` | `/api/sdd/requisitos` | Cria novo requisito | `{ projeto_id, nome, descricao?, status }` |
+| `PUT` | `/api/sdd/requisitos/:id` | Atualiza requisito | `{ nome, descricao?, status }` |
+| `PUT` | `/api/sdd/requisitos/:id/restaurar-status` | Restaura status anterior | - |
+| `DELETE` | `/api/sdd/requisitos/:id` | Remove requisito | Apenas se tarefas estiverem DONE |
+
+**Status dos Requisitos**:
+- **Fluxo Normal**: `"BACKLOG"` → `"REFINAMENTO"` → `"PRONTO P/DEV"` → `"DONE"`
+- **Status Especiais**: `"BLOQUEADO"` | `"EM RETRABALHO"` | `"SPIKE TÉCNICO"` | `"PAUSADO"` | `"CANCELADO"` | `"ROLLBACK"`
+
+**Regras de Negócio**:
+- Sequência é gerada automaticamente no formato `REQ-001`, `REQ-002`, etc.
+- Retorna `tarefas_count` e `tarefas_done_count` em cada requisito
+- Não pode excluir requisito com tarefas não finalizadas
+
+### Tarefas
+
+| Método | Endpoint | Descrição | Payload |
+|--------|----------|-----------|---------|
+| `GET` | `/api/sdd/tarefas/:requisitoId` | Lista tarefas do requisito | Array com dias decorridos |
+| `POST` | `/api/sdd/tarefas` | Cria nova tarefa | `{ requisito_id, descricao, data_inicio? }` |
+| `PUT` | `/api/sdd/tarefas/:id` | Atualiza tarefa | `{ descricao?, data_inicio?, data_termino?, status }` |
+| `DELETE` | `/api/sdd/tarefas/:id` | Remove tarefa | - |
+
+**Status das Tarefas**: `"TO DO" | "IN PROGRESS" | "DONE"`
+
+**Regras de Negócio**:
+- Tarefas só podem ser criadas para requisitos com status `"PRONTO P/DEV"`
+- Sequência é gerada automaticamente no formato `TASK-001`, `TASK-002`, etc.
+- Retorna `dias_decorridos` calculado entre `data_inicio` e `data_termino` (ou data atual)
+- Status inicial sempre `"TO DO"`
+
+### Decisões Arquiteturais (ADRs)
+
+| Método | Endpoint | Descrição | Payload |
+|--------|----------|-----------|---------|
+| `GET` | `/api/sdd/decisoes/:projetoId` | Lista decisões do projeto | Array com ADR associado |
+| `POST` | `/api/sdd/decisoes` | Associa ADR ao projeto | `{ projeto_id, adr_id, justificativa? }` |
+| `PUT` | `/api/sdd/decisoes/:id` | Atualiza decisão | `{ justificativa? }` |
+| `DELETE` | `/api/sdd/decisoes/:id` | Remove associação | - |
+
+**Integração**: Permite associar ADRs existentes do sistema aos projetos SDD.
+
+### Integração com Azure DevOps
+
+Quando um projeto SDD possui:
+- Requisitos com status `"PRONTO P/DEV"` → são criados como **PBIs** no Azure
+- Tarefas com status `"TO DO"` → são criadas como **Tasks** no Azure
+
+**Endpoint de Criação**: `POST /api/azure-devops/integrar-projeto`
+
+---
+
 ## ⚙️ Configurações
 
 | Método | Endpoint | Descrição | Payload |
@@ -640,6 +756,6 @@ GET /api/logs-auditoria?dataInicio=2024-12-01&dataFim=2024-12-31&tela=Aplicaçõ
 
 ---
 
-**Última atualização**: 29/12/2024  
-**Total de Endpoints**: 185+  
+**Última atualização**: 08/01/2026  
+**Total de Endpoints**: 210+  
 **Versão da API**: 1.0

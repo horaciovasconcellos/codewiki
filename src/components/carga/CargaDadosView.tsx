@@ -127,16 +127,16 @@ export function CargaDadosView() {
         break;
       case 'colaboradores':
         exemplos = [
-          '001234,João Silva Santos,Tecnologia da Informação,2023-01-15',
-          '001235,Maria Santos Oliveira,Recursos Humanos,2022-06-10',
-          '001236,Pedro Costa Ferreira,Comercial,2021-03-20'
+          '5664,João Silva Santos,Tecnologia da Informação,2020-01-15',
+          '5665,Maria Santos Oliveira,Recursos Humanos,2019-03-10',
+          '5666,Pedro Costa Ferreira,Comercial,2021-06-01'
         ];
         break;
       case 'tecnologias':
         exemplos = [
-          'ORACLE-DB,Oracle Database,19c,Banco de Dados,Ativa,Oracle Corporation,Proprietária,Padronizada,Suporte Avançado',
-          'MYSQL,MySQL Database,8.0,Banco de Dados,Ativa,Oracle Corporation,Open Source,Padronizada,Suporte Básico',
-          'POSTGRES,PostgreSQL,15.0,Banco de Dados,Ativa,PostgreSQL Global Development Group,Open Source,Adotada,Suporte Intermediário'
+          'REACT,React,18.2.0,Frontend,Ativa,Meta,Open Source,Padronizada,Suporte Completo / Especializado',
+          'MYSQL,MySQL,8.0.35,Banco de Dados,Ativa,Oracle,Open Source,Padronizada,AMS',
+          'POSTGRES,PostgreSQL,16.0,Banco de Dados,Ativa,PostgreSQL Global Development Group,Open Source,Adotada,Suporte Intermediário'
         ];
         break;
       case 'processos-negocio':
@@ -148,9 +148,9 @@ export function CargaDadosView() {
         break;
       case 'aplicacoes':
         exemplos = [
-          'CRM-WEB,Sistema de gestão de relacionamento com clientes,https://docs.empresa.com/crm,INTERNO,ON-PREMISE,Produção,Média',
-          'PORTAL-RH,Portal de recursos humanos e autoatendimento,-,INTERNO,AWS,Produção,Alta',
-          'APP-VENDAS,Aplicativo mobile para força de vendas,https://docs.empresa.com/vendas,EXTERNO,AZURE,Desenvolvimento,Baixa'
+          'CRM-WEB,Sistema de gestão de relacionamento com clientes,https://docs.empresa.com/crm,INTERNO,Produção,Média',
+          'PORTAL-RH,Portal de recursos humanos e autoatendimento,https://docs.empresa.com/rh,INTERNO,Produção,Alta',
+          'APP-VENDAS,Aplicativo mobile para força de vendas,https://docs.empresa.com/vendas,EXTERNO,Desenvolvimento,Baixa'
         ];
         break;
       case 'capacidades-negocio':
@@ -176,9 +176,9 @@ export function CargaDadosView() {
         break;
       case 'scripts':
         exemplos = [
-          'SCR-AUTO-001,Script de backup automático diário,2024-01-15,,Automação',
-          'SCR-DB-001,Script de otimização de índices,2024-01-10,,Banco de Dados',
-          'SCR-CICD-001,Pipeline CI/CD completo,2024-02-20,,CI/CD'
+          'SCR-AUTO-001,Script de backup automático diário,2024-01-15,Automação',
+          'SCR-DB-001,Script de otimização de índices,2024-01-10,Banco de Dados',
+          'SCR-CICD-001,Pipeline CI/CD completo,2024-02-20,CI/CD'
         ];
         break;
       case 'estruturas-projeto':

@@ -1,13 +1,15 @@
-sigla,descricao,dataInicio,dataTermino,tipoScript
-SCR-AUTO-001,Script de backup automático diário,2024-01-15,,Automação
-SCR-ADM-001,Script de limpeza de logs antigos,2024-02-01,,Administração
-SCR-DB-001,Script de otimização de índices,2024-01-10,,Banco de Dados
-SCR-INT-001,Script de sincronização Azure DevOps,2024-03-01,,Integração
-SCR-TEST-001,Testes de integração automatizados,2024-02-15,,Testes
-SCR-BUILD-001,Build e deploy para produção,2024-01-05,,Build & Deploy
-SCR-CICD-001,Pipeline CI/CD completo,2024-02-20,,CI/CD
-SCR-IAC-001,Terraform infraestrutura AWS,2024-03-10,,Infraestrutura (IaC)
-SCR-MON-001,Monitoramento de saúde dos serviços,2024-01-20,,Monitoramento
+sigla,descricao,dataInicio,tipoScript
+SCR-AUTO-001,Script de backup automático diário,2024-01-15,Automação
+SCR-ADM-001,Script de limpeza de logs antigos,2024-02-01,Administração
+SCR-DB-001,Script de otimização de índices,2024-01-10,Banco de Dados
+SCR-INT-001,Script de sincronização Azure DevOps,2024-03-01,Integração
+SCR-TEST-001,Testes de integração automatizados,2024-02-15,Testes
+SCR-BUILD-001,Build e deploy para produção,2024-01-05,Build & Deploy
+SCR-CICD-001,Pipeline CI/CD completo,2024-02-20,CI/CD
+SCR-IAC-001,Terraform infraestrutura AWS,2024-03-10,Infraestrutura (IaC)
+SCR-MON-001,Monitoramento de saúde dos serviços,2024-01-20,Monitoramento
+SCR-SEC-001,Scan de vulnerabilidades de segurança,2024-03-05,Segurança
+
 SCR-SEC-001,Auditoria de segurança,2024-02-05,,Segurança
 SCR-GOV-001,Compliance e governança LGPD,2024-03-15,,Governança
 SCR-DATA-001,Pipeline ETL de dados,2024-01-25,,Dados

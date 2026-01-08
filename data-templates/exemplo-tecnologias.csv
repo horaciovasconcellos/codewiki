@@ -1,9 +1,12 @@
-nome,versao,plataforma,categoria,fabricante,tipo,status
-Spring Boot,3.2.0,Java (Maven),Framework,VMware,Framework,Em Uso
-React,18.2.0,JavaScript,Framework,Meta,Biblioteca,Em Uso
-Node.js,20.10.0,JavaScript,Runtime,OpenJS Foundation,Runtime,Em Uso
-PostgreSQL,16.0,Database,SGBD,PostgreSQL Global Development Group,Database,Em Uso
-Docker,24.0.7,Infrastructure,Containerização,Docker Inc,Ferramenta,Em Uso
-Kubernetes,1.28.0,Infrastructure,Orquestração,CNCF,Plataforma,Em Uso
-Redis,7.2.0,Database,Cache,Redis Ltd,Cache,Em Uso
-Nginx,1.25.0,Infrastructure,Web Server,F5 Inc,Servidor,Em Uso
+sigla,nome,versaoRelease,categoria,status,fornecedorFabricante,tipoLicenciamento,maturidadeInterna,nivelSuporteInterno
+REACT,React,18.2.0,Frontend,Ativa,Meta,Open Source,Padronizada,Suporte Completo / Especializado
+MYSQL,MySQL,8.0.35,Banco de Dados,Ativa,Oracle,Open Source,Padronizada,AMS
+POSTGRES,PostgreSQL,16.0,Banco de Dados,Ativa,PostgreSQL Global Development Group,Open Source,Adotada,Suporte Intermediário
+ORACLE-DB,Oracle Database,19c,Banco de Dados,Ativa,Oracle Corporation,Proprietária,Padronizada,Suporte Avançado
+AWS-EC2,Amazon EC2,Latest,Infraestrutura,Ativa,Amazon,SaaS,Adotada,Suporte Intermediário
+NODE,Node.js,20.10.0,Backend,Ativa,OpenJS Foundation,Open Source,Padronizada,Suporte Completo / Especializado
+JAVA,Java JDK,21,Backend,Ativa,Oracle Corporation,Open Source,Padronizada,Suporte Avançado
+PYTHON,Python,3.12,Backend,Ativa,Python Software Foundation,Open Source,Adotada,Suporte Intermediário
+DOCKER,Docker,24.0.7,Infraestrutura,Ativa,Docker Inc.,Open Source,Padronizada,Suporte Completo / Especializado
+KUBERNETES,Kubernetes,1.28.0,Infraestrutura,Ativa,CNCF,Open Source,Em Adoção,Suporte Básico
+

@@ -305,6 +305,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
     }
   }, [tempScreenStyles]);
 
+
   const handleSave = async () => {
     try {
       // Salvar cada configuração

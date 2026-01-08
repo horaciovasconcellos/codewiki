@@ -201,6 +201,7 @@ function App() {
     }
   }, [cardStyles]);
 
+
   const handleHabilidadeSave = async (habilidade: Habilidade) => {
     try {
       console.log('[App] handleHabilidadeSave recebeu:', habilidade);

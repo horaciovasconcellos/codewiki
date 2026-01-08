@@ -1,8 +1,12 @@
-nome,descricao,remunerado,afastaINSS
-Férias,Período de descanso anual do colaborador,true,false
-Licença Médica,Afastamento por motivos de saúde,true,true
-Licença Maternidade,Licença para mães após o parto,true,true
-Licença Paternidade,Licença para pais após nascimento do filho,true,false
-Ausência Justificada,Falta justificada com documentação,false,false
-Suspensão Disciplinar,Suspensão por infração disciplinar,false,false
-Afastamento INSS,Afastamento por auxílio-doença,true,true
+sigla,descricao,argumentacaoLegal,numeroDias,tipoTempo
+FERIAS,Férias anuais remuneradas,Art. 129 da CLT - Todo empregado terá direito anualmente ao gozo de um período de férias,30,Dias
+LIC-MED,Licença médica,Art. 60 da Lei 8.213/91 - Auxílio-doença será devido ao segurado empregado,15,Dias
+LIC-MAT,Licença maternidade,Art. 392 da CLT - A empregada gestante tem direito à licença-maternidade,4,Meses
+LIC-PAT,Licença paternidade,Art. 473 da CLT - O empregado poderá deixar de comparecer ao serviço,5,Dias
+AUSENC-J,Ausência justificada,Art. 473 da CLT - Permite faltas sem prejuízo de salário em situações específicas,1,Dias
+SUSP-DISC,Suspensão disciplinar,Art. 474 da CLT - A suspensão do empregado por mais de 30 dias consecutivos,30,Dias
+AFAS-INSS,Afastamento por auxílio-doença INSS,Art. 59 da Lei 8.213/91 - Auxílio-doença será devido após 15 dias,120,Dias
+LIC-ACES,Licença por acidente,Art. 7º da CF - Seguro contra acidentes de trabalho,30,Dias
+DOAC-SANG,Doação de sangue voluntária,Art. 473 CLT - Até 1 dia por ano em caso de doação voluntária,1,Dias
+SERV-MIL,Serviço militar obrigatório,Art. 472 da CLT - Durante o período de prestação de serviço militar,12,Meses
+

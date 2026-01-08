@@ -1,7 +1,12 @@
-nome,descricao,stack,status,criticidade,url
-Sistema de Vendas,Plataforma de vendas online,Java (Spring Boot),Ativa,Alta,https://vendas.empresa.com
-Portal do Cliente,Portal de autoatendimento para clientes,React + Node.js,Ativa,Alta,https://portal.empresa.com
-API Gateway,Gateway de APIs corporativas,Node.js (Express),Ativa,Crítica,https://api.empresa.com
-Sistema de RH,Gestão de recursos humanos,Python (Django),Ativa,Média,https://rh.empresa.com
-Dashboard Analytics,Dashboards de análise de dados,React + TypeScript,Em Desenvolvimento,Média,
-Sistema Legado,Sistema antigo em manutenção,Java (Legacy),Manutenção,Baixa,
+sigla,descricao,urlDocumentacao,tipoAplicacao,faseCicloVida,criticidadeNegocio
+CRM-WEB,Sistema de gestão de relacionamento com clientes,https://docs.empresa.com/crm,INTERNO,Produção,Média
+PORTAL-RH,Portal de recursos humanos e autoatendimento,https://docs.empresa.com/rh,INTERNO,Produção,Alta
+APP-VENDAS,Aplicativo mobile para força de vendas,https://docs.empresa.com/vendas,EXTERNO,Desenvolvimento,Baixa
+SISFIN,Sistema financeiro corporativo,https://docs.empresa.com/financeiro,INTERNO,Produção,Muito Alta
+API-GATEWAY,Gateway de APIs corporativas,https://docs.empresa.com/gateway,INTERNO,Produção,Alta
+PORTAL-CLI,Portal de autoatendimento para clientes,https://docs.empresa.com/portal-cliente,EXTERNO,Produção,Muito Alta
+DASH-BI,Dashboard de business intelligence,https://docs.empresa.com/bi,INTERNO,Produção,Média
+ESTOQUE,Sistema de controle de estoque,https://docs.empresa.com/estoque,INTERNO,Produção,Alta
+PEDIDOS,Sistema de gestão de pedidos,https://docs.empresa.com/pedidos,INTERNO,Produção,Alta
+LEGADO-ERP,Sistema ERP legado em fase de substituição,https://docs.empresa.com/erp-legado,INTERNO,Descomissionamento,Baixa
+
