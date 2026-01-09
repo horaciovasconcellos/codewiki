@@ -32,3 +32,15 @@ pids
 .devcontainer/
 
 .spark-workbench-id
+
+# Backup files
+server/api.js.backup-*
+server/api.js.bak*
+server/api.js.LEGACY
+
+# Test coverage
+coverage/
+*.coverage
+
+# Temporary files
+/tmp
