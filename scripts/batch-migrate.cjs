@@ -49,7 +49,7 @@ function migrateDomain(domain) {
     // Simular entrada do usuário via stdin
     const input = `${domain.name}\n${domain.table}\n`;
     
-    execSync(`node scripts/auto-migrate.js`, {
+    execSync(`node scripts/auto-migrate.cjs`, {
       input: input,
       stdio: ['pipe', 'pipe', 'pipe'],
       cwd: process.cwd()

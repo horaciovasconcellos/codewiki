@@ -7,9 +7,9 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-// Templates para geração de código
+// Templates para geração de código (ES6 modules)
 const templates = {
-  model: (domain, domainCapitalized) => `const Joi = require('joi');
+  model: (domain, domainCapitalized) => `import Joi from 'joi';
 
 const ${domain}Schema = Joi.object({
   id: Joi.string().optional(),
@@ -25,19 +25,27 @@ const ${domain}UpdateSchema = ${domain}Schema.fork(
   (schema) => schema.optional()
 );
 
-module.exports = {
+export {
+  ${domain}Schema,
+  ${domain}UpdateSchema
+};
+
+export default {
   ${domain}Schema,
   ${domain}UpdateSchema
 };
 `,
 
-  service: (domain, domainCapitalized, tableName) => `const db = require('../config/database');
-const { v4: uuidv4 } = require('uuid');
+  service: (domain, domainCapitalized, tableName) => `import { v4 as uuidv4 } from 'uuid';
+import database from '../config/database.js';
 
+/**
+ * Serviço de ${domainCapitalized}
+ */
 class ${domainCapitalized}Service {
   async getAll() {
     try {
-      const results = await db.query(
+      const results = await database.query(
         \`SELECT * FROM ${tableName} ORDER BY nome ASC\`
       );
       return results;
@@ -49,7 +57,7 @@ class ${domainCapitalized}Service {
 
   async getById(id) {
     try {
-      const [result] = await db.query(
+      const [result] = await database.query(
         \`SELECT * FROM ${tableName} WHERE id = ?\`,
         [id]
       );
@@ -69,7 +77,7 @@ class ${domainCapitalized}Service {
     try {
       const id = data.id || uuidv4();
       
-      await db.query(
+      await database.query(
         \`INSERT INTO ${tableName} (id, nome, descricao, status, created_at)
          VALUES (?, ?, ?, ?, NOW())\`,
         [id, data.nome, data.descricao || null, data.status || 'Ativo']
@@ -106,7 +114,7 @@ class ${domainCapitalized}Service {
       fields.push('updated_at = NOW()');
       values.push(id);
 
-      await db.query(
+      await database.query(
         \`UPDATE ${tableName} SET \${fields.join(', ')} WHERE id = ?\`,
         values
       );
@@ -122,7 +130,7 @@ class ${domainCapitalized}Service {
     try {
       await this.getById(id);
 
-      await db.query(\`DELETE FROM ${tableName} WHERE id = ?\`, [id]);
+      await database.query(\`DELETE FROM ${tableName} WHERE id = ?\`, [id]);
 
       console.log(\`[${domainCapitalized}Service] Registro \${id} excluído com sucesso\`);
     } catch (error) {
@@ -137,7 +145,7 @@ class ${domainCapitalized}Service {
   async search(searchTerm) {
     try {
       const term = \`%\${searchTerm}%\`;
-      const results = await db.query(
+      const results = await database.query(
         \`SELECT * FROM ${tableName} 
          WHERE nome LIKE ? OR descricao LIKE ? 
          ORDER BY nome ASC\`,
@@ -152,7 +160,7 @@ class ${domainCapitalized}Service {
 
   async count() {
     try {
-      const [result] = await db.query(\`SELECT COUNT(*) as total FROM ${tableName}\`);
+      const [result] = await database.query(\`SELECT COUNT(*) as total FROM ${tableName}\`);
       return result.total;
     } catch (error) {
       console.error('[${domainCapitalized}Service] Erro ao contar:', error);
@@ -162,7 +170,7 @@ class ${domainCapitalized}Service {
 
   async getStats() {
     try {
-      const [stats] = await db.query(\`
+      const [stats] = await database.query(\`
         SELECT 
           COUNT(*) as total,
           COUNT(CASE WHEN status = 'Ativo' THEN 1 END) as ativos,
@@ -178,13 +186,16 @@ class ${domainCapitalized}Service {
   }
 }
 
-module.exports = new ${domainCapitalized}Service();
+export default new ${domainCapitalized}Service();
 `,
 
-  controller: (domain, domainCapitalized) => `const ${domain}Service = require('../services/${domain}.service');
-const ApiResponse = require('../utils/response');
-const { ${domain}Schema, ${domain}UpdateSchema } = require('../models/${domain}.model');
+  controller: (domain, domainCapitalized) => `import ${domain}Service from '../services/${domain}.service.js';
+import ApiResponse from '../utils/response.js';
+import { ${domain}Schema, ${domain}UpdateSchema } from '../models/${domain}.model.js';
 
+/**
+ * Controller de ${domainCapitalized}
+ */
 class ${domainCapitalized}Controller {
   async getAll(req, res, next) {
     try {
@@ -288,12 +299,13 @@ class ${domainCapitalized}Controller {
   }
 }
 
-module.exports = new ${domainCapitalized}Controller();
+export default new ${domainCapitalized}Controller();
 `,
 
-  routes: (domain) => `const express = require('express');
+  routes: (domain) => `import express from 'express';
+import ${domain}Controller from '../controllers/${domain}.controller.js';
+
 const router = express.Router();
-const ${domain}Controller = require('../controllers/${domain}.controller');
 
 /**
  * @swagger
@@ -425,13 +437,17 @@ router.put('/:id', ${domain}Controller.update);
  */
 router.delete('/:id', ${domain}Controller.delete);
 
-module.exports = router;
+export default router;
 `,
 
-  test: (domain, domainCapitalized) => `const ${domain}Service = require('../../../services/${domain}.service');
-const db = require('../../../config/database');
+  test: (domain, domainCapitalized) => `import ${domain}Service from '../../../services/${domain}.service.js';
+import database from '../../../config/database.js';
 
-jest.mock('../../../config/database');
+jest.mock('../../../config/database.js', () => ({
+  default: {
+    query: jest.fn()
+  }
+}));
 
 describe('${domainCapitalized}Service', () => {
   beforeEach(() => {
@@ -445,7 +461,7 @@ describe('${domainCapitalized}Service', () => {
         { id: '2', nome: 'Teste 2', status: 'Ativo' }
       ];
       
-      db.query.mockResolvedValue(mockData);
+      database.query.mockResolvedValue(mockData);
 
       const result = await ${domain}Service.getAll();
 
@@ -458,7 +474,7 @@ describe('${domainCapitalized}Service', () => {
     it('deve retornar registro por ID', async () => {
       const mockData = { id: '1', nome: 'Teste', status: 'Ativo' };
       
-      db.query.mockResolvedValue([mockData]);
+      database.query.mockResolvedValue([mockData]);
 
       const result = await ${domain}Service.getById('1');
 
@@ -466,7 +482,7 @@ describe('${domainCapitalized}Service', () => {
     });
 
     it('deve lançar erro se não encontrar', async () => {
-      db.query.mockResolvedValue([]);
+      database.query.mockResolvedValue([]);
 
       await expect(${domain}Service.getById('999'))
         .rejects
@@ -482,7 +498,7 @@ describe('${domainCapitalized}Service', () => {
         status: 'Ativo'
       };
 
-      db.query
+      database.query
         .mockResolvedValueOnce([{ insertId: 1 }])
         .mockResolvedValueOnce([{ id: '1', ...newData }]);
 
@@ -498,7 +514,7 @@ describe('${domainCapitalized}Service', () => {
       const updateData = { nome: 'Nome Atualizado' };
       const existing = { id: '1', nome: 'Nome Antigo', status: 'Ativo' };
 
-      db.query
+      database.query
         .mockResolvedValueOnce([existing])
         .mockResolvedValueOnce([{ affectedRows: 1 }])
         .mockResolvedValueOnce([{ ...existing, ...updateData }]);
@@ -513,7 +529,7 @@ describe('${domainCapitalized}Service', () => {
     it('deve excluir registro', async () => {
       const existing = { id: '1', nome: 'Teste' };
 
-      db.query
+      database.query
         .mockResolvedValueOnce([existing])
         .mockResolvedValueOnce([{ affectedRows: 1 }]);
 
@@ -562,30 +578,53 @@ function updateRoutesIndex(domain) {
   const indexPath = 'server/src/routes/index.js';
   
   if (!fs.existsSync(indexPath)) {
-    const initialContent = `const express = require('express');
+    const initialContent = `import express from 'express';
+
 const router = express.Router();
 
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-module.exports = router;
+export default router;
 `;
     fs.writeFileSync(indexPath, initialContent);
   }
 
   let content = fs.readFileSync(indexPath, 'utf8');
 
-  const importLine = `const ${domain}Routes = require('./${domain}.routes');\n`;
-  if (!content.includes(importLine)) {
-    const routerIndex = content.indexOf('const router');
-    content = content.slice(0, routerIndex) + importLine + content.slice(routerIndex);
+  // Add import statement
+  const importLine = `import ${domain}Routes from './${domain}.routes.js';\n`;
+  if (!content.includes(importLine.trim())) {
+    // Find the last import statement
+    const lines = content.split('\n');
+    let lastImportIndex = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].trim().startsWith('import ') && lines[i].includes('from ')) {
+        lastImportIndex = i;
+      }
+    }
+    
+    if (lastImportIndex >= 0) {
+      lines.splice(lastImportIndex + 1, 0, importLine.trim());
+      content = lines.join('\n');
+    } else {
+      // No imports found, add at the beginning
+      content = importLine + content;
+    }
   }
 
+  // Add router.use statement
   const useLine = `router.use('/${domain}', ${domain}Routes);\n`;
-  if (!content.includes(useLine)) {
-    const exportIndex = content.indexOf('module.exports');
-    content = content.slice(0, exportIndex) + useLine + '\n' + content.slice(exportIndex);
+  if (!content.includes(useLine.trim())) {
+    // Add before export default or module.exports
+    const exportIndex = content.search(/export\s+default|module\.exports/);
+    if (exportIndex >= 0) {
+      content = content.slice(0, exportIndex) + useLine + '\n' + content.slice(exportIndex);
+    } else {
+      // No export found, add at the end
+      content += '\n' + useLine;
+    }
   }
 
   fs.writeFileSync(indexPath, content);
