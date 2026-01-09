@@ -9,8 +9,8 @@ Este catálogo contém a documentação completa e interativa de todas as APIs d
 | Métrica | Valor |
 |---------|-------|
 | **Total de Aplicações** | 1 |
-| **Total de APIs** | 2 |
-| **Última Atualização** | 24/12/2025, 18:05:25 |
+| **Total de APIs** | 1 |
+| **Última Atualização** | 08/01/2026, 20:18:35 |
 
 ---
 
@@ -20,7 +20,6 @@ A tabela abaixo lista todas as APIs disponíveis. Clique na sigla para acessar a
 
 | Aplicação | Sigla | Descrição | Versão OpenAPI | Status |
 |-----------|-------|-----------|----------------|--------|
-| EXEMPLO | [PAYLOADAZPPP](PAYLOADAZPPP.md) | PAYLOADAZPPP | 3.0.0 | 🟢 Ativo |
 | EXEMPLO | [PAYLOADORDSPLCLARA](PAYLOADORDSPLCLARA.md) | PAYLOADORDSPLCLARA | 3.0.0 | 🟢 Ativo |
 
 ---
@@ -74,4 +73,4 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
 
 ---
 
-*Gerado automaticamente em 24/12/2025, 18:05:25*
+*Gerado automaticamente em 08/01/2026, 20:18:35*

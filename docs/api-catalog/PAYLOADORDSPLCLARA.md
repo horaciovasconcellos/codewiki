@@ -33,7 +33,7 @@ Utilize o visualizador abaixo para explorar e testar os endpoints da API:
 
 Você pode baixar a especificação OpenAPI completa:
 
-- [📄 Download JSON](./PAYLOADORDSPLCLARA.json)
+- [📄 Download JSON](PAYLOADORDSPLCLARA.json)
 - [📄 Download via React](http://localhost:5173/json/PAYLOADORDSPLCLARA.json)
 
 ## 🔧 Como Usar

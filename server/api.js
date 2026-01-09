@@ -7,8 +7,11 @@ import { ulid } from 'ulid';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import AzureDevOpsService from './azure-devops-service.js';
 
+const execAsync = promisify(exec);
 const app = express();
 
 // Configurar multer para upload de arquivos em memória
@@ -12641,6 +12644,82 @@ app.delete('/api/sdd/decisoes/:id', async (req, res) => {
     console.error('Erro ao deletar decisão arquitetural:', error);
     res.status(500).json({ error: 'Erro ao deletar decisão arquitetural' });
   }
+});
+
+// ==================== DOCKER MKDOCS ====================
+
+// GET /api/docker/mkdocs/status - Verificar status do container MkDocs
+app.get('/api/docker/mkdocs/status', async (req, res) => {
+  try {
+    // Tentar acessar o MkDocs diretamente via HTTP
+    const mkdocsUrl = 'http://mkdocs:8082';
+    
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    
+    try {
+      const response = await fetch(mkdocsUrl, {
+        signal: controller.signal,
+        headers: { 'User-Agent': 'Sistema-Auditoria-HealthCheck' }
+      });
+      clearTimeout(timeout);
+      
+      const running = response.ok || response.status === 404; // 404 também indica que está respondendo
+      
+      res.json({ 
+        running,
+        status: running ? 'up' : 'down',
+        message: running ? 'Container MkDocs está rodando' : 'Container MkDocs não está respondendo'
+      });
+    } catch (fetchError) {
+      clearTimeout(timeout);
+      
+      // Se der timeout ou erro de conexão, container está down
+      res.json({ 
+        running: false,
+        status: 'down',
+        message: 'Container MkDocs não está respondendo'
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao verificar status do MkDocs:', error);
+    res.status(500).json({ 
+      error: 'Erro ao verificar status',
+      running: false,
+      status: 'unknown'
+    });
+  }
+});
+
+// POST /api/docker/mkdocs/start - Avisar que container precisa ser iniciado
+app.post('/api/docker/mkdocs/start', async (req, res) => {
+  // Como não temos acesso ao Docker de dentro do container,
+  // retornar instruções para o usuário
+  res.json({ 
+    success: false,
+    needsManualStart: true,
+    message: 'Por favor, inicie o container MkDocs manualmente',
+    instructions: [
+      'Abra um terminal',
+      'Navegue até o diretório do projeto',
+      'Execute: docker-compose start mkdocs',
+      'Ou execute: docker-compose up -d mkdocs'
+    ]
+  });
+});
+
+// POST /api/docker/mkdocs/restart - Avisar que container precisa ser reiniciado
+app.post('/api/docker/mkdocs/restart', async (req, res) => {
+  res.json({ 
+    success: false,
+    needsManualRestart: true,
+    message: 'Por favor, reinicie o container MkDocs manualmente',
+    instructions: [
+      'Abra um terminal',
+      'Navegue até o diretório do projeto',
+      'Execute: docker-compose restart mkdocs'
+    ]
+  });
 });
 
 startServer();

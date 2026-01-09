@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 interface DocumentacaoAPIsViewProps {}
 
 interface ApiEndpoint {
@@ -1015,10 +1017,41 @@ Obs: Se um novo arquivo for enviado, substitui o anterior`,
 
 export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
   const [selectedEndpoint, setSelectedEndpoint] = useState<string>('tipos-afastamento');
+  const [checkingMkdocs, setCheckingMkdocs] = useState(false);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copiado para a área de transferência');
+  };
+
+  const checkAndOpenMkdocs = async () => {
+    setCheckingMkdocs(true);
+    
+    try {
+      // Verificar se o container MkDocs está ativo
+      const response = await fetch(`${API_URL}/api/docker/mkdocs/status`);
+      const data = await response.json();
+      
+      if (!data.running) {
+        // Mostrar toast informativo e tentar abrir mesmo assim
+        toast.warning(
+          'Container MkDocs pode não estar rodando. Se a página não carregar, execute: docker-compose start mkdocs',
+          { duration: 6000 }
+        );
+      } else {
+        toast.success('Container MkDocs está ativo!');
+      }
+      
+      // Abrir MkDocs em nova aba
+      window.open('http://localhost:8000', '_blank');
+    } catch (error) {
+      console.error('Erro ao verificar MkDocs:', error);
+      // Mesmo com erro, tentar abrir
+      toast.info('Abrindo MkDocs... Se não carregar, verifique se o container está rodando.');
+      window.open('http://localhost:8000', '_blank');
+    } finally {
+      setCheckingMkdocs(false);
+    }
   };
 
   const getMethodColor = (method: string) => {
@@ -1048,12 +1081,13 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
               </p>
             </div>
             <Button 
-              onClick={() => window.open('http://localhost:8000', '_blank')}
+              onClick={checkAndOpenMkdocs}
+              disabled={checkingMkdocs}
               variant="outline"
               className="gap-2"
             >
               <BookOpen className="h-4 w-4" />
-              Documentação Completa (MKDocs)
+              {checkingMkdocs ? 'Verificando...' : 'Documentação Completa (MKDocs)'}
             </Button>
           </div>
 

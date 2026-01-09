@@ -58,51 +58,6 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
     }
   }, [open]);
 
-  // Atualizar formulário quando payload mudar
-  useEffect(() => {
-    if (payload) {
-      setFormData({
-        ...payload,
-        dataTermino: payload.dataTermino || '',
-      });
-      // Validar arquivo existente
-      if (payload.conteudoArquivo) {
-        validarArquivo(payload.conteudoArquivo, payload.formatoArquivo);
-      }
-    } else {
-      resetForm();
-    }
-  }, [payload, validarArquivo]);
-
-  const loadAplicacoes = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/aplicacoes`);
-      if (response.ok) {
-        const data = await response.json();
-        setAplicacoes(data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar aplicações:', error);
-      toast.error('Erro ao carregar aplicações');
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      aplicacaoId: '',
-      sigla: '',
-      definicao: '',
-      descricao: '',
-      formatoArquivo: 'JSON',
-      conteudoArquivo: '',
-      versaoOpenapi: '3.0.0',
-      arquivoValido: false,
-      errosValidacao: '',
-      dataTermino: '',
-    });
-    setValidacaoInfo(null);
-  };
-
   const validarArquivo = useCallback((conteudo: string, formato: FormatoArquivoPayload) => {
     try {
       if (formato === 'JSON') {
@@ -198,8 +153,8 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
       }
     } catch (error) {
       const errorMessage = formato === 'JSON' 
-        ? `JSON inválido: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
-        : `YAML inválido: ${error instanceof Error ? error.message : 'Erro desconhecido'}`;
+        ? 'JSON inválido: ' + (error as Error).message
+        : 'YAML inválido ou mal formatado';
       
       setValidacaoInfo({
         valido: false,
@@ -212,6 +167,51 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
       }));
     }
   }, []);
+
+  // Atualizar formulário quando payload mudar
+  useEffect(() => {
+    if (payload) {
+      setFormData({
+        ...payload,
+        dataTermino: payload.dataTermino || '',
+      });
+      // Validar arquivo existente
+      if (payload.conteudoArquivo) {
+        validarArquivo(payload.conteudoArquivo, payload.formatoArquivo);
+      }
+    } else {
+      resetForm();
+    }
+  }, [payload, validarArquivo]);
+
+  const loadAplicacoes = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/aplicacoes`);
+      if (response.ok) {
+        const data = await response.json();
+        setAplicacoes(data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar aplicações:', error);
+      toast.error('Erro ao carregar aplicações');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      aplicacaoId: '',
+      sigla: '',
+      definicao: '',
+      descricao: '',
+      formatoArquivo: 'JSON',
+      conteudoArquivo: '',
+      versaoOpenapi: '3.0.0',
+      arquivoValido: false,
+      errosValidacao: '',
+      dataTermino: '',
+    });
+    setValidacaoInfo(null);
+  };
 
   const handleInputChange = (field: keyof Payload, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -430,8 +430,11 @@ export function PayloadWizard({ open, onClose, onSave, payload }: PayloadWizardP
                   : 'openapi: 3.0.0\ninfo:\n  ...\npaths:\n  ...'
               }
               rows={10}
-              className="font-mono text-sm"
+              className="font-mono text-sm max-h-[250px] overflow-y-auto resize-none"
             />
+            <p className="text-xs text-muted-foreground">
+              Conteúdo da especificação OpenAPI em formato {formData.formatoArquivo}
+            </p>
           </div>
 
           {/* Status de Validação */}

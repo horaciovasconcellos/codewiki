@@ -25,6 +25,8 @@ nav:
           - "Gerador de Projetos": "TELA-GERADOR-PROJETOS.md"
       - "Análise":
           - "ReportBook": "TELA-REPORTBOOK.md"
+      - "InnerSource":
+          - "Visão Geral": "TELA-INNERSOURCE.md"
   
   - "📊 Métricas e Dashboards":
       - "DORA Dashboard": "DASHBOARD-DORA.md"
@@ -52,6 +54,7 @@ nav:
   
   - "📜 Scripts":
       - "Documentação": "SCRIPTS-README.md"
+      - "Testes": "TESTE-SCRIPTS.md"
   
   - "📝 Logging e Auditoria":
       - "Quick Reference": "LOGGING-QUICK-REFERENCE.md"
@@ -67,6 +70,37 @@ nav:
           - "Payloads":
               - "AZ PPP": "api-catalog/PAYLOADAZPPP.md"
               - "OrdSPL Clara": "api-catalog/PAYLOADORDSPLCLARA.md"
+  
+  - "📦 Data Templates":
+      - "Guia de Carga CSV": "data-templates/GUIA-CARGA-CSV.md"
+      - "Carga de Dados": "data-templates/README-CARGA.md"
+      - "Tecnologias":
+          - "README": "data-templates/README-EXEMPLOS-TECNOLOGIAS.md"
+      - "Colaboradores":
+          - "README": "data-templates/README-HABILIDADES.md"
+          - "Quick Reference": "data-templates/HABILIDADES-QUICK-REF.md"
+      - "Aplicações":
+          - "README": "data-templates/README-APLICACOES.md"
+          - "Exemplos": "data-templates/README-APLICACOES-EXEMPLO.md"
+      - "ADRs":
+          - "README": "data-templates/README-ADRS.md"
+      - "Spec-Kit (SDD)":
+          - "README": "data-templates/README-SDD.md"
+      - "InnerSource":
+          - "README": "data-templates/README-INNERSOURCE.md"
+          - "Identificador": "data-templates/README-IDENTIFICADOR-v1.5.1.md"
+      - "Comunicações":
+          - "README": "data-templates/README-COMUNICACOES.md"
+          - "Tipos": "data-templates/README-TIPOS-COMUNICACAO.md"
+      - "Infraestrutura":
+          - "Servidores": "data-templates/README-SERVIDORES.md"
+          - "Estruturas de Projeto": "data-templates/README-ESTRUTURAS-PROJETO.md"
+      - "Processos":
+          - "Processos de Negócio": "data-templates/README-PROCESSOS-NEGOCIO.md"
+      - "Scripts":
+          - "README": "data-templates/README-SCRIPTS.md"
+      - "Payloads":
+          - "README": "data-templates/README-PAYLOADS.md"
   
   - "📚 Runbooks":
       - "Índice": "runbooks/index.md"

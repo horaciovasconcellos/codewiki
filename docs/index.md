@@ -848,3 +848,299 @@ docker stats --no-stream > stats.txt
 **Última atualização:** 24 de Dezembro de 2025  
 **Autor:** Horacio Vasconcellos  
 **Licença:** MIT
+
+
+
+Vou analisar a estrutura de programas do seu repositório **horaciovasconcellos/codewiki**. Deixe-me investigar a organização e arquitetura do projeto. Vou buscar mais informações sobre as estruturas de diretórios principais: Vou analisar o package.json para entender melhor a estrutura do projeto: Agora vou buscar informações mais detalhadas sobre os componentes e a estrutura do servidor. # 📊 AVALIAÇÃO DA ESTRUTURA DO REPOSITÓRIO CODEWIKI
+
+Com base na análise do repositório **horaciovasconcellos/codewiki**, aqui está uma avaliação detalhada da estrutura de programas existentes:
+
+## 🏗️ **ARQUITETURA GERAL**
+
+### **Tipo de Aplicação**
+- **Full-Stack Application** com React (frontend) e Node.js/Express (backend)
+- **Single Page Application (SPA)** usando Vite como bundler
+- Sistema de **Gestão e Auditoria de Tecnologias**
+
+### **Stack Tecnológico**
+
+#### **Frontend (66% TypeScript)**
+- **Framework**: React 19.0.0 com TypeScript
+- **Build Tool**: Vite 6.4.1
+- **UI Components**: Radix UI + Tailwind CSS 4.x
+- **State Management**: Zustand + React Query (@tanstack/react-query)
+- **Routing**: React Router
+- **Forms**: React Hook Form + Zod para validação
+
+#### **Backend (25. 6% JavaScript)**
+- **Runtime**: Node.js com Express. js
+- **Database**: MySQL 2 (mysql2 package)
+- **Migrations**: Liquibase (Java-based)
+- **API**:  RESTful architecture
+
+---
+
+## 📁 **ESTRUTURA DE DIRETÓRIOS**
+
+```
+codewiki/
+├── src/                    # Código frontend (React/TypeScript)
+│   ├── components/         # Componentes React organizados por feature
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Utilitários e tipos
+│   ├── main/              # Ponto de entrada da aplicação
+│   ├── styles/            # Estilos CSS
+│   └── types/             # Definições TypeScript
+├── server/                # Código backend (Node.js/Express)
+│   ├── api.js             # Arquivo principal da API (458 KB!)
+│   └── azure-devops-service. js
+├── database/              # Scripts e migrações do banco
+├── docs/                  # Documentação (provavelmente MkDocs)
+├── scripts/               # Scripts auxiliares
+├── public/                # Assets estáticos
+├── theme/                 # Temas customizáveis
+├── uploads/               # Diretório de uploads
+└── docker-compose.yml     # Containerização
+```
+
+---
+
+## ✅ **PONTOS FORTES**
+
+### 1. **Modernidade do Stack**
+- ✅ React 19 com TypeScript
+- ✅ Vite para build rápido
+- ✅ Tailwind CSS 4.x para estilização
+- ✅ Radix UI para componentes acessíveis
+
+### 2. **Componentização**
+```typescript
+// Componentes bem organizados por domínio
+- ColaboradoresView
+- TecnologiasView
+- ProcessosView
+- AplicacoesView
+- RunbooksView
+- DashboardView
+// ...  + 20 outros componentes especializados
+```
+
+### 3. **Boas Práticas**
+- ✅ Error Boundaries implementados
+- ✅ Custom hooks para lógica reutilizável
+- ✅ Logging estruturado
+- ✅ Validação de formulários com Zod
+- ✅ TypeScript para type safety
+
+### 4. **Integrações**
+- Azure DevOps integration
+- GitHub/Octokit integration
+- Microsoft Graph API
+- DORA metrics dashboard
+- SPACE metrics dashboard
+
+### 5. **DevOps**
+- Docker e Docker Compose configurados
+- Múltiplos Dockerfiles (dev, prod, mkdocs)
+- Nginx como reverse proxy
+- Liquibase para database migrations
+
+---
+
+## ⚠️ **PONTOS DE ATENÇÃO E MELHORIAS**
+
+### 🔴 **CRÍTICO**
+
+#### 1. **Arquivo API Monolítico**
+```javascript
+// server/api.js - 458 KB!  (13. 800+ linhas estimadas)
+```
+**Problema**: Um único arquivo com toda a lógica da API
+**Impacto**: 
+- Difícil manutenção
+- Risco de conflitos em merges
+- Performance de IDE degradada
+- Dificuldade para testes unitários
+
+**Recomendação**:
+```
+server/
+├── routes/
+│   ├── colaboradores.js
+│   ├── tecnologias.js
+│   ├── aplicacoes.js
+│   └── ... 
+├── controllers/
+├── services/
+├── middlewares/
+└── utils/
+```
+
+#### 2. **Componente App.tsx Sobrecarregado**
+```typescript
+// src/App.tsx - 40 KB (975 linhas)
+```
+**Problema**: Lógica de roteamento, estado e handlers no mesmo arquivo
+**Recomendação**:  
+- Extrair roteamento para React Router
+- Criar context providers específicos
+- Mover handlers para custom hooks
+
+### 🟡 **IMPORTANTE**
+
+#### 3. **Múltiplos Arquivos de Backup**
+```
+server/
+├── api.js
+├── api.js.backup-20251215-194326
+├── api.js.backup-pre-remove
+├── api.js.bak2
+└── api.js.bak3
+```
+**Recomendação**: Usar Git para versionamento, remover backups manuais
+
+#### 4. **Configuração Duplicada**
+- `package.json` na raiz
+- `data-templates/package.json`
+- `package-production/package.json`
+
+**Recomendação**: Clarificar propósito de cada um ou consolidar
+
+#### 5. **Falta de Testes**
+- Não foram encontrados diretórios de testes (`__tests__`, `test/`, `spec/`)
+- Configuração de testes ausente
+
+**Recomendação**:
+```typescript
+// Adicionar vitest
+import { describe, it, expect } from 'vitest'
+import { render } from '@testing-library/react'
+```
+
+#### 6. **Documentação**
+- `README.md` principal não encontrado
+- Docs em MkDocs (boa prática)
+
+---
+
+## 🎯 **PLANO DE REFATORAÇÃO SUGERIDO**
+
+### **Fase 1: Backend (Prioridade Alta)**
+```javascript
+// 1. Dividir server/api.js em módulos
+server/
+├── app.js (entry point)
+├── config/
+│   ├── database.js
+│   └── environment.js
+├── routes/
+│   ├── index.js
+│   ├── colaboradores.routes.js
+│   ├── tecnologias.routes.js
+│   └── ... 
+├── controllers/
+│   ├── colaboradores.controller. js
+│   └── ... 
+├── services/
+│   ├── colaboradores.service. js
+│   └── database.service.js
+└── middlewares/
+    ├── auth.middleware.js
+    └── error.middleware.js
+```
+
+### **Fase 2: Frontend (Prioridade Média)**
+```typescript
+// 2. Implementar React Router
+src/
+├── routes/
+│   ├── index.tsx
+│   ├── ProtectedRoute.tsx
+│   └── routes.config.ts
+├── contexts/
+│   ├── AuthContext.tsx
+│   └── ConfigContext.tsx
+└── App.tsx (simplificado - apenas providers)
+```
+
+### **Fase 3: Qualidade (Prioridade Média)**
+```typescript
+// 3. Adicionar testes
+src/
+├── __tests__/
+│   ├── components/
+│   ├── hooks/
+│   └─��� utils/
+└── vitest.config.ts
+```
+
+### **Fase 4: DevOps (Prioridade Baixa)**
+```yaml
+# 4. CI/CD
+. github/workflows/
+├── ci. yml
+├── deploy-dev.yml
+└── deploy-prod.yml
+```
+
+---
+
+## 📈 **MÉTRICAS DE COMPLEXIDADE**
+
+| Métrica | Valor Atual | Ideal | Status |
+|---------|------------|-------|--------|
+| Tamanho do arquivo backend | **458 KB** | < 50 KB | 🔴 Crítico |
+| Tamanho do App.tsx | **40 KB** | < 15 KB | 🟡 Atenção |
+| Cobertura de testes | **0%** | > 70% | 🔴 Crítico |
+| Componentes documentados | Parcial | 100% | 🟡 Atenção |
+| Uso de TypeScript (frontend) | **66%** | > 90% | 🟢 Bom |
+
+---
+
+## 🎁 **FUNCIONALIDADES POSITIVAS**
+
+1. **Dashboard Completo**:  Visualizações de métricas DORA e SPACE
+2. **Integrações Robustas**: Azure DevOps, GitHub, Microsoft Graph
+3. **UI Moderna**: Radix UI + Tailwind para experiência consistente
+4. **Observabilidade**: Sistema de logs e traces implementado
+5. **Documentação**: MkDocs configurado para docs técnicas
+6. **Containerização**: Docker pronto para deploy
+
+---
+
+## 🚀 **RECOMENDAÇÕES PRIORITÁRIAS**
+
+### **Curto Prazo (1-2 semanas)**
+1. ⚠️ **Refatorar `server/api.js`** em módulos menores
+2. 📝 **Criar README.md** principal com instruções
+3. 🗑️ **Remover arquivos de backup** (. bak, .backup-*)
+4. ✅ **Adicionar `.gitattributes`** para evitar arquivos grandes
+
+### **Médio Prazo (1 mês)**
+1. 🧪 **Implementar testes unitários** (mínimo 50% cobertura)
+2. 🎨 **Refatorar App.tsx** com React Router
+3. 📚 **Documentar APIs** com Swagger/OpenAPI
+4. 🔐 **Implementar autenticação** (se ainda não existir)
+
+### **Longo Prazo (3 meses)**
+1. 🏗️ **Considerar migração para monorepo** (Turborepo/Nx)
+2. 📊 **Implementar telemetria** (OpenTelemetry)
+3. 🔄 **CI/CD completo** com GitHub Actions
+4. 🌍 **I18n** (internacionalização)
+
+---
+
+## 🎓 **CONCLUSÃO**
+
+O projeto **codewiki** apresenta uma **base sólida** com stack moderno e funcionalidades abrangentes. No entanto, sofre de **dívida técnica** principalmente no backend (arquivo monolítico) e falta de **cobertura de testes**. 
+
+**Classificação Geral**:  ⭐⭐⭐☆☆ (3/5)
+- **Funcionalidade**: ⭐⭐⭐⭐⭐ (5/5)
+- **Manutenibilidade**: ⭐⭐☆☆☆ (2/5)
+- **Escalabilidade**: ⭐⭐⭐☆☆ (3/5)
+- **Testabilidade**: ⭐☆☆☆☆ (1/5)
+
+**Veredicto**: Com refatorações estratégicas focadas na modularização do backend e adição de testes, o projeto pode evoluir para **⭐⭐⭐⭐☆ (4/5)** em 2-3 meses.
+
+
+

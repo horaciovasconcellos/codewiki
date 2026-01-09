@@ -25,9 +25,9 @@ echo -e "${CYAN}"
 cat << "EOF"
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
-║      SISTEMA DE AUDITORIA - QUICK START DEPLOY          ║
+║      SISTEMA DE AUDITORIA - QUICK START DEPLOY           ║
 ║                                                          ║
-║      Assistente Interativo de Deploy em Produção        ║
+║      Assistente Interativo de Deploy em Produção         ║
 ║                                                          ║
 ╚══════════════════════════════════════════════════════════╝
 EOF
