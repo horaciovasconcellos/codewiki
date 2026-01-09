@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { NormasProcessoTable } from './NormasProcessoTable';
 import { Plus } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface ProcessoNegocioFormProps {
   processo?: ProcessoNegocio;
@@ -75,7 +76,7 @@ export function ProcessoNegocioForm({ processo, processos, onSave }: ProcessoNeg
     }
 
     const novoProcesso: ProcessoNegocio = {
-      id: processo?.id || crypto.randomUUID(),
+      id: processo?.id || generateUUID(),
       identificacao,
       descricao,
       nivelMaturidade,

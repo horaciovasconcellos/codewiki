@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { AfastamentosTable } from './AfastamentosTable';
 import { Separator } from '@/components/ui/separator';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface ColaboradorFormProps {
   colaborador?: Colaborador;
@@ -48,7 +49,7 @@ export function ColaboradorForm({ colaborador, colaboradores, tiposAfastamento, 
     }
 
     const novoColaborador: Colaborador = {
-      id: colaborador?.id || crypto.randomUUID(),
+      id: colaborador?.id || generateUUID(),
       matricula,
       nome,
       setor,

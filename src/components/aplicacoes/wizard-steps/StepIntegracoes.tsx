@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Pencil, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface StepIntegracoesProps {
   aplicacoes: Aplicacao[];
@@ -56,7 +57,7 @@ export function StepIntegracoes({
     }
 
     const integ: IntegracaoAplicacao = {
-      id: editing?.id || crypto.randomUUID(),
+      id: editing?.id || generateUUID(),
       aplicacaoDestinoId: formData.aplicacaoDestinoId,
       dataInicio: formData.dataInicio,
       dataTermino: formData.dataTermino || undefined,

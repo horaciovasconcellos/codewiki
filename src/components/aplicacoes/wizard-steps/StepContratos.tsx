@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Pencil, Trash } from '@phosphor-icons/react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface StepContratosProps {
   aplicacaoId: string;
@@ -85,7 +86,7 @@ export function StepContratos({ aplicacaoId, contratos, setContratos }: StepCont
     }
 
     const contrato: Contrato = {
-      id: editing?.id || crypto.randomUUID(),
+      id: editing?.id || generateUUID(),
       aplicacaoId,
       numeroContrato: formData.numeroContrato,
       dataVigenciaInicial: formData.dataVigenciaInicial,

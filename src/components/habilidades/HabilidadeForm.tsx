@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { X, Check } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLogging } from '@/hooks/use-logging';
+import { generateUUID } from '@/utils/uuid';
 
 const habilidadeSchema = z.object({
   sigla: z.string()
@@ -70,7 +71,7 @@ export function HabilidadeForm({ habilidade, onSave, onCancel }: HabilidadeFormP
 
   const onSubmit = (data: HabilidadeFormValues) => {
     const novaHabilidade: Habilidade = {
-      id: habilidade?.id || crypto.randomUUID(),
+      id: habilidade?.id || generateUUID(),
       sigla: data.sigla,
       descricao: data.descricao,
       tipo: data.tipo,

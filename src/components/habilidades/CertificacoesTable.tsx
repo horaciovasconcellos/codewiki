@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Plus, Trash, PencilSimple } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLogging } from '@/hooks/use-logging';
+import { generateUUID } from '@/utils/uuid';
 
 interface CertificacoesTableProps {
   certificacoes: CertificacaoRelacionada[];
@@ -66,7 +67,7 @@ export function CertificacoesTable({
       toast.success('Certificação atualizada com sucesso');
     } else {
       const nova: CertificacaoRelacionada = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         nomeCertificacao: nomeCertificacao.trim(),
         tempoValidadeDias: validadeDias
       };

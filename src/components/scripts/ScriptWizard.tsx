@@ -15,6 +15,7 @@ import {
 import { ArrowLeft, Check, UploadSimple, X, FileText } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface ScriptWizardProps {
   scripts: Script[];
@@ -112,7 +113,7 @@ export function ScriptWizard({ scripts, onSave, onCancel, editingScript }: Scrip
     }
 
     const script: Script = {
-      id: editingScript?.id || crypto.randomUUID(),
+      id: editingScript?.id || generateUUID(),
       sigla: sigla.trim(),
       descricao: descricao.trim(),
       dataInicio,

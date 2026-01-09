@@ -8,6 +8,7 @@ import { AfastamentosStep } from './wizard-steps/AfastamentosStep';
 import { HabilidadesStep } from './wizard-steps/HabilidadesStep';
 import { StepAvaliacoes } from './wizard-steps/StepAvaliacoes';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface ColaboradorWizardProps {
   colaborador?: Colaborador;
@@ -94,7 +95,7 @@ export function ColaboradorWizard({
     }
 
     const novoColaborador: Colaborador = {
-      id: colaborador?.id || crypto.randomUUID(),
+      id: colaborador?.id || generateUUID(),
       matricula,
       nome,
       setor,

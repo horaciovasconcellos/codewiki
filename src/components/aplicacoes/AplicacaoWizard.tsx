@@ -18,6 +18,7 @@ import {
   CapacidadeNegocio,
   ADRAplicacao
 } from '@/lib/types';
+import { generateUUID } from '@/utils/uuid';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -221,7 +222,7 @@ export function AplicacaoWizard({
     if (!validateStep(1)) return;
 
     const aplicacaoData: Aplicacao = {
-      id: aplicacao?.id || crypto.randomUUID(),
+      id: aplicacao?.id || generateUUID(),
       sigla,
       descricao,
       urlDocumentacao,

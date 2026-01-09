@@ -96,25 +96,41 @@ const scriptsDir = path.join(uploadsDir, 'scripts');
 
 const PORT = process.env.API_PORT || process.env.PORT || 3000;
 
+// Pool de conexões
+let pool;
+
+// Healthcheck endpoint - deve vir antes de outras rotas
+app.get('/health', async (req, res) => {
+  if (!pool) {
+    return res.status(503).json({ status: 'error', database: 'not_initialized' });
+  }
+  
+  try {
+    await pool.query('SELECT 1');
+    res.status(200).json({ 
+      status: 'ok', 
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'error', 
+      database: 'disconnected',
+      error: error.message 
+    });
+  }
+});
+
 // Configuração do MySQL
 const dbConfig = {
   host: process.env.MYSQL_HOST || 'mysql-master',
-  port: process.env.MYSQL_PORT || 3306,
+  port: process.env. MYSQL_PORT || 3306,
   user: process.env.MYSQL_USER || 'app_user',
-  password: process.env.MYSQL_PASSWORD || 'apppass123',
-  database: process.env.MYSQL_DATABASE || 'auditoria_db',
+  password:  process.env.MYSQL_PASSWORD || 'apppass123',
+  database: process.env. MYSQL_DATABASE || 'auditoria_db',
   charset: 'utf8mb4',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  multipleStatements: false,
-  typeCast: function(field, next) {
-    if (field.type === 'VAR_STRING' || field.type === 'STRING' || field.type === 'TINY_BLOB' || 
-        field.type === 'MEDIUM_BLOB' || field.type === 'LONG_BLOB' || field.type === 'BLOB') {
-      const value = field.string();
-      return value === null ? null : value;
-    }
-    return next();
+  authPlugins: {
+    sha256_password: () => () => require('mysql2/lib/auth_plugins').authPlugins.caching_sha2_password  
   }
 };
 
@@ -124,9 +140,6 @@ console.log('📋 Configuração do banco:', {
   user: dbConfig.user,
   database: dbConfig.database
 });
-
-// Pool de conexões
-let pool;
 
 // Helper para converter data ISO para formato MySQL DATE (YYYY-MM-DD)
 function formatDateForMySQL(dateString) {
@@ -12234,7 +12247,7 @@ app.get('/api/sdd/projetos/:id', async (req, res) => {
 // POST /api/sdd/projetos - Criar novo projeto
 app.post('/api/sdd/projetos', async (req, res) => {
   try {
-    const { aplicacao_id, nome_projeto, ia_selecionada, constituicao, gerador_projetos } = req.body;
+    const { aplicacao_id, nome_projeto, ia_selecionada, constituicao, prd_content, gerador_projetos } = req.body;
     
     if (!nome_projeto || !ia_selecionada) {
       return res.status(400).json({ error: 'Nome do projeto e IA são obrigatórios' });
@@ -12243,9 +12256,9 @@ app.post('/api/sdd/projetos', async (req, res) => {
     const id = uuidv4();
     
     await pool.query(`
-      INSERT INTO projetos_sdd (id, aplicacao_id, nome_projeto, ia_selecionada, constituicao, gerador_projetos)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, [id, aplicacao_id || null, nome_projeto, ia_selecionada, constituicao || null, gerador_projetos || false]);
+      INSERT INTO projetos_sdd (id, aplicacao_id, nome_projeto, ia_selecionada, constituicao, prd_content, gerador_projetos)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [id, aplicacao_id || null, nome_projeto, ia_selecionada, constituicao || null, prd_content || null, gerador_projetos || false]);
     
     const [rows] = await pool.query(`
       SELECT 
@@ -12267,13 +12280,13 @@ app.post('/api/sdd/projetos', async (req, res) => {
 // PUT /api/sdd/projetos/:id - Atualizar projeto
 app.put('/api/sdd/projetos/:id', async (req, res) => {
   try {
-    const { aplicacao_id, nome_projeto, ia_selecionada, constituicao, gerador_projetos } = req.body;
+    const { aplicacao_id, nome_projeto, ia_selecionada, constituicao, prd_content, gerador_projetos } = req.body;
     
     await pool.query(`
       UPDATE projetos_sdd
-      SET aplicacao_id = ?, nome_projeto = ?, ia_selecionada = ?, constituicao = ?, gerador_projetos = ?
+      SET aplicacao_id = ?, nome_projeto = ?, ia_selecionada = ?, constituicao = ?, prd_content = ?, gerador_projetos = ?
       WHERE id = ?
-    `, [aplicacao_id || null, nome_projeto, ia_selecionada, constituicao || null, gerador_projetos, req.params.id]);
+    `, [aplicacao_id || null, nome_projeto, ia_selecionada, constituicao || null, prd_content || null, gerador_projetos, req.params.id]);
     
     const [rows] = await pool.query(`
       SELECT 
@@ -12435,6 +12448,181 @@ app.delete('/api/sdd/requisitos/:id', async (req, res) => {
   } catch (error) {
     console.error('Erro ao deletar requisito:', error);
     res.status(500).json({ error: 'Erro ao deletar requisito' });
+  }
+});
+
+// POST /api/sdd/projetos/:id/extrair-requisitos-prd - Extrair requisitos do PRD
+app.post('/api/sdd/projetos/:id/extrair-requisitos-prd', async (req, res) => {
+  try {
+    const projetoId = req.params.id;
+    
+    // Buscar projeto com PRD
+    const [projeto] = await pool.query('SELECT prd_content FROM projetos_sdd WHERE id = ?', [projetoId]);
+    
+    if (projeto.length === 0) {
+      return res.status(404).json({ error: 'Projeto não encontrado' });
+    }
+    
+    if (!projeto[0].prd_content) {
+      return res.status(400).json({ error: 'Projeto não possui PRD' });
+    }
+    
+    const prdContent = projeto[0].prd_content;
+    const requisitosExtraidos = [];
+    
+    // Parser de Markdown otimizado para requisitos estruturados
+    const lines = prdContent.split('\n');
+    let currentSection = '';
+    let currentRequisitoPrincipal = '';
+    let counter = 1;
+    
+    // Buscar maior sequência existente
+    const [maxSeq] = await pool.query(`
+      SELECT sequencia FROM requisitos_sdd WHERE projeto_id = ? ORDER BY sequencia DESC LIMIT 1
+    `, [projetoId]);
+    
+    if (maxSeq.length > 0) {
+      const match = maxSeq[0].sequencia.match(/REQ-(\d+)/);
+      if (match) {
+        counter = parseInt(match[1]) + 1;
+      }
+    }
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Capturar requisitos principais: ### RF001 - Nome do Requisito
+      const reqPrincipalMatch = line.match(/^###\s+(RF\d+|RNF\d+|RD\d+)\s*-\s*(.+)$/i);
+      if (reqPrincipalMatch) {
+        currentRequisitoPrincipal = reqPrincipalMatch[1].toUpperCase(); // RF001, RNF001, etc.
+        currentSection = `${reqPrincipalMatch[1]} - ${reqPrincipalMatch[2].trim()}`;
+        
+        // Opcional: criar o requisito principal também
+        const nome = `${reqPrincipalMatch[1]} - ${reqPrincipalMatch[2].trim()}`;
+        
+        // Capturar descrição (próximas linhas até encontrar outro header ou subtarefa)
+        let descricao = '';
+        let j = i + 1;
+        while (j < lines.length) {
+          const nextLine = lines[j].trim();
+          if (nextLine.match(/^#{3,4}\s+/) || nextLine.length === 0) break;
+          if (nextLine.startsWith('**Descrição:**')) {
+            descricao = nextLine.replace('**Descrição:**', '').trim();
+          }
+          j++;
+        }
+        
+        const id = uuidv4();
+        const sequencia = `REQ-${String(counter).padStart(3, '0')}`;
+        
+        await pool.query(`
+          INSERT INTO requisitos_sdd 
+          (id, projeto_id, sequencia, nome, descricao, status, origem_prd, secao_prd)
+          VALUES (?, ?, ?, ?, ?, 'BACKLOG', TRUE, ?)
+        `, [id, projetoId, sequencia, nome.substring(0, 150), descricao || null, currentSection]);
+        
+        requisitosExtraidos.push({
+          id,
+          sequencia,
+          nome: nome.substring(0, 150),
+          secao: currentSection
+        });
+        
+        counter++;
+        continue;
+      }
+      
+      // Capturar subtarefas/requisitos detalhados: #### RF001.1 - Nome da Tarefa
+      const subtarefaMatch = line.match(/^####\s+(RF\d+\.\d+|RNF\d+\.\d+|RD\d+\.\d+)\s*-\s*(.+)$/i);
+      if (subtarefaMatch) {
+        const codigo = subtarefaMatch[1].toUpperCase(); // RF001.1
+        const nomeSubtarefa = subtarefaMatch[2].trim();
+        const nome = `${codigo} - ${nomeSubtarefa}`;
+        
+        // Capturar descrição e critérios de aceitação
+        let descricao = '';
+        let prioridade = '';
+        let j = i + 1;
+        
+        while (j < lines.length) {
+          const nextLine = lines[j].trim();
+          
+          // Parar se encontrar outro header
+          if (nextLine.match(/^#{3,4}\s+/)) break;
+          
+          // Capturar descrição
+          if (nextLine.startsWith('**Descrição:**')) {
+            descricao = nextLine.replace('**Descrição:**', '').trim();
+          }
+          
+          // Capturar prioridade
+          if (nextLine.startsWith('**Prioridade:**')) {
+            prioridade = nextLine.replace('**Prioridade:**', '').trim();
+          }
+          
+          // Capturar critérios de aceitação
+          if (nextLine.startsWith('**Critérios de Aceitação:**')) {
+            let k = j + 1;
+            const criterios = [];
+            while (k < lines.length) {
+              const criterioLine = lines[k].trim();
+              if (criterioLine.match(/^#{3,4}\s+/) || criterioLine.startsWith('**')) break;
+              if (criterioLine.startsWith('-') && criterioLine.length > 20) {
+                criterios.push(criterioLine.replace(/^-\s*/, '').trim());
+              }
+              k++;
+            }
+            if (criterios.length > 0) {
+              descricao += '\n\nCritérios: ' + criterios.join('; ');
+            }
+          }
+          
+          j++;
+        }
+        
+        const id = uuidv4();
+        const sequencia = `REQ-${String(counter).padStart(3, '0')}`;
+        
+        // Adicionar prioridade à descrição se existir
+        if (prioridade) {
+          descricao = `[${prioridade}] ${descricao}`;
+        }
+        
+        await pool.query(`
+          INSERT INTO requisitos_sdd 
+          (id, projeto_id, sequencia, nome, descricao, status, origem_prd, secao_prd)
+          VALUES (?, ?, ?, ?, ?, 'BACKLOG', TRUE, ?)
+        `, [id, projetoId, sequencia, nome.substring(0, 150), descricao.substring(0, 5000) || null, currentSection]);
+        
+        requisitosExtraidos.push({
+          id,
+          sequencia,
+          nome: nome.substring(0, 150),
+          secao: currentSection,
+          codigo: codigo
+        });
+        
+        counter++;
+        continue;
+      }
+      
+      // Capturar seções gerais (## Título)
+      if (line.match(/^#{2}\s+(.+)/)) {
+        const sectionName = line.replace(/^#{2}\s+/, '').trim();
+        if (!currentSection || !currentSection.includes('RF') && !currentSection.includes('RNF')) {
+          currentSection = sectionName;
+        }
+      }
+    }
+    
+    res.json({
+      success: true,
+      requisitosExtraidos: requisitosExtraidos.length,
+      requisitos: requisitosExtraidos
+    });
+  } catch (error) {
+    console.error('Erro ao extrair requisitos do PRD:', error);
+    res.status(500).json({ error: 'Erro ao extrair requisitos do PRD' });
   }
 });
 

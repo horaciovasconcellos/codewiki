@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { FloppyDisk, X } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface TiposAfastamentoFormProps {
   tipo?: TipoAfastamento;
@@ -72,7 +73,7 @@ export function TiposAfastamentoForm({ tipo, onSave, onCancel }: TiposAfastament
     }
 
     const novoTipo: TipoAfastamento = {
-      id: tipo?.id || crypto.randomUUID(),
+      id: tipo?.id || generateUUID(),
       sigla: sigla.toUpperCase().trim(),
       descricao: descricao.trim(),
       argumentacaoLegal: argumentacaoLegal.trim(),

@@ -23,6 +23,7 @@ import { ContratosAMSTable } from './ContratosAMSTable';
 import { ResponsaveisTable } from './ResponsaveisTable';
 import { CustosSaaSTable } from './CustosSaaSTable';
 import { ManutencoesSaaSTable } from './ManutencoesSaaSTable';
+import { generateUUID } from '@/utils/uuid';
 
 interface TecnologiaFormProps {
   tecnologia?: Tecnologia;
@@ -169,7 +170,7 @@ export function TecnologiaForm({ tecnologia, tecnologias, colaboradores, onSave,
     }
 
     const novaTecnologia: Tecnologia = {
-      id: tecnologia?.id || crypto.randomUUID(),
+      id: tecnologia?.id || generateUUID(),
       sigla,
       nome,
       versaoRelease,

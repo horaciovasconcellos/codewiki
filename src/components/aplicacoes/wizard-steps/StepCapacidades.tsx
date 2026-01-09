@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Pencil, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface StepCapacidadesProps {
   capacidades: CapacidadeNegocio[];
@@ -56,7 +57,7 @@ export function StepCapacidades({
     }
 
     const assoc: AssociacaoCapacidadeNegocio = {
-      id: editing?.id || crypto.randomUUID(),
+      id: editing?.id || generateUUID(),
       capacidadeId: formData.capacidadeId,
       dataInicio: formData.dataInicio,
       dataTermino: formData.dataTermino || undefined,

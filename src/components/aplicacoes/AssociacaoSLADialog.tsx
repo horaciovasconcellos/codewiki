@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, FloppyDisk, X } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface AssociacaoSLADialogProps {
   associacao?: AssociacaoSLAAplicacao;
@@ -50,7 +51,7 @@ export function AssociacaoSLADialog({ associacao, onSave }: AssociacaoSLADialogP
     }
 
     const novaAssociacao: AssociacaoSLAAplicacao = {
-      id: associacao?.id || crypto.randomUUID(),
+      id: associacao?.id || generateUUID(),
       slaId,
       descricao: descricao.trim(),
       dataInicio,

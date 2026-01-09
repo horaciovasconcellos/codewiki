@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { FloppyDisk, X } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface ComunicacaoFormProps {
   comunicacao?: Comunicacao;
@@ -118,7 +119,7 @@ export function ComunicacaoForm({ comunicacao, onSave, onCancel }: ComunicacaoFo
     }
 
     const novaComunicacao: Comunicacao = {
-      id: comunicacao?.id || crypto.randomUUID(),
+      id: comunicacao?.id || generateUUID(),
       sigla: sigla.trim(),
       tecnologias,
       tipo,

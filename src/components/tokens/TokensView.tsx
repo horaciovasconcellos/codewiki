@@ -11,6 +11,7 @@ import { TokenDetailsDialog } from './TokenDetailsDialog';
 import { Button } from '@/components/ui/button';
 import { Key, Plus } from '@phosphor-icons/react';
 import { StatusToken, HistoricoTokenAcesso } from '@/lib/types';
+import { generateUUID } from '@/utils/uuid';
 
 export function TokensView() {
   const { logClick, logEvent, logError } = useLogging('tokens-view');
@@ -64,7 +65,7 @@ export function TokensView() {
       return currentList.map((t) => {
         if (t.id === id) {
           const novaEntradaHistorico: HistoricoTokenAcesso = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             tokenId: id,
             tipoAcao: 'Revogação',
             descricao: `Token revogado - ${motivo}`,
@@ -99,7 +100,7 @@ export function TokensView() {
           novaDataExpiracao.setFullYear(novaDataExpiracao.getFullYear() + 1);
 
           const novaEntradaHistorico: HistoricoTokenAcesso = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             tokenId: id,
             tipoAcao: 'Renovação',
             descricao: `Token renovado - Nova data de expiração: ${

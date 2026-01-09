@@ -42,10 +42,12 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
     nome_projeto: projeto?.nome_projeto || '',
     ia_selecionada: projeto?.ia_selecionada || 'claude',
     constituicao: projeto?.constituicao || '',
+    prd_content: projeto?.prd_content || '',
     gerador_projetos: projeto?.gerador_projetos || false,
   });
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prdFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadAplicacoes();
@@ -64,7 +66,7 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'constituicao' | 'prd_content') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -74,23 +76,28 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
       return;
     }
 
-    // Verificar tamanho do arquivo (máx 500KB)
-    if (file.size > 500 * 1024) {
-      toast.error('Arquivo muito grande. Tamanho máximo: 500KB');
+    // Verificar tamanho do arquivo (máx 2MB para PRD, 500KB para constituição)
+    const maxSize = field === 'prd_content' ? 2 * 1024 * 1024 : 500 * 1024;
+    const maxSizeLabel = field === 'prd_content' ? '2MB' : '500KB';
+    
+    if (file.size > maxSize) {
+      toast.error(`Arquivo muito grande. Tamanho máximo: ${maxSizeLabel}`);
       return;
     }
 
     try {
       const text = await file.text();
-      setFormData({ ...formData, constituicao: text });
-      toast.success('Arquivo Markdown carregado com sucesso');
+      setFormData({ ...formData, [field]: text });
+      toast.success(`${field === 'prd_content' ? 'PRD' : 'Arquivo Markdown'} carregado com sucesso`);
     } catch (error) {
       toast.error('Erro ao ler arquivo');
     }
 
     // Limpar input
-    if (fileInputRef.current) {
+    if (field === 'constituicao' && fileInputRef.current) {
       fileInputRef.current.value = '';
+    } else if (field === 'prd_content' && prdFileInputRef.current) {
+      prdFileInputRef.current.value = '';
     }
   };
 
@@ -214,7 +221,7 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
                 ref={fileInputRef}
                 type="file"
                 accept=".md,.markdown"
-                onChange={handleFileUpload}
+                onChange={(e) => handleFileUpload(e, 'constituicao')}
                 className="hidden"
               />
             </div>
@@ -232,7 +239,61 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
             </p>
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Seção PRD - Product Requirements Document */}
+          <div className="space-y-2 border-t pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="prd_content" className="text-base font-semibold">
+                  PRD (Product Requirements Document)
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Documento de requisitos do produto em formato Markdown
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => prdFileInputRef.current?.click()}
+                className="h-8"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Anexar PRD (.md)
+              </Button>
+              <input
+                ref={prdFileInputRef}
+                type="file"
+                accept=".md,.markdown"
+                onChange={(e) => handleFileUpload(e, 'prd_content')}
+                className="hidden"
+              />
+            </div>
+            <Textarea
+              id="prd_content"
+              value={formData.prd_content}
+              onChange={(e) => setFormData({ ...formData, prd_content: e.target.value })}
+              placeholder="Cole ou carregue o conteúdo do PRD em Markdown. Este documento será usado para extrair requisitos automaticamente..."
+              rows={15}
+              className="font-mono text-sm resize-none overflow-y-auto"
+              style={{ minHeight: '20rem', maxHeight: '20rem' }}
+            />
+            <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-900">
+              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="text-xs text-blue-800 dark:text-blue-300">
+                <p className="font-medium mb-1">Como usar o PRD:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>Estruture o documento com títulos (# ## ###) para separar seções</li>
+                  <li>Use listas para requisitos funcionais e não-funcionais</li>
+                  <li>Os requisitos serão automaticamente extraídos e vinculados à tabela <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">requisitos_sdd</code></li>
+                  <li>Tamanho máximo: 2MB</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 border-t pt-4">
             <Switch
               id="gerador"
               checked={formData.gerador_projetos}

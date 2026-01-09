@@ -11,6 +11,7 @@ import { StepSupport } from './wizard-steps/StepSupport';
 import { StepResponsaveis } from './wizard-steps/StepResponsaveis';
 import { StepContracts } from './wizard-steps/StepContracts';
 import { StepReview } from './wizard-steps/StepReview';
+import { generateUUID } from '@/utils/uuid';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -197,7 +198,7 @@ export function TecnologiaWizard({ tecnologia, tecnologias, colaboradores, onSav
     if (!validateStep(1)) return;
 
     const novaTecnologia: Tecnologia = {
-      id: tecnologia?.id || crypto.randomUUID(),
+      id: tecnologia?.id || generateUUID(),
       sigla,
       nome,
       versaoRelease,

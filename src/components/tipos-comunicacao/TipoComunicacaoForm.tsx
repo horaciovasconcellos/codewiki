@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { generateUUID } from '@/utils/uuid';
 import {
   Select,
   SelectContent,
@@ -85,7 +86,7 @@ export function TipoComunicacaoForm({ tipoComunicacao, onSave, onCancel }: TipoC
     }
 
     const novoTipo: TipoComunicacao = {
-      id: tipoComunicacao?.id || crypto.randomUUID(),
+      id: tipoComunicacao?.id || generateUUID(),
       sigla: sigla.trim().toUpperCase(),
       tipo,
       tecnologias,

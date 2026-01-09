@@ -9,6 +9,7 @@ import { Plus, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { formatarData, getTodayDate } from '@/lib/utils';
 import { apiDelete } from '@/hooks/use-api';
+import { generateUUID } from '@/utils/uuid';
 
 interface AfastamentosStepProps {
   afastamentos: Afastamento[];
@@ -44,7 +45,7 @@ export function AfastamentosStep({
     }
 
     const novoAfastamento: Afastamento = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       tipoAfastamentoId,
       inicialProvavel,
       finalProvavel,

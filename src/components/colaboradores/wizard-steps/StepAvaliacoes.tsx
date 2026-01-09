@@ -10,6 +10,7 @@ import { Plus, Pencil, Trash, ChartBar } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
 import { apiDelete } from '@/hooks/use-api';
+import { generateUUID } from '@/utils/uuid';
 
 interface StepAvaliacoesProps {
   avaliacoes: AvaliacaoColaborador[];
@@ -95,7 +96,7 @@ export function StepAvaliacoes({ avaliacoes, setAvaliacoes }: StepAvaliacoesProp
     if (!validateForm()) return;
 
     const novaAvaliacao: AvaliacaoColaborador = {
-      id: editing?.id || crypto.randomUUID(),
+      id: editing?.id || generateUUID(),
       colaboradorId: editing?.colaboradorId || '',
       dataAvaliacao: formData.dataAvaliacao,
       resultadosEntregas: Number(formData.resultadosEntregas),

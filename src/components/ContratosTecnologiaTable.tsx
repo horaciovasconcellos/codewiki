@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Pencil, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface ContratosTecnologiaTableProps {
   contratos: ContratoTecnologia[];
@@ -56,7 +57,7 @@ export function ContratosTecnologiaTable({ contratos, onChange }: ContratosTecno
     }
 
     const contrato: ContratoTecnologia = {
-      id: editingContrato?.id || crypto.randomUUID(),
+      id: editingContrato?.id || generateUUID(),
       numeroContrato: formData.numeroContrato!,
       vigenciaInicial: formData.vigenciaInicial!,
       vigenciaTermino: formData.vigenciaTermino!,

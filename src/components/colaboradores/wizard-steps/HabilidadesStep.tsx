@@ -10,6 +10,7 @@ import { Plus, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { formatarData } from '@/lib/utils';
 import { apiDelete } from '@/hooks/use-api';
+import { generateUUID } from '@/utils/uuid';
 
 interface HabilidadesStepProps {
   habilidades: HabilidadeColaborador[];
@@ -48,7 +49,7 @@ export function HabilidadesStep({
     }
 
     const novaHabilidade: HabilidadeColaborador = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       habilidadeId,
       nivelDeclarado,
       nivelAvaliado,

@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { StepBasicInfoProcesso } from './wizard-steps/StepBasicInfoProcesso';
 import { StepNormasProcesso } from './wizard-steps/StepNormasProcesso';
 import { StepReviewProcesso } from './wizard-steps/StepReviewProcesso';
+import { generateUUID } from '@/utils/uuid';
 
 interface ProcessoWizardProps {
   processo?: ProcessoNegocio;
@@ -106,7 +107,7 @@ export function ProcessoWizard({ processo, processos, onSave, onCancel }: Proces
     if (!validateStep(1)) return;
 
     const processoData: ProcessoNegocio = {
-      id: processo?.id || crypto.randomUUID(),
+      id: processo?.id || generateUUID(),
       identificacao,
       nome,
       descricao,

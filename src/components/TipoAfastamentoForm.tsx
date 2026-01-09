@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Plus, PencilSimple } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface TipoAfastamentoFormProps {
   tipoAfastamento?: TipoAfastamento;
@@ -66,7 +67,7 @@ export function TipoAfastamentoForm({ tipoAfastamento, tiposAfastamento, onSave,
     }
 
     const novoTipo: TipoAfastamento = {
-      id: tipoAfastamento?.id || crypto.randomUUID(),
+      id: tipoAfastamento?.id || generateUUID(),
       sigla: sigla.toUpperCase(),
       descricao,
       argumentacaoLegal,

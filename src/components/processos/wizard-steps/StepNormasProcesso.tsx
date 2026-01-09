@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash, PencilSimple, Check, X } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface StepNormasProcessoProps {
   normas: NormaProcesso[];
@@ -42,7 +43,7 @@ export function StepNormasProcesso({ normas, setNormas }: StepNormasProcessoProp
     }
 
     const novaNorma: NormaProcesso = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       tipoNorma,
       obrigatoriedade,
       itemNorma,

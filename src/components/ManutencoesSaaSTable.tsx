@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Plus, PencilSimple, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface ManutencoesSaaSTableProps {
   manutencoes: ManutencaoSaaS[];
@@ -67,7 +68,7 @@ export function ManutencoesSaaSTable({ manutencoes, onChange }: ManutencoesSaaST
     }
 
     const novaManutencao: ManutencaoSaaS = {
-      id: editingManutencao?.id || crypto.randomUUID(),
+      id: editingManutencao?.id || generateUUID(),
       dataHoraInicio,
       dataHoraTermino,
       tempoIndisponibilidadeHoras,

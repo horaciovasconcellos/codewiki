@@ -8,7 +8,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
 import { formatarData } from '@/lib/utils';
 
 interface ColaboradoresViewProps {
@@ -22,6 +22,7 @@ export function ColaboradoresView({
   tiposAfastamento,
   habilidades
 }: ColaboradoresViewProps) {
+  const { logEvent, logError } = useLogging('colaboradores-view');
   const [colaboradores, setColaboradores] = useState<Colaborador[]>(initialColaboradores);
   
   // Atualizar quando os props mudarem
@@ -370,59 +371,79 @@ export function ColaboradoresView({
         doc.text('Avaliações de Desempenho', margin, yPosition);
         yPosition += 10;
 
-        colaborador.avaliacoes.forEach((avaliacao, index) => {
-          if (yPosition > pageHeight - 80) {
-            doc.addPage();
-            yPosition = margin;
+        // Preparar dados da tabela
+        const tableData = colaborador.avaliacoes.map((avaliacao, index) => [
+          `${index + 1}`,
+          formatarData(avaliacao.dataAvaliacao),
+          avaliacao.resultadosEntregas?.toFixed(1) || 'N/A',
+          avaliacao.competenciasTecnicas?.toFixed(1) || 'N/A',
+          avaliacao.qualidadeSeguranca?.toFixed(1) || 'N/A',
+          avaliacao.comportamentoCultura?.toFixed(1) || 'N/A',
+          avaliacao.evolucaoAprendizado?.toFixed(1) || 'N/A',
+          avaliacao.notaFinal?.toFixed(2) || 'N/A'
+        ]);
+
+        // Criar tabela
+        (doc as any).autoTable({
+          startY: yPosition,
+          head: [[
+            '#',
+            'Data',
+            'Result.',
+            'Comp. Téc.',
+            'Qual.',
+            'Comport.',
+            'Evol.',
+            'Nota Final'
+          ]],
+          body: tableData,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [79, 70, 229],
+            textColor: 255,
+            fontSize: 8,
+            fontStyle: 'bold',
+            halign: 'center'
+          },
+          bodyStyles: {
+            fontSize: 8,
+            halign: 'center'
+          },
+          columnStyles: {
+            0: { cellWidth: 15 },
+            1: { cellWidth: 30 },
+            2: { cellWidth: 25 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 25 },
+            5: { cellWidth: 25 },
+            6: { cellWidth: 25 },
+            7: { cellWidth: 30, fontStyle: 'bold' }
+          },
+          margin: { left: margin, right: margin },
+          didDrawPage: (data: any) => {
+            yPosition = data.cursor.y + 5;
           }
+        });
 
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.text(`Avaliação ${index + 1} - ${formatarData(avaliacao.dataAvaliacao)}`, margin, yPosition);
-          yPosition += 7;
-
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-
-          const addAvaliacao = (label: string, nota?: number) => {
-            if (yPosition > pageHeight - 25) {
+        // Adicionar observações se existirem
+        colaborador.avaliacoes.forEach((avaliacao, index) => {
+          if (avaliacao.observacoes) {
+            if (yPosition > pageHeight - 40) {
               doc.addPage();
               yPosition = margin;
             }
-            doc.text(`${label}: ${nota !== undefined ? nota.toFixed(1) : 'N/A'}`, margin + 5, yPosition);
-            yPosition += 5;
-          };
-
-          addAvaliacao('Resultados e Entregas', avaliacao.resultadosEntregas);
-          addAvaliacao('Competências Técnicas', avaliacao.competenciasTecnicas);
-          addAvaliacao('Qualidade e Segurança', avaliacao.qualidadeSeguranca);
-          addAvaliacao('Comportamento e Cultura', avaliacao.comportamentoCultura);
-          addAvaliacao('Evolução e Aprendizado', avaliacao.evolucaoAprendizado);
-
-          if (avaliacao.notaFinal !== undefined) {
+            doc.setFontSize(9);
             doc.setFont('helvetica', 'bold');
-            doc.text(`Nota Final: ${avaliacao.notaFinal.toFixed(2)}`, margin + 5, yPosition);
-            doc.setFont('helvetica', 'normal');
+            doc.text(`Obs. Avaliação ${index + 1}:`, margin, yPosition);
             yPosition += 5;
-          }
-
-          if (avaliacao.observacoes) {
-            yPosition += 2;
-            doc.setFont('helvetica', 'italic');
-            const splitObs = doc.splitTextToSize(`Observações: ${avaliacao.observacoes}`, contentWidth - 10);
-            splitObs.forEach((line: string) => {
-              if (yPosition > pageHeight - 20) {
-                doc.addPage();
-                yPosition = margin;
-              }
-              doc.text(line, margin + 5, yPosition);
-              yPosition += 4;
-            });
             doc.setFont('helvetica', 'normal');
+            const obsLines = doc.splitTextToSize(avaliacao.observacoes, pageWidth - 2 * margin);
+            doc.text(obsLines, margin, yPosition);
+            yPosition += obsLines.length * 5 + 5;
           }
-
-          yPosition += 8;
         });
+
+        yPosition += 5;
       }
 
       // Histórico de Alocação

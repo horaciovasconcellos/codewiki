@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Edit, FileText } from 'lucide-react';
+import { ArrowLeft, Edit, FileText, FileCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { ProjetoSDD } from '@/types/sdd';
 import { ProjetoSDDForm } from './ProjetoSDDForm';
 import { RequisitosList } from './RequisitosList';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 
 interface ProjetoSDDDetailProps {
   projeto: ProjetoSDD;
@@ -17,6 +18,7 @@ interface ProjetoSDDDetailProps {
 export function ProjetoSDDDetail({ projeto: initialProjeto, onBack }: ProjetoSDDDetailProps) {
   const [projeto, setProjeto] = useState(initialProjeto);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [extracting, setExtracting] = useState(false);
 
   const handleUpdate = async () => {
     // Recarregar projeto atualizado
@@ -24,6 +26,35 @@ export function ProjetoSDDDetail({ projeto: initialProjeto, onBack }: ProjetoSDD
     const updated = await response.json();
     setProjeto(updated);
     setShowEditForm(false);
+  };
+
+  const handleExtractRequirements = async () => {
+    if (!projeto.prd_content) {
+      toast.error('Este projeto não possui um PRD cadastrado');
+      return;
+    }
+
+    setExtracting(true);
+    try {
+      const response = await fetch(`/api/sdd/projetos/${projeto.id}/extrair-requisitos-prd`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao extrair requisitos');
+      }
+
+      const result = await response.json();
+      toast.success(`${result.requisitosExtraidos} requisitos extraídos do PRD com sucesso!`);
+      
+      // Recarregar a página ou atualizar lista de requisitos
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao extrair requisitos:', error);
+      toast.error('Erro ao extrair requisitos do PRD');
+    } finally {
+      setExtracting(false);
+    }
   };
 
   return (
@@ -91,6 +122,27 @@ export function ProjetoSDDDetail({ projeto: initialProjeto, onBack }: ProjetoSDD
                     <Label className="text-sm font-semibold">Constituição</Label>
                     <div className="mt-2 prose prose-sm max-w-none max-h-[6rem] overflow-y-auto border rounded-md p-3 bg-muted/30">
                       <ReactMarkdown>{projeto.constituicao}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+                {projeto.prd_content && (
+                  <div className="col-span-2 border-t pt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-sm font-semibold flex items-center gap-2">
+                        <FileCode className="w-4 h-4" />
+                        PRD (Product Requirements Document)
+                      </Label>
+                      <Button
+                        size="sm"
+                        onClick={handleExtractRequirements}
+                        disabled={extracting}
+                        variant="outline"
+                      >
+                        {extracting ? 'Extraindo...' : 'Extrair Requisitos do PRD'}
+                      </Button>
+                    </div>
+                    <div className="mt-2 prose prose-sm max-w-none max-h-[20rem] overflow-y-auto border rounded-md p-4 bg-muted/30">
+                      <ReactMarkdown>{projeto.prd_content}</ReactMarkdown>
                     </div>
                   </div>
                 )}

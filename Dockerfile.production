@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN npm ci
 
 # Copiar código fonte
-COPY . .
+COPY .  .
 
 # Build do frontend
 RUN npm run build
@@ -23,7 +23,7 @@ RUN npm prune --production
 # ===================================
 FROM node:20-slim
 
-# Instalar apenas ferramentas essenciais
+# Instalar apenas ferramentas essenciais (wget para healthcheck)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     curl \
@@ -44,8 +44,8 @@ COPY --from=builder /app/server ./server
 # Copiar arquivos de configuração necessários
 COPY --from=builder /app/package*.json ./
 
-# Criar diretório de logs
-RUN mkdir -p /app/logs && chmod 777 /app/logs
+# Criar diretórios necessários
+RUN mkdir -p /app/logs /app/uploads/scripts && chmod -R 777 /app/logs /app/uploads
 
 # Usar usuário não-root
 RUN groupadd -r appuser && useradd -r -g appuser appuser && \
@@ -60,5 +60,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --quiet --tries=1 --spider http://localhost:3000/health || exit 1
 
-# Comando de inicialização
+# ✅ COMANDO CORRETO PARA PRODUÇÃO
 CMD ["node", "server/api.js"]

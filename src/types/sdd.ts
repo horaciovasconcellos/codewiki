@@ -40,6 +40,7 @@ export interface ProjetoSDD {
   nome_projeto: string;
   ia_selecionada: IAType;
   constituicao?: string;
+  prd_content?: string;
   gerador_projetos: boolean;
   created_at: string;
   updated_at: string;
@@ -53,6 +54,8 @@ export interface RequisitoSDD {
   descricao?: string;
   status: StatusRequisito;
   status_anterior?: StatusRequisito;
+  origem_prd?: boolean;
+  secao_prd?: string;
   created_at: string;
   updated_at: string;
   tarefas_count?: number;

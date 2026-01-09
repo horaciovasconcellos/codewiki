@@ -22,6 +22,7 @@ import { SLAComponentesForm } from './forms/SLAComponentesForm';
 import { SLAUsuarioForm } from './forms/SLAUsuarioForm';
 import { SLAClienteForm } from './forms/SLAClienteForm';
 import { SLAServicoForm } from './forms/SLAServicoForm';
+import { generateUUID } from '@/utils/uuid';
 
 interface SLAWizardProps {
   slas: SLA[];
@@ -215,7 +216,7 @@ export function SLAWizard({ slas, onSave, onCancel, editingSLA }: SLAWizardProps
     }
 
     const sla: SLA = {
-      id: editingSLA?.id || crypto.randomUUID(),
+      id: editingSLA?.id || generateUUID(),
       sigla: sigla.trim(),
       descricao: descricao.trim(),
       tipoSLA: tipoPrincipal.tipo,

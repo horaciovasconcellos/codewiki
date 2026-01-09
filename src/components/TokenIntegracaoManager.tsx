@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { Eye, EyeSlash, Clock, Trash, Plus, Key } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface TokenIntegracao {
   id: string;
@@ -109,7 +110,7 @@ export function TokenIntegracaoManager({ sistema, onTokenChange }: TokenIntegrac
     }
 
     const token: TokenIntegracao = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       sistema,
       token: novoToken,
       tokenMasked: mascarToken(novoToken),

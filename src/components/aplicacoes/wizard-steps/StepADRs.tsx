@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Pencil, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -74,7 +75,7 @@ export function StepADRs({
     }
 
     const assoc: ADRAplicacao = {
-      id: editing?.id || crypto.randomUUID(),
+      id: editing?.id || generateUUID(),
       adrId: formData.adrId,
       aplicacaoId: '', // Será preenchido ao salvar a aplicação
       dataInicio: formData.dataInicio,

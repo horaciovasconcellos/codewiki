@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Pencil, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface StepSLAsProps {
   slas: AssociacaoSLAAplicacao[];
@@ -91,7 +92,7 @@ export function StepSLAs({ slas, setSlas }: StepSLAsProps) {
     }
 
     const assoc: AssociacaoSLAAplicacao = {
-      id: editing?.id || crypto.randomUUID(),
+      id: editing?.id || generateUUID(),
       slaId: formData.slaId,
       descricao: `${slaEncontrado.sigla} - ${slaEncontrado.descricao}`,
       dataInicio: formData.dataInicio,

@@ -10,6 +10,7 @@ import { Plus, PencilSimple, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface ContratosAMSTableProps {
   contratos: ContratoAMS[];
@@ -77,7 +78,7 @@ export function ContratosAMSTable({ contratos, onChange }: ContratosAMSTableProp
     }
 
     const novoContrato: ContratoAMS = {
-      id: editingContrato?.id || crypto.randomUUID(),
+      id: editingContrato?.id || generateUUID(),
       contrato,
       cnpjContratado,
       custoAnual: custoAnualNum,

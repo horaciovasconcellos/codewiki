@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, PencilSimple, Trash, Check, X, Copy } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
 
 interface AfastamentosTableProps {
   colaboradorId: string;
@@ -54,7 +55,7 @@ export function AfastamentosTable({ colaboradorId, afastamentos, tiposAfastament
     }
 
     const novoAfastamento: Afastamento = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       tipoAfastamentoId,
       inicialProvavel,
       finalProvavel

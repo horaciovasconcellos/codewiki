@@ -18,4 +18,5 @@ COPY . .
 EXPOSE 5173 3000
 
 # Script de inicialização que roda backend e frontend
-CMD ["npm", "run", "dev:all"]
+#CMD ["npm", "run", "dev:all"]
+CMD ["npm", "run", "start:prod"]

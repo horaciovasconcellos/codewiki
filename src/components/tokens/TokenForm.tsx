@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import * as jose from 'jose';
+import { generateUUID } from '@/utils/uuid';
 
 interface TokenFormProps {
   tokens: TokenAcesso[];
@@ -52,10 +53,10 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
 
   const generateJWTToken = async (tokenData: Partial<TokenAcesso>) => {
     const systemUrl = window.location.origin;
-    const secret = new TextEncoder().encode(crypto.randomUUID() + Date.now().toString(36));
+    const secret = new TextEncoder().encode(generateUUID() + Date.now().toString(36));
     
     const payload = {
-      jti: crypto.randomUUID(),
+      jti: generateUUID(),
       iss: systemUrl,
       sub: tokenData.identificadorEntidade,
       aud: systemUrl,
@@ -128,8 +129,8 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
 
     // Criar entrada de histórico
     const novaEntradaHistorico: HistoricoTokenAcesso = {
-      id: crypto.randomUUID(),
-      tokenId: editToken?.id || crypto.randomUUID(),
+      id: generateUUID(),
+      tokenId: editToken?.id || generateUUID(),
       tipoAcao: editToken ? 'Alteração de Escopos' : 'Criação',
       descricao: editToken 
         ? `Token atualizado - Alteração nos dados do token`
@@ -149,7 +150,7 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
     };
 
     const token: TokenAcesso = {
-      id: editToken?.id || crypto.randomUUID(),
+      id: editToken?.id || generateUUID(),
       tokenHash: tokenHash!,
       tipoEntidade: formData.tipoEntidade!,
       identificadorEntidade: formData.identificadorEntidade!,

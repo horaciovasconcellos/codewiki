@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Plus, PencilSimple, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 interface CustosSaaSTableProps {
   custos: CustoSaaS[];
@@ -107,7 +108,7 @@ export function CustosSaaSTable({ custos, onChange }: CustosSaaSTableProps) {
     }
 
     const novoCusto: CustoSaaS = {
-      id: editingCusto?.id || crypto.randomUUID(),
+      id: editingCusto?.id || generateUUID(),
       custoTotalSaaS: custoTotalNum,
       custoPorLicenca: custoPorLicencaNum,
       numeroLicencasContratadas: numeroLicencasContratadasNum,
