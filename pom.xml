@@ -18,7 +18,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <liquibase.version>4.25.1</liquibase.version>
-        <mysql.connector.version>8.0.33</mysql.connector.version>
+        <mysql.connector.version>8.2.0</mysql.connector.version>
         
         <!-- Database Properties - Podem ser sobrescritas via linha de comando ou CI/CD -->
         <db.url>jdbc:mysql://localhost:3306/auditoria_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=America/Sao_Paulo</db.url>
