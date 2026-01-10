@@ -108,6 +108,20 @@ export function LGPDView() {
     }
   };
 
+  // Se wizard estiver aberto, renderizar apenas o wizard
+  if (showWizard) {
+    return (
+      <LGPDWizard
+        registro={editingRegistro}
+        onSave={handleSave}
+        onCancel={() => {
+          setShowWizard(false);
+          setEditingRegistro(undefined);
+        }}
+      />
+    );
+  }
+
   const formatarData = (data: string | undefined) => {
     if (!data) return '-';
     try {
@@ -119,10 +133,13 @@ export function LGPDView() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-center text-muted-foreground">Carregando registros LGPD...</p>
+      <div className="w-full h-full p-6">
+        <Card className="h-full">
+          <CardContent className="flex items-center justify-center p-12">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="text-center text-muted-foreground">Carregando registros LGPD...</p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -130,23 +147,31 @@ export function LGPDView() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <Card>
+    <div className="w-full h-full p-6 space-y-6">
+      <Card className="h-full">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Gestão de LGPD</CardTitle>
+              <CardTitle className="text-2xl">Gestão de LGPD</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Gerenciamento de dados pessoais e técnicas de anonimização
+                Gerenciamento de dados pessoais e técnicas de anonimização conforme Lei Geral de Proteção de Dados
               </p>
+              <div className="flex gap-2 mt-3">
+                <Badge variant="outline" className="text-xs">
+                  Total: {registros.length} registros
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  Ativos: {registros.filter(r => r.ativo).length}
+                </Badge>
+              </div>
             </div>
-            <Button onClick={handleCreate}>
-              <Plus size={16} className="mr-2" />
-              Novo Registro
+            <Button onClick={handleCreate} size="lg">
+              <Plus size={20} className="mr-2" />
+              Novo Registro LGPD
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <LGPDDataTable
             registros={registros}
             onView={handleView}
@@ -156,21 +181,11 @@ export function LGPDView() {
         </CardContent>
       </Card>
 
-      <LGPDWizard
-        open={showWizard}
-        onClose={() => {
-          setShowWizard(false);
-          setEditingRegistro(undefined);
-        }}
-        registro={editingRegistro}
-        onSave={handleSave}
-      />
-
       {/* Dialog de Visualização */}
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Detalhes do Registro LGPD</DialogTitle>
+            <DialogTitle className="text-xl">Detalhes do Registro LGPD</DialogTitle>
           </DialogHeader>
           {viewingRegistro && (
             <div className="space-y-6">

@@ -44,6 +44,16 @@ export interface AvaliacaoColaborador {
   dataConversa?: string;
 }
 
+export interface OptInOut {
+  id: string;
+  colaboradorId?: string;
+  aplicacaoId: string;
+  dataInicio: string;
+  dataRevogacao?: string;
+  arquivoPdf?: string;
+  assinaturaEletronica?: string;
+}
+
 export interface Colaborador {
   id: string;
   matricula: string;
@@ -54,6 +64,7 @@ export interface Colaborador {
   afastamentos: Afastamento[];
   habilidades: HabilidadeColaborador[];
   avaliacoes?: AvaliacaoColaborador[];
+  optInOuts?: OptInOut[];
 }
 
 export type CategoriaTecnologia = 
@@ -388,6 +399,7 @@ export interface Aplicacao {
   tipoAplicacao?: TipoAplicacao;
   faseCicloVida: FaseCicloVida;
   criticidadeNegocio: CriticidadeNegocio;
+  optInOut?: boolean;
   categoriaSistema?: string;
   fornecedor?: string;
   tipoHospedagem?: string;
@@ -1298,4 +1310,171 @@ export interface DocumentacaoProjeto {
   dataUltimaAtualizacao: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// ========================================
+// FinOps-Focus Types
+// ========================================
+
+export type FinOpsCloudProvider = 'AWS' | 'Azure' | 'GCP' | 'OCI';
+
+export type ServiceCategory = 
+  | 'Compute' 
+  | 'Storage' 
+  | 'Network' 
+  | 'Database' 
+  | 'Analytics' 
+  | 'AI/ML'
+  | 'Security'
+  | 'Other';
+
+export interface FinOpsProvider {
+  id: string;
+  name: FinOpsCloudProvider;
+  displayName: string;
+  apiEndpoint?: string;
+  lastSyncDate?: string;
+  active: boolean;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FinOpsResource {
+  id: string;
+  providerId: string;
+  providerName?: FinOpsCloudProvider;
+  aplicacaoId?: string;
+  aplicacaoNome?: string;
+  resourceId: string; // ID no provedor (ex: i-0abcd1234)
+  resourceType: string; // EC2, Virtual Machine, etc
+  resourceName?: string;
+  region?: string;
+  tags?: Record<string, string>;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FinOpsCostDaily {
+  id: string;
+  resourceId: string;
+  providerId: string;
+  providerName?: FinOpsCloudProvider;
+  aplicacaoId?: string;
+  aplicacaoNome?: string;
+  costDate: string; // YYYY-MM-DD
+  
+  // Métricas de Uso
+  cpuHours: number;
+  storageGb: number;
+  networkGb: number;
+  memoryGbHours: number;
+  requestsCount: number;
+  
+  // Métricas de Custo (FOCUS-based)
+  cpuCost: number;
+  storageCost: number;
+  networkCost: number;
+  memoryCost: number;
+  otherCost: number;
+  totalCost: number;
+  
+  // Classificação FinOps
+  serviceCategory: ServiceCategory;
+  isTagged: boolean;
+  isAllocated: boolean;
+  unitCost?: number; // Custo unitário (ex: custo por request)
+  
+  currency: string;
+  billingAccount?: string;
+  metadata?: Record<string, any>;
+  
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Dados para API de ingestão
+export interface FinOpsIngestionData {
+  provider: FinOpsCloudProvider;
+  resources: Array<{
+    resource_id: string;
+    resource_type: string;
+    resource_name?: string;
+    aplicacao_id?: string;
+    region?: string;
+    tags?: Record<string, string>;
+    usage: {
+      cpu_hours?: number;
+      storage_gb?: number;
+      network_gb?: number;
+      memory_gb_hours?: number;
+      requests_count?: number;
+    };
+    cost: {
+      cpu_cost?: number;
+      storage_cost?: number;
+      network_cost?: number;
+      memory_cost?: number;
+      other_cost?: number;
+      total_cost: number;
+    };
+    service_category?: ServiceCategory;
+    cost_date: string; // YYYY-MM-DD
+  }>;
+}
+
+// Dashboard KPIs
+export interface FinOpsKPI {
+  label: string;
+  value: number | string;
+  trend?: number; // % variação
+  format?: 'currency' | 'percentage' | 'number';
+}
+
+// Dados para Dashboard
+export interface FinOpsDashboardData {
+  kpis: {
+    totalDailyCost: number;
+    unallocatedCostPercentage: number;
+    topApplications: Array<{ name: string; cost: number }>;
+  };
+  costByDay: Array<{
+    date: string;
+    [aplicacaoId: string]: number | string;
+  }>;
+  costByProvider: Array<{
+    provider: FinOpsCloudProvider;
+    cost: number;
+  }>;
+  costByService: Array<{
+    service: ServiceCategory;
+    cost: number;
+  }>;
+  taggedVsUntagged: {
+    tagged: number;
+    untagged: number;
+  };
+  allocatedVsUnallocated: {
+    allocated: number;
+    unallocated: number;
+  };
+}
+
+export interface FinOpsDailySummary {
+  costDate: string;
+  providerId: string;
+  providerName?: FinOpsCloudProvider;
+  aplicacaoId?: string;
+  aplicacaoNome?: string;
+  serviceCategory?: ServiceCategory;
+  dailyCost: number;
+  dailyCpuCost: number;
+  dailyStorageCost: number;
+  dailyNetworkCost: number;
+  resourceCount: number;
+  allocatedCost: number;
+  unallocatedCost: number;
+  taggedCost: number;
+  untaggedCost: number;
 }

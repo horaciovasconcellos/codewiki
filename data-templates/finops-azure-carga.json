@@ -1,0 +1,121 @@
+{
+  "provider": "Azure",
+  "resources": [
+    {
+      "resource_id": "/subscriptions/abc123/resourceGroups/prod-rg/providers/Microsoft.Compute/virtualMachines/vm-web-01",
+      "resource_type": "Virtual Machine",
+      "resource_name": "vm-web-prod-01",
+      "aplicacao_id": null,
+      "region": "eastus",
+      "tags": {
+        "environment": "production",
+        "team": "platform",
+        "cost-center": "engineering",
+        "owner": "devops-team"
+      },
+      "usage": {
+        "cpu_hours": 720,
+        "storage_gb": 128,
+        "network_gb": 300,
+        "memory_gb_hours": 2880,
+        "requests_count": 0
+      },
+      "cost": {
+        "cpu_cost": 180.00,
+        "storage_cost": 12.80,
+        "network_cost": 27.00,
+        "memory_cost": 36.00,
+        "other_cost": 8.20,
+        "total_cost": 264.00
+      },
+      "service_category": "Compute",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "/subscriptions/abc123/resourceGroups/prod-rg/providers/Microsoft.Storage/storageAccounts/prodstorageacct",
+      "resource_type": "Storage Account",
+      "resource_name": "prodstorageacct",
+      "aplicacao_id": null,
+      "region": "eastus",
+      "tags": {
+        "environment": "production",
+        "team": "data-engineering"
+      },
+      "usage": {
+        "cpu_hours": 0,
+        "storage_gb": 3000,
+        "network_gb": 800,
+        "memory_gb_hours": 0,
+        "requests_count": 3500000
+      },
+      "cost": {
+        "cpu_cost": 0,
+        "storage_cost": 69.00,
+        "network_cost": 72.00,
+        "memory_cost": 0,
+        "other_cost": 1.75,
+        "total_cost": 142.75
+      },
+      "service_category": "Storage",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "/subscriptions/abc123/resourceGroups/prod-rg/providers/Microsoft.Sql/servers/sqlprod/databases/maindb",
+      "resource_type": "SQL Database",
+      "resource_name": "sqlprod-maindb",
+      "aplicacao_id": null,
+      "region": "eastus",
+      "tags": {
+        "environment": "production",
+        "team": "backend",
+        "cost-center": "engineering",
+        "application": "codewiki"
+      },
+      "usage": {
+        "cpu_hours": 720,
+        "storage_gb": 250,
+        "network_gb": 150,
+        "memory_gb_hours": 1440,
+        "requests_count": 6000000
+      },
+      "cost": {
+        "cpu_cost": 216.00,
+        "storage_cost": 25.00,
+        "network_cost": 13.50,
+        "memory_cost": 28.80,
+        "other_cost": 10.70,
+        "total_cost": 294.00
+      },
+      "service_category": "Database",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "/subscriptions/abc123/resourceGroups/prod-rg/providers/Microsoft.Web/sites/api-app",
+      "resource_type": "App Service",
+      "resource_name": "api-app-prod",
+      "aplicacao_id": null,
+      "region": "eastus",
+      "tags": {
+        "environment": "production",
+        "team": "backend"
+      },
+      "usage": {
+        "cpu_hours": 720,
+        "storage_gb": 50,
+        "network_gb": 400,
+        "memory_gb_hours": 1440,
+        "requests_count": 18000000
+      },
+      "cost": {
+        "cpu_cost": 108.00,
+        "storage_cost": 5.00,
+        "network_cost": 36.00,
+        "memory_cost": 14.40,
+        "other_cost": 6.60,
+        "total_cost": 170.00
+      },
+      "service_category": "Compute",
+      "cost_date": "2026-01-10"
+    }
+  ]
+}

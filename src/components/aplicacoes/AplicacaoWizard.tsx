@@ -65,6 +65,7 @@ export function AplicacaoWizard({
   const [cloudProvider, setCloudProvider] = useState<CloudProvider | undefined>(aplicacao?.cloudProvider);
   const [faseCicloVida, setFaseCicloVida] = useState<FaseCicloVida>(aplicacao?.faseCicloVida || 'Planejamento');
   const [criticidadeNegocio, setCriticidadeNegocio] = useState<CriticidadeNegocio>(aplicacao?.criticidadeNegocio || 'Média');
+  const [optInOut, setOptInOut] = useState<boolean>(aplicacao?.optInOut || false);
   const [tecnologiasAssociadas, setTecnologiasAssociadas] = useState<AssociacaoTecnologiaAplicacao[]>(aplicacao?.tecnologias || []);
   const [adrsAssociadas, setAdrsAssociadas] = useState<ADRAplicacao[]>([]);
   const [ambientes, setAmbientes] = useState<AmbienteTecnologico[]>(aplicacao?.ambientes || []);
@@ -129,6 +130,7 @@ export function AplicacaoWizard({
       setCloudProvider(aplicacao.cloudProvider);
       setFaseCicloVida(aplicacao.faseCicloVida || 'Planejamento');
       setCriticidadeNegocio(aplicacao.criticidadeNegocio || 'Média');
+      setOptInOut(aplicacao.optInOut || false);
       setTecnologiasAssociadas(aplicacao.tecnologias || []);
       setAmbientes(aplicacao.ambientes || []);
       setCapacidadesAssociadas(aplicacao.capacidades || []);
@@ -230,6 +232,7 @@ export function AplicacaoWizard({
       cloudProvider: cloudProvider || undefined,
       faseCicloVida,
       criticidadeNegocio,
+      optInOut,
       tecnologias: tecnologiasAssociadas,
       ambientes,
       capacidades: capacidadesAssociadas,
@@ -335,6 +338,8 @@ export function AplicacaoWizard({
                 setFaseCicloVida={setFaseCicloVida}
                 criticidadeNegocio={criticidadeNegocio}
                 setCriticidadeNegocio={setCriticidadeNegocio}
+                optInOut={optInOut}
+                setOptInOut={setOptInOut}
               />
             )}
             {currentStep === 2 && (
@@ -415,6 +420,7 @@ export function AplicacaoWizard({
                 tipoAplicacao={tipoAplicacao}
                 faseCicloVida={faseCicloVida}
                 criticidadeNegocio={criticidadeNegocio}
+                optInOut={optInOut}
                 tecnologias={tecnologias}
                 tecnologiasAssociadas={tecnologiasAssociadas}
                 ambientes={ambientes}

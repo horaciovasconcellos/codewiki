@@ -23,10 +23,11 @@ import { LogsAndTracesView } from '@/components/LogsAndTracesView';
 import { ADRsView } from '@/components/adr/ADRsView';
 import { DocumentacaoProjetosView } from '@/components/documentacao-projetos/DocumentacaoProjetosView';
 import { PesquisaPeriodoView } from '@/components/pesquisa/PesquisaPeriodoView';
+import { FinOpsView } from '@/components/finops/FinOpsView';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
-import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope, MagnifyingGlass } from '@phosphor-icons/react';
+import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope, MagnifyingGlass, CurrencyDollar } from '@phosphor-icons/react';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarTrigger } from '@/components/ui/sidebar';
 import { IntegracaoView } from '@/components/integracoes/IntegracaoView';
 import { DocumentacaoAPIsView } from '@/components/DocumentacaoAPIsView';
@@ -410,6 +411,8 @@ function App() {
         return <DocumentacaoProjetosView />;
       case 'pesquisa-periodo':
         return <PesquisaPeriodoView />;
+      case 'finops':
+        return <FinOpsView />;
       case 'tokens-acesso':
         return <TokensView />;
       case 'configuracoes':
@@ -629,6 +632,18 @@ function App() {
                     >
                       <ChartBar />
                       <span>Dashboard SPACE</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'finops'}
+                      onClick={() => {
+                        logClick('nav_finops');
+                        setCurrentView('finops');
+                      }}
+                    >
+                      <CurrencyDollar />
+                      <span>FinOps-Focus</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>

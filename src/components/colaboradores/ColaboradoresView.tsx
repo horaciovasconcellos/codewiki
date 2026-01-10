@@ -110,9 +110,28 @@ export function ColaboradoresView({
           }
         }
         
+        // Salvar Opt-In/Out - apenas os novos
+        if (colaborador.optInOuts && colaborador.optInOuts.length > 0) {
+          const optInOutsExistentes = initialColaboradores.find(c => c.id === colaborador.id)?.optInOuts || [];
+          const existingIds = new Set(optInOutsExistentes.map(o => o.id));
+          
+          for (const optInOut of colaborador.optInOuts) {
+            if (!existingIds.has(optInOut.id)) {
+              // Novo Opt-In/Out
+              await apiPost(`/colaboradores/${savedColaborador.id}/optinouts`, {
+                aplicacaoId: optInOut.aplicacaoId,
+                dataInicio: optInOut.dataInicio,
+                dataRevogacao: optInOut.dataRevogacao,
+                arquivoPdf: optInOut.arquivoPdf,
+                assinaturaEletronica: optInOut.assinaturaEletronica
+              });
+            }
+          }
+        }
+        
         setColaboradores((current) => {
           const currentList = current || [];
-          return currentList.map(c => c.id === colaborador.id ? {...savedColaborador, afastamentos: colaborador.afastamentos, habilidades: colaborador.habilidades, avaliacoes: colaborador.avaliacoes} : c);
+          return currentList.map(c => c.id === colaborador.id ? {...savedColaborador, afastamentos: colaborador.afastamentos, habilidades: colaborador.habilidades, avaliacoes: colaborador.avaliacoes, optInOuts: colaborador.optInOuts} : c);
         });
         toast.success('Colaborador atualizado com sucesso!');
       } else {
@@ -161,9 +180,22 @@ export function ColaboradoresView({
           }
         }
         
+        // Salvar Opt-In/Out
+        if (colaborador.optInOuts && colaborador.optInOuts.length > 0) {
+          for (const optInOut of colaborador.optInOuts) {
+            await apiPost(`/colaboradores/${savedColaborador.id}/optinouts`, {
+              aplicacaoId: optInOut.aplicacaoId,
+              dataInicio: optInOut.dataInicio,
+              dataRevogacao: optInOut.dataRevogacao,
+              arquivoPdf: optInOut.arquivoPdf,
+              assinaturaEletronica: optInOut.assinaturaEletronica
+            });
+          }
+        }
+        
         setColaboradores((current) => {
           const currentList = current || [];
-          return [...currentList, {...savedColaborador, afastamentos: colaborador.afastamentos, habilidades: colaborador.habilidades, avaliacoes: colaborador.avaliacoes}];
+          return [...currentList, {...savedColaborador, afastamentos: colaborador.afastamentos, habilidades: colaborador.habilidades, avaliacoes: colaborador.avaliacoes, optInOuts: colaborador.optInOuts}];
         });
         toast.success('Colaborador cadastrado com sucesso!');
       }

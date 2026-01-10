@@ -126,58 +126,58 @@ export function TokensView() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-[1800px]">
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <Key size={32} weight="duotone" className="text-primary" />
-              Tokens de Acesso
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Gerenciamento de tokens para autenticação de usuários, aplicações e integrações
-            </p>
+    <div className="w-full h-full flex flex-col">
+      <div className="flex-none border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger />
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                <Key size={32} weight="duotone" className="text-primary" />
+                Tokens de Acesso
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Gerenciamento de tokens para autenticação de usuários, aplicações e integrações
+              </p>
+            </div>
+            <Button onClick={handleNewToken} size="lg">
+              <Plus className="mr-2" size={20} />
+              Novo Token
+            </Button>
           </div>
         </div>
-
-        <Separator />
-
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle>Lista de Tokens</CardTitle>
-                <CardDescription>{tokens.length} token(s) cadastrado(s)</CardDescription>
-              </div>
-              <Button onClick={handleNewToken}>
-                <Plus className="mr-2" size={16} />
-                Novo Token
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <TokensDataTable
-              tokens={tokens || []}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={handleTokenDelete}
-              onRevoke={handleTokenRevoke}
-              onRenew={handleTokenRenew}
-            />
-          </CardContent>
-        </Card>
-
-        <TokenDetailsDialog token={selectedToken} open={detailsOpen} onOpenChange={setDetailsOpen} />
-
-        <TokenForm
-          tokens={tokens || []}
-          onSave={handleTokenSave}
-          editToken={editToken}
-          open={formOpen}
-          onOpenChange={setFormOpen}
-        />
       </div>
+
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto px-6 py-6">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Lista de Tokens</CardTitle>
+              <CardDescription>{tokens.length} token(s) cadastrado(s)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TokensDataTable
+                tokens={tokens || []}
+                onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleTokenDelete}
+                onRevoke={handleTokenRevoke}
+                onRenew={handleTokenRenew}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <TokenDetailsDialog token={selectedToken} open={detailsOpen} onOpenChange={setDetailsOpen} />
+
+      <TokenForm
+        tokens={tokens || []}
+        onSave={handleTokenSave}
+        editToken={editToken}
+        open={formOpen}
+        onOpenChange={setFormOpen}
+      />
     </div>
   );
 }

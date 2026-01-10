@@ -370,6 +370,16 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
         const criticX = app.tipoAplicacao ? 138 : 105;
         doc.roundedRect(criticX, yPos - 3, doc.getTextWidth(app.criticidadeNegocio) + 4, 5, 1, 1, 'F');
         doc.text(app.criticidadeNegocio, criticX + 2, yPos);
+        
+        // Badge para Opt-In/Out se ativo
+        if (app.optInOut) {
+          yPos += 7;
+          doc.setFillColor(240, 240, 245); // badge secondary background
+          const optInOutText = 'Opt-In/Out';
+          doc.roundedRect(12, yPos - 3, doc.getTextWidth(optInOutText) + 4, 5, 1, 1, 'F');
+          doc.text(optInOutText, 14, yPos);
+        }
+        
         yPos += 8;
 
         // ========== CARD 2: ASSOCIAÇÕES ==========
@@ -1039,6 +1049,14 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
                           <Badge className={`text-xs ${getCriticidadeColor(aplicacao.criticidadeNegocio)}`}>
                             {aplicacao.criticidadeNegocio}
                           </Badge>
+                          {aplicacao.optInOut && (
+                            <>
+                              <span className="font-medium text-muted-foreground">•</span>
+                              <Badge variant="secondary" className="text-xs">
+                                Opt-In/Out
+                              </Badge>
+                            </>
+                          )}
                         </div>
                       </div>
                     </TableCell>

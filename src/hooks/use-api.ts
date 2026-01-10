@@ -56,6 +56,29 @@ export function useApi<T>(endpoint: string, initialData: T): UseApiResult<T> {
   return { data, loading, error, refetch: fetchData };
 }
 
+export async function apiGet<T>(endpoint: string): Promise<T> {
+  console.log('[apiGet] Endpoint:', `${API_BASE}${endpoint}`);
+  
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'GET',
+    headers: {
+      'ngrok-skip-browser-warning': 'true'
+    }
+  });
+
+  console.log('[apiGet] Response status:', response.status);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error('[apiGet] Error response:', errorData);
+    throw new Error(errorData.error || `HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  console.log('[apiGet] Success response:', Array.isArray(result) ? `${result.length} itens` : result);
+  return result;
+}
+
 export async function apiPost<T>(endpoint: string, data: any): Promise<T> {
   console.log('[apiPost] Endpoint:', `${API_BASE}${endpoint}`);
   console.log('[apiPost] Data:', data);

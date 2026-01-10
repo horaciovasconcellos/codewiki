@@ -1,0 +1,121 @@
+{
+  "provider": "AWS",
+  "resources": [
+    {
+      "resource_id": "i-0abcd1234efgh5678",
+      "resource_type": "EC2",
+      "resource_name": "prod-web-server-01",
+      "aplicacao_id": null,
+      "region": "us-east-1",
+      "tags": {
+        "environment": "production",
+        "team": "platform",
+        "cost-center": "engineering"
+      },
+      "usage": {
+        "cpu_hours": 720,
+        "storage_gb": 100,
+        "network_gb": 500,
+        "memory_gb_hours": 1440,
+        "requests_count": 1500000
+      },
+      "cost": {
+        "cpu_cost": 144.00,
+        "storage_cost": 10.00,
+        "network_cost": 25.00,
+        "memory_cost": 28.80,
+        "other_cost": 5.20,
+        "total_cost": 213.00
+      },
+      "service_category": "Compute",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "s3-bucket-data-lake",
+      "resource_type": "S3",
+      "resource_name": "company-data-lake",
+      "aplicacao_id": null,
+      "region": "us-east-1",
+      "tags": {
+        "environment": "production",
+        "team": "data-engineering"
+      },
+      "usage": {
+        "cpu_hours": 0,
+        "storage_gb": 5000,
+        "network_gb": 1000,
+        "memory_gb_hours": 0,
+        "requests_count": 5000000
+      },
+      "cost": {
+        "cpu_cost": 0,
+        "storage_cost": 115.00,
+        "network_cost": 90.00,
+        "memory_cost": 0,
+        "other_cost": 2.50,
+        "total_cost": 207.50
+      },
+      "service_category": "Storage",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "rds-postgres-prod-01",
+      "resource_type": "RDS",
+      "resource_name": "prod-database-main",
+      "aplicacao_id": null,
+      "region": "us-east-1",
+      "tags": {
+        "environment": "production",
+        "team": "backend",
+        "cost-center": "engineering",
+        "application": "codewiki"
+      },
+      "usage": {
+        "cpu_hours": 720,
+        "storage_gb": 500,
+        "network_gb": 200,
+        "memory_gb_hours": 2880,
+        "requests_count": 8000000
+      },
+      "cost": {
+        "cpu_cost": 288.00,
+        "storage_cost": 50.00,
+        "network_cost": 18.00,
+        "memory_cost": 57.60,
+        "other_cost": 15.40,
+        "total_cost": 429.00
+      },
+      "service_category": "Database",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "lambda-api-gateway",
+      "resource_type": "Lambda",
+      "resource_name": "api-gateway-handler",
+      "aplicacao_id": null,
+      "region": "us-east-1",
+      "tags": {
+        "environment": "production",
+        "team": "platform",
+        "cost-center": "engineering"
+      },
+      "usage": {
+        "cpu_hours": 0,
+        "storage_gb": 0,
+        "network_gb": 50,
+        "memory_gb_hours": 120,
+        "requests_count": 25000000
+      },
+      "cost": {
+        "cpu_cost": 0,
+        "storage_cost": 0,
+        "network_cost": 4.50,
+        "memory_cost": 24.00,
+        "other_cost": 5.00,
+        "total_cost": 33.50
+      },
+      "service_category": "Compute",
+      "cost_date": "2026-01-10"
+    }
+  ]
+}

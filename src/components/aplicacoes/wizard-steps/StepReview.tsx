@@ -30,6 +30,7 @@ interface StepReviewProps {
   tipoAplicacao?: TipoAplicacao;
   faseCicloVida: FaseCicloVida;
   criticidadeNegocio: CriticidadeNegocio;
+  optInOut?: boolean;
   tecnologias: Tecnologia[];
   tecnologiasAssociadas: AssociacaoTecnologiaAplicacao[];
   ambientes: AmbienteTecnologico[];
@@ -72,6 +73,7 @@ export function StepReview({
   tipoAplicacao,
   faseCicloVida,
   criticidadeNegocio,
+  optInOut,
   tecnologias,
   tecnologiasAssociadas,
   ambientes,
@@ -219,6 +221,12 @@ export function StepReview({
               <Badge className="mt-1">{criticidadeNegocio}</Badge>
             </div>
           </div>
+          {optInOut && (
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Opt-In/Out</p>
+              <Badge variant="secondary" className="mt-1">Ativo</Badge>
+            </div>
+          )}
         </CardContent>
       </Card>
 

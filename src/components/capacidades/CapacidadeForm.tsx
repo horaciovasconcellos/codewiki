@@ -89,14 +89,14 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
       <DialogTrigger asChild>
         {trigger || (
           <Button>
-            <Plus />
+            <Plus className="mr-2" />
             Nova Capacidade
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[1664px] h-[910px] max-w-[95vw] max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader className="pb-6">
+          <DialogTitle className="text-2xl font-bold">
             {capacidadeToEdit ? 'Editar Capacidade de Negócio' : 'Nova Capacidade de Negócio'}
           </DialogTitle>
           <DialogDescription>
@@ -105,31 +105,36 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="sigla">Sigla *</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="sigla" className="text-base font-medium">Sigla *</Label>
               <Input
                 id="sigla"
                 value={sigla}
                 onChange={(e) => setSigla(e.target.value)}
                 placeholder="Ex: FIN-01"
                 maxLength={20}
+                className="h-11 text-base"
               />
+              <p className="text-sm text-muted-foreground">
+                Até 20 caracteres
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="nome">Nome *</Label>
+            <div className="space-y-3">
+              <Label htmlFor="nome" className="text-base font-medium">Nome *</Label>
               <Input
                 id="nome"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Nome da capacidade"
+                className="h-11 text-base"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="descricao">Descrição</Label>
+          <div className="space-y-3">
+            <Label htmlFor="descricao" className="text-base font-medium">Descrição</Label>
             <Textarea
               id="descricao"
               value={descricao}
@@ -139,11 +144,11 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="nivel">Nível</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="nivel" className="text-base font-medium">Nível</Label>
               <Select value={nivel} onValueChange={(value) => setNivel(value as NivelCapacidade)}>
-                <SelectTrigger id="nivel">
+                <SelectTrigger id="nivel" className="h-11">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -156,10 +161,10 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="categoria">Categoria da Capacidade</Label>
+            <div className="space-y-3">
+              <Label htmlFor="categoria" className="text-base font-medium">Categoria da Capacidade</Label>
               <Select value={categoria} onValueChange={(value) => setCategoria(value as CategoriaCapacidade)}>
-                <SelectTrigger id="categoria">
+                <SelectTrigger id="categoria" className="h-11">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -173,64 +178,64 @@ export function CapacidadeForm({ capacidades, capacidadeToEdit, onSave, trigger 
             </div>
           </div>
 
-          <div className="border-t pt-4">
+          <div className="border-t pt-6 mt-6">
             <h3 className="text-lg font-semibold mb-4">Cobertura Estratégica</h3>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="alinhamento">Alinhamento com Objetivos Estratégicos</Label>
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="alinhamento" className="text-base font-medium">Alinhamento com Objetivos Estratégicos</Label>
                 <Textarea
                   id="alinhamento"
                   value={alinhamentoObjetivos}
                   onChange={(e) => setAlinhamentoObjetivos(e.target.value)}
                   placeholder="Descreva como esta capacidade se alinha aos objetivos estratégicos da organização"
-                  rows={8}
+                  rows={4}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="beneficios">Benefícios Esperados</Label>
+              <div className="space-y-3">
+                <Label htmlFor="beneficios" className="text-base font-medium">Benefícios Esperados</Label>
                 <Textarea
                   id="beneficios"
                   value={beneficiosEsperados}
                   onChange={(e) => setBeneficiosEsperados(e.target.value)}
                   placeholder="Liste os benefícios esperados com o desenvolvimento desta capacidade"
-                  rows={8}
+                  rows={4}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="estadoFuturo">Estado Futuro Desejado (Target State)</Label>
+              <div className="space-y-3">
+                <Label htmlFor="estadoFuturo" className="text-base font-medium">Estado Futuro Desejado (Target State)</Label>
                 <Textarea
                   id="estadoFuturo"
                   value={estadoFuturoDesejado}
                   onChange={(e) => setEstadoFuturoDesejado(e.target.value)}
                   placeholder="Descreva o estado futuro desejado para esta capacidade"
-                  rows={8}
+                  rows={4}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="gap">Gap entre Estado Atual e Futuro</Label>
+              <div className="space-y-3">
+                <Label htmlFor="gap" className="text-base font-medium">Gap entre Estado Atual e Futuro</Label>
                 <Textarea
                   id="gap"
                   value={gapEstadoAtualFuturo}
                   onChange={(e) => setGapEstadoAtualFuturo(e.target.value)}
                   placeholder="Identifique as lacunas entre o estado atual e o estado futuro desejado"
-                  rows={8}
+                  rows={4}
                 />
               </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="h-11 px-6 text-base">
               Cancelar
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="h-11 px-6 text-base">
               {capacidadeToEdit ? 'Atualizar' : 'Criar'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

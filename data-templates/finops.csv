@@ -1,0 +1,13 @@
+provider,resource_id,resource_type,resource_name,region,service_category,cost_date,cpu_hours,storage_gb,network_gb,memory_gb_hours,requests_count,cpu_cost,storage_cost,network_cost,memory_cost,other_cost,total_cost,environment,team,cost_center,application
+AWS,i-0abcd1234efgh5678,EC2,prod-web-server-01,us-east-1,Compute,2026-01-10,720,100,500,1440,1500000,144.00,10.00,25.00,28.80,5.20,213.00,production,platform,engineering,
+AWS,s3-bucket-data-lake,S3,company-data-lake,us-east-1,Storage,2026-01-10,0,5000,1000,0,5000000,0,115.00,90.00,0,2.50,207.50,production,data-engineering,,
+AWS,rds-postgres-prod-01,RDS,prod-database-main,us-east-1,Database,2026-01-10,720,500,200,2880,8000000,288.00,50.00,18.00,57.60,15.40,429.00,production,backend,engineering,codewiki
+AWS,lambda-api-gateway,Lambda,api-gateway-handler,us-east-1,Compute,2026-01-10,0,0,50,120,25000000,0,0,4.50,24.00,5.00,33.50,production,platform,engineering,
+Azure,/subscriptions/abc123/Microsoft.Compute/virtualMachines/vm-web-01,Virtual Machine,vm-web-prod-01,eastus,Compute,2026-01-10,720,128,300,2880,0,180.00,12.80,27.00,36.00,8.20,264.00,production,platform,engineering,
+Azure,/subscriptions/abc123/Microsoft.Storage/storageAccounts/prodstorageacct,Storage Account,prodstorageacct,eastus,Storage,2026-01-10,0,3000,800,0,3500000,0,69.00,72.00,0,1.75,142.75,production,data-engineering,,
+Azure,/subscriptions/abc123/Microsoft.Sql/servers/sqlprod/databases/maindb,SQL Database,sqlprod-maindb,eastus,Database,2026-01-10,720,250,150,1440,6000000,216.00,25.00,13.50,28.80,10.70,294.00,production,backend,engineering,codewiki
+Azure,/subscriptions/abc123/Microsoft.Web/sites/api-app,App Service,api-app-prod,eastus,Compute,2026-01-10,720,50,400,1440,18000000,108.00,5.00,36.00,14.40,6.60,170.00,production,backend,,
+GCP,projects/my-project/zones/us-central1-a/instances/prod-instance-01,Compute Engine,prod-vm-web-01,us-central1,Compute,2026-01-10,720,200,450,2880,0,172.80,20.00,40.50,34.56,7.14,275.00,production,platform,engineering,
+GCP,projects/my-project/buckets/company-data-bucket,Cloud Storage,company-data-bucket,us-central1,Storage,2026-01-10,0,4000,900,0,4200000,0,92.00,81.00,0,2.10,175.10,production,data-engineering,,
+GCP,projects/my-project/instances/prod-cloudsql-01,Cloud SQL,prod-cloudsql-postgres,us-central1,Database,2026-01-10,720,400,180,2160,7500000,259.20,40.00,16.20,51.84,12.76,380.00,production,backend,engineering,codewiki
+GCP,projects/my-project/locations/us-central1/functions/api-handler,Cloud Functions,api-handler-prod,us-central1,Compute,2026-01-10,0,0,60,150,30000000,0,0,5.40,30.00,6.00,41.40,production,platform,,

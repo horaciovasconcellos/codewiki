@@ -1191,6 +1191,147 @@ app.delete('/api/avaliacoes/:id', async (req, res) => {
   }
 });
 
+// ================== OPT-IN/OUT ROUTES ==================
+
+// Listar Opt-In/Out de um colaborador
+app.get('/api/colaboradores/:id/optinouts', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT o.*, a.sigla as aplicacao_nome 
+       FROM colaborador_opt_in_out o
+       LEFT JOIN aplicacoes a ON o.aplicacao_id = a.id
+       WHERE o.colaborador_id = ?
+       ORDER BY o.data_inicio DESC`,
+      [req.params.id]
+    );
+    res.json(rows.map(row => ({
+      id: row.id,
+      colaboradorId: row.colaborador_id,
+      aplicacaoId: row.aplicacao_id,
+      aplicacaoNome: row.aplicacao_nome,
+      dataInicio: row.data_inicio,
+      dataRevogacao: row.data_revogacao,
+      arquivoPdf: row.arquivo_pdf,
+      assinaturaEletronica: row.assinatura_eletronica
+    })));
+  } catch (error) {
+    console.error('Erro ao listar Opt-In/Out:', error);
+    res.status(500).json({ error: 'Erro ao buscar registros de Opt-In/Out', code: 'DATABASE_ERROR' });
+  }
+});
+
+// Criar novo Opt-In/Out
+app.post('/api/colaboradores/:id/optinouts', async (req, res) => {
+  const startTime = Date.now();
+  const requestInfo = extractRequestInfo(req);
+  
+  const {
+    aplicacaoId,
+    dataInicio,
+    dataRevogacao,
+    arquivoPdf,
+    assinaturaEletronica
+  } = req.body;
+  
+  if (!aplicacaoId || !dataInicio) {
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'INSERT',
+      entityType: 'colaborador_opt_in_out',
+      method: 'POST',
+      route: `/api/colaboradores/${req.params.id}/optinouts`,
+      statusCode: 400,
+      durationMs: Date.now() - startTime,
+      payload: req.body,
+      errorMessage: 'Campos obrigatórios faltando (aplicacaoId e dataInicio)',
+      severity: 'warn'
+    });
+    
+    return res.status(400).json({
+      error: 'Campos obrigatórios faltando',
+      code: 'MISSING_FIELDS'
+    });
+  }
+  
+  try {
+    const id = uuidv4();
+    const dataInicioFormatted = dataInicio.split('T')[0];
+    const dataRevogacaoFormatted = dataRevogacao ? dataRevogacao.split('T')[0] : null;
+    
+    await pool.query(
+      `INSERT INTO colaborador_opt_in_out (
+        id, colaborador_id, aplicacao_id, data_inicio, data_revogacao,
+        arquivo_pdf, assinatura_eletronica
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [id, req.params.id, aplicacaoId, dataInicioFormatted, dataRevogacaoFormatted, arquivoPdf, assinaturaEletronica]
+    );
+    
+    const [rows] = await pool.query(
+      'SELECT * FROM colaborador_opt_in_out WHERE id = ?',
+      [id]
+    );
+    
+    const result = {
+      id: rows[0].id,
+      colaboradorId: rows[0].colaborador_id,
+      aplicacaoId: rows[0].aplicacao_id,
+      dataInicio: rows[0].data_inicio,
+      dataRevogacao: rows[0].data_revogacao,
+      arquivoPdf: rows[0].arquivo_pdf,
+      assinaturaEletronica: rows[0].assinatura_eletronica
+    };
+    
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'INSERT',
+      entityType: 'colaborador_opt_in_out',
+      entityId: id,
+      method: 'POST',
+      route: `/api/colaboradores/${req.params.id}/optinouts`,
+      statusCode: 201,
+      durationMs: Date.now() - startTime,
+      payload: req.body,
+      newValues: result,
+      severity: 'info'
+    });
+    
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Erro ao criar Opt-In/Out:', error);
+    
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'INSERT',
+      entityType: 'colaborador_opt_in_out',
+      method: 'POST',
+      route: `/api/colaboradores/${req.params.id}/optinouts`,
+      statusCode: 500,
+      durationMs: Date.now() - startTime,
+      payload: req.body,
+      errorMessage: error.message,
+      severity: 'error'
+    });
+    
+    res.status(500).json({ error: 'Erro ao salvar Opt-In/Out', code: 'DATABASE_ERROR' });
+  }
+});
+
+// Deletar Opt-In/Out
+app.delete('/api/optinouts/:id', async (req, res) => {
+  try {
+    const [existing] = await pool.query('SELECT * FROM colaborador_opt_in_out WHERE id = ?', [req.params.id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Opt-In/Out não encontrado', code: 'NOT_FOUND' });
+    }
+    
+    await pool.query('DELETE FROM colaborador_opt_in_out WHERE id = ?', [req.params.id]);
+    res.status(204).send();
+  } catch (error) {
+    console.error('Erro ao excluir Opt-In/Out:', error);
+    res.status(500).json({ error: 'Erro ao excluir Opt-In/Out', code: 'DATABASE_ERROR' });
+  }
+});
+
 app.delete('/api/colaboradores/:id', async (req, res) => {
   try {
     console.log('[DELETE] Tentando excluir colaborador:', req.params.id);
@@ -2541,6 +2682,7 @@ function mapAplicacao(row) {
     descricao: row.descricao,
     urlDocumentacao: row.url_documentacao,
     tipoAplicacao: row.tipo_aplicacao,
+    optInOut: row.opt_in_out ? Boolean(row.opt_in_out) : false,
     cloudProvider: row.cloud_provider,
     faseCicloVida: row.fase_ciclo_vida,
     criticidadeNegocio: row.criticidade_negocio,
@@ -2937,6 +3079,7 @@ app.post('/api/aplicacoes', async (req, res) => {
     cloudProvider,
     faseCicloVida, 
     criticidadeNegocio,
+    optInOut,
     categoriaSistema,
     fornecedor,
     tipoHospedagem,
@@ -3005,13 +3148,13 @@ app.post('/api/aplicacoes', async (req, res) => {
     
     await pool.query(
       `INSERT INTO aplicacoes (
-        id, sigla, descricao, url_documentacao, tipo_aplicacao, fase_ciclo_vida, criticidade_negocio,
+        id, sigla, descricao, url_documentacao, tipo_aplicacao, opt_in_out, fase_ciclo_vida, criticidade_negocio,
         categoria_sistema, fornecedor, tipo_hospedagem, cloud_provider, custo_mensal, numero_usuarios,
         data_implantacao, versao_atual, responsavel_tecnico, responsavel_negocio,
         status_operacional, observacoes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        id, sigla, descricao, urlDocumentacao, tipoAplicacao, faseCicloVida, criticidadeNegocio,
+        id, sigla, descricao, urlDocumentacao, tipoAplicacao, optInOut || false, faseCicloVida, criticidadeNegocio,
         categoriaSistema || null,
         fornecedor || null,
         tipoHospedagem || null,
@@ -3281,6 +3424,7 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
     cloudProvider,
     faseCicloVida, 
     criticidadeNegocio,
+    optInOut,
     categoriaSistema,
     fornecedor,
     tipoHospedagem,
@@ -3323,6 +3467,7 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
         descricao = ?,
         url_documentacao = ?,
         tipo_aplicacao = ?,
+        opt_in_out = ?,
         cloud_provider = ?,
         fase_ciclo_vida = ?,
         criticidade_negocio = ?,
@@ -3343,6 +3488,7 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
         descricao !== undefined ? descricao : existing[0].descricao,
         urlDocumentacao !== undefined ? urlDocumentacao : existing[0].url_documentacao,
         tipoAplicacao !== undefined ? tipoAplicacao : existing[0].tipo_aplicacao,
+        optInOut !== undefined ? optInOut : existing[0].opt_in_out,
         cloudProvider !== undefined ? cloudProvider : existing[0].cloud_provider,
         faseCicloVida !== undefined ? faseCicloVida : existing[0].fase_ciclo_vida,
         criticidadeNegocio !== undefined ? criticidadeNegocio : existing[0].criticidade_negocio,
@@ -4561,6 +4707,7 @@ app.post('/api/lgpd', async (req, res) => {
       tecnicaAnonimizacao,
       dataInicio,
       dataTermino,
+      ativo,
       campos = []
     } = req.body;
 
@@ -4573,13 +4720,14 @@ app.post('/api/lgpd', async (req, res) => {
         data_inicio,
         data_termino,
         ativo
-      ) VALUES (?, ?, ?, ?, ?, true)
+      ) VALUES (?, ?, ?, ?, ?, ?)
     `, [
       identificacaoDados,
       tipoDados,
       tecnicaAnonimizacao,
       dataInicio || new Date().toISOString().split('T')[0],
-      dataTermino || null
+      dataTermino || null,
+      ativo !== undefined ? ativo : true
     ]);
 
     const lgpdId = result.insertId;
@@ -4657,8 +4805,11 @@ app.put('/api/lgpd/:id', async (req, res) => {
       tecnicaAnonimizacao,
       dataInicio,
       dataTermino,
+      ativo,
       campos = []
     } = req.body;
+
+    console.log('PUT /api/lgpd/:id - Dados recebidos:', { id, identificacaoDados, tipoDados, dataInicio, dataTermino, ativo, camposCount: campos.length });
 
     // Atualizar registro principal
     await connection.query(`
@@ -4668,6 +4819,7 @@ app.put('/api/lgpd/:id', async (req, res) => {
           tecnica_anonimizacao = ?,
           data_inicio = ?,
           data_termino = ?,
+          ativo = ?,
           updated_at = NOW()
       WHERE id = ?
     `, [
@@ -4676,11 +4828,16 @@ app.put('/api/lgpd/:id', async (req, res) => {
       tecnicaAnonimizacao,
       dataInicio,
       dataTermino || null,
+      ativo !== undefined ? ativo : true,
       id
     ]);
 
+    console.log('Registro principal atualizado com sucesso');
+
     // Deletar campos existentes
     await connection.query('DELETE FROM lgpd_campos WHERE lgpd_id = ?', [id]);
+
+    console.log('Campos anteriores deletados');
 
     // Inserir novos campos
     if (campos.length > 0) {
@@ -4696,6 +4853,8 @@ app.put('/api/lgpd/:id', async (req, res) => {
         campo.matrizAnonimizacao.assistenciaTecnica,
         campo.matrizAnonimizacao.analytics
       ]);
+
+      console.log('Inserindo campos:', camposValues);
 
       await connection.query(`
         INSERT INTO lgpd_campos (
@@ -12337,6 +12496,375 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     console.log('[SPACE CFD] Gerando estrutura vazia de CFD');
     return [];
   }
+
+  // ========================================
+  // FinOps-Focus Endpoints
+  // ========================================
+
+  // GET /api/finops/providers - Listar provedores cloud
+  app.get('/api/finops/providers', async (req, res) => {
+    try {
+      const [providers] = await pool.query(`
+        SELECT 
+          id,
+          name,
+          display_name as displayName,
+          api_endpoint as apiEndpoint,
+          last_sync_date as lastSyncDate,
+          active,
+          metadata,
+          created_at as createdAt,
+          updated_at as updatedAt
+        FROM finops_providers
+        ORDER BY name
+      `);
+      
+      res.json(providers);
+    } catch (error) {
+      console.error('[FinOps] Erro ao buscar provedores:', error);
+      res.status(500).json({ error: 'Erro ao buscar provedores' });
+    }
+  });
+
+  // POST /api/finops/ingest - Receber dados de custos dos provedores
+  app.post('/api/finops/ingest', async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const { provider, resources } = req.body;
+
+      if (!provider || !resources || !Array.isArray(resources)) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos. Esperado: { provider, resources: [...] }' 
+        });
+      }
+
+      // Buscar ID do provedor
+      const [providerRows] = await connection.query(
+        'SELECT id FROM finops_providers WHERE name = ?',
+        [provider]
+      );
+
+      if (providerRows.length === 0) {
+        return res.status(400).json({ error: `Provedor ${provider} não encontrado` });
+      }
+
+      const providerId = providerRows[0].id;
+      let processedCount = 0;
+      let errorCount = 0;
+
+      for (const resourceData of resources) {
+        try {
+          const {
+            resource_id,
+            resource_type,
+            resource_name,
+            aplicacao_id,
+            region,
+            tags,
+            usage = {},
+            cost,
+            service_category,
+            cost_date
+          } = resourceData;
+
+          if (!resource_id || !resource_type || !cost || !cost.total_cost || !cost_date) {
+            console.warn('[FinOps] Dados incompletos para recurso:', resource_id);
+            errorCount++;
+            continue;
+          }
+
+          // Inserir ou atualizar recurso
+          const resourceId = uuidv4();
+          await connection.query(`
+            INSERT INTO finops_resources (
+              id, provider_id, aplicacao_id, resource_id, resource_type, 
+              resource_name, region, tags, metadata
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+              aplicacao_id = VALUES(aplicacao_id),
+              resource_name = VALUES(resource_name),
+              region = VALUES(region),
+              tags = VALUES(tags),
+              metadata = VALUES(metadata),
+              updated_at = CURRENT_TIMESTAMP
+          `, [
+            resourceId,
+            providerId,
+            aplicacao_id || null,
+            resource_id,
+            resource_type,
+            resource_name || null,
+            region || null,
+            tags ? JSON.stringify(tags) : null,
+            JSON.stringify({ lastUpdate: new Date().toISOString() })
+          ]);
+
+          // Buscar ID do recurso (novo ou existente)
+          const [existingResource] = await connection.query(
+            'SELECT id FROM finops_resources WHERE provider_id = ? AND resource_id = ?',
+            [providerId, resource_id]
+          );
+
+          const finalResourceId = existingResource[0].id;
+
+          // Inserir custo diário
+          const costId = uuidv4();
+          const isTagged = tags && Object.keys(tags).length > 0;
+          const isAllocated = !!aplicacao_id;
+
+          // Calcular unit cost (custo por request, se disponível)
+          const unitCost = usage.requests_count > 0 
+            ? cost.total_cost / usage.requests_count 
+            : null;
+
+          await connection.query(`
+            INSERT INTO finops_costs_daily (
+              id, resource_id, provider_id, aplicacao_id, cost_date,
+              cpu_hours, storage_gb, network_gb, memory_gb_hours, requests_count,
+              cpu_cost, storage_cost, network_cost, memory_cost, other_cost, total_cost,
+              service_category, is_tagged, is_allocated, unit_cost,
+              currency, metadata
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+              cpu_hours = VALUES(cpu_hours),
+              storage_gb = VALUES(storage_gb),
+              network_gb = VALUES(network_gb),
+              memory_gb_hours = VALUES(memory_gb_hours),
+              requests_count = VALUES(requests_count),
+              cpu_cost = VALUES(cpu_cost),
+              storage_cost = VALUES(storage_cost),
+              network_cost = VALUES(network_cost),
+              memory_cost = VALUES(memory_cost),
+              other_cost = VALUES(other_cost),
+              total_cost = VALUES(total_cost),
+              service_category = VALUES(service_category),
+              is_tagged = VALUES(is_tagged),
+              is_allocated = VALUES(is_allocated),
+              unit_cost = VALUES(unit_cost),
+              updated_at = CURRENT_TIMESTAMP
+          `, [
+            costId,
+            finalResourceId,
+            providerId,
+            aplicacao_id || null,
+            cost_date,
+            usage.cpu_hours || 0,
+            usage.storage_gb || 0,
+            usage.network_gb || 0,
+            usage.memory_gb_hours || 0,
+            usage.requests_count || 0,
+            cost.cpu_cost || 0,
+            cost.storage_cost || 0,
+            cost.network_cost || 0,
+            cost.memory_cost || 0,
+            cost.other_cost || 0,
+            cost.total_cost,
+            service_category || 'Other',
+            isTagged,
+            isAllocated,
+            unitCost,
+            'USD',
+            JSON.stringify({ provider, imported: new Date().toISOString() })
+          ]);
+
+          processedCount++;
+        } catch (resourceError) {
+          console.error('[FinOps] Erro ao processar recurso:', resourceError);
+          errorCount++;
+        }
+      }
+
+      // Atualizar data de sincronização do provedor
+      await connection.query(
+        'UPDATE finops_providers SET last_sync_date = NOW() WHERE id = ?',
+        [providerId]
+      );
+
+      await connection.commit();
+
+      res.json({
+        success: true,
+        provider,
+        processed: processedCount,
+        errors: errorCount,
+        message: `${processedCount} recursos processados com sucesso`
+      });
+
+    } catch (error) {
+      await connection.rollback();
+      console.error('[FinOps] Erro ao ingerir dados:', error);
+      res.status(500).json({ error: 'Erro ao processar dados de custos' });
+    } finally {
+      connection.release();
+    }
+  });
+
+  // GET /api/finops/dashboard - Dados para dashboard
+  app.get('/api/finops/dashboard', async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      const dateFilter = startDate && endDate
+        ? `cost_date BETWEEN '${startDate}' AND '${endDate}'`
+        : `cost_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`;
+
+      // KPIs principais
+      const [kpiResults] = await pool.query(`
+        SELECT 
+          SUM(total_cost) as totalCost,
+          SUM(CASE WHEN is_allocated = 0 THEN total_cost ELSE 0 END) as unallocatedCost,
+          COUNT(DISTINCT resource_id) as totalResources,
+          COUNT(DISTINCT aplicacao_id) as totalApplications
+        FROM finops_costs_daily
+        WHERE ${dateFilter}
+      `);
+
+      const kpis = kpiResults[0];
+      const unallocatedPercentage = kpis.totalCost > 0 
+        ? ((kpis.unallocatedCost / kpis.totalCost) * 100).toFixed(2)
+        : 0;
+
+      // Top 5 aplicações por custo
+      const [topApps] = await pool.query(`
+        SELECT 
+          a.sigla as name,
+          SUM(c.total_cost) as cost
+        FROM finops_costs_daily c
+        LEFT JOIN aplicacoes a ON c.aplicacao_id = a.id
+        WHERE ${dateFilter} AND c.aplicacao_id IS NOT NULL
+        GROUP BY c.aplicacao_id, a.sigla
+        ORDER BY cost DESC
+        LIMIT 5
+      `);
+
+      // Custo por dia e aplicação
+      const [costByDay] = await pool.query(`
+        SELECT 
+          cost_date as date,
+          COALESCE(a.sigla, 'Não Alocado') as aplicacao,
+          SUM(total_cost) as cost
+        FROM finops_costs_daily c
+        LEFT JOIN aplicacoes a ON c.aplicacao_id = a.id
+        WHERE ${dateFilter}
+        GROUP BY cost_date, aplicacao
+        ORDER BY cost_date
+      `);
+
+      // Custo por provedor
+      const [costByProvider] = await pool.query(`
+        SELECT 
+          p.name as provider,
+          SUM(c.total_cost) as cost
+        FROM finops_costs_daily c
+        JOIN finops_providers p ON c.provider_id = p.id
+        WHERE ${dateFilter}
+        GROUP BY p.name
+      `);
+
+      // Custo por serviço
+      const [costByService] = await pool.query(`
+        SELECT 
+          service_category as service,
+          SUM(total_cost) as cost
+        FROM finops_costs_daily
+        WHERE ${dateFilter}
+        GROUP BY service_category
+        ORDER BY cost DESC
+      `);
+
+      // Tagged vs Untagged
+      const [taggedStats] = await pool.query(`
+        SELECT 
+          SUM(CASE WHEN is_tagged = 1 THEN total_cost ELSE 0 END) as tagged,
+          SUM(CASE WHEN is_tagged = 0 THEN total_cost ELSE 0 END) as untagged
+        FROM finops_costs_daily
+        WHERE ${dateFilter}
+      `);
+
+      // Allocated vs Unallocated
+      const [allocatedStats] = await pool.query(`
+        SELECT 
+          SUM(CASE WHEN is_allocated = 1 THEN total_cost ELSE 0 END) as allocated,
+          SUM(CASE WHEN is_allocated = 0 THEN total_cost ELSE 0 END) as unallocated
+        FROM finops_costs_daily
+        WHERE ${dateFilter}
+      `);
+
+      res.json({
+        kpis: {
+          totalDailyCost: parseFloat(kpis.totalCost || 0),
+          unallocatedCostPercentage: parseFloat(unallocatedPercentage),
+          topApplications: topApps.map(app => ({
+            name: app.name,
+            cost: parseFloat(app.cost)
+          }))
+        },
+        costByDay,
+        costByProvider,
+        costByService,
+        taggedVsUntagged: {
+          tagged: parseFloat(taggedStats[0]?.tagged || 0),
+          untagged: parseFloat(taggedStats[0]?.untagged || 0)
+        },
+        allocatedVsUnallocated: {
+          allocated: parseFloat(allocatedStats[0]?.allocated || 0),
+          unallocated: parseFloat(allocatedStats[0]?.unallocated || 0)
+        }
+      });
+
+    } catch (error) {
+      console.error('[FinOps] Erro ao buscar dados do dashboard:', error);
+      res.status(500).json({ error: 'Erro ao buscar dados do dashboard' });
+    }
+  });
+
+  // GET /api/finops/resources - Listar recursos com custos
+  app.get('/api/finops/resources', async (req, res) => {
+    try {
+      const { providerId, aplicacaoId } = req.query;
+      
+      let whereClause = '1=1';
+      const params = [];
+
+      if (providerId) {
+        whereClause += ' AND r.provider_id = ?';
+        params.push(providerId);
+      }
+
+      if (aplicacaoId) {
+        whereClause += ' AND r.aplicacao_id = ?';
+        params.push(aplicacaoId);
+      }
+
+      const [resources] = await pool.query(`
+        SELECT 
+          r.id,
+          r.resource_id as resourceId,
+          r.resource_type as resourceType,
+          r.resource_name as resourceName,
+          r.region,
+          p.name as providerName,
+          a.sigla as aplicacaoNome,
+          r.tags,
+          SUM(c.total_cost) as totalCost,
+          MAX(c.cost_date) as lastCostDate
+        FROM finops_resources r
+        JOIN finops_providers p ON r.provider_id = p.id
+        LEFT JOIN aplicacoes a ON r.aplicacao_id = a.id
+        LEFT JOIN finops_costs_daily c ON r.id = c.resource_id
+        WHERE ${whereClause}
+        GROUP BY r.id
+        ORDER BY totalCost DESC
+      `, params);
+
+      res.json(resources);
+    } catch (error) {
+      console.error('[FinOps] Erro ao buscar recursos:', error);
+      res.status(500).json({ error: 'Erro ao buscar recursos' });
+    }
+  });
 
   // Middleware de tratamento de erros global
   app.use((err, req, res, next) => {

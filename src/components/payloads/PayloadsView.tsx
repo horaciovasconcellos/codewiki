@@ -113,41 +113,45 @@ export function PayloadsView() {
   };
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Payloads OpenAPI</h2>
-            <p className="text-muted-foreground">
-              Gerencie especificações de APIs seguindo o padrão OpenAPI
-            </p>
+    <div className="w-full h-full flex flex-col">
+      <div className="flex-none border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger />
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold tracking-tight">Payloads OpenAPI</h1>
+              <p className="text-muted-foreground mt-1">
+                Gerencie especificações de APIs seguindo o padrão OpenAPI
+              </p>
+            </div>
+            <Button onClick={handleNewPayload} size="lg">
+              <Plus className="mr-2" size={20} />
+              Novo Payload
+            </Button>
           </div>
         </div>
-        <Button onClick={handleNewPayload}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Payload
-        </Button>
       </div>
 
-      <Separator />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Payloads</CardTitle>
-          <CardDescription>
-            Especificações OpenAPI cadastradas no sistema
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <PayloadsDataTable
-            data={payloads}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            loading={loading}
-          />
-        </CardContent>
-      </Card>
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto px-6 py-6">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Lista de Payloads</CardTitle>
+              <CardDescription>
+                Especificações OpenAPI cadastradas no sistema
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PayloadsDataTable
+                data={payloads}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                loading={loading}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {showWizard && (
         <PayloadWizard

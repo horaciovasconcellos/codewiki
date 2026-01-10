@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Colaborador, TipoAfastamento, Habilidade, Afastamento, HabilidadeColaborador, AvaliacaoColaborador } from '@/lib/types';
+import { useState, useEffect } from 'react';
+import { Colaborador, TipoAfastamento, Habilidade, Afastamento, HabilidadeColaborador, AvaliacaoColaborador, OptInOut } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, ArrowRight, Check, X } from '@phosphor-icons/react';
@@ -7,8 +7,10 @@ import { DadosBasicosStep } from './wizard-steps/DadosBasicosStep';
 import { AfastamentosStep } from './wizard-steps/AfastamentosStep';
 import { HabilidadesStep } from './wizard-steps/HabilidadesStep';
 import { StepAvaliacoes } from './wizard-steps/StepAvaliacoes';
+import { OptInOutStep } from './wizard-steps/OptInOutStep';
 import { toast } from 'sonner';
 import { generateUUID } from '@/utils/uuid';
+import { apiGet } from '@/hooks/use-api';
 
 interface ColaboradorWizardProps {
   colaborador?: Colaborador;
@@ -19,7 +21,7 @@ interface ColaboradorWizardProps {
   onCancel: () => void;
 }
 
-type WizardStep = 'basicos' | 'afastamentos' | 'habilidades' | 'avaliacoes';
+type WizardStep = 'basicos' | 'afastamentos' | 'habilidades' | 'avaliacoes' | 'optinout';
 
 export function ColaboradorWizard({
   colaborador,
@@ -42,14 +44,36 @@ export function ColaboradorWizard({
     colaborador?.habilidades || []
   );
   const [avaliacoes, setAvaliacoes] = useState<AvaliacaoColaborador[]>(colaborador?.avaliacoes || []);
+  const [optInOuts, setOptInOuts] = useState<OptInOut[]>(colaborador?.optInOuts || []);
+  const [aplicacoes, setAplicacoes] = useState<Array<{ id: string; nome: string }>>([]);
 
   const isEditing = !!colaborador;
+
+  useEffect(() => {
+    const fetchAplicacoes = async () => {
+      try {
+        console.log('[ColaboradorWizard] Iniciando busca de aplicações...');
+        const response = await apiGet('/aplicacoes');
+        console.log('[ColaboradorWizard] Resposta da API:', response);
+        console.log('[ColaboradorWizard] Total de aplicações:', response.length);
+        const mapped = response.map((app: any) => ({ id: app.id, nome: app.sigla }));
+        console.log('[ColaboradorWizard] Aplicações mapeadas:', mapped.slice(0, 3));
+        setAplicacoes(mapped);
+        console.log('[ColaboradorWizard] Estado atualizado com', mapped.length, 'aplicações');
+      } catch (error) {
+        console.error('Erro ao buscar aplicações:', error);
+        toast.error('Erro ao carregar aplicações');
+      }
+    };
+    fetchAplicacoes();
+  }, []);
 
   const steps: { id: WizardStep; label: string }[] = [
     { id: 'basicos', label: 'Dados Básicos' },
     { id: 'afastamentos', label: 'Afastamentos' },
     { id: 'habilidades', label: 'Habilidades' },
-    { id: 'avaliacoes', label: 'Avaliações' }
+    { id: 'avaliacoes', label: 'Avaliações' },
+    { id: 'optinout', label: 'Opt-In/Out' }
   ];
 
   const currentStepIndex = steps.findIndex(s => s.id === currentStep);
@@ -103,7 +127,8 @@ export function ColaboradorWizard({
       dataDemissao: dataDemissao || undefined,
       afastamentos,
       habilidades: habilidadesColaborador,
-      avaliacoes
+      avaliacoes,
+      optInOuts
     };
 
     onSave(novoColaborador);
@@ -170,6 +195,7 @@ export function ColaboradorWizard({
                 {currentStep === 'afastamentos' && 'Registre os afastamentos do colaborador (opcional)'}
                 {currentStep === 'habilidades' && 'Cadastre as habilidades do colaborador (opcional)'}
                 {currentStep === 'avaliacoes' && 'Registre as avaliações de desempenho do colaborador (opcional)'}
+                {currentStep === 'optinout' && 'Gerencie os consentimentos de acesso às aplicações (opcional)'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -208,6 +234,14 @@ export function ColaboradorWizard({
                 <StepAvaliacoes
                   avaliacoes={avaliacoes}
                   setAvaliacoes={setAvaliacoes}
+                />
+              )}
+
+              {currentStep === 'optinout' && (
+                <OptInOutStep
+                  optInOuts={optInOuts}
+                  setOptInOuts={setOptInOuts}
+                  aplicacoes={aplicacoes}
                 />
               )}
             </CardContent>

@@ -1,0 +1,120 @@
+{
+  "provider": "GCP",
+  "resources": [
+    {
+      "resource_id": "projects/my-project/zones/us-central1-a/instances/prod-instance-01",
+      "resource_type": "Compute Engine",
+      "resource_name": "prod-vm-web-01",
+      "aplicacao_id": null,
+      "region": "us-central1",
+      "tags": {
+        "environment": "production",
+        "team": "platform",
+        "cost-center": "engineering"
+      },
+      "usage": {
+        "cpu_hours": 720,
+        "storage_gb": 200,
+        "network_gb": 450,
+        "memory_gb_hours": 2880,
+        "requests_count": 0
+      },
+      "cost": {
+        "cpu_cost": 172.80,
+        "storage_cost": 20.00,
+        "network_cost": 40.50,
+        "memory_cost": 34.56,
+        "other_cost": 7.14,
+        "total_cost": 275.00
+      },
+      "service_category": "Compute",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "projects/my-project/buckets/company-data-bucket",
+      "resource_type": "Cloud Storage",
+      "resource_name": "company-data-bucket",
+      "aplicacao_id": null,
+      "region": "us-central1",
+      "tags": {
+        "environment": "production",
+        "team": "data-engineering"
+      },
+      "usage": {
+        "cpu_hours": 0,
+        "storage_gb": 4000,
+        "network_gb": 900,
+        "memory_gb_hours": 0,
+        "requests_count": 4200000
+      },
+      "cost": {
+        "cpu_cost": 0,
+        "storage_cost": 92.00,
+        "network_cost": 81.00,
+        "memory_cost": 0,
+        "other_cost": 2.10,
+        "total_cost": 175.10
+      },
+      "service_category": "Storage",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "projects/my-project/instances/prod-cloudsql-01",
+      "resource_type": "Cloud SQL",
+      "resource_name": "prod-cloudsql-postgres",
+      "aplicacao_id": null,
+      "region": "us-central1",
+      "tags": {
+        "environment": "production",
+        "team": "backend",
+        "cost-center": "engineering",
+        "application": "codewiki"
+      },
+      "usage": {
+        "cpu_hours": 720,
+        "storage_gb": 400,
+        "network_gb": 180,
+        "memory_gb_hours": 2160,
+        "requests_count": 7500000
+      },
+      "cost": {
+        "cpu_cost": 259.20,
+        "storage_cost": 40.00,
+        "network_cost": 16.20,
+        "memory_cost": 51.84,
+        "other_cost": 12.76,
+        "total_cost": 380.00
+      },
+      "service_category": "Database",
+      "cost_date": "2026-01-10"
+    },
+    {
+      "resource_id": "projects/my-project/locations/us-central1/functions/api-handler",
+      "resource_type": "Cloud Functions",
+      "resource_name": "api-handler-prod",
+      "aplicacao_id": null,
+      "region": "us-central1",
+      "tags": {
+        "environment": "production",
+        "team": "platform"
+      },
+      "usage": {
+        "cpu_hours": 0,
+        "storage_gb": 0,
+        "network_gb": 60,
+        "memory_gb_hours": 150,
+        "requests_count": 30000000
+      },
+      "cost": {
+        "cpu_cost": 0,
+        "storage_cost": 0,
+        "network_cost": 5.40,
+        "memory_cost": 30.00,
+        "other_cost": 6.00,
+        "total_cost": 41.40
+      },
+      "service_category": "Compute",
+      "cost_date": "2026-01-10"
+    }
+  ]
+}

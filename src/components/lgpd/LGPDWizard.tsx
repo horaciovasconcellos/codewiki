@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
 import { LGPDRegistro, LGPDCampoFormData, TipoDadoLGPD, TecnicaAnonimizacao, MatrizAnonimizacao } from '@/types/lgpd';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash, Eye } from '@phosphor-icons/react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ArrowLeft, ArrowRight, Check, X, Plus, Trash, Eye } from '@phosphor-icons/react';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface LGPDWizardProps {
-  open: boolean;
-  onClose: () => void;
   registro?: LGPDRegistro;
   onSave: (data: any) => Promise<void>;
+  onCancel: () => void;
 }
 
 const TIPOS_DADOS: TipoDadoLGPD[] = [
@@ -43,16 +44,17 @@ const DEPARTAMENTOS = [
   { key: 'analytics', label: 'Analytics' }
 ];
 
-export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps) {
-  const [step, setStep] = useState(1);
+export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
+  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
   // Step 1: Dados Mestres
   const [identificacaoDados, setIdentificacaoDados] = useState('');
-  const [tipoDados, setTipoDados] = useState<TipoDadoLGPD>('Dados Identificadores Diretos');
-  const [tecnicaAnonimizacao, setTecnicaAnonimizacao] = useState<TecnicaAnonimizacao>('Anonimização por Supressão');
+  const [tipoDados, setTipoDados] = useState<TipoDadoLGPD>('Dados Sensíveis');
+  const [tecnicaAnonimizacao, setTecnicaAnonimizacao] = useState<TecnicaAnonimizacao>('Anonimização por Generalização');
   const [dataInicio, setDataInicio] = useState(new Date().toISOString().split('T')[0]);
   const [dataTermino, setDataTermino] = useState('');
+  const [ativo, setAtivo] = useState(true);
   
   // Step 2: Campos
   const [campos, setCampos] = useState<LGPDCampoFormData[]>([]);
@@ -60,6 +62,8 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
   const [editingCampoIndex, setEditingCampoIndex] = useState<number | null>(null);
   const [showMatrizDialog, setShowMatrizDialog] = useState(false);
   const [viewingCampoIndex, setViewingCampoIndex] = useState<number | null>(null);
+  const [csvText, setCsvText] = useState('');
+  const [showCsvImport, setShowCsvImport] = useState(false);
   
   // Formulário de Campo
   const [nomeCampo, setNomeCampo] = useState('');
@@ -72,13 +76,23 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
   const [matrizAssistenciaTecnica, setMatrizAssistenciaTecnica] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
   const [matrizAnalytics, setMatrizAnalytics] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
 
+  const isEditing = !!registro;
+  const totalSteps = 2;
+
+  const steps = [
+    { number: 1, title: 'Dados Mestres', description: 'Informações básicas do registro LGPD' },
+    { number: 2, title: 'Campos e Matriz', description: 'Campos de dados e matriz de anonimização' },
+  ];
+
   useEffect(() => {
     if (registro) {
       setIdentificacaoDados(registro.identificacaoDados);
       setTipoDados(registro.tipoDados);
       setTecnicaAnonimizacao(registro.tecnicaAnonimizacao);
-      setDataInicio(registro.dataInicio);
-      setDataTermino(registro.dataTermino || '');
+      // Converter data ISO para formato yyyy-MM-dd
+      setDataInicio(registro.dataInicio ? registro.dataInicio.split('T')[0] : new Date().toISOString().split('T')[0]);
+      setDataTermino(registro.dataTermino ? registro.dataTermino.split('T')[0] : '');
+      setAtivo(registro.ativo ?? true);
       
       if (registro.campos) {
         setCampos(registro.campos.map(c => ({
@@ -90,7 +104,7 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
     } else {
       resetForm();
     }
-  }, [registro, open]);
+  }, [registro]);
 
   // Resetar matriz ao mudar técnica padrão
   useEffect(() => {
@@ -104,13 +118,16 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
   }, [tecnicaAnonimizacao]);
 
   const resetForm = () => {
-    setStep(1);
+    setCurrentStep(1);
     setIdentificacaoDados('');
-    setTipoDados('Dados Identificadores Diretos');
-    setTecnicaAnonimizacao('Anonimização por Supressão');
+    setTipoDados('Dados Sensíveis');
+    setTecnicaAnonimizacao('Anonimização por Generalização');
     setDataInicio(new Date().toISOString().split('T')[0]);
     setDataTermino('');
+    setAtivo(true);
     setCampos([]);
+    setCsvText('');
+    setShowCsvImport(false);
     resetCampoForm();
   };
 
@@ -149,12 +166,12 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
 
   const handleSaveCampo = () => {
     if (!nomeCampo || !descricaoCampo) {
-      alert('Preencha todos os campos obrigatórios');
+      toast.error('Preencha todos os campos obrigatórios');
       return;
     }
 
     const novoCampo: LGPDCampoFormData = {
-      nomeCampo,
+      nomeCampo: nomeCampo.toUpperCase(),
       descricao: descricaoCampo,
       matrizAnonimizacao: {
         vendas: matrizVendas,
@@ -188,21 +205,125 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
     setShowMatrizDialog(true);
   };
 
-  const handleNext = () => {
-    if (step === 1) {
-      if (!identificacaoDados) {
-        alert('Preencha a identificação dos dados');
+  const parseCsvLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const handleImportCsv = () => {
+    try {
+      const lines = csvText.trim().split('\n').filter(line => line.trim());
+      if (lines.length === 0) {
+        toast.error('Nenhum dado para importar');
         return;
       }
-      setStep(2);
+
+      // Mapear técnicas simplificadas para valores completos
+      const mapTecnica = (valor: string): TecnicaAnonimizacao => {
+        const v = valor.trim().toLowerCase();
+        if (v.includes('supress')) return 'Anonimização por Supressão';
+        if (v.includes('generaliz')) return 'Anonimização por Generalização';
+        if (v.includes('pseudo')) return 'Pseudonimização (Embaralhamento Reversível)';
+        if (v.includes('permut')) return 'Anonimização por Permutação';
+        return 'Anonimização por Generalização'; // default
+      };
+
+      // Primeira linha pode ser cabeçalho ou dados
+      const hasHeader = lines[0].toLowerCase().includes('nome') || lines[0].toLowerCase().includes('campo');
+      const dataLines = hasHeader ? lines.slice(1) : lines;
+
+      const novosCampos: LGPDCampoFormData[] = dataLines.map(line => {
+        const cols = parseCsvLine(line);
+        
+        const nomeCampo = (cols[0] || '').toUpperCase();
+        const descricao = cols[1] || '';
+        
+        // Mapear técnicas de anonimização para cada departamento
+        const vendas = mapTecnica(cols[2] || 'Generalização');
+        const marketing = mapTecnica(cols[3] || 'Generalização');
+        const financeiro = mapTecnica(cols[4] || 'Generalização');
+        const rh = mapTecnica(cols[5] || 'Generalização');
+        const logistica = mapTecnica(cols[6] || 'Generalização');
+        const assistenciaTecnica = mapTecnica(cols[7] || 'Generalização');
+        const analytics = mapTecnica(cols[8] || 'Generalização');
+
+        return {
+          nomeCampo,
+          descricao,
+          matrizAnonimizacao: {
+            vendas,
+            marketing,
+            financeiro,
+            rh,
+            logistica,
+            assistenciaTecnica,
+            analytics
+          }
+        };
+      });
+
+      setCampos([...campos, ...novosCampos]);
+      setCsvText('');
+      setShowCsvImport(false);
+      toast.success(`${novosCampos.length} campo(s) importado(s) com sucesso`);
+    } catch (error) {
+      console.error('Erro ao importar CSV:', error);
+      toast.error('Erro ao processar CSV. Verifique o formato.');
     }
   };
 
-  const handleSubmit = async () => {
-    if (!identificacaoDados) {
-      alert('Preencha a identificação dos dados');
-      return;
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      setCsvText(text);
+    };
+    reader.readAsText(file);
+  };
+
+  const validateStep = (step: number): boolean => {
+    switch (step) {
+      case 1:
+        if (!identificacaoDados || !identificacaoDados.trim()) {
+          toast.error('Informe a identificação dos dados');
+          return false;
+        }
+        return true;
+      default:
+        return true;
     }
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+    }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep(1)) return;
 
     setLoading(true);
     try {
@@ -212,114 +333,199 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
         tecnicaAnonimizacao,
         dataInicio,
         dataTermino: dataTermino || undefined,
+        ativo,
         campos
       };
       await onSave(data);
+      toast.success(isEditing ? 'Registro LGPD atualizado com sucesso' : 'Registro LGPD cadastrado com sucesso');
       resetForm();
-      onClose();
+      onCancel();
     } catch (error) {
       console.error('Erro ao salvar:', error);
-      alert('Erro ao salvar registro LGPD');
+      toast.error('Erro ao salvar registro LGPD');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {registro ? 'Editar Registro LGPD' : 'Novo Registro LGPD'} - Etapa {step} de 2
-            </DialogTitle>
-          </DialogHeader>
+    <div className="min-h-screen bg-muted/30">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {isEditing ? 'Editar Registro LGPD' : 'Novo Registro LGPD'}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {steps[currentStep - 1].description}
+              </p>
+            </div>
+            <Button variant="ghost" onClick={onCancel}>
+              <X className="mr-2" />
+              Cancelar
+            </Button>
+          </div>
 
-          {step === 1 && (
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="identificacaoDados">Identificação de Dados *</Label>
-                <Input
-                  id="identificacaoDados"
-                  value={identificacaoDados}
-                  onChange={(e) => setIdentificacaoDados(e.target.value)}
-                  placeholder="Ex: Dados de Clientes - CRM"
-                />
-              </div>
+          <div className="mb-6">
+            <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
+            <div className="flex justify-between mt-4">
+              {steps.map((step) => (
+                <div
+                  key={step.number}
+                  className={`flex flex-col items-center flex-1 ${
+                    step.number === currentStep ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                      step.number < currentStep
+                        ? 'bg-primary text-primary-foreground'
+                        : step.number === currentStep
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    {step.number < currentStep ? <Check size={20} /> : step.number}
+                  </div>
+                  <p className="text-xs font-medium text-center">{step.title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <div>
-                <Label htmlFor="tipoDados">Tipo de Dados *</Label>
-                <Select value={tipoDados} onValueChange={(v) => setTipoDados(v as TipoDadoLGPD)}>
-                  <SelectTrigger id="tipoDados">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIPOS_DADOS.map(tipo => (
-                      <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="tecnicaAnonimizacao">Técnica de Anonimização (Padrão) *</Label>
-                <Select value={tecnicaAnonimizacao} onValueChange={(v) => setTecnicaAnonimizacao(v as TecnicaAnonimizacao)}>
-                  <SelectTrigger id="tecnicaAnonimizacao">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TECNICAS_ANONIMIZACAO.map(tec => (
-                      <SelectItem key={tec} value={tec}>{tec}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Esta técnica será aplicada como padrão para todos os campos
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="dataInicio">Data de Início *</Label>
+      <div className="container mx-auto px-6 py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{steps[currentStep - 1].title}</CardTitle>
+            <CardDescription>{steps[currentStep - 1].description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {currentStep === 1 && (
+            <div className="space-y-6 py-4">
+              <div className="grid gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="identificacaoDados" className="text-base font-medium">
+                    Identificação de Dados *
+                  </Label>
                   <Input
-                    id="dataInicio"
-                    type="date"
-                    value={dataInicio}
-                    onChange={(e) => setDataInicio(e.target.value)}
+                    id="identificacaoDados"
+                    value={identificacaoDados}
+                    onChange={(e) => setIdentificacaoDados(e.target.value)}
+                    placeholder="Ex: Dados de Clientes - CRM"
+                    className="h-11 text-base"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Nome ou identificação clara do conjunto de dados pessoais
+                  </p>
                 </div>
 
-                <div>
-                  <Label htmlFor="dataTermino">Data de Término</Label>
-                  <Input
-                    id="dataTermino"
-                    type="date"
-                    value={dataTermino}
-                    onChange={(e) => setDataTermino(e.target.value)}
-                  />
-                </div>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="tipoDados" className="text-base font-medium">
+                      Tipo de Dados *
+                    </Label>
+                    <Select value={tipoDados} onValueChange={(v) => setTipoDados(v as TipoDadoLGPD)}>
+                      <SelectTrigger id="tipoDados" className="h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIPOS_DADOS.map(tipo => (
+                          <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={onClose}>Cancelar</Button>
-                <Button onClick={handleNext}>Próximo: Campos</Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="tecnicaAnonimizacao" className="text-base font-medium">
+                      Técnica de Anonimização *
+                    </Label>
+                    <Select value={tecnicaAnonimizacao} onValueChange={(v) => setTecnicaAnonimizacao(v as TecnicaAnonimizacao)}>
+                      <SelectTrigger id="tecnicaAnonimizacao" className="h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TECNICAS_ANONIMIZACAO.map(tec => (
+                          <SelectItem key={tec} value={tec}>{tec}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="dataInicio" className="text-base font-medium">
+                      Data de Início *
+                    </Label>
+                    <Input
+                      id="dataInicio"
+                      type="date"
+                      value={dataInicio}
+                      onChange={(e) => setDataInicio(e.target.value)}
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="dataTermino" className="text-base font-medium">
+                      Data de Término
+                    </Label>
+                    <Input
+                      id="dataTermino"
+                      type="date"
+                      value={dataTermino}
+                      onChange={(e) => setDataTermino(e.target.value)}
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ativo" className="text-base font-medium">
+                      Status
+                    </Label>
+                    <Select value={ativo ? '1' : '0'} onValueChange={(v) => setAtivo(v === '1')}>
+                      <SelectTrigger id="ativo" className="h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Ativo</SelectItem>
+                        <SelectItem value="0">Inativo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+            )}
 
-          {step === 2 && !showCampoForm && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">Campos e Matriz de Anonimização</h3>
-                <Button onClick={handleAddCampo} size="sm">
-                  <Plus size={16} className="mr-1" />
-                  Adicionar Campo
-                </Button>
-              </div>
-
-              {campos.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8 border rounded-md">
-                  Nenhum campo cadastrado. Clique em "Adicionar Campo" para começar.
+            {currentStep === 2 && !showCampoForm && !showCsvImport && (
+            <div className="space-y-6 py-4">
+              <div className="flex items-center justify-between pb-4 border-b">
+                <div>
+                  <h3 className="text-xl font-semibold">Campos e Matriz de Anonimização</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Configure as técnicas de anonimização específicas para cada departamento
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={() => setShowCsvImport(true)} size="lg" variant="outline">
+                    <Plus size={18} className="mr-2" />
+                    Importar CSV
+                  </Button>
+                  <Button onClick={handleAddCampo} size="lg">
+                    <Plus size={18} className="mr-2" />
+                    Adicionar Campo
+                  </Button>
+                </div>
+              </div>              {campos.length === 0 ? (
+                <div className="text-center text-muted-foreground py-16 border-2 border-dashed rounded-lg">
+                  <div className="space-y-3">
+                    <Plus size={48} className="mx-auto opacity-20" />
+                    <p className="text-base">Nenhum campo cadastrado</p>
+                    <p className="text-sm">Clique em "Adicionar Campo" para começar a configurar a matriz de anonimização</p>
+                  </div>
                 </div>
               ) : (
                 <div className="rounded-md border">
@@ -381,20 +587,65 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
                   </Table>
                 </div>
               )}
+            </div>
+            )}
 
-              <div className="flex justify-between pt-4">
-                <Button variant="outline" onClick={() => setStep(1)}>Voltar</Button>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={onClose}>Cancelar</Button>
-                  <Button onClick={handleSubmit} disabled={loading || campos.length === 0}>
-                    {loading ? 'Salvando...' : (registro ? 'Salvar Alterações' : 'Criar Registro')}
-                  </Button>
+            {currentStep === 2 && showCsvImport && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-4 border-b">
+                <div>
+                  <h3 className="text-lg font-medium">Importar Campos via CSV</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Cole o texto CSV ou carregue um arquivo
+                  </p>
                 </div>
               </div>
-            </div>
-          )}
 
-          {step === 2 && showCampoForm && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="csvFile">Carregar Arquivo CSV</Label>
+                  <Input
+                    id="csvFile"
+                    type="file"
+                    accept=".csv,.txt"
+                    onChange={handleFileUpload}
+                    className="mt-2"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Formato esperado: Nome do Campo, Descrição, Vendas, Marketing, Financeiro, RH, Logística, Assistência Técnica, Analytics
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="csvText">Ou Cole o Texto CSV</Label>
+                  <Textarea
+                    id="csvText"
+                    value={csvText}
+                    onChange={(e) => setCsvText(e.target.value)}
+                    placeholder="Nome do Campo,Descrição,Vendas,Marketing,Financeiro,RH,Logística,Assistência Técnica,Analytics&#10;CPF,Cadastro de Pessoa Física,Supressão,Generalização,Supressão,Supressão,Generalização,Generalização,Pseudonimização"
+                    className="font-mono text-sm"
+                    rows={10}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    • Nome do Campo será convertido para MAIÚSCULO automaticamente<br />
+                    • Valores não informados receberão "Generalização" como padrão<br />
+                    • Primeira linha pode ser cabeçalho ou dados
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => { setShowCsvImport(false); setCsvText(''); }}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleImportCsv} disabled={!csvText.trim()}>
+                  Importar Campos
+                </Button>
+              </div>
+            </div>
+            )}
+
+            {currentStep === 2 && showCampoForm && (
             <div className="space-y-4">
               <h3 className="text-lg font-medium">
                 {editingCampoIndex !== null ? 'Editar Campo' : 'Adicionar Campo'}
@@ -427,27 +678,49 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
                   Técnica padrão: <strong>{tecnicaAnonimizacao}</strong> (configurada na etapa anterior)
                 </p>
 
-                {DEPARTAMENTOS.map(dept => (
-                  <div key={dept.key}>
-                    <Label htmlFor={dept.key}>{dept.label}</Label>
-                    <Select
-                      value={eval(`matriz${dept.key.charAt(0).toUpperCase() + dept.key.slice(1)}`)}
-                      onValueChange={(v) => {
-                        const setter = eval(`setMatriz${dept.key.charAt(0).toUpperCase() + dept.key.slice(1)}`);
-                        setter(v as TecnicaAnonimizacao);
-                      }}
-                    >
-                      <SelectTrigger id={dept.key}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TECNICAS_ANONIMIZACAO.map(tec => (
-                          <SelectItem key={tec} value={tec}>{tec}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+                  {DEPARTAMENTOS.map(dept => {
+                    const matrizMap: Record<string, TecnicaAnonimizacao> = {
+                      vendas: matrizVendas,
+                      marketing: matrizMarketing,
+                      financeiro: matrizFinanceiro,
+                      rh: matrizRH,
+                      logistica: matrizLogistica,
+                      assistenciaTecnica: matrizAssistenciaTecnica,
+                      analytics: matrizAnalytics
+                    };
+                    
+                    const setterMap: Record<string, (v: TecnicaAnonimizacao) => void> = {
+                      vendas: setMatrizVendas,
+                      marketing: setMatrizMarketing,
+                      financeiro: setMatrizFinanceiro,
+                      rh: setMatrizRH,
+                      logistica: setMatrizLogistica,
+                      assistenciaTecnica: setMatrizAssistenciaTecnica,
+                      analytics: setMatrizAnalytics
+                    };
+
+                    return (
+                      <div key={dept.key} className="space-y-2">
+                        <Label htmlFor={dept.key} className="text-sm">{dept.label}</Label>
+                        <Select
+                          value={matrizMap[dept.key]}
+                          onValueChange={(v) => setterMap[dept.key](v as TecnicaAnonimizacao)}
+                        >
+                          <SelectTrigger id={dept.key}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Anonimização por Supressão">Supressão</SelectItem>
+                            <SelectItem value="Anonimização por Generalização">Generalização</SelectItem>
+                            <SelectItem value="Pseudonimização (Embaralhamento Reversível)">Pseudonimização</SelectItem>
+                            <SelectItem value="Anonimização por Permutação">Permutação</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
@@ -459,16 +732,39 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
                 </Button>
               </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            )}
+
+            <div className="flex justify-between mt-8 pt-6 border-t">
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={currentStep === 1}
+              >
+                <ArrowLeft className="mr-2" />
+                Anterior
+              </Button>
+              {currentStep < totalSteps ? (
+                <Button onClick={handleNext}>
+                  Próximo
+                  <ArrowRight className="ml-2" />
+                </Button>
+              ) : (
+                <Button onClick={handleSubmit} disabled={loading || campos.length === 0}>
+                  <Check className="mr-2" />
+                  {loading ? 'Salvando...' : (isEditing ? 'Salvar Alterações' : 'Criar Registro')}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Dialog para visualizar matriz */}
-      <Dialog open={showMatrizDialog} onOpenChange={setShowMatrizDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Matriz de Anonimização</DialogTitle>
-          </DialogHeader>
+      <AlertDialog open={showMatrizDialog} onOpenChange={setShowMatrizDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Matriz de Anonimização</AlertDialogTitle>
+          </AlertDialogHeader>
           {viewingCampoIndex !== null && campos[viewingCampoIndex] && (
             <div className="space-y-3">
               <div>
@@ -490,8 +786,13 @@ export function LGPDWizard({ open, onClose, registro, onSave }: LGPDWizardProps)
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-    </>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowMatrizDialog(false)}>
+              Fechar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
