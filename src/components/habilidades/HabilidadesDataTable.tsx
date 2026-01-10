@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Habilidade } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -80,6 +80,8 @@ const getDominioBadgeVariant = (dominio: string) => {
 
 export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: HabilidadesDataTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterTipo, setFilterTipo] = useState<string>('todos');
+  const [filterDominio, setFilterDominio] = useState<string>('todos');
   const [sortField, setSortField] = useState<SortField>('sigla');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -108,6 +110,17 @@ export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: Habilida
       : <CaretDown size={16} className="ml-1" />;
   };
 
+  // Obter listas únicas de tipos e domínios
+  const tiposUnicos = useMemo(() => {
+    const tipos = new Set(habilidades.map(h => h.tipo));
+    return Array.from(tipos).sort();
+  }, [habilidades]);
+
+  const dominiosUnicos = useMemo(() => {
+    const dominios = new Set(habilidades.map(h => h.dominio));
+    return Array.from(dominios).sort();
+  }, [habilidades]);
+
   const filteredAndSortedHabilidades = useMemo(() => {
     let result = habilidades.filter(hab => {
       const matchesSearch = 
@@ -115,7 +128,10 @@ export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: Habilida
         hab.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
         hab.dominio.toLowerCase().includes(searchTerm.toLowerCase());
       
-      return matchesSearch;
+      const matchesTipo = filterTipo === 'todos' || hab.tipo === filterTipo;
+      const matchesDominio = filterDominio === 'todos' || hab.dominio === filterDominio;
+      
+      return matchesSearch && matchesTipo && matchesDominio;
     });
 
     result.sort((a, b) => {
@@ -131,13 +147,25 @@ export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: Habilida
     });
 
     return result;
-  }, [habilidades, searchTerm, sortField, sortOrder]);
+  }, [habilidades, searchTerm, filterTipo, filterDominio, sortField, sortOrder]);
 
   const totalPages = Math.ceil(filteredAndSortedHabilidades.length / pageSize);
   const paginatedHabilidades = filteredAndSortedHabilidades.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterTipo, filterDominio]);
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setFilterTipo('todos');
+    setFilterDominio('todos');
+    setCurrentPage(1);
+  };
 
   return (
     <Card>
@@ -151,32 +179,44 @@ export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: Habilida
               <Input
                 placeholder="Buscar por sigla, descrição ou domínio..."
                 value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
+            <Select value={filterTipo} onValueChange={setFilterTipo}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Filtrar por tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os Tipos</SelectItem>
+                {tiposUnicos.map(tipo => (
+                  <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterDominio} onValueChange={setFilterDominio}>
+              <SelectTrigger className="w-full md:w-[280px]">
+                <SelectValue placeholder="Filtrar por domínio" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os Domínios</SelectItem>
+                {dominiosUnicos.map(dominio => (
+                  <SelectItem key={dominio} value={dominio}>{dominio}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              Mostrando {paginatedHabilidades.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, filteredAndSortedHabilidades.length)} de {filteredAndSortedHabilidades.length} habilidades
-            </div>
-            {searchTerm && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchTerm('');
-                  setCurrentPage(1);
-                }}
-              >
-                Limpar filtros
+          {(searchTerm || filterTipo !== 'todos' || filterDominio !== 'todos') && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {filteredAndSortedHabilidades.length} resultado(s) encontrado(s)
+              </span>
+              <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+                Limpar Filtros
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -284,7 +324,7 @@ export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: Habilida
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Itens por página:</span>
               <Select 
@@ -306,7 +346,19 @@ export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: Habilida
               </Select>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              Mostrando {paginatedHabilidades.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, filteredAndSortedHabilidades.length)} de {filteredAndSortedHabilidades.length} habilidades
+            </div>
+
+            <div className="flex gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+              >
+                Primeira
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -315,9 +367,6 @@ export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: Habilida
               >
                 Anterior
               </Button>
-              <span className="text-sm">
-                Página {currentPage} de {totalPages}
-              </span>
               <Button
                 variant="outline"
                 size="sm"
@@ -325,6 +374,14 @@ export function HabilidadesDataTable({ habilidades, onEdit, onDelete }: Habilida
                 disabled={currentPage === totalPages}
               >
                 Próxima
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+              >
+                Última
               </Button>
             </div>
           </div>

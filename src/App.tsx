@@ -41,6 +41,7 @@ import SpaceDashboardView from '@/components/space-dashboard/SpaceDashboardView'
 import { ApiCatalogGeneratorView } from '@/components/ApiCatalogGeneratorView';
 import { ReportBookView } from '@/components/reportbook/ReportBookView';
 import { SimilarityAnalyzer } from '@/components/reportbook/SimilarityAnalyzer';
+import { LGPDView } from '@/views/LGPDView';
 import { useLogging } from '@/hooks/use-logging';
 import { useApi, apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -69,7 +70,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -427,6 +428,8 @@ function App() {
         return <ReportBookView />;
       case 'similarity-analyzer':
         return <SimilarityAnalyzer />;
+      case 'lgpd':
+        return <LGPDView />;
       case 'carga-dados':
         return <CargaDadosView />;
       case 'carga-lockfiles':
@@ -658,6 +661,26 @@ function App() {
                     >
                       <BookOpen />
                       <span>Relatórios</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Governança e Compliance</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'lgpd'}
+                      onClick={() => {
+                        logClick('nav_lgpd');
+                        setCurrentView('lgpd');
+                      }}
+                    >
+                      <GearSix />
+                      <span>LGPD</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>

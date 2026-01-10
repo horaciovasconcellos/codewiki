@@ -20,7 +20,7 @@ import { formatarData } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface ColaboradorDetailsProps {
   colaborador: Colaborador;
@@ -198,7 +198,7 @@ export function ColaboradorDetails({
         ]);
 
         // Criar tabela
-        (doc as any).autoTable({
+        autoTable(doc, {
           startY: yPosition,
           head: [[
             '#',

@@ -67,6 +67,8 @@ export function ReportBookWizard({ report, onSave, onCancel }: ReportBookWizardP
 
   const [csvText, setCsvText] = useState('');
   const [showCsvImport, setShowCsvImport] = useState(false);
+  const [sqlSelect, setSqlSelect] = useState('');
+  const [showSqlImport, setShowSqlImport] = useState(false);
 
   useEffect(() => {
     if (report) {
@@ -230,6 +232,115 @@ export function ReportBookWizard({ report, onSave, onCancel }: ReportBookWizardP
     }
   };
 
+  const handleImportSql = () => {
+    if (!sqlSelect.trim()) {
+      toast.error('Cole a query SELECT para importar');
+      return;
+    }
+
+    logClick('import_sql_button');
+    try {
+      const query = sqlSelect.trim();
+      
+      // Validar se é um SELECT
+      if (!query.toUpperCase().includes('SELECT')) {
+        toast.error('A query deve conter um SELECT');
+        return;
+      }
+
+      // Extrair a parte SELECT até o FROM
+      const selectMatch = query.match(/SELECT\s+(.*?)\s+FROM/is);
+      if (!selectMatch) {
+        toast.error('Formato de SELECT inválido. Use: SELECT col1, col2 AS alias FROM ...');
+        return;
+      }
+
+      const selectClause = selectMatch[1];
+      const importedColumns: ReportColumn[] = [];
+
+      // Separar colunas (considerar vírgulas, mas não dentro de parênteses ou aspas)
+      const columns = selectClause.split(',').map(col => col.trim());
+
+      console.log('Colunas extraídas:', columns);
+
+      for (const col of columns) {
+        if (!col) continue;
+
+        let columnName = '';
+        let alias = '';
+        
+        // Verificar se tem AS (alias explícito)
+        const asMatch = col.match(/(.+?)\s+AS\s+(.+)/i);
+        if (asMatch) {
+          columnName = asMatch[1].trim();
+          alias = asMatch[2].trim();
+        } else {
+          // Verificar se tem alias sem AS (espaço simples)
+          const parts = col.split(/\s+/);
+          if (parts.length > 1 && !parts[1].match(/^(FROM|WHERE|GROUP|ORDER|LIMIT)/i)) {
+            columnName = parts[0].trim();
+            alias = parts[parts.length - 1].trim();
+          } else {
+            columnName = col.trim();
+            alias = '';
+          }
+        }
+
+        // Limpar pontos de tabela (ex: t.nome -> nome)
+        if (columnName.includes('.')) {
+          const dotParts = columnName.split('.');
+          columnName = dotParts[dotParts.length - 1];
+        }
+
+        // Remover caracteres especiais e funções
+        columnName = columnName.replace(/[`'"()]/g, '').trim();
+        alias = alias.replace(/[`'"()]/g, '').trim();
+
+        // Usar alias se existir, senão usar columnName
+        const finalName = alias || columnName;
+
+        // Pular se for * ou função agregada sem alias
+        if (finalName === '*' || !finalName) continue;
+
+        const column: ReportColumn = {
+          id: uuidv4(),
+          columnName: finalName,
+          dataType: 'VARCHAR',
+          orderDirection: 'ASC',
+          description: alias ? `${columnName} (${alias})` : columnName,
+          query: `SELECT ${col.trim()} FROM ...`
+        };
+
+        console.log('Coluna importada:', column);
+        importedColumns.push(column);
+      }
+
+      console.log('Total de colunas importadas do SQL:', importedColumns.length);
+
+      if (importedColumns.length === 0) {
+        toast.error('Nenhuma coluna válida encontrada no SELECT');
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        columns: [...prev.columns, ...importedColumns],
+        query: query
+      }));
+
+      setSqlSelect('');
+      setShowSqlImport(false);
+      logEvent('sql_imported', 'load', { 
+        columns_count: importedColumns.length
+      });
+      toast.success(`${importedColumns.length} coluna(s) importada(s) do SELECT`);
+    } catch (error) {
+      console.error('Erro ao importar SELECT:', error);
+      logError(error as Error, 'sql_import_error');
+      toast.error('Erro ao processar SELECT. Verifique o formato.');
+    }
+  };
+
   const handleSubmit = () => {
     if (!formData.nome) {
       toast.error('Nome é obrigatório');
@@ -382,17 +493,73 @@ export function ReportBookWizard({ report, onSave, onCancel }: ReportBookWizardP
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Adicionar Coluna</CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowCsvImport(!showCsvImport)}
-                  >
-                    <FileArrowDown className="mr-2" />
-                    {showCsvImport ? 'Fechar' : 'Importar CSV'}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowSqlImport(!showSqlImport);
+                        if (!showSqlImport) setShowCsvImport(false);
+                      }}
+                    >
+                      <FileArrowDown className="mr-2" />
+                      {showSqlImport ? 'Fechar' : 'Importar SELECT'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowCsvImport(!showCsvImport);
+                        if (!showCsvImport) setShowSqlImport(false);
+                      }}
+                    >
+                      <FileArrowDown className="mr-2" />
+                      {showCsvImport ? 'Fechar' : 'Importar CSV'}
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
+                {showSqlImport && (
+                  <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+                    <Label className="mb-2 block font-semibold">Cole sua query SELECT aqui</Label>
+                    <Textarea
+                      value={sqlSelect}
+                      onChange={(e) => setSqlSelect(e.target.value)}
+                      placeholder="SELECT id, nome, email AS contato, status FROM usuarios WHERE ativo = 1"
+                      rows={6}
+                      className="font-mono text-xs mb-2"
+                    />
+                    <div className="flex gap-2">
+                      <Button onClick={handleImportSql} size="sm">
+                        Importar Colunas do SELECT
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setSqlSelect('');
+                          setShowSqlImport(false);
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-2 space-y-1">
+                      <p><strong>Como funciona:</strong></p>
+                      <ul className="list-disc ml-4 space-y-1">
+                        <li>Extrai colunas e aliases da cláusula SELECT</li>
+                        <li>Nome: usa alias se existir, senão usa nome da coluna</li>
+                        <li>Descrição: gerada automaticamente</li>
+                        <li>Tipo: padrão VARCHAR (você pode editar depois)</li>
+                        <li>Ordenação: padrão ASC</li>
+                        <li>Query: arquivada automaticamente para cada campo</li>
+                      </ul>
+                      <p className="mt-2"><strong>Exemplo:</strong> SELECT id, nome, email AS contato FROM usuarios</p>
+                      <p>Resultado: colunas "id", "nome" e "contato"</p>
+                    </div>
+                  </div>
+                )}
                 {showCsvImport && (
                   <div className="mb-6 p-4 border rounded-lg bg-muted/50">
                     <Label className="mb-2 block font-semibold">Cole o texto CSV aqui</Label>

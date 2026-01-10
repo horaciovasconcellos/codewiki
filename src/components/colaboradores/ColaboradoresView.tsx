@@ -8,7 +8,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { formatarData } from '@/lib/utils';
 
 interface ColaboradoresViewProps {
@@ -384,7 +384,7 @@ export function ColaboradoresView({
         ]);
 
         // Criar tabela
-        (doc as any).autoTable({
+        autoTable(doc, {
           startY: yPosition,
           head: [[
             '#',

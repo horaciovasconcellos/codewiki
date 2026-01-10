@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Eye, PencilSimple, Plus, Trash, MagnifyingGlass, X, FilePdf } from '@phosphor-icons/react';
+import { Eye, PencilSimple, Plus, Trash, MagnifyingGlass, X, FilePdf, CaretUp, CaretDown, CaretUpDown } from '@phosphor-icons/react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +35,9 @@ interface ColaboradoresDataTableProps {
   onGeneratePDF?: (colaborador: Colaborador) => void;
 }
 
+type SortField = 'matricula' | 'nome' | 'setor' | 'dataAdmissao';
+type SortOrder = 'asc' | 'desc';
+
 export function ColaboradoresDataTable({
   colaboradores,
   onView,
@@ -46,14 +49,36 @@ export function ColaboradoresDataTable({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSetor, setFilterSetor] = useState<string>('todos');
   const [filterStatus, setFilterStatus] = useState<string>('todos');
+  const [sortField, setSortField] = useState<SortField>('nome');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const setores = useMemo(() => {
     const uniqueSetores = new Set(colaboradores.map(c => c.setor));
     return Array.from(uniqueSetores).sort();
   }, [colaboradores]);
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <CaretUpDown size={16} className="ml-1 text-muted-foreground" />;
+    }
+    return sortOrder === 'asc' 
+      ? <CaretUp size={16} className="ml-1" />
+      : <CaretDown size={16} className="ml-1" />;
+  };
+
   const filteredColaboradores = useMemo(() => {
-    return colaboradores.filter((colaborador) => {
+    let result = colaboradores.filter((colaborador) => {
       const matchesSearch = 
         searchTerm === '' ||
         colaborador.matricula.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -72,12 +97,57 @@ export function ColaboradoresDataTable({
 
       return matchesSearch && matchesSetor && matchesStatus;
     });
-  }, [colaboradores, searchTerm, filterSetor, filterStatus]);
+
+    // Ordenação
+    result.sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'matricula':
+          aValue = a.matricula;
+          bValue = b.matricula;
+          break;
+        case 'nome':
+          aValue = a.nome;
+          bValue = b.nome;
+          break;
+        case 'setor':
+          aValue = a.setor;
+          bValue = b.setor;
+          break;
+        case 'dataAdmissao':
+          aValue = new Date(a.dataAdmissao).getTime();
+          bValue = new Date(b.dataAdmissao).getTime();
+          break;
+        default:
+          return 0;
+      }
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sortOrder === 'asc' ? comparison : -comparison;
+      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+
+      return 0;
+    });
+
+    return result;
+  }, [colaboradores, searchTerm, filterSetor, filterStatus, sortField, sortOrder]);
+
+  const totalPages = Math.ceil(filteredColaboradores.length / pageSize);
+  const paginatedColaboradores = filteredColaboradores.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setFilterSetor('todos');
     setFilterStatus('todos');
+    setCurrentPage(1);
   };
 
   const hasActiveFilters = searchTerm !== '' || filterSetor !== 'todos' || filterStatus !== 'todos';
@@ -85,93 +155,88 @@ export function ColaboradoresDataTable({
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Lista de Colaboradores</CardTitle>
-            <CardDescription>
-              Cadastro e gerenciamento de colaboradores
-            </CardDescription>
-          </div>
-          <Button onClick={onNew}>
-            <Plus className="mr-2" />
-            Novo Colaborador
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
         <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Lista de Colaboradores</CardTitle>
+              <CardDescription>
+                Cadastro e gerenciamento de colaboradores
+              </CardDescription>
+            </div>
+            <Button onClick={onNew}>
+              <Plus className="mr-2" />
+              Novo Colaborador
+            </Button>
+          </div>
+        
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">
-                Buscar
-              </label>
-              <div className="relative">
-                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <div className="relative flex-1">
+                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
                 <Input
                   id="search-colaborador"
                   placeholder="Buscar por matrícula, nome ou setor..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="pl-10"
                 />
+                </div>
+              <div className="w-full sm:w-[200px]">
+                <Select value={filterSetor} onValueChange={(value) => {
+                  setFilterSetor(value);
+                  setCurrentPage(1);
+                }}>
+                  <SelectTrigger id="filter-setor">
+                    <SelectValue placeholder="Todos os setores" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os setores</SelectItem>
+                    {setores.map((setor) => (
+                      <SelectItem key={setor} value={setor}>
+                        {setor}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            <div className="w-full sm:w-[200px]">
-              <label className="text-sm font-medium mb-2 block">
-                Setor
-              </label>
-              <Select value={filterSetor} onValueChange={setFilterSetor}>
-                <SelectTrigger id="filter-setor">
-                  <SelectValue placeholder="Todos os setores" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos os setores</SelectItem>
-                  {setores.map((setor) => (
-                    <SelectItem key={setor} value={setor}>
-                      {setor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-full sm:w-[200px]">
-              <label className="text-sm font-medium mb-2 block">
-                Status
-              </label>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger id="filter-status">
-                  <SelectValue placeholder="Todos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="ativo">Ativos</SelectItem>
-                  <SelectItem value="demitido">Demitidos</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="w-full sm:w-[200px]">
+                <Select value={filterStatus} onValueChange={(value) => {
+                  setFilterStatus(value);
+                  setCurrentPage(1);
+                }}>
+                  <SelectTrigger id="filter-status">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="ativo">Ativos</SelectItem>
+                    <SelectItem value="demitido">Demitidos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              Mostrando {paginatedColaboradores.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, filteredColaboradores.length)} de {filteredColaboradores.length} colaborador{filteredColaboradores.length !== 1 ? 'es' : ''}
             </div>
             {hasActiveFilters && (
               <Button
-                variant="outline"
+                variant="ghost"
+                size="sm"
                 onClick={handleClearFilters}
-                className="w-full sm:w-auto"
               >
-                <X className="mr-2" />
-                Limpar Filtros
+                Limpar filtros
               </Button>
             )}
           </div>
-
-          {hasActiveFilters && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>
-                Exibindo {filteredColaboradores.length} de {colaboradores.length} colaborador{colaboradores.length !== 1 ? 'es' : ''}
-              </span>
-            </div>
-          )}
         </div>
-
-        <div className="mt-6">
-          {filteredColaboradores.length === 0 ? (
+      </CardHeader>
+      <CardContent>
+        <div className="rounded-md border">
+          {paginatedColaboradores.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               {colaboradores.length === 0 ? (
                 <>
@@ -189,10 +254,50 @@ export function ColaboradoresDataTable({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Matrícula</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Setor</TableHead>
-                  <TableHead>Data Admissão</TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-semibold hover:bg-transparent"
+                      onClick={() => handleSort('matricula')}
+                    >
+                      Matrícula
+                      {getSortIcon('matricula')}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-semibold hover:bg-transparent"
+                      onClick={() => handleSort('nome')}
+                    >
+                      Nome
+                      {getSortIcon('nome')}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-semibold hover:bg-transparent"
+                      onClick={() => handleSort('setor')}
+                    >
+                      Setor
+                      {getSortIcon('setor')}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 font-semibold hover:bg-transparent"
+                      onClick={() => handleSort('dataAdmissao')}
+                    >
+                      Data Admissão
+                      {getSortIcon('dataAdmissao')}
+                    </Button>
+                  </TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Afastamentos</TableHead>
                   <TableHead>Habilidades</TableHead>
@@ -201,8 +306,8 @@ export function ColaboradoresDataTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredColaboradores.map((colaborador) => (
-                  <TableRow key={colaborador.id}>
+                {paginatedColaboradores.map((colaborador) => (
+                  <TableRow key={colaborador.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">{colaborador.matricula}</TableCell>
                     <TableCell>{colaborador.nome}</TableCell>
                     <TableCell>{colaborador.setor}</TableCell>
@@ -286,6 +391,53 @@ export function ColaboradoresDataTable({
             </Table>
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Itens por página:</span>
+              <Select 
+                value={pageSize.toString()} 
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </Button>
+              <span className="text-sm">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Próxima
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
