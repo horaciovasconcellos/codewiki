@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, FloppyDisk, Eye, EyeSlash, Trash, Palette } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { TokenIntegracaoManager } from './TokenIntegracaoManager';
+import { generateUUID } from '@/utils/uuid';
 
 interface ThemeColors {
   primary: string;
@@ -131,6 +132,16 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
   const [filterSubjects, setFilterSubjects] = useState<FilterSubject[]>([]);
   const [novoFilterSubject, setNovoFilterSubject] = useState({ aplicacaoId: '', subject: '' });
   const [aplicacoes, setAplicacoes] = useState<any[]>([]);
+
+  // Configuração Gmail API
+  const [gmailClientId, setGmailClientId] = useState('');
+  const [gmailClientSecret, setGmailClientSecret] = useState('');
+  const [gmailScope, setGmailScope] = useState('gmail.readonly');
+  const [gmailAccessType, setGmailAccessType] = useState('offline');
+  const [showGmailClientSecret, setShowGmailClientSecret] = useState(false);
+  const [gmailAuthenticated, setGmailAuthenticated] = useState(false);
+  const [gmailFilterSubjects, setGmailFilterSubjects] = useState<FilterSubject[]>([]);
+  const [novoGmailFilterSubject, setNovoGmailFilterSubject] = useState({ aplicacaoId: '', subject: '' });
 
   // Templates YAML do Azure DevOps
   const [templatePullRequest, setTemplatePullRequest] = useState<File | null>(null);
@@ -305,6 +316,120 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
     }
   }, [tempScreenStyles]);
 
+  // Carregar configurações do Gmail
+  useEffect(() => {
+    const loadGmailConfig = async () => {
+      try {
+        const response = await fetch('/api/gmail/config');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.configured && data.config) {
+            setGmailClientId(data.config.clientId || '');
+            setGmailScope(data.config.scope || 'gmail.readonly');
+            setGmailAccessType(data.config.accessType || 'offline');
+            setGmailAuthenticated(data.config.authenticated || false);
+            setGmailFilterSubjects(data.config.filterSubjects || []);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao carregar configurações do Gmail:', error);
+      }
+    };
+    loadGmailConfig();
+  }, []);
+
+  // Salvar configurações do Gmail
+  const handleSaveGmailConfig = async () => {
+    try {
+      const response = await fetch('/api/gmail/save-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: gmailClientId,
+          clientSecret: gmailClientSecret || undefined,
+          scope: gmailScope,
+          accessType: gmailAccessType,
+          filterSubjects: gmailFilterSubjects
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success('Configurações do Gmail salvas com sucesso');
+        
+        if (data.needsAuth) {
+          toast.info('Agora você precisa autenticar com sua conta Google');
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Erro ao salvar configurações');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar configurações do Gmail:', error);
+      toast.error('Erro ao salvar configurações');
+    }
+  };
+
+  // Autenticar com Gmail
+  const handleAuthenticateGmail = async () => {
+    try {
+      // Primeiro salvar as configurações
+      await handleSaveGmailConfig();
+
+      // Depois buscar URL de autenticação
+      const response = await fetch('/api/gmail/auth-url');
+      if (response.ok) {
+        const data = await response.json();
+        window.open(data.authUrl, '_blank', 'width=600,height=700');
+        
+        toast.info('Uma janela será aberta para autenticação com o Google');
+        
+        // Recarregar configurações após 10 segundos para verificar se foi autenticado
+        setTimeout(async () => {
+          const configResponse = await fetch('/api/gmail/config');
+          if (configResponse.ok) {
+            const configData = await configResponse.json();
+            setGmailAuthenticated(configData.config?.authenticated || false);
+            if (configData.config?.authenticated) {
+              toast.success('Autenticação com Gmail concluída!');
+            }
+          }
+        }, 10000);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Erro ao gerar URL de autenticação');
+      }
+    } catch (error) {
+      console.error('Erro ao autenticar com Gmail:', error);
+      toast.error('Erro ao iniciar autenticação');
+    }
+  };
+
+  // Adicionar filtro de subject do Gmail
+  const handleAddGmailFilterSubject = () => {
+    if (!novoGmailFilterSubject.aplicacaoId || !novoGmailFilterSubject.subject.trim()) {
+      toast.error('Preencha a aplicação e o subject');
+      return;
+    }
+
+    const aplicacao = aplicacoes.find(app => app.id === novoGmailFilterSubject.aplicacaoId);
+    const novoFiltro: FilterSubject = {
+      id: generateUUID(),
+      aplicacaoId: novoGmailFilterSubject.aplicacaoId,
+      aplicacaoSigla: aplicacao?.sigla,
+      subject: novoGmailFilterSubject.subject
+    };
+
+    setGmailFilterSubjects([...gmailFilterSubjects, novoFiltro]);
+    setNovoGmailFilterSubject({ aplicacaoId: '', subject: '' });
+    toast.success('Filtro adicionado');
+  };
+
+  // Remover filtro de subject do Gmail
+  const handleRemoveGmailFilterSubject = (id: string) => {
+    setGmailFilterSubjects(gmailFilterSubjects.filter(f => f.id !== id));
+    toast.success('Filtro removido');
+  };
 
   const handleSave = async () => {
     try {
@@ -866,6 +991,277 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                     <p>• Mail.Read (para ler e-mails da caixa compartilhada)</p>
                     <p>• Mail.ReadWrite (se precisar marcar como lido)</p>
                     <p className="mt-2">Configure estas permissões no portal do Azure AD em "API permissions"</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Integração Gmail API</CardTitle>
+                <CardDescription>
+                  Configure a integração com Gmail API para leitura de e-mails
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-semibold mb-3">Credenciais OAuth 2.0</h4>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Configure as credenciais do projeto no Google Cloud Console
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="gmail-client-id">ID do Cliente (Client ID)</Label>
+                      <Input
+                        id="gmail-client-id"
+                        placeholder="000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
+                        value={gmailClientId}
+                        onChange={(e) => setGmailClientId(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        ID do cliente OAuth 2.0 do projeto Google Cloud
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="gmail-client-secret">Chave Secreta do Cliente (Client Secret)</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="gmail-client-secret"
+                          type={showGmailClientSecret ? 'text' : 'password'}
+                          placeholder="••••••••••••••••••••••••"
+                          value={gmailClientSecret}
+                          onChange={(e) => setGmailClientSecret(e.target.value)}
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setShowGmailClientSecret(!showGmailClientSecret)}
+                        >
+                          {showGmailClientSecret ? <EyeSlash /> : <Eye />}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Chave secreta do cliente OAuth 2.0
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="gmail-scope">Escopo (Scope)</Label>
+                        <Select
+                          value={gmailScope}
+                          onValueChange={setGmailScope}
+                        >
+                          <SelectTrigger id="gmail-scope">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="gmail.readonly">gmail.readonly (Ler e-mails)</SelectItem>
+                            <SelectItem value="gmail.modify">gmail.modify (Ler e Modificar)</SelectItem>
+                            <SelectItem value="mail.google.com">mail.google.com (Acesso Total)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          Nível de permissão de acesso ao Gmail
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="gmail-access-type">Tipo de Acesso (Access Type)</Label>
+                        <Select
+                          value={gmailAccessType}
+                          onValueChange={setGmailAccessType}
+                        >
+                          <SelectTrigger id="gmail-access-type">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="offline">offline (Com refresh token)</SelectItem>
+                            <SelectItem value="online">online (Apenas access token)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                          Define se deve gerar refresh token
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-3">Escopos Disponíveis</h4>
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-lg bg-muted/30">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">gmail.readonly</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Ler e-mails: Permite visualizar e buscar mensagens e configurações
+                          </p>
+                        </div>
+                        <code className="text-xs bg-background px-2 py-1 rounded border">
+                          https://www.googleapis.com/auth/gmail.readonly
+                        </code>
+                      </div>
+                    </div>
+
+                    <div className="p-3 border rounded-lg bg-muted/30">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">gmail.modify</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Ler e Modificar: Permite ler, enviar, excluir e modificar e-mails
+                          </p>
+                        </div>
+                        <code className="text-xs bg-background px-2 py-1 rounded border">
+                          https://www.googleapis.com/auth/gmail.modify
+                        </code>
+                      </div>
+                    </div>
+
+                    <div className="p-3 border rounded-lg bg-muted/30">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">mail.google.com</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Acesso Total: Acesso completo a todas as funcionalidades do Gmail
+                          </p>
+                        </div>
+                        <code className="text-xs bg-background px-2 py-1 rounded border">
+                          https://mail.google.com/
+                        </code>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-3">Filtros de Assunto (Subjects)</h4>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Configure os subjects por aplicação para filtrar os e-mails do Gmail
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="gmail-filter-aplicacao">Aplicação</Label>
+                        <Select
+                          value={novoGmailFilterSubject.aplicacaoId}
+                          onValueChange={(value) => setNovoGmailFilterSubject({ ...novoGmailFilterSubject, aplicacaoId: value })}
+                        >
+                          <SelectTrigger id="gmail-filter-aplicacao">
+                            <SelectValue placeholder="Selecione a aplicação" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {aplicacoes.map((app) => (
+                              <SelectItem key={app.id} value={app.id}>
+                                {app.sigla} - {app.descricao}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="gmail-filter-subject">Subject</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="gmail-filter-subject"
+                            placeholder="Ex: [Notificação] Sistema"
+                            value={novoGmailFilterSubject.subject}
+                            onChange={(e) => setNovoGmailFilterSubject({ ...novoGmailFilterSubject, subject: e.target.value })}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddGmailFilterSubject();
+                              }
+                            }}
+                          />
+                          <Button onClick={handleAddGmailFilterSubject} variant="outline">
+                            Adicionar
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {gmailFilterSubjects.length > 0 && (
+                      <div className="border rounded-lg">
+                        <table className="w-full">
+                          <thead className="border-b bg-muted/50">
+                            <tr>
+                              <th className="text-left p-3 text-sm font-medium">Aplicação</th>
+                              <th className="text-left p-3 text-sm font-medium">Subject</th>
+                              <th className="text-center p-3 text-sm font-medium w-24">Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {gmailFilterSubjects.map((filter) => (
+                              <tr key={filter.id} className="border-b last:border-0">
+                                <td className="p-3 text-sm font-medium">{filter.aplicacaoSigla}</td>
+                                <td className="p-3 text-sm">{filter.subject}</td>
+                                <td className="p-3 text-center">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleRemoveGmailFilterSubject(filter.id)}
+                                  >
+                                    <Trash className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {gmailFilterSubjects.length === 0 && (
+                      <div className="text-center py-8 border rounded-lg bg-muted/20">
+                        <p className="text-sm text-muted-foreground">
+                          Nenhum filtro de assunto configurado. Adicione filtros para segmentar os e-mails por aplicação.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="flex gap-3">
+                  <Button onClick={handleSaveGmailConfig} className="flex-1">
+                    <FloppyDisk className="mr-2" size={16} />
+                    Salvar Configurações
+                  </Button>
+                  <Button 
+                    onClick={handleAuthenticateGmail} 
+                    variant={gmailAuthenticated ? "outline" : "default"}
+                    className="flex-1"
+                  >
+                    {gmailAuthenticated ? (
+                      <>✓ Autenticado com Google</>
+                    ) : (
+                      <>Autenticar com Google</>
+                    )}
+                  </Button>
+                </div>
+
+                <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
+                  <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">
+                    ℹ️ Como configurar no Google Cloud Console
+                  </p>
+                  <div className="text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                    <p>1. Acesse o <strong>Google Cloud Console</strong> e crie um projeto</p>
+                    <p>2. Ative a <strong>Gmail API</strong> no projeto</p>
+                    <p>3. Configure a <strong>Tela de consentimento OAuth</strong></p>
+                    <p>4. Crie credenciais do tipo <strong>ID do cliente OAuth 2.0</strong></p>
+                    <p>5. Adicione os <strong>URIs de redirecionamento autorizados</strong></p>
+                    <p>6. Configure os <strong>escopos necessários</strong> para sua aplicação</p>
                   </div>
                 </div>
               </CardContent>

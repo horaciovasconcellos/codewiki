@@ -277,16 +277,16 @@ export function ProjetoSDDForm({ projeto, onClose, onSave }: ProjetoSDDFormProps
               className="font-mono text-sm resize-none overflow-y-auto"
               style={{ minHeight: '20rem', maxHeight: '20rem' }}
             />
-            <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-900">
-              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex items-start gap-2 p-3 bg-white dark:bg-white rounded-md border border-black dark:border-black">
+              <svg className="w-5 h-5 text-black dark:text-black flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <div className="text-xs text-blue-800 dark:text-blue-300">
+              <div className="text-xs text-black dark:text-black">
                 <p className="font-medium mb-1">Como usar o PRD:</p>
                 <ul className="list-disc list-inside space-y-1 ml-2">
                   <li>Estruture o documento com títulos (# ## ###) para separar seções</li>
                   <li>Use listas para requisitos funcionais e não-funcionais</li>
-                  <li>Os requisitos serão automaticamente extraídos e vinculados à tabela <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">requisitos_sdd</code></li>
+                  <li>Os requisitos serão automaticamente extraídos e vinculados à tabela <code className="bg-gray-100 dark:bg-gray-100 px-1 rounded text-black">requisitos_sdd</code></li>
                   <li>Tamanho máximo: 2MB</li>
                 </ul>
               </div>

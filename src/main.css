@@ -3,8 +3,24 @@
 @import './styles/theme.css';
 @import './index.css';
 @import "tw-animate-css";
+
 /*
-  ---break---
+  ==========================================
+  CONFIGURAÇÃO PADRÃO DO SISTEMA - CodeWiki
+  ==========================================
+  
+  Este arquivo contém as definições de CSS padrão do sistema.
+  Todas as variáveis CSS customizadas estão definidas aqui.
+  
+  Última atualização: 10 de janeiro de 2026
+  
+  Paleta de Cores:
+  - Light Mode: Tons neutros com foco em legibilidade
+  - Dark Mode: Contraste otimizado para uso prolongado
+  - Charts: 5 cores distintas para visualizações
+  - Sidebar: Tema personalizado com verde/roxo
+  
+  ==========================================
 */
 @custom-variant dark (&:is(.dark *));
 
@@ -29,41 +45,72 @@
 }
 
 /*
-  ---break---
+  ==========================================
+  TEMA LIGHT (PADRÃO)
+  ==========================================
+  
+  Definições de cores para o tema claro do sistema.
+  Baseado em OKLCH para melhor percepção de cores.
+  
+  Variáveis principais:
+  - background/foreground: Cores base do layout
+  - primary/secondary: Ações e destaques
+  - muted/accent: Elementos de suporte
+  - destructive: Ações críticas (deletar, erro)
+  - border/input/ring: Elementos de UI
+  - chart-1 a 5: Paleta para gráficos
+  - sidebar-*: Tema personalizado da sidebar
+  
+  ==========================================
 */
 :root {
+  /* === GEOMETRIA === */
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.66 0.16 265);
-  --sidebar: oklch(0.97 0.18 102);
-  --sidebar-foreground: oklch(0.35 0.15 270);
-  --sidebar-primary: oklch(0.35 0.15 270);
-  --sidebar-primary-foreground: oklch(0.97 0.18 102);
-  --sidebar-accent: oklch(0.96 0.12 95);
-  --sidebar-accent-foreground: oklch(0.35 0.15 270);
-  --sidebar-border: oklch(0.90 0.10 95);
-  --sidebar-ring: oklch(0.35 0.15 270);
+  
+  /* === CORES BASE === */
+  --background: oklch(1 0 0);           /* Branco puro */
+  --foreground: oklch(0.145 0 0);       /* Preto quase puro */
+  
+  /* === CARTÕES E POPUPS === */
+  --card: oklch(1 0 0);                 /* Branco */
+  --card-foreground: oklch(0.145 0 0);  /* Preto */
+  --popover: oklch(1 0 0);              /* Branco */
+  --popover-foreground: oklch(0.145 0 0); /* Preto */
+  
+  /* === CORES DE AÇÃO === */
+  --primary: oklch(0.205 0 0);          /* Preto para primário */
+  --primary-foreground: oklch(0.985 0 0); /* Branco para texto em primário */
+  --secondary: oklch(0.97 0 0);         /* Cinza muito claro */
+  --secondary-foreground: oklch(0.205 0 0); /* Preto */
+  
+  /* === CORES DE SUPORTE === */
+  --muted: oklch(0.97 0 0);             /* Cinza claro */
+  --muted-foreground: oklch(0.556 0 0); /* Cinza médio */
+  --accent: oklch(0.97 0 0);            /* Cinza claro */
+  --accent-foreground: oklch(0.205 0 0); /* Preto */
+  
+  /* === CORES DE SISTEMA === */
+  --destructive: oklch(0.577 0.245 27.325); /* Vermelho para ações destrutivas */
+  --border: oklch(0 0 0);           /* Preto absoluto para bordas */
+  --input: oklch(0.922 0 0);            /* Cinza muito claro para inputs */
+  --ring: oklch(0.708 0 0);             /* Cinza médio para focus ring */
+  
+  /* === PALETA DE GRÁFICOS === */
+  --chart-1: oklch(0.646 0.222 41.116); /* Laranja */
+  --chart-2: oklch(0.6 0.118 184.704);  /* Azul ciano */
+  --chart-3: oklch(0.398 0.07 227.392); /* Azul escuro */
+  --chart-4: oklch(0.828 0.189 84.429); /* Amarelo */
+  --chart-5: oklch(0.66 0.16 265);      /* Roxo */
+  
+  /* === TEMA DA SIDEBAR === */
+  --sidebar: oklch(0.97 0.18 102);                    /* Verde muito claro */
+  --sidebar-foreground: oklch(0.35 0.15 270);         /* Roxo escuro */
+  --sidebar-primary: oklch(0.35 0.15 270);            /* Roxo escuro */
+  --sidebar-primary-foreground: oklch(0.97 0.18 102); /* Verde muito claro */
+  --sidebar-accent: oklch(0.96 0.12 95);              /* Verde claro hover */
+  --sidebar-accent-foreground: oklch(0.35 0.15 270);  /* Roxo escuro */
+  --sidebar-border: oklch(0.90 0.10 95);              /* Verde claro borda */
+  --sidebar-ring: oklch(0.35 0.15 270);               /* Roxo escuro focus */
 }
 
 /*
@@ -182,5 +229,15 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Forçar bordas pretas em todos os elementos com borda */
+  [class*="border"],
+  .border,
+  .border-t,
+  .border-b,
+  .border-l,
+  .border-r {
+    border-color: oklch(0 0 0) !important;
   }
 }

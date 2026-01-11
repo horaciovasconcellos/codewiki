@@ -121,6 +121,149 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Endpoint para verificar status do Master
+app.get('/api/sincronismo/master', async (req, res) => {
+  try {
+    const [masterStatus] = await pool.query('SHOW MASTER STATUS');
+    const [processlist] = await pool.query('SHOW PROCESSLIST');
+    const [variables] = await pool.query("SHOW VARIABLES LIKE 'server_id'");
+    const [binlogStatus] = await pool.query("SHOW VARIABLES LIKE 'log_bin'");
+    
+    const slaveConnections = processlist.filter(proc => 
+      proc.Command === 'Binlog Dump' || proc.User === 'repl_user'
+    );
+    
+    res.json({
+      status: 'ok',
+      server_id: variables[0]?.Value || 'N/A',
+      binlog_enabled: binlogStatus[0]?.Value === 'ON',
+      master_status: masterStatus[0] || null,
+      slave_connections: slaveConnections.length,
+      slaves: slaveConnections.map(slave => ({
+        host: slave.Host,
+        state: slave.State,
+        time: slave.Time
+      })),
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Erro ao obter status do master:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: error.message 
+    });
+  }
+});
+
+// Endpoint para verificar status do Slave
+app.get('/api/sincronismo/slave', async (req, res) => {
+  try {
+    // Conectar ao slave (porta 3306 dentro do container Docker)
+    const slavePool = mysql.createPool({
+      host: process.env.MYSQL_SLAVE_HOST || 'mysql-slave',
+      port: process.env.MYSQL_SLAVE_PORT || 3306,
+      user: process.env.MYSQL_USER || 'app_user',
+      password: process.env.MYSQL_APP_PASSWORD || 'apppass123',
+      database: process.env.MYSQL_DATABASE || 'auditoria_db',
+      charset: 'utf8mb4',
+      connectionLimit: 2
+    });
+    
+    const [slaveStatus] = await slavePool.query('SHOW SLAVE STATUS');
+    const [variables] = await slavePool.query("SHOW VARIABLES LIKE 'server_id'");
+    
+    await slavePool.end();
+    
+    if (!slaveStatus || slaveStatus.length === 0) {
+      return res.json({
+        status: 'not_configured',
+        message: 'Replicação não configurada neste servidor',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    const slave = slaveStatus[0];
+    const isReplicating = slave.Slave_IO_Running === 'Yes' && slave.Slave_SQL_Running === 'Yes';
+    
+    res.json({
+      status: isReplicating ? 'ok' : 'error',
+      server_id: variables[0]?.Value || 'N/A',
+      slave_io_running: slave.Slave_IO_Running,
+      slave_sql_running: slave.Slave_SQL_Running,
+      seconds_behind_master: slave.Seconds_Behind_Master,
+      master_host: slave.Master_Host,
+      master_port: slave.Master_Port,
+      master_log_file: slave.Master_Log_File,
+      read_master_log_pos: slave.Read_Master_Log_Pos,
+      relay_log_file: slave.Relay_Log_File,
+      relay_log_pos: slave.Relay_Log_Pos,
+      last_io_error: slave.Last_IO_Error || '',
+      last_sql_error: slave.Last_SQL_Error || '',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Erro ao obter status do slave:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: error.message,
+      details: 'Não foi possível conectar ao slave. Verifique se o servidor está rodando.'
+    });
+  }
+});
+
+// Endpoint para testar replicação (inserir dado no master e verificar no slave)
+app.post('/api/sincronismo/test', async (req, res) => {
+  try {
+    const testMessage = `Teste de sincronismo - ${new Date().toISOString()}`;
+    
+    // Inserir no master
+    await pool.query(
+      'INSERT INTO replication_test (message) VALUES (?)',
+      [testMessage]
+    );
+    
+    // Aguardar 2 segundos para replicação
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Verificar no slave
+    const slavePool = mysql.createPool({
+      host: process.env.MYSQL_SLAVE_HOST || 'mysql-slave',
+      port: process.env.MYSQL_SLAVE_PORT || 3306,
+      user: process.env.MYSQL_USER || 'app_user',
+      password: process.env.MYSQL_APP_PASSWORD || 'apppass123',
+      database: process.env.MYSQL_DATABASE || 'auditoria_db',
+      charset: 'utf8mb4',
+      connectionLimit: 2
+    });
+    
+    const [rows] = await slavePool.query(
+      'SELECT * FROM replication_test WHERE message = ? ORDER BY created_at DESC LIMIT 1',
+      [testMessage]
+    );
+    
+    await slavePool.end();
+    
+    const success = rows && rows.length > 0;
+    
+    res.json({
+      status: success ? 'ok' : 'error',
+      test_message: testMessage,
+      replicated: success,
+      replication_data: success ? rows[0] : null,
+      message: success 
+        ? 'Teste de replicação bem-sucedido! Dados foram replicados corretamente.' 
+        : 'Falha na replicação! Dados não foram encontrados no slave.',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Erro ao testar replicação:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: error.message 
+    });
+  }
+});
+
 // Configuração do MySQL
 const dbConfig = {
   host: process.env.MYSQL_HOST || 'mysql-master',
@@ -9360,111 +9503,514 @@ async function startServer() {
     }
   });
 
-  // POST /api/notificacoes/buscar-emails - Buscar e-mails e salvar como notificações via Microsoft Graph API
-  app.post('/api/notificacoes/buscar-emails', async (req, res) => {
+  // ===== ENDPOINTS GMAIL OAUTH =====
+
+  // GET /api/gmail/auth-url - Gerar URL de autenticação OAuth do Gmail
+  app.get('/api/gmail/auth-url', async (req, res) => {
     try {
-      // Buscar configurações de e-mail
       const [configRows] = await pool.query(
         'SELECT valor FROM configuracoes WHERE chave = ?',
-        ['email-notifications']
+        ['gmail-config']
+      );
+      
+      let gmailConfig = {};
+      if (configRows.length > 0) {
+        gmailConfig = JSON.parse(configRows[0].valor);
+      }
+
+      if (!gmailConfig.clientId || !gmailConfig.clientSecret) {
+        return res.status(400).json({ 
+          error: 'Credenciais do Gmail não configuradas. Configure Client ID e Client Secret primeiro.' 
+        });
+      }
+
+      const { google } = await import('googleapis');
+      
+      const oauth2Client = new google.auth.OAuth2(
+        gmailConfig.clientId,
+        gmailConfig.clientSecret,
+        `${req.protocol}://${req.get('host')}/api/gmail/oauth-callback`
+      );
+
+      const scopes = [
+        gmailConfig.scope === 'gmail.modify' 
+          ? 'https://www.googleapis.com/auth/gmail.modify'
+          : gmailConfig.scope === 'mail.google.com'
+          ? 'https://mail.google.com/'
+          : 'https://www.googleapis.com/auth/gmail.readonly'
+      ];
+
+      const authUrl = oauth2Client.generateAuthUrl({
+        access_type: gmailConfig.accessType || 'offline',
+        scope: scopes,
+        prompt: 'consent'
+      });
+
+      res.json({ authUrl });
+    } catch (error) {
+      console.error('Erro ao gerar URL de autenticação:', error);
+      res.status(500).json({ error: 'Erro ao gerar URL de autenticação: ' + error.message });
+    }
+  });
+
+  // GET /api/gmail/oauth-callback - Callback OAuth do Gmail
+  app.get('/api/gmail/oauth-callback', async (req, res) => {
+    try {
+      const { code } = req.query;
+
+      if (!code) {
+        return res.status(400).send('Código de autorização não fornecido');
+      }
+
+      const [configRows] = await pool.query(
+        'SELECT valor FROM configuracoes WHERE chave = ?',
+        ['gmail-config']
       );
       
       if (configRows.length === 0) {
-        return res.status(400).json({ 
-          error: 'Configurações de e-mail não encontradas. Configure em Configurações > Notificações.' 
-        });
+        return res.status(400).send('Configurações do Gmail não encontradas');
       }
+
+      const gmailConfig = JSON.parse(configRows[0].valor);
+
+      const { google } = await import('googleapis');
       
-      const emailConfig = JSON.parse(configRows[0].valor);
-      
-      // Validar configurações do Graph API
-      if (!emailConfig.tenantId || !emailConfig.clientId || !emailConfig.clientSecret) {
-        return res.status(400).json({ 
-          error: 'Credenciais do Azure AD não configuradas. Configure Tenant ID, Client ID e Client Secret.' 
-        });
-      }
-
-      if (!emailConfig.emailCaixa) {
-        return res.status(400).json({ 
-          error: 'E-mail da caixa não configurado.' 
-        });
-      }
-
-      console.log('Conectando ao Microsoft Graph API...');
-
-      // Importar bibliotecas do Graph API dinamicamente
-      const { Client } = await import('@microsoft/microsoft-graph-client');
-      const { ClientSecretCredential } = await import('@azure/identity');
-      const fetch = (await import('isomorphic-fetch')).default;
-
-      // Criar credencial com Client Credentials Flow
-      const credential = new ClientSecretCredential(
-        emailConfig.tenantId,
-        emailConfig.clientId,
-        emailConfig.clientSecret
+      const oauth2Client = new google.auth.OAuth2(
+        gmailConfig.clientId,
+        gmailConfig.clientSecret,
+        `${req.protocol}://${req.get('host')}/api/gmail/oauth-callback`
       );
 
-      // Obter token de acesso
-      const tokenResponse = await credential.getToken('https://graph.microsoft.com/.default');
-
-      // Criar cliente do Graph
-      const client = Client.init({
-        authProvider: (done) => {
-          done(null, tokenResponse.token);
-        }
-      });
-
-      // Calcular data de corte (últimos 30 dias)
-      const dataCutoff = new Date();
-      dataCutoff.setDate(dataCutoff.getDate() - 30);
-      const filterDate = dataCutoff.toISOString();
-
-      // Buscar e-mails não lidos da caixa
-      let messagesQuery = `/users/${emailConfig.emailCaixa}/messages?$filter=isRead eq false and receivedDateTime ge ${filterDate}`;
+      const { tokens } = await oauth2Client.getToken(code);
       
-      // Adicionar filtros de assunto se configurados usando filterSubjects (com aplicação)
-      if (emailConfig.filterSubjects && Array.isArray(emailConfig.filterSubjects) && emailConfig.filterSubjects.length > 0) {
-        const subjectFilters = emailConfig.filterSubjects
-          .map(fs => `contains(subject,'${fs.subject.replace(/'/g, "''")}')`)
-          .join(' or ');
-        messagesQuery += ` and (${subjectFilters})`;
+      // Salvar tokens no banco
+      gmailConfig.accessToken = tokens.access_token;
+      gmailConfig.refreshToken = tokens.refresh_token;
+      gmailConfig.expiryDate = tokens.expiry_date;
+
+      await pool.query(
+        'UPDATE configuracoes SET valor = ?, updated_at = NOW() WHERE chave = ?',
+        [JSON.stringify(gmailConfig), 'gmail-config']
+      );
+
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Autenticação Gmail Concluída</title>
+          <style>
+            body { 
+              font-family: system-ui, -apple-system, sans-serif; 
+              display: flex; 
+              justify-content: center; 
+              align-items: center; 
+              height: 100vh; 
+              margin: 0;
+              background: #f5f5f5;
+            }
+            .success-box {
+              background: white;
+              padding: 40px;
+              border-radius: 8px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              text-align: center;
+              max-width: 500px;
+            }
+            .success-icon {
+              font-size: 48px;
+              color: #22c55e;
+              margin-bottom: 16px;
+            }
+            h1 { color: #22c55e; margin: 0 0 16px 0; }
+            p { color: #666; margin: 8px 0; }
+            button {
+              margin-top: 24px;
+              padding: 12px 24px;
+              background: #3b82f6;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 16px;
+            }
+            button:hover { background: #2563eb; }
+          </style>
+        </head>
+        <body>
+          <div class="success-box">
+            <div class="success-icon">✓</div>
+            <h1>Autenticação Concluída!</h1>
+            <p>Sua conta Gmail foi conectada com sucesso.</p>
+            <p>Você já pode fechar esta janela e voltar para o sistema.</p>
+            <button onclick="window.close()">Fechar</button>
+          </div>
+        </body>
+        </html>
+      `);
+    } catch (error) {
+      console.error('Erro no callback OAuth:', error);
+      res.status(500).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Erro na Autenticação</title>
+          <style>
+            body { 
+              font-family: system-ui, -apple-system, sans-serif; 
+              display: flex; 
+              justify-content: center; 
+              align-items: center; 
+              height: 100vh; 
+              margin: 0;
+              background: #f5f5f5;
+            }
+            .error-box {
+              background: white;
+              padding: 40px;
+              border-radius: 8px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              text-align: center;
+              max-width: 500px;
+            }
+            .error-icon {
+              font-size: 48px;
+              color: #ef4444;
+              margin-bottom: 16px;
+            }
+            h1 { color: #ef4444; margin: 0 0 16px 0; }
+            p { color: #666; margin: 8px 0; }
+            .error-details {
+              background: #fee;
+              padding: 12px;
+              border-radius: 4px;
+              margin-top: 16px;
+              font-family: monospace;
+              font-size: 12px;
+              color: #c00;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="error-box">
+            <div class="error-icon">✗</div>
+            <h1>Erro na Autenticação</h1>
+            <p>Não foi possível completar a autenticação com o Gmail.</p>
+            <div class="error-details">${error.message}</div>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+  });
+
+  // POST /api/gmail/save-config - Salvar configurações do Gmail
+  app.post('/api/gmail/save-config', async (req, res) => {
+    try {
+      const { clientId, clientSecret, scope, accessType, filterSubjects } = req.body;
+
+      if (!clientId || !clientSecret) {
+        return res.status(400).json({ 
+          error: 'Client ID e Client Secret são obrigatórios' 
+        });
       }
 
-      messagesQuery += '&$select=id,receivedDateTime,from,subject,bodyPreview,body&$top=50';
+      const gmailConfig = {
+        clientId,
+        clientSecret,
+        scope: scope || 'gmail.readonly',
+        accessType: accessType || 'offline',
+        filterSubjects: filterSubjects || []
+      };
 
-      console.log('Buscando e-mails:', messagesQuery);
+      // Verificar se já existe configuração
+      const [existing] = await pool.query(
+        'SELECT id FROM configuracoes WHERE chave = ?',
+        ['gmail-config']
+      );
 
-      const messages = await client
-        .api(messagesQuery)
-        .get();
-
-      console.log(`Encontrados ${messages.value?.length || 0} e-mails`);
-
-      const emailsEncontrados = [];
-
-      for (const message of messages.value || []) {
-        // Encontrar a aplicação correspondente ao subject
-        const filterMatch = emailConfig.filterSubjects?.find(fs => 
-          message.subject && message.subject.includes(fs.subject)
+      if (existing.length > 0) {
+        // Atualizar configuração existente preservando tokens se já existirem
+        const [current] = await pool.query(
+          'SELECT valor FROM configuracoes WHERE chave = ?',
+          ['gmail-config']
         );
+        const currentConfig = JSON.parse(current[0].valor);
+        
+        // Preservar tokens se existirem
+        if (currentConfig.accessToken) gmailConfig.accessToken = currentConfig.accessToken;
+        if (currentConfig.refreshToken) gmailConfig.refreshToken = currentConfig.refreshToken;
+        if (currentConfig.expiryDate) gmailConfig.expiryDate = currentConfig.expiryDate;
 
-        const email = {
-          id: uuidv4(),
-          de: message.from?.emailAddress?.address || 'Desconhecido',
-          subject: message.subject || 'Sem assunto',
-          conteudo: (message.body?.content || message.bodyPreview || 'Sem conteúdo').substring(0, 5000),
-          data_recebimento: new Date(message.receivedDateTime),
-          aplicacao_id: filterMatch?.aplicacaoId || null,
-          aplicacao_sigla: filterMatch?.aplicacaoSigla || null,
-          email: emailConfig.emailCaixa || null
-        };
-
-        emailsEncontrados.push(email);
+        await pool.query(
+          'UPDATE configuracoes SET valor = ?, updated_at = NOW() WHERE chave = ?',
+          [JSON.stringify(gmailConfig), 'gmail-config']
+        );
+      } else {
+        // Inserir nova configuração
+        await pool.query(
+          'INSERT INTO configuracoes (id, chave, valor, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())',
+          [uuidv4(), 'gmail-config', JSON.stringify(gmailConfig)]
+        );
       }
 
-      // Salvar notificações no banco
+      res.json({ 
+        success: true, 
+        message: 'Configurações do Gmail salvas com sucesso',
+        needsAuth: !gmailConfig.refreshToken 
+      });
+    } catch (error) {
+      console.error('Erro ao salvar configurações do Gmail:', error);
+      res.status(500).json({ error: 'Erro ao salvar configurações: ' + error.message });
+    }
+  });
+
+  // GET /api/gmail/config - Buscar configurações do Gmail
+  app.get('/api/gmail/config', async (req, res) => {
+    try {
+      const [configRows] = await pool.query(
+        'SELECT valor FROM configuracoes WHERE chave = ?',
+        ['gmail-config']
+      );
+      
+      if (configRows.length === 0) {
+        return res.json({ 
+          configured: false,
+          config: {
+            clientId: '',
+            clientSecret: '',
+            scope: 'gmail.readonly',
+            accessType: 'offline',
+            filterSubjects: []
+          }
+        });
+      }
+
+      const gmailConfig = JSON.parse(configRows[0].valor);
+      
+      // Não enviar tokens sensíveis para o frontend
+      const safeConfig = {
+        clientId: gmailConfig.clientId || '',
+        clientSecret: gmailConfig.clientSecret ? '••••••••••••••••' : '',
+        scope: gmailConfig.scope || 'gmail.readonly',
+        accessType: gmailConfig.accessType || 'offline',
+        filterSubjects: gmailConfig.filterSubjects || [],
+        hasRefreshToken: !!gmailConfig.refreshToken,
+        authenticated: !!gmailConfig.refreshToken
+      };
+
+      res.json({ 
+        configured: true,
+        config: safeConfig
+      });
+    } catch (error) {
+      console.error('Erro ao buscar configurações do Gmail:', error);
+      res.status(500).json({ error: 'Erro ao buscar configurações: ' + error.message });
+    }
+  });
+
+  // POST /api/notificacoes/buscar-emails - Buscar e-mails e salvar como notificações via Microsoft Graph API e Gmail API
+  app.post('/api/notificacoes/buscar-emails', async (req, res) => {
+    try {
+      let todosEmailsEncontrados = [];
       let notificacoesInseridas = 0;
-      for (const email of emailsEncontrados) {
+      const resultados = { outlook: 0, gmail: 0, total: 0 };
+
+      // ========== BUSCAR NO OUTLOOK (Microsoft Graph API) ==========
+      try {
+        const [configRowsOutlook] = await pool.query(
+          'SELECT valor FROM configuracoes WHERE chave = ?',
+          ['email-notifications']
+        );
+        
+        if (configRowsOutlook.length > 0) {
+          const emailConfig = JSON.parse(configRowsOutlook[0].valor);
+          
+          // Validar se tem as configurações necessárias
+          if (emailConfig.tenantId && emailConfig.clientId && emailConfig.clientSecret && emailConfig.emailCaixa) {
+            console.log('[Outlook] Conectando ao Microsoft Graph API...');
+
+            // Importar bibliotecas do Graph API dinamicamente
+            const { Client } = await import('@microsoft/microsoft-graph-client');
+            const { ClientSecretCredential } = await import('@azure/identity');
+
+            // Criar credencial com Client Credentials Flow
+            const credential = new ClientSecretCredential(
+              emailConfig.tenantId,
+              emailConfig.clientId,
+              emailConfig.clientSecret
+            );
+
+            // Obter token de acesso
+            const tokenResponse = await credential.getToken('https://graph.microsoft.com/.default');
+
+            // Criar cliente do Graph
+            const client = Client.init({
+              authProvider: (done) => {
+                done(null, tokenResponse.token);
+              }
+            });
+
+            // Calcular data de corte (últimos 30 dias)
+            const dataCutoff = new Date();
+            dataCutoff.setDate(dataCutoff.getDate() - 30);
+            const filterDate = dataCutoff.toISOString();
+
+            // Buscar e-mails não lidos da caixa
+            let messagesQuery = `/users/${emailConfig.emailCaixa}/messages?$filter=isRead eq false and receivedDateTime ge ${filterDate}`;
+            
+            // Adicionar filtros de assunto se configurados
+            if (emailConfig.filterSubjects && Array.isArray(emailConfig.filterSubjects) && emailConfig.filterSubjects.length > 0) {
+              const subjectFilters = emailConfig.filterSubjects
+                .map(fs => `contains(subject,'${fs.subject.replace(/'/g, "''")}')`)
+                .join(' or ');
+              messagesQuery += ` and (${subjectFilters})`;
+            }
+
+            messagesQuery += '&$select=id,receivedDateTime,from,subject,bodyPreview,body&$top=50';
+
+            console.log('[Outlook] Buscando e-mails...');
+
+            const messages = await client.api(messagesQuery).get();
+
+            console.log(`[Outlook] Encontrados ${messages.value?.length || 0} e-mails`);
+
+            for (const message of messages.value || []) {
+              const filterMatch = emailConfig.filterSubjects?.find(fs => 
+                message.subject && message.subject.includes(fs.subject)
+              );
+
+              todosEmailsEncontrados.push({
+                id: uuidv4(),
+                de: message.from?.emailAddress?.address || 'Desconhecido',
+                subject: message.subject || 'Sem assunto',
+                conteudo: (message.body?.content || message.bodyPreview || 'Sem conteúdo').substring(0, 5000),
+                data_recebimento: new Date(message.receivedDateTime),
+                aplicacao_id: filterMatch?.aplicacaoId || null,
+                aplicacao_sigla: filterMatch?.aplicacaoSigla || null,
+                email: emailConfig.emailCaixa || null,
+                fonte: 'Outlook'
+              });
+            }
+            
+            resultados.outlook = messages.value?.length || 0;
+          } else {
+            console.log('[Outlook] Configurações incompletas, pulando busca no Outlook');
+          }
+        }
+      } catch (errorOutlook) {
+        console.error('[Outlook] Erro ao buscar e-mails:', errorOutlook.message);
+        // Continua para tentar o Gmail
+      }
+
+      // ========== BUSCAR NO GMAIL ==========
+      try {
+        const [configRowsGmail] = await pool.query(
+          'SELECT valor FROM configuracoes WHERE chave = ?',
+          ['gmail-config']
+        );
+        
+        if (configRowsGmail.length > 0) {
+          const gmailConfig = JSON.parse(configRowsGmail[0].valor);
+          
+          // Validar se tem as configurações necessárias
+          if (gmailConfig.clientId && gmailConfig.clientSecret && gmailConfig.refreshToken) {
+            console.log('[Gmail] Conectando ao Gmail API...');
+
+            const { google } = await import('googleapis');
+            
+            const oauth2Client = new google.auth.OAuth2(
+              gmailConfig.clientId,
+              gmailConfig.clientSecret,
+              'http://localhost'
+            );
+
+            oauth2Client.setCredentials({
+              refresh_token: gmailConfig.refreshToken
+            });
+
+            const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+
+            // Calcular data de corte (últimos 30 dias)
+            const dataCutoff = new Date();
+            dataCutoff.setDate(dataCutoff.getDate() - 30);
+            const afterDate = Math.floor(dataCutoff.getTime() / 1000);
+
+            // Buscar e-mails não lidos
+            let query = `is:unread after:${afterDate}`;
+            
+            // Adicionar filtros de assunto se configurados
+            if (gmailConfig.filterSubjects && Array.isArray(gmailConfig.filterSubjects) && gmailConfig.filterSubjects.length > 0) {
+              const subjectQuery = gmailConfig.filterSubjects
+                .map(fs => `subject:"${fs.subject}"`)
+                .join(' OR ');
+              query += ` (${subjectQuery})`;
+            }
+
+            console.log('[Gmail] Query:', query);
+
+            const response = await gmail.users.messages.list({
+              userId: 'me',
+              q: query,
+              maxResults: 50
+            });
+
+            const messages = response.data.messages || [];
+            console.log(`[Gmail] Encontrados ${messages.length} e-mails`);
+
+            for (const message of messages) {
+              // Buscar detalhes da mensagem
+              const msgDetail = await gmail.users.messages.get({
+                userId: 'me',
+                id: message.id,
+                format: 'full'
+              });
+
+              const headers = msgDetail.data.payload.headers;
+              const subject = headers.find(h => h.name === 'Subject')?.value || 'Sem assunto';
+              const from = headers.find(h => h.name === 'From')?.value || 'Desconhecido';
+              const date = headers.find(h => h.name === 'Date')?.value;
+
+              // Extrair conteúdo
+              let body = '';
+              if (msgDetail.data.payload.body.data) {
+                body = Buffer.from(msgDetail.data.payload.body.data, 'base64').toString('utf-8');
+              } else if (msgDetail.data.payload.parts) {
+                const textPart = msgDetail.data.payload.parts.find(p => p.mimeType === 'text/plain');
+                if (textPart?.body?.data) {
+                  body = Buffer.from(textPart.body.data, 'base64').toString('utf-8');
+                }
+              }
+
+              // Encontrar a aplicação correspondente ao subject
+              const filterMatch = gmailConfig.filterSubjects?.find(fs => 
+                subject && subject.includes(fs.subject)
+              );
+
+              todosEmailsEncontrados.push({
+                id: uuidv4(),
+                de: from,
+                subject: subject,
+                conteudo: (msgDetail.data.snippet || body || 'Sem conteúdo').substring(0, 5000),
+                data_recebimento: date ? new Date(date) : new Date(),
+                aplicacao_id: filterMatch?.aplicacaoId || null,
+                aplicacao_sigla: filterMatch?.aplicacaoSigla || null,
+                email: 'gmail',
+                fonte: 'Gmail'
+              });
+            }
+            
+            resultados.gmail = messages.length;
+          } else {
+            console.log('[Gmail] Configurações incompletas, pulando busca no Gmail');
+          }
+        }
+      } catch (errorGmail) {
+        console.error('[Gmail] Erro ao buscar e-mails:', errorGmail.message);
+        // Continua mesmo com erro
+      }
+
+      // ========== SALVAR NOTIFICAÇÕES NO BANCO ==========
+      for (const email of todosEmailsEncontrados) {
         // Verificar se já existe
         const [existing] = await pool.query(
           'SELECT id FROM notificacoes WHERE subject = ? AND de = ? AND DATE(data_recebimento) = DATE(?)',
@@ -9480,10 +10026,17 @@ async function startServer() {
         }
       }
       
+      resultados.total = notificacoesInseridas;
+
+      let message = `${notificacoesInseridas} nova(s) notificação(ões) encontrada(s)`;
+      if (resultados.outlook > 0 || resultados.gmail > 0) {
+        message += ` (Outlook: ${resultados.outlook}, Gmail: ${resultados.gmail})`;
+      }
+      
       res.json({ 
         success: true, 
-        message: `${notificacoesInseridas} nova(s) notificação(ões) encontrada(s)`,
-        total: notificacoesInseridas 
+        message,
+        resultados
       });
     } catch (error) {
       console.error('Erro ao buscar e-mails:', error);
@@ -13137,13 +13690,13 @@ app.post('/api/sdd/projetos', async (req, res) => {
 // PUT /api/sdd/projetos/:id - Atualizar projeto
 app.put('/api/sdd/projetos/:id', async (req, res) => {
   try {
-    const { aplicacao_id, nome_projeto, ia_selecionada, constituicao, prd_content, gerador_projetos } = req.body;
+    const { aplicacao_id, nome_projeto, ia_selecionada, constituicao, gerador_projetos } = req.body;
     
     await pool.query(`
       UPDATE projetos_sdd
-      SET aplicacao_id = ?, nome_projeto = ?, ia_selecionada = ?, constituicao = ?, prd_content = ?, gerador_projetos = ?
+      SET aplicacao_id = ?, nome_projeto = ?, ia_selecionada = ?, constituicao = ?, gerador_projetos = ?
       WHERE id = ?
-    `, [aplicacao_id || null, nome_projeto, ia_selecionada, constituicao || null, prd_content || null, gerador_projetos, req.params.id]);
+    `, [aplicacao_id || null, nome_projeto, ia_selecionada, constituicao || null, gerador_projetos, req.params.id]);
     
     const [rows] = await pool.query(`
       SELECT 

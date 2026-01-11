@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { ProjetoSDD } from '@/types/sdd';
 import { ProjetoSDDForm } from './ProjetoSDDForm';
 import { RequisitosList } from './RequisitosList';
@@ -58,36 +59,38 @@ export function ProjetoSDDDetail({ projeto: initialProjeto, onBack }: ProjetoSDD
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <header className="flex items-center gap-4 border-b px-6 py-3" style={{backgroundColor: 'var(--card-bg)'}}>
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <FileText className="w-6 h-6" />
-            <div>
-              <h1 className="text-2xl font-bold" style={{color: 'var(--card-text)'}}>
-                {projeto.nome_projeto}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {projeto.aplicacao_nome ? `${projeto.aplicacao_sigla} - ${projeto.aplicacao_nome}` : 'Sem aplicação'}
-              </p>
+    <div className="container mx-auto py-8 px-4 max-w-7xl">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <FileText className="w-6 h-6" />
+              <div>
+                <h1 className="text-2xl font-bold">
+                  {projeto.nome_projeto}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {projeto.aplicacao_nome ? `${projeto.aplicacao_sigla} - ${projeto.aplicacao_nome}` : 'Sem aplicação'}
+                </p>
+              </div>
             </div>
           </div>
+          <Badge variant="outline">{projeto.ia_selecionada}</Badge>
+          {projeto.gerador_projetos && (
+            <Badge className="bg-green-100 text-green-800">Gerador Ativo</Badge>
+          )}
+          <Button variant="outline" size="sm" onClick={() => setShowEditForm(true)}>
+            <Edit className="w-4 h-4 mr-2" />
+            Editar
+          </Button>
         </div>
-        <Badge variant="outline">{projeto.ia_selecionada}</Badge>
-        {projeto.gerador_projetos && (
-          <Badge className="bg-green-100 text-green-800">Gerador Ativo</Badge>
-        )}
-        <Button variant="outline" size="sm" onClick={() => setShowEditForm(true)}>
-          <Edit className="w-4 h-4 mr-2" />
-          Editar
-        </Button>
-      </header>
 
-      <div className="flex-1 overflow-auto p-6">
+        <Separator />
+
         <div className="space-y-6">
           {/* Bloco 1: Projeto SDD */}
           <Card>
@@ -155,15 +158,15 @@ export function ProjetoSDDDetail({ projeto: initialProjeto, onBack }: ProjetoSDD
 
           {/* Bloco 3: Tarefas aparece dentro dos requisitos expandidos */}
         </div>
-      </div>
 
-      {showEditForm && (
-        <ProjetoSDDForm
-          projeto={projeto}
-          onClose={() => setShowEditForm(false)}
-          onSave={handleUpdate}
-        />
-      )}
+        {showEditForm && (
+          <ProjetoSDDForm
+            projeto={projeto}
+            onClose={() => setShowEditForm(false)}
+            onSave={handleUpdate}
+          />
+        )}
+      </div>
     </div>
   );
 }

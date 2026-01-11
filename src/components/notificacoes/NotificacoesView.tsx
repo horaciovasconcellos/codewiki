@@ -54,6 +54,7 @@ interface Notificacao {
   aplicacaoId?: string;
   aplicacaoSigla?: string;
   email?: string;
+  fonte?: 'Outlook' | 'Gmail';
 }
 
 export function NotificacoesView() {
@@ -192,7 +193,7 @@ export function NotificacoesView() {
               Notificações por E-mail
             </h1>
             <p className="text-muted-foreground mt-2">
-              Visualize e gerencie as notificações recebidas por e-mail do sistema
+              Visualize e gerencie as notificações recebidas por e-mail do Outlook e Gmail
             </p>
           </div>
         </div>
@@ -215,7 +216,7 @@ export function NotificacoesView() {
               </div>
               <Button onClick={handleSyncEmails} disabled={loading}>
                 <ArrowsClockwise className="mr-2" size={16} />
-                Sincronizar E-mails
+                Sincronizar E-mails (Outlook + Gmail)
               </Button>
             </div>
           </CardHeader>
@@ -241,7 +242,7 @@ export function NotificacoesView() {
                       <TableHead>Aplicação</TableHead>
                       <TableHead>De</TableHead>
                       <TableHead>Assunto</TableHead>
-                      <TableHead>E-mail</TableHead>
+                      <TableHead>Fonte</TableHead>
                       <TableHead className="w-[70px]"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -286,10 +287,16 @@ export function NotificacoesView() {
                             {notificacao.subject}
                           </TableCell>
                           <TableCell className="text-sm">
-                            {notificacao.email ? (
-                              <span className="text-xs text-muted-foreground">{notificacao.email}</span>
+                            {notificacao.email === 'gmail' || notificacao.fonte === 'Gmail' ? (
+                              <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">
+                                Gmail
+                              </Badge>
+                            ) : notificacao.email && notificacao.email !== 'gmail' ? (
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100">
+                                Outlook
+                              </Badge>
                             ) : (
-                              <span className="text-muted-foreground">-</span>
+                              <span className="text-muted-foreground text-xs">-</span>
                             )}
                           </TableCell>
                           <TableCell>

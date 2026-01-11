@@ -43,6 +43,7 @@ import { ApiCatalogGeneratorView } from '@/components/ApiCatalogGeneratorView';
 import { ReportBookView } from '@/components/reportbook/ReportBookView';
 import { SimilarityAnalyzer } from '@/components/reportbook/SimilarityAnalyzer';
 import { LGPDView } from '@/views/LGPDView';
+import { SincronismoView } from '@/views/SincronismoView';
 import { useLogging } from '@/hooks/use-logging';
 import { useApi, apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -71,7 +72,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -99,8 +100,8 @@ function App() {
     foreground: 'oklch(0.264 0.126 276)',
     muted: 'oklch(0.92 0.08 95)',
     border: 'oklch(0.85 0.08 95)',
-    sidebar: 'oklch(0.970 0.139 106)',
-    sidebarForeground: 'oklch(0.264 0.126 276)'
+    sidebar: 'oklch(0.97 0.18 102)',
+    sidebarForeground: 'oklch(0.35 0.15 270)'
   });
   const [cardStyles, setCardStyles] = useState<CardStyles>({
     backgroundColor: '#ffffff',
@@ -433,6 +434,8 @@ function App() {
         return <SimilarityAnalyzer />;
       case 'lgpd':
         return <LGPDView />;
+      case 'sincronismo':
+        return <SincronismoView />;
       case 'carga-dados':
         return <CargaDadosView />;
       case 'carga-lockfiles':
@@ -993,6 +996,18 @@ function App() {
                     >
                       <ChartLineUp />
                       <span>Logs e Traces</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={currentView === 'sincronismo'}
+                      onClick={() => {
+                        logClick('nav_sincronismo');
+                        setCurrentView('sincronismo');
+                      }}
+                    >
+                      <Database />
+                      <span>Sincronismo MySQL</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
