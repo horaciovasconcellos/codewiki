@@ -532,72 +532,70 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{pipeline ? 'Editar Pipeline' : 'Nova Pipeline'}</CardTitle>
-              <CardDescription>
-                {steps[currentStep].description}
-              </CardDescription>
-            </div>
-            <Button variant="outline" onClick={onCancel}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar
-            </Button>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>{pipeline ? 'Editar Pipeline' : 'Nova Pipeline'}</CardTitle>
+            <CardDescription>
+              {steps[currentStep].description}
+            </CardDescription>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Progress Steps */}
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => (
-              <div key={index} className="flex flex-col items-center flex-1">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    index === currentStep
-                      ? 'bg-primary text-primary-foreground'
-                      : index < currentStep
-                      ? 'bg-primary/20 text-primary'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {index + 1}
-                </div>
-                <span className="text-xs mt-1 text-center">{step.title}</span>
+          <Button variant="outline" onClick={onCancel}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Progress Steps */}
+        <div className="flex items-center justify-between">
+          {steps.map((step, index) => (
+            <div key={index} className="flex flex-col items-center flex-1">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  index === currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : index < currentStep
+                    ? 'bg-primary/20 text-primary'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+              >
+                {index + 1}
               </div>
-            ))}
-          </div>
+              <span className="text-xs mt-1 text-center">{step.title}</span>
+            </div>
+          ))}
+        </div>
 
-          {/* Step Content */}
-          <div className="min-h-[400px]">
-            {renderStep()}
-          </div>
+        {/* Step Content */}
+        <div className="min-h-[400px]">
+          {renderStep()}
+        </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-              disabled={currentStep === 0}
-            >
-              Anterior
+        {/* Navigation */}
+        <div className="flex justify-between pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+            disabled={currentStep === 0}
+          >
+            Anterior
+          </Button>
+          
+          {currentStep < steps.length - 1 ? (
+            <Button onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
+              Próximo
             </Button>
-            
-            {currentStep < steps.length - 1 ? (
-              <Button onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
-                Próximo
-              </Button>
-            ) : (
-              <Button onClick={handleSave} disabled={saving}>
-                <FloppyDisk className="mr-2 h-4 w-4" />
-                {saving ? 'Salvando...' : 'Salvar Pipeline'}
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          ) : (
+            <Button onClick={handleSave} disabled={saving}>
+              <FloppyDisk className="mr-2 h-4 w-4" />
+              {saving ? 'Salvando...' : 'Salvar Pipeline'}
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

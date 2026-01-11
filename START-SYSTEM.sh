@@ -126,3 +126,34 @@ echo ""
 
 # Manter o script rodando e mostrar logs
 wait $SERVERS_PID
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?
+
+Cannot connect to the Docker daemon at unix:///Users/horaciovasconcellos/.docker/run/docker.sock. Is the docker daemon running?

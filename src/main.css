@@ -35,6 +35,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -66,51 +67,78 @@
 :root {
   /* === GEOMETRIA === */
   --radius: 0.625rem;
-  
+
   /* === CORES BASE === */
-  --background: oklch(1 0 0);           /* Branco puro */
-  --foreground: oklch(0.145 0 0);       /* Preto quase puro */
-  
+  --background: oklch(1 0 0);
+  /* Branco puro */
+  --foreground: oklch(0.145 0 0);
+  /* Preto quase puro */
+
   /* === CARTÕES E POPUPS === */
-  --card: oklch(1 0 0);                 /* Branco */
-  --card-foreground: oklch(0.145 0 0);  /* Preto */
-  --popover: oklch(1 0 0);              /* Branco */
-  --popover-foreground: oklch(0.145 0 0); /* Preto */
-  
+  --card: oklch(1 0 0);
+  /* Branco */
+  --card-foreground: oklch(0.145 0 0);
+  /* Preto */
+  --popover: oklch(1 0 0);
+  /* Branco */
+  --popover-foreground: oklch(0.145 0 0);
+  /* Preto */
+
   /* === CORES DE AÇÃO === */
-  --primary: oklch(0.205 0 0);          /* Preto para primário */
-  --primary-foreground: oklch(0.985 0 0); /* Branco para texto em primário */
-  --secondary: oklch(0.97 0 0);         /* Cinza muito claro */
-  --secondary-foreground: oklch(0.205 0 0); /* Preto */
-  
+  --primary: oklch(0.205 0 0);
+  /* Preto para primário */
+  --primary-foreground: oklch(0.985 0 0);
+  /* Branco para texto em primário */
+  --secondary: oklch(0.97 0 0);
+  /* Cinza muito claro */
+  --secondary-foreground: oklch(0.205 0 0);
+  /* Preto */
+
   /* === CORES DE SUPORTE === */
-  --muted: oklch(0.97 0 0);             /* Cinza claro */
-  --muted-foreground: oklch(0.556 0 0); /* Cinza médio */
-  --accent: oklch(0.97 0 0);            /* Cinza claro */
-  --accent-foreground: oklch(0.205 0 0); /* Preto */
-  
+  --muted: oklch(0.97 0 0);
+  /* Cinza claro */
+  --muted-foreground: oklch(0.556 0 0);
+  /* Cinza médio */
+  --accent: oklch(0.97 0 0);
+  /* Cinza claro */
+  --accent-foreground: oklch(0.205 0 0);
+  /* Preto */
+
   /* === CORES DE SISTEMA === */
-  --destructive: oklch(0.577 0.245 27.325); /* Vermelho para ações destrutivas */
-  --border: oklch(0 0 0);           /* Preto absoluto para bordas */
-  --input: oklch(0.922 0 0);            /* Cinza muito claro para inputs */
-  --ring: oklch(0.708 0 0);             /* Cinza médio para focus ring */
-  
+  --destructive: oklch(0.577 0.245 27.325);
+  /* Vermelho para ações destrutivas */
+  --border: oklch(0 0 0);
+  /* Preto absoluto para bordas */
+  --input: oklch(0.922 0 0);
+  /* Cinza muito claro para inputs */
+  --ring: oklch(0.708 0 0);
+  /* Cinza médio para focus ring */
+
   /* === PALETA DE GRÁFICOS === */
-  --chart-1: oklch(0.646 0.222 41.116); /* Laranja */
-  --chart-2: oklch(0.6 0.118 184.704);  /* Azul ciano */
-  --chart-3: oklch(0.398 0.07 227.392); /* Azul escuro */
-  --chart-4: oklch(0.828 0.189 84.429); /* Amarelo */
-  --chart-5: oklch(0.66 0.16 265);      /* Roxo */
-  
+  --chart-1: oklch(0.646 0.222 41.116);
+  /* Laranja */
+  --chart-2: oklch(0.6 0.118 184.704);
+  /* Azul ciano */
+  --chart-3: oklch(0.398 0.07 227.392);
+  /* Azul escuro */
+  --chart-4: oklch(0.828 0.189 84.429);
+  /* Amarelo */
+  --chart-5: oklch(0.66 0.16 265);
+  /* Roxo */
+
   /* === TEMA DA SIDEBAR === */
-  --sidebar: oklch(0.97 0.18 102);                    /* Verde muito claro */
-  --sidebar-foreground: oklch(0.35 0.15 270);         /* Roxo escuro */
-  --sidebar-primary: oklch(0.35 0.15 270);            /* Roxo escuro */
-  --sidebar-primary-foreground: oklch(0.97 0.18 102); /* Verde muito claro */
-  --sidebar-accent: oklch(0.96 0.12 95);              /* Verde claro hover */
-  --sidebar-accent-foreground: oklch(0.35 0.15 270);  /* Roxo escuro */
-  --sidebar-border: oklch(0.90 0.10 95);              /* Verde claro borda */
-  --sidebar-ring: oklch(0.35 0.15 270);               /* Roxo escuro focus */
+  --sidebar: oklch(0.65 0.17 265) --sidebar-primary: oklch(0.35 0.15 270);
+  /* Roxo escuro */
+  --sidebar-primary-foreground: oklch(0.97 0.18 102);
+  /* Verde muito claro */
+  --sidebar-accent: oklch(0.96 0.12 95);
+  /* Verde claro hover */
+  --sidebar-accent-foreground: oklch(0.35 0.15 270);
+  /* Roxo escuro */
+  --sidebar-border: oklch(0.90 0.10 95);
+  /* Verde claro borda */
+  --sidebar-ring: oklch(0.35 0.15 270);
+  /* Roxo escuro focus */
 }
 
 /*
@@ -230,7 +258,7 @@
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* Forçar bordas pretas em todos os elementos com borda */
   [class*="border"],
   .border,

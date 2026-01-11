@@ -40,8 +40,16 @@ interface ContratoResult {
 }
 
 export function PesquisaPeriodoView() {
-  const [dataInicio, setDataInicio] = useState('');
-  const [dataFim, setDataFim] = useState('');
+  // Calcular data de início (hoje) e data fim (hoje + 180 dias)
+  const hoje = new Date();
+  const dataInicioDefault = hoje.toISOString().split('T')[0];
+  
+  const dataFimCalc = new Date(hoje);
+  dataFimCalc.setDate(dataFimCalc.getDate() + 180);
+  const dataFimDefault = dataFimCalc.toISOString().split('T')[0];
+  
+  const [dataInicio, setDataInicio] = useState(dataInicioDefault);
+  const [dataFim, setDataFim] = useState(dataFimDefault);
   const [loading, setLoading] = useState(false);
   const [afastamentos, setAfastamentos] = useState<AfastamentoResult[]>([]);
   const [contratos, setContratos] = useState<ContratoResult[]>([]);

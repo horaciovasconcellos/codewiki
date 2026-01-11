@@ -13,8 +13,8 @@ function Card({ className, ...props }: ComponentProps<"div">) {
       style={{
         backgroundColor: 'var(--card-bg, hsl(var(--card)))',
         color: 'var(--card-text, hsl(var(--card-foreground)))',
-        borderColor: 'var(--card-border-color, hsl(var(--border)))',
-        borderWidth: 'var(--card-border-width, 1px)',
+        borderColor: '#000000',
+        borderWidth: '1px',
         borderStyle: 'solid',
         borderRadius: 'var(--card-border-radius, 0.75rem)',
         boxShadow: 'var(--card-shadow, 0 1px 3px 0 rgb(0 0 0 / 0.1))',

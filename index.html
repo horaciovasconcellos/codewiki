@@ -5,6 +5,100 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema de Auditoria</title>
+    <!-- Estilo inline para evitar flash de cores - carrega antes do CSS -->
+    <style id="theme-preload">
+      :root {
+        /* Cores principais */
+        --background: oklch(0.988 0.018 105) !important;
+        --foreground: oklch(0.264 0.126 276) !important;
+        --primary: oklch(0.264 0.126 276) !important;
+        --primary-foreground: oklch(0.988 0.018 105) !important;
+        --secondary: oklch(0.35 0.08 265) !important;
+        --secondary-foreground: oklch(0.95 0.12 95) !important;
+        --accent: oklch(0.30 0.08 265) !important;
+        --accent-foreground: oklch(0.95 0.12 95) !important;
+        --muted: oklch(0.92 0.08 95) !important;
+        --muted-foreground: oklch(0.40 0.08 265) !important;
+        --border: oklch(0 0 0) !important;
+        --card: oklch(0.97 0.10 95) !important;
+        --card-foreground: oklch(0.264 0.126 276) !important;
+        
+        /* Sidebar - valores do index.css */
+        --sidebar: oklch(0.65 0.17 265) !important;
+        --sidebar-foreground: oklch(0.264 0.126 276) !important;
+        --sidebar-primary: oklch(0.264 0.126 276) !important;
+        --sidebar-primary-foreground: oklch(0.65 0.17 265) !important;
+        --sidebar-accent: oklch(1 0 0) !important;
+        --sidebar-accent-foreground: oklch(0.264 0.126 276) !important;
+        --sidebar-border: oklch(0.65 0.17 265) !important;
+        --sidebar-ring: oklch(0.264 0.126 276) !important;
+        
+        /* Cards personalizados */
+        --card-bg: #ffffff !important;
+        --card-text: #0f172a !important;
+        --card-border-color: #e2e8f0 !important;
+        --card-border-width: 1px !important;
+        --card-border-radius: 12px !important;
+        --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1) !important;
+        --card-padding: 24px !important;
+        
+        /* Fundo das páginas sempre branco */
+        --background: #ffffff !important;
+        
+        /* Tabelas com cinza claro */
+        --table-header-bg: #f3f4f6 !important;
+        --table-row-hover: #f3f4f6 !important;
+      }
+      
+      body {
+        background-color: #ffffff !important;
+      }
+    </style>
+    <script>
+      // Carregar e aplicar cores personalizadas da API assim que possível
+      (async function() {
+        try {
+          const response = await fetch('/api/configuracoes');
+          if (response.ok) {
+            const data = await response.json();
+            const root = document.documentElement;
+            
+            // Aplicar nome do sistema no título
+            if (data['system-name']) {
+              document.title = data['system-name'];
+            }
+            
+            if (data['theme-colors']) {
+              const colors = data['theme-colors'];
+              root.style.setProperty('--primary', colors.primary);
+              root.style.setProperty('--secondary', colors.secondary);
+              root.style.setProperty('--accent', colors.accent);
+              root.style.setProperty('--background', colors.background);
+              root.style.setProperty('--foreground', colors.foreground);
+              root.style.setProperty('--muted', colors.muted);
+              root.style.setProperty('--border', colors.border);
+              root.style.setProperty('--sidebar', colors.sidebar);
+              root.style.setProperty('--sidebar-foreground', colors.sidebarForeground);
+              root.style.setProperty('--sidebar-accent', 'oklch(1 0 0)');
+              root.style.setProperty('--sidebar-border', colors.sidebar || 'oklch(0.65 0.17 265)');
+            }
+            
+            if (data['card-styles']) {
+              const styles = data['card-styles'];
+              root.style.setProperty('--card-bg', styles.backgroundColor);
+              root.style.setProperty('--card-text', styles.textColor);
+              root.style.setProperty('--card-border-color', styles.borderColor);
+              root.style.setProperty('--card-border-width', styles.borderWidth);
+              root.style.setProperty('--card-border-radius', styles.borderRadius);
+              root.style.setProperty('--card-shadow', styles.shadow);
+              root.style.setProperty('--card-padding', styles.padding);
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao carregar configurações iniciais:', error);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

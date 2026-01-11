@@ -290,7 +290,7 @@ export function PipelinesDataTable({
         ) : (
           <div className="rounded-md border">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-gray-100">
                 <TableRow>
                   <TableHead>
                     <Button
@@ -341,7 +341,7 @@ export function PipelinesDataTable({
               </TableHeader>
               <TableBody>
                 {paginatedPipelines.map((pipeline) => (
-                  <TableRow key={pipeline.id} className="hover:bg-muted/50">
+                  <TableRow key={pipeline.id}>
                     <TableCell className="font-medium">{pipeline.nome}</TableCell>
                     <TableCell>
                       <Badge className={STATUS_COLORS[pipeline.status] || 'bg-gray-100 text-gray-800'}>

@@ -76,7 +76,7 @@ type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologi
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
-  
+
   // Buscar dados da API
   const { data: tiposAfastamento, loading: loadingTipos, refetch: refetchTipos } = useApi<TipoAfastamento[]>('/tipos-afastamento', []);
   const { data: habilidades, loading: loadingHabilidades, refetch: refetchHabilidades } = useApi<Habilidade[]>('/habilidades', []);
@@ -88,7 +88,7 @@ function App() {
   const { data: slas, refetch: refetchSlas } = useApi<SLA[]>('/slas', []);
   const { data: comunicacoes, refetch: refetchComunicacoes } = useApi<Comunicacao[]>('/comunicacoes', []);
   const { data: integracoes, refetch: refetchIntegracoes } = useApi<Integracao[]>('/integracoes', []);
-  
+
   const [runbooks] = useState<Runbook[]>([]);
   const [companyLogo, setCompanyLogo] = useState<string | null>(null);
   const [systemName, setSystemName] = useState<string>('Sistema de Auditoria');
@@ -154,18 +154,18 @@ function App() {
         console.error('[App] Erro ao carregar configurações:', error);
       }
     };
-    
+
     // Carregar configurações inicialmente
     loadConfiguracoes();
-    
+
     // Escutar eventos de atualização de configurações
     const handleConfigUpdate = () => {
       console.log('[App] Evento de atualização de configurações recebido');
       loadConfiguracoes();
     };
-    
+
     window.addEventListener('configuracoes-updated', handleConfigUpdate);
-    
+
     // Cleanup
     return () => {
       window.removeEventListener('configuracoes-updated', handleConfigUpdate);
@@ -188,6 +188,8 @@ function App() {
       root.style.setProperty('--border', themeColors.border);
       root.style.setProperty('--sidebar', themeColors.sidebar);
       root.style.setProperty('--sidebar-foreground', themeColors.sidebarForeground);
+      root.style.setProperty('--sidebar-accent', 'oklch(1 0 0)');
+      root.style.setProperty('--sidebar-border', themeColors.sidebar);
     }
   }, [themeColors]);
 
@@ -210,7 +212,7 @@ function App() {
       console.log('[App] handleHabilidadeSave recebeu:', habilidade);
       const existe = habilidades.find(h => h.id === habilidade.id);
       console.log('[App] Habilidade já existe?', existe ? 'SIM - UPDATE' : 'NÃO - CREATE');
-      
+
       if (existe) {
         console.log('[App] Enviando PUT para /habilidades/' + habilidade.id);
         await apiPut(`/habilidades/${habilidade.id}`, habilidade);
@@ -344,8 +346,8 @@ function App() {
         return <LogsAndTracesView />;
       case 'tecnologias':
         return (
-          <TecnologiasView 
-            colaboradores={colaboradores || []} 
+          <TecnologiasView
+            colaboradores={colaboradores || []}
           />
         );
       case 'processos-negocio':
@@ -491,537 +493,537 @@ function App() {
               )}
               <h2 className="text-lg font-semibold text-sidebar-foreground text-center">{systemName || 'Sistema de Auditoria'}</h2>
             </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel>Visão Geral</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'dashboard'}
-                      onClick={() => {
-                        logClick('nav_dashboard');
-                        setCurrentView('dashboard');
-                      }}
-                    >
-                      <ChartBar />
-                      <span>Dashboard</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel>Visão Geral</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'dashboard'}
+                        onClick={() => {
+                          logClick('nav_dashboard');
+                          setCurrentView('dashboard');
+                        }}
+                      >
+                        <ChartBar />
+                        <span>Dashboard</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Pesquisa</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'pesquisa-periodo'}
-                      onClick={() => {
-                        logClick('nav_pesquisa_periodo');
-                        setCurrentView('pesquisa-periodo');
-                      }}
-                    >
-                      <MagnifyingGlass />
-                      <span>Pesquisa por Período</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Pesquisa</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'pesquisa-periodo'}
+                        onClick={() => {
+                          logClick('nav_pesquisa_periodo');
+                          setCurrentView('pesquisa-periodo');
+                        }}
+                      >
+                        <MagnifyingGlass />
+                        <span>Pesquisa por Período</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>DevSecOps</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'pipelines'}
-                      onClick={() => {
-                        logClick('nav_pipelines');
-                        setCurrentView('pipelines');
-                      }}
-                    >
-                      <GitBranch />
-                      <span>Pipeline Database</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'stages'}
-                      onClick={() => {
-                        logClick('nav_stages');
-                        setCurrentView('stages');
-                      }}
-                    >
-                      <ListChecks />
-                      <span>Stages</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>DevSecOps</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'pipelines'}
+                        onClick={() => {
+                          logClick('nav_pipelines');
+                          setCurrentView('pipelines');
+                        }}
+                      >
+                        <GitBranch />
+                        <span>Pipeline Database</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'stages'}
+                        onClick={() => {
+                          logClick('nav_stages');
+                          setCurrentView('stages');
+                        }}
+                      >
+                        <ListChecks />
+                        <span>Stages</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Azure</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'documentacao-sdd'}
-                      onClick={() => setCurrentView('documentacao-sdd')}
-                    >
-                      <Code />
-                      <span>Spec-Kit</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'gerador-projetos'}
-                      onClick={() => {
-                        logClick('nav_gerador_projetos');
-                        setCurrentView('gerador-projetos');
-                      }}
-                    >
-                      <FolderPlus />
-                      <span>Gerador de Projetos</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'innersource'}
-                      onClick={() => {
-                        logClick('nav_innersource');
-                        setCurrentView('innersource');
-                      }}
-                    >
-                      <ShareNetwork />
-                      <span>Projetos InnerSource</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'azure-work-items'}
-                      onClick={() => {
-                        logClick('nav_azure_work_items');
-                        setCurrentView('azure-work-items');
-                      }}
-                    >
-                      <ListChecks />
-                      <span>Sincronizar Azure</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'dora-dashboard'}
-                      onClick={() => {
-                        logClick('nav_dora_dashboard');
-                        setCurrentView('dora-dashboard');
-                      }}
-                    >
-                      <ChartLineUp />
-                      <span>Dashboard DORA</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'space-dashboard'}
-                      onClick={() => {
-                        logClick('nav_space_dashboard');
-                        setCurrentView('space-dashboard');
-                      }}
-                    >
-                      <ChartBar />
-                      <span>Dashboard SPACE</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'finops'}
-                      onClick={() => {
-                        logClick('nav_finops');
-                        setCurrentView('finops');
-                      }}
-                    >
-                      <CurrencyDollar />
-                      <span>FinOps-Focus</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Azure</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'documentacao-sdd'}
+                        onClick={() => setCurrentView('documentacao-sdd')}
+                      >
+                        <Code />
+                        <span>Spec-Kit</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'gerador-projetos'}
+                        onClick={() => {
+                          logClick('nav_gerador_projetos');
+                          setCurrentView('gerador-projetos');
+                        }}
+                      >
+                        <FolderPlus />
+                        <span>Gerador de Projetos</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'innersource'}
+                        onClick={() => {
+                          logClick('nav_innersource');
+                          setCurrentView('innersource');
+                        }}
+                      >
+                        <ShareNetwork />
+                        <span>Projetos InnerSource</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'azure-work-items'}
+                        onClick={() => {
+                          logClick('nav_azure_work_items');
+                          setCurrentView('azure-work-items');
+                        }}
+                      >
+                        <ListChecks />
+                        <span>Sincronizar Azure</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'dora-dashboard'}
+                        onClick={() => {
+                          logClick('nav_dora_dashboard');
+                          setCurrentView('dora-dashboard');
+                        }}
+                      >
+                        <ChartLineUp />
+                        <span>Dashboard DORA</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'space-dashboard'}
+                        onClick={() => {
+                          logClick('nav_space_dashboard');
+                          setCurrentView('space-dashboard');
+                        }}
+                      >
+                        <ChartBar />
+                        <span>Dashboard SPACE</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'finops'}
+                        onClick={() => {
+                          logClick('nav_finops');
+                          setCurrentView('finops');
+                        }}
+                      >
+                        <CurrencyDollar />
+                        <span>FinOps-Focus</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>ReportBook</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'similarity-analyzer'}
-                      onClick={() => {
-                        logClick('nav_similarity_analyzer');
-                        setCurrentView('similarity-analyzer');
-                      }}
-                    >
-                      <ChartBar />
-                      <span>Analisador de Similaridade</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'reportbook'}
-                      onClick={() => {
-                        logClick('nav_reportbook');
-                        setCurrentView('reportbook');
-                      }}
-                    >
-                      <BookOpen />
-                      <span>Relatórios</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>ReportBook</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'similarity-analyzer'}
+                        onClick={() => {
+                          logClick('nav_similarity_analyzer');
+                          setCurrentView('similarity-analyzer');
+                        }}
+                      >
+                        <ChartBar />
+                        <span>Analisador de Similaridade</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'reportbook'}
+                        onClick={() => {
+                          logClick('nav_reportbook');
+                          setCurrentView('reportbook');
+                        }}
+                      >
+                        <BookOpen />
+                        <span>Relatórios</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Governança e Compliance</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'lgpd'}
-                      onClick={() => {
-                        logClick('nav_lgpd');
-                        setCurrentView('lgpd');
-                      }}
-                    >
-                      <GearSix />
-                      <span>LGPD</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Governança e Compliance</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'lgpd'}
+                        onClick={() => {
+                          logClick('nav_lgpd');
+                          setCurrentView('lgpd');
+                        }}
+                      >
+                        <GearSix />
+                        <span>LGPD</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Integrações Externas</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'capacidades-negocio'}
-                      onClick={() => setCurrentView('capacidades-negocio')}
-                    >
-                      <Target />
-                      <span>Capacidades de Negócio</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'colaboradores'}
-                      onClick={() => setCurrentView('colaboradores')}
-                    >
-                      <Users />
-                      <span>Colaboradores</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'habilidades'}
-                      onClick={() => {
-                        logClick('nav_habilidades');
-                        setCurrentView('habilidades');
-                      }}
-                    >
-                      <Certificate />
-                      <span>Habilidades</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'processos-negocio'}
-                      onClick={() => setCurrentView('processos-negocio')}
-                    >
-                      <GitBranch />
-                      <span>Processos de Negócio</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'tipos-afastamento'}
-                      onClick={() => setCurrentView('tipos-afastamento')}
-                    >
-                      <ListChecks />
-                      <span>Tipos de Afastamento</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Integrações Externas</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'capacidades-negocio'}
+                        onClick={() => setCurrentView('capacidades-negocio')}
+                      >
+                        <Target />
+                        <span>Capacidades de Negócio</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'colaboradores'}
+                        onClick={() => setCurrentView('colaboradores')}
+                      >
+                        <Users />
+                        <span>Colaboradores</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'habilidades'}
+                        onClick={() => {
+                          logClick('nav_habilidades');
+                          setCurrentView('habilidades');
+                        }}
+                      >
+                        <Certificate />
+                        <span>Habilidades</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'processos-negocio'}
+                        onClick={() => setCurrentView('processos-negocio')}
+                      >
+                        <GitBranch />
+                        <span>Processos de Negócio</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'tipos-afastamento'}
+                        onClick={() => setCurrentView('tipos-afastamento')}
+                      >
+                        <ListChecks />
+                        <span>Tipos de Afastamento</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Registros</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'aplicacoes'}
-                      onClick={() => setCurrentView('aplicacoes')}
-                    >
-                      <DeviceMobile />
-                      <span>Aplicações</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'comunicacao'}
-                      onClick={() => {
-                        logClick('nav_comunicacao');
-                        setCurrentView('comunicacao');
-                      }}
-                    >
-                      <ShareNetwork />
-                      <span>Comunicação</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'adrs'}
-                      onClick={() => {
-                        logClick('nav_adrs');
-                        setCurrentView('adrs');
-                      }}
-                    >
-                      <FileText />
-                      <span>Decisões Arquitetônicas</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'integracoes'}
-                      onClick={() => setCurrentView('integracoes')}
-                    >
-                      <GitBranch />
-                      <span>Integrações</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'notificacoes'}
-                      onClick={() => {
-                        logClick('nav_notificacoes');
-                        setCurrentView('notificacoes');
-                      }}
-                    >
-                      <Envelope />
-                      <span>Notificações</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'runbooks'}
-                      onClick={() => setCurrentView('runbooks')}
-                    >
-                      <BookOpen />
-                      <span>Runbooks</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'scripts'}
-                      onClick={() => setCurrentView('scripts')}
-                    >
-                      <Terminal />
-                      <span>Scripts</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'servidores'}
-                      onClick={() => {
-                        logClick('nav_servidores');
-                        setCurrentView('servidores');
-                      }}
-                    >
-                      <HardDrives />
-                      <span>Servidores</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'slas'}
-                      onClick={() => setCurrentView('slas')}
-                    >
-                      <ClipboardText />
-                      <span>SLAs</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'tecnologias'}
-                      onClick={() => setCurrentView('tecnologias')}
-                    >
-                      <Code />
-                      <span>Tecnologias</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Registros</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'aplicacoes'}
+                        onClick={() => setCurrentView('aplicacoes')}
+                      >
+                        <DeviceMobile />
+                        <span>Aplicações</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'comunicacao'}
+                        onClick={() => {
+                          logClick('nav_comunicacao');
+                          setCurrentView('comunicacao');
+                        }}
+                      >
+                        <ShareNetwork />
+                        <span>Comunicação</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'adrs'}
+                        onClick={() => {
+                          logClick('nav_adrs');
+                          setCurrentView('adrs');
+                        }}
+                      >
+                        <FileText />
+                        <span>Decisões Arquitetônicas</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'integracoes'}
+                        onClick={() => setCurrentView('integracoes')}
+                      >
+                        <GitBranch />
+                        <span>Integrações</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'notificacoes'}
+                        onClick={() => {
+                          logClick('nav_notificacoes');
+                          setCurrentView('notificacoes');
+                        }}
+                      >
+                        <Envelope />
+                        <span>Notificações</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'runbooks'}
+                        onClick={() => setCurrentView('runbooks')}
+                      >
+                        <BookOpen />
+                        <span>Runbooks</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'scripts'}
+                        onClick={() => setCurrentView('scripts')}
+                      >
+                        <Terminal />
+                        <span>Scripts</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'servidores'}
+                        onClick={() => {
+                          logClick('nav_servidores');
+                          setCurrentView('servidores');
+                        }}
+                      >
+                        <HardDrives />
+                        <span>Servidores</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'slas'}
+                        onClick={() => setCurrentView('slas')}
+                      >
+                        <ClipboardText />
+                        <span>SLAs</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'tecnologias'}
+                        onClick={() => setCurrentView('tecnologias')}
+                      >
+                        <Code />
+                        <span>Tecnologias</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Cargas</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'carga-dados'}
-                      onClick={() => {
-                        logClick('nav_carga_dados');
-                        setCurrentView('carga-dados');
-                      }}
-                    >
-                      <Database />
-                      <span>Carga de Dados</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'carga-lockfiles'}
-                      onClick={() => {
-                        logClick('nav_carga_lockfiles');
-                        setCurrentView('carga-lockfiles');
-                      }}
-                    >
-                      <FileText />
-                      <span>Carga Lockfiles</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Cargas</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'carga-dados'}
+                        onClick={() => {
+                          logClick('nav_carga_dados');
+                          setCurrentView('carga-dados');
+                        }}
+                      >
+                        <Database />
+                        <span>Carga de Dados</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'carga-lockfiles'}
+                        onClick={() => {
+                          logClick('nav_carga_lockfiles');
+                          setCurrentView('carga-lockfiles');
+                        }}
+                      >
+                        <FileText />
+                        <span>Carga Lockfiles</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Documentação</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'documentacao-apis'}
-                      onClick={() => setCurrentView('documentacao-apis')}
-                    >
-                      <FileText />
-                      <span>Documentação de APIs</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'documentacao-projetos'}
-                      onClick={() => {
-                        logClick('nav_documentacao_projetos');
-                        setCurrentView('documentacao-projetos');
-                      }}
-                    >
-                      <BookOpen />
-                      <span>Documentação de Projetos</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'payloads'}
-                      onClick={() => {
-                        logClick('nav_payloads');
-                        setCurrentView('payloads');
-                      }}
-                    >
-                      <FileText />
-                      <span>Payloads</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'api-catalog-generator'}
-                      onClick={() => {
-                        logClick('nav_api_catalog_generator');
-                        setCurrentView('api-catalog-generator');
-                      }}
-                    >
-                      <BookOpen />
-                      <span>Catálogo de APIs</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Documentação</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'documentacao-apis'}
+                        onClick={() => setCurrentView('documentacao-apis')}
+                      >
+                        <FileText />
+                        <span>Documentação de APIs</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'documentacao-projetos'}
+                        onClick={() => {
+                          logClick('nav_documentacao_projetos');
+                          setCurrentView('documentacao-projetos');
+                        }}
+                      >
+                        <BookOpen />
+                        <span>Documentação de Projetos</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'payloads'}
+                        onClick={() => {
+                          logClick('nav_payloads');
+                          setCurrentView('payloads');
+                        }}
+                      >
+                        <FileText />
+                        <span>Payloads</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'api-catalog-generator'}
+                        onClick={() => {
+                          logClick('nav_api_catalog_generator');
+                          setCurrentView('api-catalog-generator');
+                        }}
+                      >
+                        <BookOpen />
+                        <span>Catálogo de APIs</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Configurações e Logs</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'configuracoes'}
-                      onClick={() => setCurrentView('configuracoes')}
-                    >
-                      <Gear />
-                      <span>Configurações</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'tokens-acesso'}
-                      onClick={() => setCurrentView('tokens-acesso')}
-                    >
-                      <Key />
-                      <span>Tokens de Acesso</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              <SidebarGroup>
+                <SidebarGroupLabel>Configurações e Logs</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'configuracoes'}
+                        onClick={() => setCurrentView('configuracoes')}
+                      >
+                        <Gear />
+                        <span>Configurações</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'tokens-acesso'}
+                        onClick={() => setCurrentView('tokens-acesso')}
+                      >
+                        <Key />
+                        <span>Tokens de Acesso</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Observabilidade</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'logs-traces'}
-                      onClick={() => {
-                        logClick('nav_logs_traces');
-                        setCurrentView('logs-traces');
-                      }}
-                    >
-                      <ChartLineUp />
-                      <span>Logs e Traces</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      isActive={currentView === 'sincronismo'}
-                      onClick={() => {
-                        logClick('nav_sincronismo');
-                        setCurrentView('sincronismo');
-                      }}
-                    >
-                      <Database />
-                      <span>Sincronismo MySQL</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-        </Sidebar>
+              <SidebarGroup>
+                <SidebarGroupLabel>Observabilidade</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'logs-traces'}
+                        onClick={() => {
+                          logClick('nav_logs_traces');
+                          setCurrentView('logs-traces');
+                        }}
+                      >
+                        <ChartLineUp />
+                        <span>Logs e Traces</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'sincronismo'}
+                        onClick={() => {
+                          logClick('nav_sincronismo');
+                          setCurrentView('sincronismo');
+                        }}
+                      >
+                        <Database />
+                        <span>Sincronismo MySQL</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
 
-        <main className="flex-1 overflow-auto">
-          {renderMainContent()}
-        </main>
-      </div>
-      <Toaster />
-    </SidebarProvider>
+          <main className="flex-1 overflow-auto">
+            {renderMainContent()}
+          </main>
+        </div>
+        <Toaster />
+      </SidebarProvider>
     </ErrorBoundary>
   );
 }
