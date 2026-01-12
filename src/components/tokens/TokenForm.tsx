@@ -6,24 +6,26 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { TokenAcesso, TipoEntidadeToken, EscopoToken, AmbienteToken, HistoricoTokenAcesso } from '@/lib/types';
+import { TokenAcesso } from '@/lib/types';
 import { Copy, Check, X, FloppyDisk } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import * as jose from 'jose';
 import { generateUUID } from '@/utils/uuid';
+import { useTokens } from '@/hooks/use-tokens';
 
 interface TokenFormProps {
-  tokens: TokenAcesso[];
-  onSave: (token: TokenAcesso) => void;
+  onSave: () => void;
   editToken?: TokenAcesso;
   onCancel: () => void;
 }
 
-export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProps) {
+export function TokenForm({ onSave, editToken, onCancel }: TokenFormProps) {
+  const { createToken, updateToken } = useTokens();
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
   
   const getInitialFormData = (): Partial<TokenAcesso> => {
     if (editToken) return editToken;
@@ -38,15 +40,10 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
     const dataExp = dataExpiracao.toISOString().split('T')[0];
     
     return {
-      tipoEntidade: 'Sistema' as TipoEntidadeToken,
+      entidadeTipo: 'Servico',
       escopos: [],
-      ambiente: 'Desenvolvimento' as AmbienteToken,
-      tokenTemporario: false,
       permitirRegeneracao: true,
-      rateLimitPorHora: 100,
-      origensPermitidas: [],
       requerMFA: false,
-      quantidadeAcessos: 0,
       dataInicioValidade: dataInicio,
       dataExpiracao: dataExp,
     };
@@ -54,7 +51,7 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
   
   const [formData, setFormData] = useState<Partial<TokenAcesso>>(getInitialFormData());
 
-  const escoposDisponiveis: EscopoToken[] = ['INSERT', 'UPDATE', 'DELETE', 'READ', 'ADMIN', 'FINANCEIRO', 'AUDITORIA', 'INTEGRACAO'];
+  const escoposDisponiveis = ['INSERT', 'UPDATE', 'DELETE', 'READ', 'ADMIN', 'FINANCEIRO', 'AUDITORIA', 'INTEGRACAO'];
 
   const generateJWTToken = async (tokenData: Partial<TokenAcesso>) => {
     const systemUrl = window.location.origin;
@@ -63,30 +60,26 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
     const payload = {
       jti: generateUUID(),
       iss: systemUrl,
-      sub: tokenData.identificadorEntidade,
+      sub: tokenData.entidadeNome || '',
       aud: systemUrl,
       exp: tokenData.dataExpiracao 
         ? Math.floor(new Date(tokenData.dataExpiracao).getTime() / 1000) 
-        : Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60),
+        : Math.floor(Date.now() / 1000) + (180 * 24 * 60 * 60), // 180 dias
       nbf: Math.floor(new Date(tokenData.dataInicioValidade!).getTime() / 1000),
       iat: Math.floor(Date.now() / 1000),
       entity: {
-        type: tokenData.tipoEntidade,
-        id: tokenData.identificadorEntidade,
-        name: tokenData.nomeEntidade,
+        type: tokenData.entidadeTipo,
+        name: tokenData.entidadeNome,
       },
       scopes: tokenData.escopos,
-      environment: tokenData.ambiente,
-      rateLimit: tokenData.rateLimitPorHora,
       mfa: tokenData.requerMFA,
-      origins: tokenData.origensPermitidas,
     };
     
     const token = await new jose.SignJWT(payload)
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setIssuer(systemUrl)
-      .setSubject(tokenData.identificadorEntidade!)
+      .setSubject(tokenData.entidadeNome!)
       .setAudience(systemUrl)
       .setExpirationTime(payload.exp)
       .setNotBefore(payload.nbf)
@@ -95,18 +88,8 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
     return token;
   };
 
-  const hashToken = (token: string) => {
-    let hash = 0;
-    for (let i = 0; i < token.length; i++) {
-      const char = token.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return `hash_${Math.abs(hash).toString(16)}`;
-  };
-
   const handleSave = async () => {
-    if (!formData.tipoEntidade || !formData.identificadorEntidade || !formData.nomeEntidade) {
+    if (!formData.nome || !formData.entidadeTipo || !formData.entidadeNome) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
@@ -121,76 +104,50 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
       return;
     }
 
-    const user = { login: 'sistema' };
-    const now = new Date().toISOString();
-    
-    let tokenHash = formData.tokenHash;
-    let plainToken: string | null = null;
-
-    if (!editToken) {
-      plainToken = await generateJWTToken(formData);
-      tokenHash = hashToken(plainToken);
-    }
-
-    // Criar entrada de histórico
-    const novaEntradaHistorico: HistoricoTokenAcesso = {
-      id: generateUUID(),
-      tokenId: editToken?.id || generateUUID(),
-      tipoAcao: editToken ? 'Alteração de Escopos' : 'Criação',
-      descricao: editToken 
-        ? `Token atualizado - Alteração nos dados do token`
-        : `Token criado para ${formData.nomeEntidade}`,
-      realizadoPor: user?.login || 'sistema',
-      dataHora: now,
-      dadosAnteriores: editToken ? {
-        escopos: editToken.escopos,
-        ambiente: editToken.ambiente,
-        status: editToken.status,
-      } : undefined,
-      dadosNovos: {
-        escopos: formData.escopos,
-        ambiente: formData.ambiente,
-        status: editToken?.status || 'Ativo',
+    try {
+      setSaving(true);
+      
+      if (editToken) {
+        // Atualizar token existente (não regenera o token JWT)
+        await updateToken(editToken.id, {
+          nome: formData.nome,
+          descricao: formData.descricao,
+          entidadeTipo: formData.entidadeTipo,
+          entidadeNome: formData.entidadeNome,
+          dataInicioValidade: formData.dataInicioValidade,
+          dataExpiracao: formData.dataExpiracao,
+          escopos: formData.escopos,
+          permitirRegeneracao: formData.permitirRegeneracao,
+          requerMFA: formData.requerMFA,
+        });
+        toast.success('Token atualizado com sucesso');
+        onSave();
+      } else {
+        // Criar novo token
+        const plainToken = await generateJWTToken(formData);
+        
+        await createToken({
+          nome: formData.nome!,
+          descricao: formData.descricao,
+          entidadeTipo: formData.entidadeTipo!,
+          entidadeNome: formData.entidadeNome!,
+          dataInicioValidade: formData.dataInicioValidade!,
+          dataExpiracao: formData.dataExpiracao!,
+          escopos: formData.escopos!,
+          token: plainToken,
+          permitirRegeneracao: formData.permitirRegeneracao ?? true,
+          requerMFA: formData.requerMFA ?? false,
+          status: 'Ativo',
+        });
+        
+        setGeneratedToken(plainToken);
+        toast.success('Token gerado com sucesso! Copie-o agora, ele não será exibido novamente.');
       }
-    };
-
-    const token: TokenAcesso = {
-      id: editToken?.id || generateUUID(),
-      tokenHash: tokenHash!,
-      tipoEntidade: formData.tipoEntidade!,
-      identificadorEntidade: formData.identificadorEntidade!,
-      nomeEntidade: formData.nomeEntidade!,
-      escopos: formData.escopos!,
-      ambiente: formData.ambiente!,
-      dataGeracao: editToken?.dataGeracao || now,
-      dataInicioValidade: formData.dataInicioValidade!,
-      dataExpiracao: formData.dataExpiracao,
-      tokenTemporario: formData.tokenTemporario || false,
-      motivoExpiracao: formData.motivoExpiracao,
-      permitirRegeneracao: formData.permitirRegeneracao ?? true,
-      rateLimitPorHora: formData.rateLimitPorHora || 100,
-      origensPermitidas: formData.origensPermitidas || [],
-      requerMFA: formData.requerMFA || false,
-      status: editToken?.status || 'Ativo',
-      motivoRevogacao: formData.motivoRevogacao,
-      ultimaAtualizacao: now,
-      criadoPor: editToken?.criadoPor || user?.login || 'sistema',
-      dataHoraCriacao: editToken?.dataHoraCriacao || now,
-      ultimoUso: formData.ultimoUso,
-      quantidadeAcessos: formData.quantidadeAcessos || 0,
-      origemUltimoAcesso: formData.origemUltimoAcesso,
-      localizacaoUltimoAcesso: formData.localizacaoUltimoAcesso,
-      historico: [...(editToken?.historico || []), novaEntradaHistorico],
-    };
-
-    onSave(token);
-    
-    if (plainToken) {
-      setGeneratedToken(plainToken);
-      toast.success('Token gerado com sucesso! Copie-o agora, ele não será exibido novamente.');
-    } else {
-      toast.success('Token atualizado com sucesso');
-      onCancel();
+    } catch (error) {
+      console.error('Erro ao salvar token:', error);
+      toast.error(error instanceof Error ? error.message : 'Erro ao salvar token');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -209,7 +166,7 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
     onCancel();
   };
 
-  const toggleEscopo = (escopo: EscopoToken) => {
+  const toggleEscopo = (escopo: string) => {
     const escoposAtuais = formData.escopos || [];
     if (escoposAtuais.includes(escopo)) {
       setFormData({ ...formData, escopos: escoposAtuais.filter(e => e !== escopo) });
@@ -280,21 +237,47 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
           </div>
         ) : (
           <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="nome">Nome do Token <span className="text-destructive">*</span></Label>
+              <Input
+                id="nome"
+                value={formData.nome || ''}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                placeholder="Nome identificador do token"
+              />
+              <p className="text-xs text-muted-foreground">
+                Nome único para identificar este token
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="descricao">Descrição</Label>
+              <Textarea
+                id="descricao"
+                value={formData.descricao || ''}
+                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                placeholder="Descrição detalhada do propósito deste token"
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                Opcional: Informações adicionais sobre o uso do token
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tipoEntidade">Tipo de Entidade <span className="text-destructive">*</span></Label>
+                <Label htmlFor="entidadeTipo">Tipo de Entidade <span className="text-destructive">*</span></Label>
                 <Select
-                  value={formData.tipoEntidade || 'Sistema'}
-                  onValueChange={(value) => setFormData({ ...formData, tipoEntidade: value as TipoEntidadeToken })}
+                  value={formData.entidadeTipo || 'Servico'}
+                  onValueChange={(value) => setFormData({ ...formData, entidadeTipo: value as 'Usuario' | 'Servico' | 'Aplicacao' })}
                 >
-                  <SelectTrigger id="tipoEntidade">
+                  <SelectTrigger id="entidadeTipo">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Pessoa Física">Pessoa Física</SelectItem>
-                    <SelectItem value="Pessoa Jurídica">Pessoa Jurídica</SelectItem>
-                    <SelectItem value="Sistema">Sistema</SelectItem>
-                    <SelectItem value="Serviço Interno">Serviço Interno</SelectItem>
+                    <SelectItem value="Usuario">Usuário</SelectItem>
+                    <SelectItem value="Servico">Serviço</SelectItem>
+                    <SelectItem value="Aplicacao">Aplicação</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
@@ -303,33 +286,17 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="identificadorEntidade">
-                  {formData.tipoEntidade === 'Pessoa Física' ? 'CPF' : 
-                   formData.tipoEntidade === 'Pessoa Jurídica' ? 'CNPJ' : 'ID'} <span className="text-destructive">*</span>
-                </Label>
+                <Label htmlFor="entidadeNome">Nome da Entidade <span className="text-destructive">*</span></Label>
                 <Input
-                  id="identificadorEntidade"
-                  value={formData.identificadorEntidade || ''}
-                  onChange={(e) => setFormData({ ...formData, identificadorEntidade: e.target.value })}
-                  placeholder="Identificador único"
+                  id="entidadeNome"
+                  value={formData.entidadeNome || ''}
+                  onChange={(e) => setFormData({ ...formData, entidadeNome: e.target.value })}
+                  placeholder="Nome do responsável ou sistema"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Identificador único da entidade
+                  Nome descritivo da entidade
                 </p>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="nomeEntidade">Nome / Descrição <span className="text-destructive">*</span></Label>
-              <Input
-                id="nomeEntidade"
-                value={formData.nomeEntidade || ''}
-                onChange={(e) => setFormData({ ...formData, nomeEntidade: e.target.value })}
-                placeholder="Nome do responsável ou sistema"
-              />
-              <p className="text-xs text-muted-foreground">
-                Nome descritivo para identificar o token
-              </p>
             </div>
 
             <div className="space-y-2">
@@ -348,26 +315,12 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
                   </div>
                 ))}
               </div>
+              <p className="text-xs text-muted-foreground">
+                Selecione as permissões que este token terá
+              </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="ambiente">Ambiente *</Label>
-                <Select
-                  value={formData.ambiente || 'Desenvolvimento'}
-                  onValueChange={(value) => setFormData({ ...formData, ambiente: value as AmbienteToken })}
-                >
-                  <SelectTrigger id="ambiente">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Desenvolvimento">Desenvolvimento</SelectItem>
-                    <SelectItem value="Homologação">Homologação</SelectItem>
-                    <SelectItem value="Produção">Produção</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="dataInicioValidade">Início Validade *</Label>
                 <Input
@@ -384,7 +337,7 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dataExpiracao">Data Expiração</Label>
+                <Label htmlFor="dataExpiracao">Data Expiração *</Label>
                 <Input
                   id="dataExpiracao"
                   type="date"
@@ -392,83 +345,42 @@ export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProp
                   onChange={(e) => setFormData({ ...formData, dataExpiracao: e.target.value })}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Padrão: 180 dias a partir do início da validade
+                  Padrão: 180 dias após a data de início
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="rateLimitPorHora">Rate Limit (chamadas/hora)</Label>
-                <Input
-                  id="rateLimitPorHora"
-                  type="number"
-                  value={formData.rateLimitPorHora || 100}
-                  onChange={(e) => setFormData({ ...formData, rateLimitPorHora: parseInt(e.target.value) })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="origensPermitidas">IPs Permitidos (separados por vírgula)</Label>
-                <Input
-                  id="origensPermitidas"
-                  value={formData.origensPermitidas?.join(', ') || ''}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    origensPermitidas: e.target.value.split(',').map(ip => ip.trim()).filter(ip => ip) 
-                  })}
-                  placeholder="192.168.1.1, 10.0.0.0/24"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="motivoExpiracao">Motivo / Observação</Label>
-              <Textarea
-                id="motivoExpiracao"
-                value={formData.motivoExpiracao || ''}
-                onChange={(e) => setFormData({ ...formData, motivoExpiracao: e.target.value })}
-                placeholder="Informações adicionais sobre o token"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
               <div className="flex items-center space-x-2">
-                <Switch
-                  id="tokenTemporario"
-                  checked={formData.tokenTemporario}
-                  onCheckedChange={(checked) => setFormData({ ...formData, tokenTemporario: checked })}
-                />
-                <Label htmlFor="tokenTemporario" className="cursor-pointer">Token Temporário</Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
+                <Checkbox
                   id="permitirRegeneracao"
-                  checked={formData.permitirRegeneracao}
-                  onCheckedChange={(checked) => setFormData({ ...formData, permitirRegeneracao: checked })}
+                  checked={formData.permitirRegeneracao ?? true}
+                  onCheckedChange={(checked) => 
+                    setFormData({ ...formData, permitirRegeneracao: checked as boolean })
+                  }
                 />
                 <Label htmlFor="permitirRegeneracao" className="cursor-pointer">Permitir Regeneração</Label>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch
+                <Checkbox
                   id="requerMFA"
-                  checked={formData.requerMFA}
-                  onCheckedChange={(checked) => setFormData({ ...formData, requerMFA: checked })}
+                  checked={formData.requerMFA || false}
+                  onCheckedChange={(checked) => 
+                    setFormData({ ...formData, requerMFA: checked as boolean })
+                  }
                 />
                 <Label htmlFor="requerMFA" className="cursor-pointer">Requer MFA</Label>
               </div>
             </div>
-
             <div className="flex gap-2 justify-end pt-4">
-              <Button type="button" variant="outline" onClick={onCancel}>
+              <Button type="button" variant="outline" onClick={onCancel} disabled={saving}>
                 <X className="mr-2 h-4 w-4" />
                 Cancelar
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={saving}>
                 <FloppyDisk className="mr-2 h-4 w-4" />
-                {editToken ? 'Atualizar' : 'Gerar Token'}
+                {saving ? 'Salvando...' : (editToken ? 'Atualizar' : 'Gerar Token')}
               </Button>
             </div>
           </form>

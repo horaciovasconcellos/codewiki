@@ -937,6 +937,509 @@ app.delete('/api/tipos-afastamento/:id', async (req, res) => {
   }
 });
 
+// ==================== TOKENS DE ACESSO ====================
+
+// Função auxiliar para mapear token do banco para formato da API
+function mapTokenAcesso(row) {
+  if (!row) return null;
+  
+  return {
+    id: row.id,
+    nome: row.nome,
+    descricao: row.descricao,
+    entidadeTipo: row.entidade_tipo,
+    entidadeNome: row.entidade_nome,
+    dataInicioValidade: row.data_inicio_validade,
+    dataExpiracao: row.data_expiracao,
+    escopos: typeof row.escopos === 'string' ? JSON.parse(row.escopos) : row.escopos,
+    token: row.token,
+    permitirRegeneracao: row.permitir_regeneracao,
+    requerMFA: row.requer_mfa,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+// GET /api/tokens-acesso - Listar todos
+app.get('/api/tokens-acesso', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM tokens_acesso ORDER BY created_at DESC');
+    res.json(rows.map(mapTokenAcesso));
+  } catch (error) {
+    console.error('Erro ao listar tokens:', error);
+    res.status(500).json({ error: 'Erro ao buscar dados', code: 'DATABASE_ERROR' });
+  }
+});
+
+// GET /api/tokens-acesso/:id - Buscar por ID
+app.get('/api/tokens-acesso/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({
+        error: 'Token não encontrado',
+        code: 'NOT_FOUND'
+      });
+    }
+    
+    res.json(mapTokenAcesso(rows[0]));
+  } catch (error) {
+    console.error('Erro ao buscar token:', error);
+    res.status(500).json({ error: 'Erro ao buscar dados', code: 'DATABASE_ERROR' });
+  }
+});
+
+// POST /api/tokens-acesso - Criar novo token
+app.post('/api/tokens-acesso', async (req, res) => {
+  const {
+    nome,
+    descricao,
+    entidadeTipo,
+    entidadeNome,
+    dataInicioValidade,
+    dataExpiracao,
+    escopos,
+    token,
+    permitirRegeneracao,
+    requerMFA
+  } = req.body;
+  
+  // Validações
+  if (!nome || !entidadeTipo || !entidadeNome || !dataInicioValidade || !dataExpiracao || !escopos || !token) {
+    return res.status(400).json({
+      error: 'Campos obrigatórios faltando',
+      code: 'MISSING_FIELDS',
+      missing: [
+        !nome && 'nome',
+        !entidadeTipo && 'entidadeTipo',
+        !entidadeNome && 'entidadeNome',
+        !dataInicioValidade && 'dataInicioValidade',
+        !dataExpiracao && 'dataExpiracao',
+        !escopos && 'escopos',
+        !token && 'token'
+      ].filter(Boolean)
+    });
+  }
+  
+  // Validar entidadeTipo
+  if (!['Usuario', 'Servico', 'Aplicacao'].includes(entidadeTipo)) {
+    return res.status(400).json({
+      error: 'Dados inválidos',
+      code: 'VALIDATION_ERROR',
+      details: {
+        entidadeTipo: 'Tipo de entidade deve ser Usuario, Servico ou Aplicacao'
+      }
+    });
+  }
+  
+  try {
+    const startTime = Date.now();
+    const requestInfo = extractRequestInfo(req);
+    
+    // Verificar nome duplicado
+    const [existing] = await pool.query(
+      'SELECT id FROM tokens_acesso WHERE LOWER(nome) = LOWER(?)',
+      [nome]
+    );
+    
+    if (existing.length > 0) {
+      await logAuditoria({
+        ...requestInfo,
+        operationType: 'INSERT',
+        entityType: 'tokens_acesso',
+        method: 'POST',
+        route: '/api/tokens-acesso',
+        statusCode: 409,
+        durationMs: Date.now() - startTime,
+        payload: { nome },
+        errorMessage: 'Nome já cadastrado',
+        severity: 'warn'
+      });
+      
+      return res.status(409).json({
+        error: 'Nome já cadastrado',
+        code: 'DUPLICATE_NAME',
+        field: 'nome'
+      });
+    }
+    
+    // Criar novo token
+    const id = uuidv4();
+    await pool.query(
+      `INSERT INTO tokens_acesso (
+        id, nome, descricao, entidade_tipo, entidade_nome,
+        data_inicio_validade, data_expiracao, escopos, token,
+        permitir_regeneracao, requer_mfa, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Ativo')`,
+      [
+        id,
+        nome,
+        descricao || null,
+        entidadeTipo,
+        entidadeNome,
+        dataInicioValidade,
+        dataExpiracao,
+        JSON.stringify(escopos),
+        token,
+        permitirRegeneracao || false,
+        requerMFA || false
+      ]
+    );
+    
+    const [newToken] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [id]);
+    const novoToken = mapTokenAcesso(newToken[0]);
+    
+    // Registrar log de auditoria
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'INSERT',
+      entityType: 'tokens_acesso',
+      entityId: id,
+      method: 'POST',
+      route: '/api/tokens-acesso',
+      statusCode: 201,
+      durationMs: Date.now() - startTime,
+      payload: { nome, entidadeTipo, entidadeNome },
+      newValues: { ...novoToken, token: '[HIDDEN]' },
+      severity: 'info'
+    });
+    
+    res.status(201).json(novoToken);
+  } catch (error) {
+    const requestInfo = extractRequestInfo(req);
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'ERROR',
+      entityType: 'tokens_acesso',
+      method: 'POST',
+      route: '/api/tokens-acesso',
+      statusCode: 500,
+      errorMessage: error.message,
+      severity: 'error'
+    });
+    
+    console.error('Erro ao criar token:', error);
+    res.status(500).json({ error: 'Erro ao salvar dados', code: 'DATABASE_ERROR' });
+  }
+});
+
+// PUT /api/tokens-acesso/:id - Atualizar token
+app.put('/api/tokens-acesso/:id', async (req, res) => {
+  const {
+    nome,
+    descricao,
+    entidadeTipo,
+    entidadeNome,
+    dataInicioValidade,
+    dataExpiracao,
+    escopos,
+    permitirRegeneracao,
+    requerMFA
+  } = req.body;
+  
+  const startTime = Date.now();
+  const requestInfo = extractRequestInfo(req);
+  
+  try {
+    // Verificar se existe
+    const [existing] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    
+    if (existing.length === 0) {
+      return res.status(404).json({
+        error: 'Token não encontrado',
+        code: 'NOT_FOUND'
+      });
+    }
+    
+    // Verificar nome duplicado (exceto o próprio registro)
+    if (nome) {
+      const [duplicate] = await pool.query(
+        'SELECT id FROM tokens_acesso WHERE LOWER(nome) = LOWER(?) AND id != ?',
+        [nome, req.params.id]
+      );
+      
+      if (duplicate.length > 0) {
+        return res.status(409).json({
+          error: 'Nome já cadastrado',
+          code: 'DUPLICATE_NAME',
+          field: 'nome'
+        });
+      }
+    }
+    
+    // Atualizar
+    await pool.query(
+      `UPDATE tokens_acesso SET
+        nome = ?,
+        descricao = ?,
+        entidade_tipo = ?,
+        entidade_nome = ?,
+        data_inicio_validade = ?,
+        data_expiracao = ?,
+        escopos = ?,
+        permitir_regeneracao = ?,
+        requer_mfa = ?
+      WHERE id = ?`,
+      [
+        nome || existing[0].nome,
+        descricao !== undefined ? descricao : existing[0].descricao,
+        entidadeTipo || existing[0].entidade_tipo,
+        entidadeNome || existing[0].entidade_nome,
+        dataInicioValidade || existing[0].data_inicio_validade,
+        dataExpiracao || existing[0].data_expiracao,
+        escopos ? JSON.stringify(escopos) : existing[0].escopos,
+        permitirRegeneracao !== undefined ? permitirRegeneracao : existing[0].permitir_regeneracao,
+        requerMFA !== undefined ? requerMFA : existing[0].requer_mfa,
+        req.params.id
+      ]
+    );
+    
+    const [updated] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    const updatedToken = mapTokenAcesso(updated[0]);
+    
+    // Registrar log de auditoria
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'UPDATE',
+      entityType: 'tokens_acesso',
+      entityId: req.params.id,
+      method: 'PUT',
+      route: '/api/tokens-acesso/:id',
+      statusCode: 200,
+      durationMs: Date.now() - startTime,
+      payload: { nome, entidadeTipo, entidadeNome },
+      oldValues: { ...mapTokenAcesso(existing[0]), token: '[HIDDEN]' },
+      newValues: { ...updatedToken, token: '[HIDDEN]' },
+      severity: 'info'
+    });
+    
+    res.json(updatedToken);
+  } catch (error) {
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'ERROR',
+      entityType: 'tokens_acesso',
+      entityId: req.params.id,
+      method: 'PUT',
+      route: '/api/tokens-acesso/:id',
+      statusCode: 500,
+      errorMessage: error.message,
+      severity: 'error'
+    });
+    
+    console.error('Erro ao atualizar token:', error);
+    res.status(500).json({ error: 'Erro ao atualizar dados', code: 'DATABASE_ERROR' });
+  }
+});
+
+// PATCH /api/tokens-acesso/:id/renovar - Regenerar token
+app.patch('/api/tokens-acesso/:id/renovar', async (req, res) => {
+  const { novoToken, novaDataExpiracao } = req.body;
+  
+  const startTime = Date.now();
+  const requestInfo = extractRequestInfo(req);
+  
+  try {
+    // Verificar se existe e se permite regeneração
+    const [existing] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    
+    if (existing.length === 0) {
+      return res.status(404).json({
+        error: 'Token não encontrado',
+        code: 'NOT_FOUND'
+      });
+    }
+    
+    if (!existing[0].permitir_regeneracao) {
+      return res.status(403).json({
+        error: 'Token não permite regeneração',
+        code: 'REGENERATION_NOT_ALLOWED'
+      });
+    }
+    
+    if (existing[0].status !== 'Ativo') {
+      return res.status(403).json({
+        error: 'Apenas tokens ativos podem ser renovados',
+        code: 'TOKEN_NOT_ACTIVE'
+      });
+    }
+    
+    // Atualizar token e data de expiração
+    await pool.query(
+      'UPDATE tokens_acesso SET token = ?, data_expiracao = ? WHERE id = ?',
+      [novoToken, novaDataExpiracao, req.params.id]
+    );
+    
+    const [updated] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    const updatedToken = mapTokenAcesso(updated[0]);
+    
+    // Registrar log de auditoria
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'UPDATE',
+      entityType: 'tokens_acesso',
+      entityId: req.params.id,
+      method: 'PATCH',
+      route: '/api/tokens-acesso/:id/renovar',
+      statusCode: 200,
+      durationMs: Date.now() - startTime,
+      payload: { action: 'renovar' },
+      severity: 'info'
+    });
+    
+    res.json(updatedToken);
+  } catch (error) {
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'ERROR',
+      entityType: 'tokens_acesso',
+      entityId: req.params.id,
+      method: 'PATCH',
+      route: '/api/tokens-acesso/:id/renovar',
+      statusCode: 500,
+      errorMessage: error.message,
+      severity: 'error'
+    });
+    
+    console.error('Erro ao renovar token:', error);
+    res.status(500).json({ error: 'Erro ao renovar token', code: 'DATABASE_ERROR' });
+  }
+});
+
+// PATCH /api/tokens-acesso/:id/revogar - Revogar token
+app.patch('/api/tokens-acesso/:id/revogar', async (req, res) => {
+  const startTime = Date.now();
+  const requestInfo = extractRequestInfo(req);
+  
+  try {
+    // Verificar se existe
+    const [existing] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    
+    if (existing.length === 0) {
+      return res.status(404).json({
+        error: 'Token não encontrado',
+        code: 'NOT_FOUND'
+      });
+    }
+    
+    if (existing[0].status === 'Revogado') {
+      return res.status(400).json({
+        error: 'Token já está revogado',
+        code: 'ALREADY_REVOKED'
+      });
+    }
+    
+    // Revogar token
+    await pool.query(
+      'UPDATE tokens_acesso SET status = "Revogado" WHERE id = ?',
+      [req.params.id]
+    );
+    
+    const [updated] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    const updatedToken = mapTokenAcesso(updated[0]);
+    
+    // Registrar log de auditoria
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'UPDATE',
+      entityType: 'tokens_acesso',
+      entityId: req.params.id,
+      method: 'PATCH',
+      route: '/api/tokens-acesso/:id/revogar',
+      statusCode: 200,
+      durationMs: Date.now() - startTime,
+      payload: { action: 'revogar' },
+      oldValues: { status: existing[0].status },
+      newValues: { status: 'Revogado' },
+      severity: 'info'
+    });
+    
+    res.json(updatedToken);
+  } catch (error) {
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'ERROR',
+      entityType: 'tokens_acesso',
+      entityId: req.params.id,
+      method: 'PATCH',
+      route: '/api/tokens-acesso/:id/revogar',
+      statusCode: 500,
+      errorMessage: error.message,
+      severity: 'error'
+    });
+    
+    console.error('Erro ao revogar token:', error);
+    res.status(500).json({ error: 'Erro ao revogar token', code: 'DATABASE_ERROR' });
+  }
+});
+
+// DELETE /api/tokens-acesso/:id - Excluir token
+app.delete('/api/tokens-acesso/:id', async (req, res) => {
+  const startTime = Date.now();
+  const requestInfo = extractRequestInfo(req);
+  
+  try {
+    // Buscar dados antes de excluir
+    const [existing] = await pool.query('SELECT * FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    const oldValues = existing.length > 0 ? { ...mapTokenAcesso(existing[0]), token: '[HIDDEN]' } : null;
+    
+    const [result] = await pool.query('DELETE FROM tokens_acesso WHERE id = ?', [req.params.id]);
+    
+    if (result.affectedRows === 0) {
+      await logAuditoria({
+        ...requestInfo,
+        operationType: 'DELETE',
+        entityType: 'tokens_acesso',
+        entityId: req.params.id,
+        method: 'DELETE',
+        route: '/api/tokens-acesso/:id',
+        statusCode: 404,
+        durationMs: Date.now() - startTime,
+        errorMessage: 'Token não encontrado',
+        severity: 'warn'
+      });
+      
+      return res.status(404).json({
+        error: 'Token não encontrado',
+        code: 'NOT_FOUND'
+      });
+    }
+    
+    // Registrar log de auditoria
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'DELETE',
+      entityType: 'tokens_acesso',
+      entityId: req.params.id,
+      method: 'DELETE',
+      route: '/api/tokens-acesso/:id',
+      statusCode: 204,
+      durationMs: Date.now() - startTime,
+      oldValues,
+      severity: 'info'
+    });
+    
+    res.status(204).send();
+  } catch (error) {
+    await logAuditoria({
+      ...requestInfo,
+      operationType: 'ERROR',
+      entityType: 'tokens_acesso',
+      entityId: req.params.id,
+      method: 'DELETE',
+      route: '/api/tokens-acesso/:id',
+      statusCode: 500,
+      errorMessage: error.message,
+      severity: 'error'
+    });
+    
+    console.error('Erro ao excluir token:', error);
+    res.status(500).json({ error: 'Erro ao excluir dados', code: 'DATABASE_ERROR' });
+  }
+});
+
 // ==================== COLABORADORES ====================
 
 app.get('/api/colaboradores', async (req, res) => {

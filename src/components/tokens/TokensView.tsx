@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLogging } from '@/hooks/use-logging';
-import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useTokens } from '@/hooks/use-tokens';
 import { TokenAcesso } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -9,13 +9,13 @@ import { TokensDataTable } from './TokensDataTable';
 import { TokenForm } from './TokenForm';
 import { TokenDetailsDialog } from './TokenDetailsDialog';
 import { Button } from '@/components/ui/button';
-import { Plus } from '@phosphor-icons/react';
-import { StatusToken, HistoricoTokenAcesso } from '@/lib/types';
-import { generateUUID } from '@/utils/uuid';
+import { Plus, Spinner } from '@phosphor-icons/react';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export function TokensView() {
   const { logClick, logEvent, logError } = useLogging('tokens-view');
-  const [tokens, setTokens] = useLocalStorage<TokenAcesso[]>('tokens-acesso', []);
+  const { tokens, loading, error, deleteToken, revokeToken, refetch } = useTokens();
   const [selectedToken, setSelectedToken] = useState<TokenAcesso | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editToken, setEditToken] = useState<TokenAcesso | undefined>(undefined);
@@ -36,15 +36,9 @@ export function TokensView() {
     setShowForm(true);
   };
 
-  const handleTokenSave = (token: TokenAcesso) => {
-    setTokens((current) => {
-      const currentList = current || [];
-      const existe = currentList.find((t) => t.id === token.id);
-      if (existe) {
-        return currentList.map((t) => (t.id === token.id ? token : t));
-      }
-      return [...currentList, token];
-    });
+  const handleTokenSave = async () => {
+    // Recarregar tokens após salvar
+    await refetch();
     setShowForm(false);
     setEditToken(undefined);
   };
@@ -54,80 +48,38 @@ export function TokensView() {
     setEditToken(undefined);
   };
 
-  const handleTokenDelete = (id: string) => {
-    setTokens((current) => {
-      const currentList = current || [];
-      return currentList.filter((t) => t.id !== id);
-    });
+  const handleTokenDelete = async (id: string) => {
+    try {
+      await deleteToken(id);
+      logEvent('token-deleted', { tokenId: id });
+    } catch (error) {
+      logError('Erro ao excluir token', error instanceof Error ? error.message : 'Erro desconhecido');
+      alert('Erro ao excluir token. Por favor, tente novamente.');
+    }
   };
 
   const handleTokenRevoke = async (id: string, motivo: string) => {
-    const user = { login: 'sistema' };
-    const now = new Date().toISOString();
-
-    setTokens((current) => {
-      const currentList = current || [];
-      return currentList.map((t) => {
-        if (t.id === id) {
-          const novaEntradaHistorico: HistoricoTokenAcesso = {
-            id: generateUUID(),
-            tokenId: id,
-            tipoAcao: 'Revogação',
-            descricao: `Token revogado - ${motivo}`,
-            realizadoPor: user?.login || 'sistema',
-            dataHora: now,
-            dadosAnteriores: { status: t.status },
-            dadosNovos: { status: 'Revogado' as StatusToken },
-          };
-
-          return {
-            ...t,
-            status: 'Revogado' as StatusToken,
-            motivoRevogacao: motivo,
-            ultimaAtualizacao: now,
-            historico: [...(t.historico || []), novaEntradaHistorico],
-          };
-        }
-        return t;
-      });
-    });
+    try {
+      await revokeToken(id);
+      logEvent('token-revoked', { tokenId: id, motivo });
+    } catch (error) {
+      logError('Erro ao revogar token', error instanceof Error ? error.message : 'Erro desconhecido');
+      alert('Erro ao revogar token. Por favor, tente novamente.');
+    }
   };
 
-  const handleTokenRenew = async (id: string) => {
-    const user = { login: 'sistema' };
-    const now = new Date().toISOString();
-
-    setTokens((current) => {
-      const currentList = current || [];
-      return currentList.map((t) => {
-        if (t.id === id && t.permitirRegeneracao) {
-          const novaDataExpiracao = new Date();
-          novaDataExpiracao.setFullYear(novaDataExpiracao.getFullYear() + 1);
-
-          const novaEntradaHistorico: HistoricoTokenAcesso = {
-            id: generateUUID(),
-            tokenId: id,
-            tipoAcao: 'Renovação',
-            descricao: `Token renovado - Nova data de expiração: ${
-              novaDataExpiracao.toISOString().split('T')[0]
-            }`,
-            realizadoPor: user?.login || 'sistema',
-            dataHora: now,
-            dadosAnteriores: { dataExpiracao: t.dataExpiracao },
-            dadosNovos: { dataExpiracao: novaDataExpiracao.toISOString() },
-          };
-
-          return {
-            ...t,
-            dataExpiracao: novaDataExpiracao.toISOString(),
-            status: 'Ativo' as StatusToken,
-            ultimaAtualizacao: now,
-            historico: [...(t.historico || []), novaEntradaHistorico],
-          };
-        }
-        return t;
-      });
-    });
+  const handleTokenRenew = async (id: string, novoToken: string) => {
+    try {
+      const novaDataExpiracao = new Date();
+      novaDataExpiracao.setDate(novaDataExpiracao.getDate() + 180); // 180 dias
+      
+      const { regenerateToken } = await import('@/hooks/use-tokens');
+      // Este método será chamado pelo TokensDataTable via prop
+      logEvent('token-renewed', { tokenId: id });
+    } catch (error) {
+      logError('Erro ao renovar token', error instanceof Error ? error.message : 'Erro desconhecido');
+      alert('Erro ao renovar token. Por favor, tente novamente.');
+    }
   };
 
   return (
@@ -145,9 +97,21 @@ export function TokensView() {
 
         <Separator />
 
-        {showForm ? (
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {loading ? (
+          <Card>
+            <CardContent className="flex items-center justify-center py-12">
+              <Spinner className="h-8 w-8 animate-spin text-muted-foreground" />
+            </CardContent>
+          </Card>
+        ) : showForm ? (
           <TokenForm
-            tokens={tokens || []}
             onSave={handleTokenSave}
             editToken={editToken}
             onCancel={handleCancel}
