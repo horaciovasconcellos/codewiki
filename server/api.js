@@ -12058,8 +12058,9 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
 
   // GET /api/adrs - Listar todos os ADRs
   app.get('/api/adrs', async (req, res) => {
+    const connection = await getUtf8Connection();
     try {
-      const [adrs] = await pool.query(`
+      const [adrs] = await connection.query(`
         SELECT 
           a.*,
           a.data_criacao as dataCriacao,
@@ -12080,13 +12081,16 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     } catch (error) {
       console.error('Erro ao buscar ADRs:', error);
       res.status(500).json({ error: 'Erro ao buscar ADRs' });
+    } finally {
+      connection.release();
     }
   });
 
   // GET /api/adrs/:id - Buscar ADR específico
   app.get('/api/adrs/:id', async (req, res) => {
+    const connection = await getUtf8Connection();
     try {
-      const [adrs] = await pool.query(`
+      const [adrs] = await connection.query(`
         SELECT 
           a.*,
           a.data_criacao as dataCriacao,
@@ -12142,12 +12146,14 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     } catch (error) {
       console.error('Erro ao buscar ADR:', error);
       res.status(500).json({ error: 'Erro ao buscar ADR' });
+    } finally {
+      connection.release();
     }
   });
 
   // POST /api/adrs - Criar novo ADR
   app.post('/api/adrs', async (req, res) => {
-    const connection = await pool.getConnection();
+    const connection = await getUtf8Connection();
     try {
       await connection.beginTransaction();
 
@@ -12225,7 +12231,7 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
 
   // PUT /api/adrs/:id - Atualizar ADR
   app.put('/api/adrs/:id', async (req, res) => {
-    const connection = await pool.getConnection();
+    const connection = await getUtf8Connection();
     try {
       await connection.beginTransaction();
 
@@ -12248,8 +12254,17 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
       console.log('[PUT /api/adrs/:id] Status recebido:', status, '| Tipo:', typeof status);
       console.log('[PUT /api/adrs/:id] Body completo:', JSON.stringify(req.body, null, 2));
 
+      // Validar ADR substituta se status for "Substituido"
+      if (status === 'Substituido' && !adrSubstitutaId) {
+        await connection.rollback();
+        return res.status(400).json({
+          error: 'Campo adrSubstitutaId é obrigatório quando status é Substituido',
+          code: 'MISSING_SUBSTITUTA'
+        });
+      }
+
       // Validar status ENUM
-      const statusValidos = ['Proposto', 'Aceito', 'Rejeitado', 'Substituído', 'Obsoleto', 'Adiado/Retirado'];
+      const statusValidos = ['Proposto', 'Aceito', 'Rejeitado', 'Substituido', 'Obsoleto', 'Adiado/Retirado'];
       if (!status || !statusValidos.includes(status)) {
         await connection.rollback();
         return res.status(400).json({
@@ -12260,13 +12275,10 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
       }
 
       // WORKAROUND: Normalizar status para evitar problema de encoding
-      // MySQL pode estar esperando charset diferente
-      let statusNormalizado = status;
-      if (status === 'Substituído') {
-        // Tentar ambas as formas
-        statusNormalizado = 'Substituído'; // Força UTF-8
-      }
-
+      // MySQL espera UTF-8 com normalização NFC (Canonical Composition)
+      let statusNormalizado = status.normalize('NFC');
+      
+      console.log('[PUT /api/adrs/:id] Status original:', status, '| Bytes:', Buffer.from(status).toString('hex'));
       console.log('[PUT /api/adrs/:id] Status normalizado:', statusNormalizado, '| Bytes:', Buffer.from(statusNormalizado).toString('hex'));
 
       console.log('[PUT /api/adrs/:id] Valores para UPDATE:', {
@@ -12276,8 +12288,7 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
         adrSubstitutaId
       });
 
-      // WORKAROUND TEMPORÁRIO: Remover status do UPDATE para testar
-      // O campo status pode ter problema de ENUM no banco
+      // Executar UPDATE sem o status primeiro (para evitar erro de truncamento)
       await connection.query(
         `UPDATE adrs SET
           descricao = ?,
@@ -12299,13 +12310,29 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
         ]
       );
 
-      // Tentar atualizar o status separadamente
+      console.log('[PUT /api/adrs/:id] Campos atualizados (exceto status)');
+
+      // Atualizar o status em query separada
       try {
+        const statusBytes = Buffer.from(statusNormalizado, 'utf8');
+        console.log('[PUT /api/adrs/:id] Tentando atualizar status. Buffer:', statusBytes.toString('hex'));
+        
         await connection.query('UPDATE adrs SET status = ? WHERE id = ?', [statusNormalizado, req.params.id]);
-        console.log('[PUT /api/adrs/:id] Status atualizado com sucesso');
+        console.log('[PUT /api/adrs/:id] ✅ Status atualizado com sucesso');
       } catch (statusError) {
-        console.error('[PUT /api/adrs/:id] ERRO ao atualizar status:', statusError.message);
-        // Continuar mesmo se falhar o status
+        console.error('[PUT /api/adrs/:id] ❌ ERRO ao atualizar status:', statusError.message);
+        console.error('[PUT /api/adrs/:id] Código do erro:', statusError.code);
+        
+        // Tentar com CAST explícito
+        try {
+          await connection.query(
+            `UPDATE adrs SET status = CAST(? AS CHAR CHARACTER SET utf8mb4) WHERE id = ?`,
+            [statusNormalizado, req.params.id]
+          );
+          console.log('[PUT /api/adrs/:id] ✅ Status atualizado com CAST');
+        } catch (castError) {
+          console.error('[PUT /api/adrs/:id] ❌ Falha até com CAST:', castError.message);
+        }
       }
 
       console.log('[PUT /api/adrs/:id] UPDATE executado com sucesso');

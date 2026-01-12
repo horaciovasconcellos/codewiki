@@ -41,8 +41,9 @@ export function StepRiscos({ data, updateData }: StepRiscosProps) {
           value={data.riscosMitigacoes?.principaisRiscos || ''}
           onChange={(e) => updateRiscos('principaisRiscos', e.target.value)}
           placeholder="Liste os principais riscos associados à execução deste procedimento"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Riscos identificados e seu impacto potencial
@@ -56,8 +57,9 @@ export function StepRiscos({ data, updateData }: StepRiscosProps) {
           value={data.riscosMitigacoes?.acoesPreventivas || ''}
           onChange={(e) => updateRiscos('acoesPreventivas', e.target.value)}
           placeholder="Descreva as ações preventivas para minimizar os riscos"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Medidas preventivas para evitar problemas
@@ -71,8 +73,9 @@ export function StepRiscos({ data, updateData }: StepRiscosProps) {
           value={data.riscosMitigacoes?.acoesCorretivasRapidas || ''}
           onChange={(e) => updateRiscos('acoesCorretivasRapidas', e.target.value)}
           placeholder="Defina ações corretivas rápidas em caso de falha ou problema durante a execução"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Planos de contingência e rollback

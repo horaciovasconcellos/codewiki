@@ -11,14 +11,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -28,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DotsThree, Eye, Pencil, Trash, Prohibit, ArrowsClockwise } from '@phosphor-icons/react';
+import { Eye, Pencil, Trash, Prohibit, ArrowsClockwise } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { formatarData } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -211,56 +203,60 @@ export function TokensDataTable({
                   </TableCell>
                   <TableCell className="text-center">{token.quantidadeAcessos}</TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <DotsThree className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => onView(token)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Visualizar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onEdit(token)}
-                          disabled={token.status === 'Revogado'}
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onView(token)}
+                        title="Visualizar"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(token)}
+                        disabled={token.status === 'Revogado'}
+                        title="Editar"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      {token.permitirRegeneracao && token.status === 'Ativo' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRenew(token)}
+                          title="Renovar"
                         >
-                          <Pencil className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                        {token.permitirRegeneracao && token.status === 'Ativo' && (
-                          <DropdownMenuItem onClick={() => handleRenew(token)}>
-                            <ArrowsClockwise className="mr-2 h-4 w-4" />
-                            Renovar
-                          </DropdownMenuItem>
-                        )}
-                        {token.status === 'Ativo' && (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedToken(token);
-                              setRevokeDialogOpen(true);
-                            }}
-                          >
-                            <Prohibit className="mr-2 h-4 w-4" />
-                            Revogar
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
+                          <ArrowsClockwise className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {token.status === 'Ativo' && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => {
                             setSelectedToken(token);
-                            setDeleteDialogOpen(true);
+                            setRevokeDialogOpen(true);
                           }}
-                          className="text-destructive"
+                          title="Revogar"
                         >
-                          <Trash className="mr-2 h-4 w-4" />
-                          Deletar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          <Prohibit className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedToken(token);
+                          setDeleteDialogOpen(true);
+                        }}
+                        className="text-destructive hover:text-destructive"
+                        title="Deletar"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

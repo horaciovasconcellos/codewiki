@@ -34,8 +34,9 @@ export function StepEvidencias({ data, updateData }: StepEvidenciasProps) {
           value={data.evidencias?.printsLogsNecessarios || ''}
           onChange={(e) => updateEvidencias('printsLogsNecessarios', e.target.value)}
           placeholder="Descreva quais prints de tela e logs devem ser capturados como evidência"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Screenshots e logs que devem ser salvos
@@ -49,8 +50,9 @@ export function StepEvidencias({ data, updateData }: StepEvidenciasProps) {
           value={data.evidencias?.arquivosGerados || ''}
           onChange={(e) => updateEvidencias('arquivosGerados', e.target.value)}
           placeholder="Liste os arquivos de saída ou relatórios gerados pelo procedimento"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Arquivos de output, relatórios e documentos gerados
@@ -64,8 +66,9 @@ export function StepEvidencias({ data, updateData }: StepEvidenciasProps) {
           value={data.evidencias?.tempoMedioExecucao || ''}
           onChange={(e) => updateEvidencias('tempoMedioExecucao', e.target.value)}
           placeholder="Informe o tempo médio de execução e variações esperadas (Ex: 15-20 minutos em ambiente de produção)"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Duração estimada e tempo médio de execução

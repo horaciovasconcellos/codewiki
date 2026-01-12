@@ -60,8 +60,8 @@ export function StepBasicInfo({ data, updateData, runbooks }: StepBasicInfoProps
           value={data.finalidade || ''}
           onChange={(e) => updateData({ finalidade: e.target.value })}
           placeholder="Descreva o objetivo e propósito deste runbook..."
-          rows={4}
-          className={hasError(data.finalidade) ? 'border-destructive' : ''}
+          rows={3}
+          className={`resize-none overflow-auto ${hasError(data.finalidade) ? 'border-destructive' : ''}`}
         />
         <p className="text-xs text-muted-foreground">
           Objetivo e propósito do runbook

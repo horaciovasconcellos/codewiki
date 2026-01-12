@@ -222,6 +222,30 @@ export function NotificacoesView() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              {/* Linha de Debug - Subjects dos E-mails */}
+              {notificacoes.length > 0 && (
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                  <p className="text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                    📧 DEBUG - E-mails Lidos ({notificacoes.length} total):
+                  </p>
+                  <div className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1 max-h-32 overflow-y-auto">
+                    {notificacoes.map((n, index) => (
+                      <div key={n.id} className="flex gap-2">
+                        <span className="font-mono text-yellow-600 dark:text-yellow-400 min-w-[30px]">
+                          [{index + 1}]
+                        </span>
+                        <span className="truncate" title={n.subject}>
+                          {n.subject}
+                        </span>
+                        <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                          {n.fonte || n.email || 'N/A'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Barra de Pesquisa */}
               <div className="flex items-center gap-2">
                 <Input

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { TokenAcesso, TipoEntidadeToken, EscopoToken, AmbienteToken, HistoricoTokenAcesso } from '@/lib/types';
-import { Plus, Copy, Check } from '@phosphor-icons/react';
+import { Copy, Check, X, FloppyDisk } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -18,22 +18,25 @@ interface TokenFormProps {
   tokens: TokenAcesso[];
   onSave: (token: TokenAcesso) => void;
   editToken?: TokenAcesso;
-  onClose?: () => void;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onCancel: () => void;
 }
 
-export function TokenForm({ tokens, onSave, editToken, onClose, open: controlledOpen, onOpenChange }: TokenFormProps) {
-  const [internalOpen, setInternalOpen] = useState(false);
-  
-  // Use controlled open if provided, otherwise use internal state
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setOpen = onOpenChange || setInternalOpen;
+export function TokenForm({ tokens, onSave, editToken, onCancel }: TokenFormProps) {
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   
   const getInitialFormData = (): Partial<TokenAcesso> => {
     if (editToken) return editToken;
+    
+    // Data atual para início da validade
+    const hoje = new Date();
+    const dataInicio = hoje.toISOString().split('T')[0];
+    
+    // Data de expiração: 180 dias a partir de hoje
+    const dataExpiracao = new Date(hoje);
+    dataExpiracao.setDate(dataExpiracao.getDate() + 180);
+    const dataExp = dataExpiracao.toISOString().split('T')[0];
+    
     return {
       tipoEntidade: 'Sistema' as TipoEntidadeToken,
       escopos: [],
@@ -44,6 +47,8 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
       origensPermitidas: [],
       requerMFA: false,
       quantidadeAcessos: 0,
+      dataInicioValidade: dataInicio,
+      dataExpiracao: dataExp,
     };
   };
   
@@ -185,8 +190,7 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
       toast.success('Token gerado com sucesso! Copie-o agora, ele não será exibido novamente.');
     } else {
       toast.success('Token atualizado com sucesso');
-      setOpen(false);
-      if (onClose) onClose();
+      onCancel();
     }
   };
 
@@ -199,19 +203,10 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
     }
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseAfterCopy = () => {
     setGeneratedToken(null);
     setCopied(false);
-    setFormData(getInitialFormData());
-    setOpen(false);
-    if (onClose) onClose();
-  };
-  
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-    if (newOpen) {
-      setFormData(getInitialFormData());
-    }
+    onCancel();
   };
 
   const toggleEscopo = (escopo: EscopoToken) => {
@@ -224,30 +219,19 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {controlledOpen === undefined && (
-        <DialogTrigger asChild>
-          {!editToken && (
-            <Button>
-              <Plus className="mr-2" />
-              Gerar Novo Token
-            </Button>
-          )}
-        </DialogTrigger>
-      )}
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{editToken ? 'Editar Token' : 'Gerar Novo Token de Acesso'}</DialogTitle>
-          <DialogDescription>
-            {generatedToken 
-              ? 'Token gerado com sucesso. Copie-o agora, pois não será possível visualizá-lo novamente.'
-              : 'Preencha as informações para gerar um novo token de autenticação.'}
-          </DialogDescription>
-        </DialogHeader>
-
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle>{editToken ? 'Editar Token' : 'Gerar Novo Token de Acesso'}</CardTitle>
+          <Button variant="ghost" size="sm" onClick={onCancel}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
         {generatedToken ? (
-          <div className="space-y-4 py-4">
-            <div className="p-4 bg-muted rounded-lg">
+          <div className="space-y-4">
+            <div className="p-4 bg-white border rounded-lg">
               <div className="flex items-center justify-between mb-3">
                 <Label className="text-sm font-medium">Token JWT Gerado</Label>
                 <Badge variant="secondary" className="text-xs">
@@ -255,7 +239,7 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
-                <code className="flex-1 p-3 bg-background rounded border text-sm font-mono break-all max-h-[200px] overflow-y-auto">
+                <code className="flex-1 p-3 bg-muted rounded border text-sm font-mono break-all max-h-[200px] overflow-y-auto">
                   {generatedToken}
                 </code>
                 <Button 
@@ -268,31 +252,37 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
                 </Button>
               </div>
             </div>
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
-              <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-1">
+            <div className="p-3 bg-white border border-amber-200 rounded-lg">
+              <p className="text-sm text-amber-900 font-medium mb-1">
                 ⚠️ Atenção - Primeira e última visualização
               </p>
-              <p className="text-sm text-amber-800 dark:text-amber-200">
-                Copie este token agora! Por motivos de segurança, ele não será exibido novamente após fechar este dialog. 
+              <p className="text-sm text-amber-800">
+                Copie este token agora! Por motivos de segurança, ele não será exibido novamente após fechar. 
                 Após salvá-lo, apenas uma versão mascarada (****) será visível na tabela.
               </p>
             </div>
-            <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
-              <p className="text-xs text-blue-900 dark:text-blue-100 font-medium mb-1">
+            <div className="p-3 bg-white border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-900 font-medium mb-1">
                 📋 Informações do Token JWT
               </p>
-              <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
+              <ul className="text-xs text-blue-800 space-y-1">
                 <li>• <strong>Emissor (iss):</strong> {window.location.origin}</li>
                 <li>• <strong>Algoritmo:</strong> HS256 (HMAC with SHA-256)</li>
                 <li>• <strong>Contém:</strong> Escopos, entidade, ambiente e configurações de segurança</li>
               </ul>
             </div>
+            <div className="flex justify-end pt-4">
+              <Button onClick={handleCloseAfterCopy}>
+                <Check className="mr-2 h-4 w-4" />
+                Concluir
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="grid gap-4 py-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tipoEntidade">Tipo de Entidade *</Label>
+                <Label htmlFor="tipoEntidade">Tipo de Entidade <span className="text-destructive">*</span></Label>
                 <Select
                   value={formData.tipoEntidade || 'Sistema'}
                   onValueChange={(value) => setFormData({ ...formData, tipoEntidade: value as TipoEntidadeToken })}
@@ -307,12 +297,15 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
                     <SelectItem value="Serviço Interno">Serviço Interno</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  Define o tipo de entidade que usará o token
+                </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="identificadorEntidade">
                   {formData.tipoEntidade === 'Pessoa Física' ? 'CPF' : 
-                   formData.tipoEntidade === 'Pessoa Jurídica' ? 'CNPJ' : 'ID'} *
+                   formData.tipoEntidade === 'Pessoa Jurídica' ? 'CNPJ' : 'ID'} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="identificadorEntidade"
@@ -320,21 +313,27 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
                   onChange={(e) => setFormData({ ...formData, identificadorEntidade: e.target.value })}
                   placeholder="Identificador único"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Identificador único da entidade
+                </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="nomeEntidade">Nome / Descrição *</Label>
+              <Label htmlFor="nomeEntidade">Nome / Descrição <span className="text-destructive">*</span></Label>
               <Input
                 id="nomeEntidade"
                 value={formData.nomeEntidade || ''}
                 onChange={(e) => setFormData({ ...formData, nomeEntidade: e.target.value })}
                 placeholder="Nome do responsável ou sistema"
               />
+              <p className="text-xs text-muted-foreground">
+                Nome descritivo para identificar o token
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label>Escopos / Operações Permitidas *</Label>
+              <Label>Escopos / Operações Permitidas <span className="text-destructive">*</span></Label>
               <div className="grid grid-cols-4 gap-2">
                 {escoposDisponiveis.map(escopo => (
                   <div key={escopo} className="flex items-center space-x-2">
@@ -375,8 +374,13 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
                   id="dataInicioValidade"
                   type="date"
                   value={formData.dataInicioValidade || ''}
-                  onChange={(e) => setFormData({ ...formData, dataInicioValidade: e.target.value })}
+                  readOnly
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Data atual do sistema (não editável)
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -387,6 +391,9 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
                   value={formData.dataExpiracao || ''}
                   onChange={(e) => setFormData({ ...formData, dataExpiracao: e.target.value })}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Padrão: 180 dias a partir do início da validade
+                </p>
               </div>
             </div>
 
@@ -453,20 +460,20 @@ export function TokenForm({ tokens, onSave, editToken, onClose, open: controlled
                 <Label htmlFor="requerMFA" className="cursor-pointer">Requer MFA</Label>
               </div>
             </div>
-          </div>
-        )}
 
-        <DialogFooter>
-          {generatedToken ? (
-            <Button onClick={handleCloseDialog}>Fechar</Button>
-          ) : (
-            <>
-              <Button variant="outline" onClick={handleCloseDialog}>Cancelar</Button>
-              <Button onClick={handleSave}>{editToken ? 'Salvar' : 'Gerar Token'}</Button>
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                <X className="mr-2 h-4 w-4" />
+                Cancelar
+              </Button>
+              <Button type="submit">
+                <FloppyDisk className="mr-2 h-4 w-4" />
+                {editToken ? 'Atualizar' : 'Gerar Token'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -330,7 +330,7 @@ export function TecnologiasDataTable({ tecnologias, onSelect, onEdit, onDelete }
                 </TableRow>
               ) : (
                 paginatedTecnologias.map((tecnologia) => (
-                  <TableRow key={tecnologia.id} className="hover:bg-muted/50">
+                  <TableRow key={tecnologia.id} className="hover:bg-gray-100">
                     <TableCell className="font-medium">{tecnologia.nome}</TableCell>
                     <TableCell>{tecnologia.sigla}</TableCell>
                     <TableCell>

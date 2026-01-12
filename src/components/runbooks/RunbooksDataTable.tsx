@@ -39,6 +39,7 @@ import {
   CaretUpDown,
   MagnifyingGlass,
   BookOpen,
+  Plus,
 } from '@phosphor-icons/react';
 
 interface RunbooksDataTableProps {
@@ -46,6 +47,7 @@ interface RunbooksDataTableProps {
   onSelect: (runbook: Runbook) => void;
   onEdit: (runbook: Runbook) => void;
   onDelete: (id: string) => void;
+  onNew?: () => void;
 }
 
 type SortField = 'sigla' | 'descricaoResumida' | 'tipoRunbook';
@@ -78,6 +80,7 @@ export function RunbooksDataTable({
   onSelect,
   onEdit,
   onDelete,
+  onNew,
 }: RunbooksDataTableProps) {
   console.log('[RunbooksDataTable] Runbooks recebidos:', runbooks?.length || 0);
   
@@ -176,7 +179,21 @@ export function RunbooksDataTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Runbooks</CardTitle>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>Runbooks</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Gerenciamento de runbooks operacionais
+            </p>
+          </div>
+          {onNew && (
+            <Button onClick={onNew}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Runbook
+            </Button>
+          )}
+        </div>
+
         <div className="flex flex-col gap-4 mt-4">
           {/* Busca */}
           <div className="flex items-center gap-2">

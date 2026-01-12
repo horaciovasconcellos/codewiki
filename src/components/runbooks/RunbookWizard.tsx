@@ -178,42 +178,50 @@ export function RunbookWizard({ runbook, runbooks, onSave, onCancel }: RunbookWi
   const progress = (currentStep / steps.length) * 100;
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                {runbook ? 'Editar Runbook' : 'Novo Runbook'}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Passo {currentStep} de {steps.length}: {steps[currentStep - 1].name}
-              </p>
-            </div>
-            <Button variant="ghost" onClick={onCancel}>
-              Cancelar
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <Progress value={progress} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              {steps.map((step) => (
-                <span
-                  key={step.id}
-                  className={`hidden md:inline ${currentStep === step.id ? 'text-primary font-semibold' : ''}`}
-                >
-                  {step.name}
-                </span>
-              ))}
-            </div>
+    <div className="fixed inset-0 z-40 flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">
+              {runbook ? 'Editar Runbook' : 'Novo Runbook'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Passo {currentStep} de {steps.length}: {steps[currentStep - 1].name}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-6">
-        <Card>
-          <CardContent className="pt-6">
+      {/* Progress Bar */}
+      <div className="border-b px-6 py-4">
+        <div className="space-y-2">
+          <Progress value={progress} className="h-2" />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            {steps.map((step) => (
+              <span
+                key={step.id}
+                className={`hidden md:inline ${currentStep === step.id ? 'text-primary font-semibold' : ''}`}
+              >
+                {step.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-auto px-6 py-6">
+        <Card className="border-black">
+          <CardContent className="bg-white pt-6">
             <CurrentStepComponent
               data={formData}
               updateData={updateFormData}

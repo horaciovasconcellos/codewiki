@@ -268,60 +268,67 @@ export function AplicacaoWizard({
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                {isEditing ? 'Editar Aplicação' : 'Nova Aplicação'}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {steps[currentStep - 1].description}
-              </p>
-            </div>
-            <Button variant="ghost" onClick={onCancel}>
-              <X className="mr-2" />
-              Cancelar
-            </Button>
-          </div>
-
-          <div className="mb-6">
-            <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
-            <div className="flex justify-between mt-4 overflow-x-auto">
-              {steps.map((step) => (
-                <div
-                  key={step.number}
-                  className={`flex flex-col items-center flex-1 min-w-[100px] ${
-                    step.number === currentStep ? 'text-primary' : 'text-muted-foreground'
-                  }`}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                      step.number < currentStep
-                        ? 'bg-primary text-primary-foreground'
-                        : step.number === currentStep
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    {step.number < currentStep ? <Check size={20} /> : step.number}
-                  </div>
-                  <p className="text-xs font-medium text-center">{step.title}</p>
-                </div>
-              ))}
-            </div>
+    <div className="fixed inset-0 z-40 flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">
+              {isEditing ? 'Editar Aplicação' : 'Nova Aplicação'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {steps[currentStep - 1].description}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-6">
-        <Card>
+      {/* Progress Bar */}
+      <div className="border-b px-6 py-4">
+        <div className="mb-4">
+          <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
+        </div>
+        <div className="flex justify-between overflow-x-auto">
+          {steps.map((step) => (
+            <div
+              key={step.number}
+              className={`flex flex-col items-center flex-1 min-w-[100px] ${
+                step.number === currentStep ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                  step.number < currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : step.number === currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted'
+                }`}
+              >
+                {step.number < currentStep ? <Check size={20} /> : step.number}
+              </div>
+              <p className="text-xs font-medium text-center">{step.title}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-auto px-6 py-6">
+        <Card className="border-black">
           <CardHeader>
             <CardTitle>{steps[currentStep - 1].title}</CardTitle>
             <CardDescription>{steps[currentStep - 1].description}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="bg-white">
             {currentStep === 1 && (
               <StepBasicInfo
                 sigla={sigla}
@@ -436,30 +443,33 @@ export function AplicacaoWizard({
                 aplicacaoId={aplicacao?.id}
               />
             )}
-
-            <div className="flex justify-between mt-8 pt-6 border-t">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 1}
-              >
-                <ArrowLeft className="mr-2" />
-                Anterior
-              </Button>
-              {currentStep < totalSteps ? (
-                <Button onClick={handleNext}>
-                  Próximo
-                  <ArrowRight className="ml-2" />
-                </Button>
-              ) : (
-                <Button onClick={handleSave}>
-                  <Check className="mr-2" />
-                  {isEditing ? 'Salvar Alterações' : 'Criar Aplicação'}
-                </Button>
-              )}
-            </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Footer with Navigation */}
+      <div className="border-t px-6 py-4">
+        <div className="flex justify-between">
+          <Button
+            variant="outline"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+          >
+            <ArrowLeft className="mr-2" />
+            Anterior
+          </Button>
+          {currentStep < totalSteps ? (
+            <Button onClick={handleNext}>
+              Próximo
+              <ArrowRight className="ml-2" />
+            </Button>
+          ) : (
+            <Button onClick={handleSave}>
+              <Check className="mr-2" />
+              {isEditing ? 'Salvar Alterações' : 'Criar Aplicação'}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -125,14 +125,33 @@ export function PipelinesView() {
   }
 
   return (
-    <>
-      <PipelinesDataTable
-        pipelines={pipelines}
-        loading={loading}
-        onNew={handleNew}
-        onEdit={handleEdit}
-        onDelete={(id) => setDeleteConfirmId(id)}
-      />
+    <div className="min-h-screen bg-background">
+      <div className="border-b">
+        <div className="container mx-auto px-6 py-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Gestão de Pipelines</h1>
+            <p className="text-muted-foreground mt-2">
+              Gerencie as pipelines de CI/CD da organização
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-6">
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Carregando pipelines...</p>
+          </div>
+        ) : (
+          <PipelinesDataTable
+            pipelines={pipelines}
+            loading={loading}
+            onNew={handleNew}
+            onEdit={handleEdit}
+            onDelete={(id) => setDeleteConfirmId(id)}
+          />
+        )}
+      </div>
 
       <AlertDialog open={deleteConfirmId !== null} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>
@@ -150,6 +169,6 @@ export function PipelinesView() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

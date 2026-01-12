@@ -273,7 +273,7 @@ export function StepRunbooks({ runbooks, setRunbooks }: StepRunbooksProps) {
               {runbooks.map((assoc) => {
                 const info = getRunbookInfo(assoc.runbookId);
                 return (
-                  <TableRow key={assoc.id} className={assoc.status === 'Inativo' ? 'opacity-50' : ''}>
+                  <TableRow key={assoc.id} className={`hover:bg-gray-100 ${assoc.status === 'Inativo' ? 'opacity-50' : ''}`}>
                     <TableCell className="font-medium">{info?.sigla || 'N/A'}</TableCell>
                     <TableCell className="max-w-md">
                       <div className="truncate" title={assoc.descricao}>

@@ -94,10 +94,10 @@ const SpaceDashboardView: React.FC = () => {
       </div>
 
       {/* Info Alert */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertTitle>Framework SPACE</AlertTitle>
-        <AlertDescription>
+      <Alert className="bg-white border text-black">
+        <Info className="h-4 w-4 text-black" />
+        <AlertTitle className="text-black">Framework SPACE</AlertTitle>
+        <AlertDescription className="text-black">
           Métricas agregadas por time para medir produtividade sustentável, saúde e eficiência de entrega.
           Nenhuma métrica individual é exposta.
         </AlertDescription>

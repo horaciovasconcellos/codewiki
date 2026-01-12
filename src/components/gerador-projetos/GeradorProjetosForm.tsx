@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ProjetoGerado, Aplicacao, WorkItemProcess } from '@/lib/types';
 import { ProjetoSDD } from '@/types/sdd';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { FloppyDisk, X, Plus, Trash, Play } from '@phosphor-icons/react';
+import { ArrowLeft, FloppyDisk, Plus, Trash } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useApi } from '@/hooks/use-api';
 import { RepositoriosDataTable } from './RepositoriosDataTable';
@@ -72,9 +72,11 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
   const [novoRepoGrupo, setNovoRepoGrupo] = useState<GrupoRepositorio | ''>('');
   const [novoRepoTipo, setNovoRepoTipo] = useState<TipoRepositorio | ''>('');
   const [novoRepoLinguagem, setNovoRepoLinguagem] = useState<LinguagemRepositorio | ''>('');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (projeto) {
+    if (projeto && !isInitialized) {
+      setIsInitialized(true);
       // Se tem aplicacaoBaseId, usar direto. Senão, buscar pelo produto (sigla)
       if (projeto.aplicacaoBaseId) {
         setAplicacaoBaseId(projeto.aplicacaoBaseId);
@@ -124,7 +126,12 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       }));
       setRepositorios(repos);
     }
-  }, [projeto, aplicacoes, projetosSDD]);
+  }, [projeto, aplicacoes, projetosSDD, isInitialized]);
+
+  // Reset initialization flag when projeto changes
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [projeto?.id]);
 
   useEffect(() => {
     if (!criarTimeSustentacao) {
@@ -132,15 +139,8 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
     }
   }, [criarTimeSustentacao]);
 
-  // Auto-preencher Nome do Time quando digitar nome do projeto (apenas modo manual)
-  useEffect(() => {
-    if (!projetoSddId && nomeProjeto.trim()) {
-      setNomeTime(`Time - ${nomeProjeto}`);
-    }
-  }, [nomeProjeto, projetoSddId]);
-
   // Handler para quando selecionar um projeto SPEC-KIT
-  const handleProjetoSddChange = (projetoId: string) => {
+  const handleProjetoSddChange = useCallback((projetoId: string) => {
     // Se selecionou MANUAL, limpar tudo
     if (projetoId === 'MANUAL') {
       setProjetoSddId('');
@@ -160,7 +160,17 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
       setNomeProjeto(projetoSdd.nome_projeto);
       setNomeTime(`Time - ${projetoSdd.nome_projeto}`);
     }
-  };
+  }, [projetosSDD]);
+
+  // Handler para mudança no nome do projeto (modo manual)
+  const handleNomeProjetoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const novoNome = e.target.value;
+    setNomeProjeto(novoNome);
+    // Auto-preencher nome do time apenas em modo manual (sem projeto SPEC-KIT)
+    if (!projetoSddId && novoNome.trim() && !projeto) {
+      setNomeTime(`Time - ${novoNome}`);
+    }
+  }, [projetoSddId, projeto]);
 
   const handleAddRepositorio = () => {
     if (projetoJaProcessado) {
@@ -296,12 +306,34 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{projeto ? 'Editar Projeto' : 'Novo Projeto'}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form className="space-y-6">
+    <div className="fixed inset-0 z-40 bg-background">
+      {/* Header */}
+      <div className="border-b">
+        <div className="flex items-center h-14 px-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            className="gap-2"
+          >
+            <ArrowLeft size={16} />
+            Voltar
+          </Button>
+          <div className="ml-6">
+            <h1 className="text-lg font-semibold">
+              {projeto ? 'Editar Projeto' : 'Novo Projeto'}
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
+        <div className="h-full overflow-y-auto">
+          <div className="max-w-5xl mx-auto p-6">
+            <Card className="border-black">
+              <div className="p-6 bg-white">
+                <form className="space-y-6">
           {/* Projeto SPEC-KIT */}
           <div className="space-y-2">
             <Label htmlFor="projetoSdd">Projeto SPEC-KIT (Opcional)</Label>
@@ -363,7 +395,7 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                 <Input
                   id="projeto"
                   value={nomeProjeto}
-                  onChange={(e) => setNomeProjeto(e.target.value)}
+                  onChange={handleNomeProjetoChange}
                   placeholder="Ex: Sistema de Vendas"
                 />
               </div>
@@ -570,7 +602,7 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
               size="sm"
               disabled={projetoJaProcessado}
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus size={16} className="mr-2" />
               {projetoJaProcessado ? 'Projeto Já Processado' : 'Adicionar Repositório'}
             </Button>
 
@@ -585,7 +617,7 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
 
           <Separator />
 
-          {/* Botões */}
+          {/* Footer dentro do Card - não é visível, mas mantém estrutura */}
           <div className="flex flex-col gap-3">
             {projetoJaProcessado && (
               <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
@@ -593,28 +625,23 @@ export function GeradorProjetosForm({ projeto, onSave, onCancel }: GeradorProjet
                 Não é possível adicionar novos repositórios ou gerar as estruturas novamente.
               </div>
             )}
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                <X className="mr-2" size={16} />
-                Cancelar
-              </Button>
-              <Button type="button" variant="secondary" onClick={() => handleSubmit(false)}>
-                <FloppyDisk className="mr-2" size={16} />
-                Salvar (Permitir Integração Azure)
-              </Button>
-              <Button 
-                type="button" 
-                onClick={() => handleSubmit(true)}
-                disabled={projetoJaProcessado}
-                title={projetoJaProcessado ? 'Projeto já foi processado e não pode ser gerado novamente' : 'Gerar estruturas no Azure DevOps'}
-              >
-                <Play className="mr-2" size={16} />
-                {projetoJaProcessado ? 'Projeto Já Processado' : 'Salvar e Gerar Estruturas'}
-              </Button>
-            </div>
           </div>
         </form>
-      </CardContent>
-    </Card>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t bg-background">
+        <div className="flex items-center justify-end h-16 px-6 gap-2">
+          <Button type="button" variant="secondary" onClick={() => handleSubmit(false)}>
+            <FloppyDisk className="mr-2" size={16} />
+            Salvar (Permitir Integração Azure)
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

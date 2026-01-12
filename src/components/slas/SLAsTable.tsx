@@ -256,7 +256,7 @@ export function SLAsTable({ slas, onEdit, onSLADelete }: SLAsTableProps) {
               </TableHeader>
               <TableBody>
                 {paginatedSLAs.map((sla) => (
-                  <TableRow key={sla.id} className="hover:bg-muted/50">
+                  <TableRow key={sla.id} className="hover:bg-gray-100">
                     <TableCell className="font-medium">{sla.sigla}</TableCell>
                     <TableCell className="max-w-xs truncate">{sla.descricao}</TableCell>
                     <TableCell>{sla.tipoSLA}</TableCell>

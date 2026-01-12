@@ -223,7 +223,7 @@ export function UserToOnPremiseDataTable({ data, onEdit, onDelete }: UserToOnPre
                 </TableRow>
               ) : (
                 paginatedData.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-muted/50">
+                  <TableRow key={item.id} className="hover:bg-gray-100">
                     <TableCell className="font-medium">{item.tipoDispositivo}</TableCell>
                     <TableCell>{item.nomeDispositivo}</TableCell>
                     <TableCell>{item.tipoAutenticacao}</TableCell>

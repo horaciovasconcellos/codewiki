@@ -227,7 +227,7 @@ export function StepADRs({
               {adrsAssociadas.map((assoc) => {
                 const adrInfo = getADRInfo(assoc.adrId);
                 return (
-                  <TableRow key={assoc.id} className={assoc.status === 'Inativo' ? 'opacity-50' : ''}>
+                  <TableRow key={assoc.id} className={`hover:bg-gray-100 ${assoc.status === 'Inativo' ? 'opacity-50' : ''}`}>
                     <TableCell className="font-medium">
                       ADR-{adrInfo.sequencia.toString().padStart(4, '0')}
                     </TableCell>

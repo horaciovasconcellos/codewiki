@@ -232,7 +232,7 @@ export function RequisitosList({ projetoId }: RequisitosListProps) {
                     </TableRow>
                     {expandedRequisitos.has(requisito.id) && (
                       <TableRow>
-                        <TableCell colSpan={6} className="bg-muted/50">
+                        <TableCell colSpan={6} className="bg-white">
                           <TarefasList requisito={requisito} onUpdate={loadRequisitos} />
                         </TableCell>
                       </TableRow>

@@ -204,7 +204,7 @@ export function StepCapacidades({
             </TableHeader>
             <TableBody>
               {capacidadesAssociadas.map((assoc) => (
-                <TableRow key={assoc.id} className={assoc.status === 'Inativo' ? 'opacity-50' : ''}>
+                <TableRow key={assoc.id} className={`hover:bg-gray-100 ${assoc.status === 'Inativo' ? 'opacity-50' : ''}`}>
                   <TableCell className="font-medium">{getCapacidadeNome(assoc.capacidadeId)}</TableCell>
                   <TableCell>{formatDate(assoc.dataInicio)}</TableCell>
                   <TableCell>{formatDate(assoc.dataTermino)}</TableCell>

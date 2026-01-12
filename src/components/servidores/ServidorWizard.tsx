@@ -240,73 +240,75 @@ export function ServidorWizard({ servidor, onSave, onCancel }: ServidorWizardPro
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={onCancel}>
-                <X className="mr-2" />
-                Cancelar
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold">
-                  {isEditing ? 'Editar Servidor' : 'Novo Servidor'}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Etapa {currentStep} de {totalSteps}: {steps[currentStep - 1].title}
-                </p>
-              </div>
-            </div>
+    <div className="fixed inset-0 z-40 flex flex-col bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">
+              {isEditing ? 'Editar Servidor' : 'Novo Servidor'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {steps[currentStep - 1].description}
+            </p>
           </div>
-          <Progress value={progress} className="h-2" />
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8 max-w-4xl">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            {steps.map((step, index) => (
-              <div key={step.number} className="flex items-center">
-                <div className="flex flex-col items-center min-w-[120px]">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
-                      currentStep > step.number
-                        ? 'bg-primary text-primary-foreground'
-                        : currentStep === step.number
-                        ? 'bg-primary text-primary-foreground ring-4 ring-primary/20'
-                        : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {currentStep > step.number ? <Check size={20} /> : step.number}
-                  </div>
-                  <div className="text-center mt-2">
-                    <div className="text-xs font-medium">{step.title}</div>
-                  </div>
-                </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={`h-0.5 w-12 mx-2 ${
-                      currentStep > step.number ? 'bg-primary' : 'bg-muted'
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+      {/* Progress Bar */}
+      <div className="border-b px-6 py-4">
+        <div className="mb-4">
+          <Progress value={progress} className="h-2" />
         </div>
+        <div className="flex justify-between overflow-x-auto">
+          {steps.map((step) => (
+            <div
+              key={step.number}
+              className={`flex flex-col items-center flex-1 min-w-[100px] ${
+                step.number === currentStep ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                  step.number < currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : step.number === currentStep
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted'
+                }`}
+              >
+                {step.number < currentStep ? <Check size={20} /> : step.number}
+              </div>
+              <p className="text-xs font-medium text-center">{step.title}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        <Card>
+      {/* Content */}
+      <div className="flex-1 overflow-auto px-6 py-6">
+        <Card className="border-black">
           <CardHeader>
             <CardTitle>{steps[currentStep - 1].title}</CardTitle>
             <CardDescription>{steps[currentStep - 1].description}</CardDescription>
           </CardHeader>
-          <CardContent className="min-h-[400px]">
+          <CardContent className="bg-white">
             {renderStep()}
           </CardContent>
         </Card>
+      </div>
 
-        <div className="flex justify-between mt-6">
+      {/* Footer with Navigation */}
+      <div className="border-t px-6 py-4">
+        <div className="flex justify-between">
           <Button
             variant="outline"
             onClick={handlePrevious}

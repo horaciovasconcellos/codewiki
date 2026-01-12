@@ -210,7 +210,7 @@ export function StepAvaliacoes({ avaliacoes, setAvaliacoes }: StepAvaliacoesProp
                 </div>
               </div>
 
-              <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
+              <div className="border rounded-lg p-4 space-y-3 bg-white">
                 <h4 className="font-semibold text-sm">Critérios de Avaliação (0 a 10)</h4>
                 
                 <div className="grid gap-2">
@@ -302,7 +302,7 @@ export function StepAvaliacoes({ avaliacoes, setAvaliacoes }: StepAvaliacoesProp
       </div>
 
       {avaliacoes.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground border rounded-lg bg-muted/20">
+        <div className="text-center py-12 text-muted-foreground border rounded-lg bg-white">
           <ChartBar size={48} className="mx-auto mb-3 opacity-50" />
           <p className="font-medium">Nenhuma avaliação registrada</p>
           <p className="text-sm mt-1">Clique em "Nova Avaliação" para começar</p>
@@ -377,7 +377,7 @@ export function StepAvaliacoes({ avaliacoes, setAvaliacoes }: StepAvaliacoesProp
       )}
 
       {avaliacoes.length > 0 && (
-        <div className="p-4 border rounded-lg bg-muted/30">
+        <div className="p-4 border rounded-lg bg-white">
           <h4 className="font-semibold mb-2">Resumo das Avaliações</h4>
           <p className="text-sm text-muted-foreground">
             Total de avaliações: <span className="font-semibold">{avaliacoes.length}</span>

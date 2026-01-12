@@ -272,7 +272,7 @@ export function ProcessosList({ processos, onSelect, onEdit, onDelete }: Process
               </TableRow>
             ) : (
               paginatedProcessos.map((processo) => (
-                <TableRow key={processo.id} className="hover:bg-muted/50">
+                <TableRow key={processo.id} className="hover:bg-gray-100">
                   <TableCell className="font-medium font-mono">{processo.identificacao}</TableCell>
                   <TableCell className="font-medium">{processo.nome || processo.descricao}</TableCell>
                   <TableCell>{processo.areaResponsavel}</TableCell>

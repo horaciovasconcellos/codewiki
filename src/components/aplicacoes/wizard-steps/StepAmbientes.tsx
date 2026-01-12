@@ -220,7 +220,7 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
             </TableHeader>
             <TableBody>
               {ambientes.map((amb) => (
-                <TableRow key={amb.id} className={amb.status === 'Inativo' ? 'opacity-50' : ''}>
+                <TableRow key={amb.id} className={`hover:bg-gray-100 ${amb.status === 'Inativo' ? 'opacity-50' : ''}`}>
                   <TableCell className="font-medium">{amb.tipoAmbiente}</TableCell>
                   <TableCell>{amb.urlAmbiente}</TableCell>
                   <TableCell>{formatDate(amb.dataCriacao)}</TableCell>

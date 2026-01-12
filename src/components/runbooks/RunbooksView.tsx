@@ -5,8 +5,6 @@ import { Runbook } from '@/lib/types';
 import { RunbookWizard } from './RunbookWizard';
 import { RunbooksDataTable } from './RunbooksDataTable';
 import { RunbookDetails } from './RunbookDetails';
-import { Button } from '@/components/ui/button';
-import { Plus } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -99,28 +97,22 @@ export function RunbooksView({}: RunbooksViewProps) {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="min-h-screen bg-background">
+      <div className="border-b">
         <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Catálogo de Runbooks</h1>
-              <p className="text-muted-foreground mt-1">
-                Gerencie todos os runbooks operacionais da instituição
-              </p>
-            </div>
-            <Button onClick={handleNewRunbook} size="lg">
-              <Plus className="mr-2" />
-              Novo Runbook
-            </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Catálogo de Runbooks</h1>
+            <p className="text-muted-foreground mt-2">
+              Gerencie todos os runbooks operacionais da instituição
+            </p>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-6">
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Carregando...
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Carregando runbooks...</p>
           </div>
         ) : (
           <RunbooksDataTable
@@ -128,6 +120,7 @@ export function RunbooksView({}: RunbooksViewProps) {
             onSelect={setSelectedRunbook}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onNew={handleNewRunbook}
           />
         )}
       </div>

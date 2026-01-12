@@ -27,6 +27,7 @@ const formatDateForInput = (date: string | undefined): string => {
 export function TarefaForm({ requisitoId, tarefa, onClose, onSave }: TarefaFormProps) {
   const [formData, setFormData] = useState({
     descricao: tarefa?.descricao || '',
+    definicao_pronto: (tarefa as any)?.definicao_pronto || '',
     data_inicio: formatDateForInput(tarefa?.data_inicio) || new Date().toISOString().split('T')[0],
     data_termino: formatDateForInput(tarefa?.data_termino),
     status: tarefa?.status || ('TO DO' as StatusTarefa),
@@ -94,6 +95,18 @@ export function TarefaForm({ requisitoId, tarefa, onClose, onSave }: TarefaFormP
               rows={6}
               className="font-mono text-sm"
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="definicao_pronto">Definição de Pronto</Label>
+            <Textarea
+              id="definicao_pronto"
+              value={formData.definicao_pronto}
+              onChange={(e) => setFormData({ ...formData, definicao_pronto: e.target.value })}
+              placeholder="Defina os critérios de aceitação para considerar esta tarefa concluída..."
+              rows={4}
+              className="font-mono text-sm"
             />
           </div>
 

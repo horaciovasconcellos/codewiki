@@ -133,9 +133,9 @@ const ActivityPanel: React.FC<Props> = ({ data }) => {
           </div>
 
           {/* Warning */}
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded">
-            <p className="text-sm font-medium text-amber-900">⚠️ Atenção</p>
-            <p className="text-sm text-amber-800 mt-1">
+          <div className="p-4 bg-white border rounded">
+            <p className="text-sm font-medium">⚠️ Atenção</p>
+            <p className="text-sm text-muted-foreground mt-1">
               Métricas de atividade não devem ser usadas isoladamente para medir produtividade. 
               Use-as como contexto para entender padrões de trabalho do time.
             </p>

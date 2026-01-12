@@ -197,7 +197,7 @@ export function LGPDDataTable({ registros, onView, onEdit, onDelete }: LGPDDataT
       {/* Tabela */}
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-100">
             <TableRow>
               <TableHead className="cursor-pointer" onClick={() => handleSort('identificacaoDados')}>
                 <div className="flex items-center gap-1">
@@ -242,7 +242,7 @@ export function LGPDDataTable({ registros, onView, onEdit, onDelete }: LGPDDataT
               </TableRow>
             ) : (
               paginatedRegistros.map((registro) => (
-                <TableRow key={registro.id} className="hover:bg-muted/50">
+                <TableRow key={registro.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
                   <TableCell className="font-medium">{registro.identificacaoDados}</TableCell>
                   <TableCell>
                     <Badge variant={getTipoDadosBadgeVariant(registro.tipoDados)}>

@@ -174,7 +174,7 @@ export function GeradorProjetosDataTable({
 
       <div className="rounded-md border">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-gray-100">
           <TableRow>
             <TableHead>
               <Button
@@ -237,7 +237,7 @@ export function GeradorProjetosDataTable({
             </TableRow>
           ) : (
             paginatedProjetos.map((projeto) => (
-              <TableRow key={projeto.id} className="hover:bg-muted/50">
+              <TableRow key={projeto.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
                 <TableCell className="font-medium">{projeto.produto}</TableCell>
                 <TableCell>
                   {projeto.urlProjeto ? (

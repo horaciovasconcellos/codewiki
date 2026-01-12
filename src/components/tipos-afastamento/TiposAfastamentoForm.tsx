@@ -171,23 +171,25 @@ export function TiposAfastamentoForm({ tipo, onSave, onCancel }: TiposAfastament
                 Tipo de Tempo <span className="text-destructive">*</span>
               </Label>
               <RadioGroup value={tipoTempo} onValueChange={(value) => setTipoTempo(value as TipoTempo)}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="D" id="dias" />
-                  <Label htmlFor="dias" className="font-normal cursor-pointer">
-                    Dias
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="M" id="meses" />
-                  <Label htmlFor="meses" className="font-normal cursor-pointer">
-                    Meses
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="A" id="anos" />
-                  <Label htmlFor="anos" className="font-normal cursor-pointer">
-                    Anos
-                  </Label>
+                <div className="flex gap-6">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="D" id="dias" />
+                    <Label htmlFor="dias" className="font-normal cursor-pointer">
+                      Dias
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="M" id="meses" />
+                    <Label htmlFor="meses" className="font-normal cursor-pointer">
+                      Meses
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="A" id="anos" />
+                    <Label htmlFor="anos" className="font-normal cursor-pointer">
+                      Anos
+                    </Label>
+                  </div>
                 </div>
               </RadioGroup>
             </div>

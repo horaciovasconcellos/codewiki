@@ -361,7 +361,6 @@ export function AzureWorkItemsView() {
             <Button
               onClick={sincronizarTodosProjetos}
               disabled={syncingAll || syncing}
-              variant="outline"
               className="w-full"
             >
               <ArrowsClockwise className={`mr-2 h-4 w-4 ${syncingAll ? 'animate-spin' : ''}`} />

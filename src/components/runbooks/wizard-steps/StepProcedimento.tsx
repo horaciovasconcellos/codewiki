@@ -35,7 +35,7 @@ export function StepProcedimento({ data, updateData }: StepProcedimentoProps) {
           onChange={(e) => updateProcedimento('comandos', e.target.value)}
           placeholder="Liste os comandos a serem executados, na ordem correta"
           rows={8}
-          className="font-mono"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Comandos a serem executados, passo a passo
@@ -49,8 +49,9 @@ export function StepProcedimento({ data, updateData }: StepProcedimentoProps) {
           value={data.procedimentoOperacional?.pontosAtencao || ''}
           onChange={(e) => updateProcedimento('pontosAtencao', e.target.value)}
           placeholder="Descreva pontos críticos que requerem atenção especial"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Alertas e cuidados durante a execução
@@ -64,8 +65,9 @@ export function StepProcedimento({ data, updateData }: StepProcedimentoProps) {
           value={data.procedimentoOperacional?.checksIntermediarios || ''}
           onChange={(e) => updateProcedimento('checksIntermediarios', e.target.value)}
           placeholder="Verificações a serem feitas durante a execução"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Validações intermediárias durante o procedimento
@@ -79,8 +81,9 @@ export function StepProcedimento({ data, updateData }: StepProcedimentoProps) {
           value={data.procedimentoOperacional?.criteriosSucesso || ''}
           onChange={(e) => updateProcedimento('criteriosSucesso', e.target.value)}
           placeholder="Como identificar que o procedimento foi executado com sucesso"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Indicadores de sucesso da execução
@@ -94,8 +97,9 @@ export function StepProcedimento({ data, updateData }: StepProcedimentoProps) {
           value={data.procedimentoOperacional?.criteriosFalha || ''}
           onChange={(e) => updateProcedimento('criteriosFalha', e.target.value)}
           placeholder="Como identificar falhas e o que fazer em caso de erro"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Indicadores de falha e ações corretivas

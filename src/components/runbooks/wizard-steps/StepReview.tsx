@@ -50,7 +50,7 @@ function ReviewField({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
-      <div className="bg-muted/50 rounded p-3">
+      <div className="bg-white border rounded p-3">
         <pre className="text-sm whitespace-pre-wrap font-mono">{value}</pre>
       </div>
     </div>

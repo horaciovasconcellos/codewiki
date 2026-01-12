@@ -370,7 +370,7 @@ export function StepTecnologias({
                 {paginatedTecnologias.map((assoc) => (
                   <TableRow 
                     key={assoc.id} 
-                    className={`hover:bg-muted/50 ${assoc.status === 'Inativo' ? 'opacity-50' : ''}`}
+                    className={`hover:bg-gray-100 ${assoc.status === 'Inativo' ? 'opacity-50' : ''}`}
                   >
                     <TableCell className="font-medium">{getTecnologiaNome(assoc.tecnologiaId)}</TableCell>
                     <TableCell>{formatDate(assoc.dataInicio)}</TableCell>

@@ -34,8 +34,9 @@ export function StepPosExecucao({ data, updateData }: StepPosExecucaoProps) {
           value={data.posExecucao?.validacoesObrigatorias || ''}
           onChange={(e) => updatePosExecucao('validacoesObrigatorias', e.target.value)}
           placeholder="Liste as validações obrigatórias após a execução"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Verificações obrigatórias pós-execução
@@ -49,8 +50,9 @@ export function StepPosExecucao({ data, updateData }: StepPosExecucaoProps) {
           value={data.posExecucao?.verificacaoLogs || ''}
           onChange={(e) => updatePosExecucao('verificacaoLogs', e.target.value)}
           placeholder="Descreva quais logs devem ser verificados e o que observar"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Logs a serem verificados e padrões esperados
@@ -64,8 +66,9 @@ export function StepPosExecucao({ data, updateData }: StepPosExecucaoProps) {
           value={data.posExecucao?.statusEsperadoAplicacao || ''}
           onChange={(e) => updatePosExecucao('statusEsperadoAplicacao', e.target.value)}
           placeholder="Descreva o estado esperado da aplicação após a execução"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Estado/status esperado do sistema após execução
@@ -79,8 +82,9 @@ export function StepPosExecucao({ data, updateData }: StepPosExecucaoProps) {
           value={data.posExecucao?.notificacoesNecessarias || ''}
           onChange={(e) => updatePosExecucao('notificacoesNecessarias', e.target.value)}
           placeholder="Liste quem deve ser notificado e em quais situações"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Pessoas/equipes a serem notificadas e condições

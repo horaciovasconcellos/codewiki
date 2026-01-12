@@ -265,7 +265,7 @@ export function ServidoresDataTable({ data, onEdit, onDelete, loading }: Servido
                 </TableRow>
               ) : (
                 paginatedServidores.map((servidor) => (
-                  <TableRow key={servidor.id} className="hover:bg-muted/50">
+                  <TableRow key={servidor.id} className="hover:bg-gray-100">
                     <TableCell className="font-mono font-semibold">{servidor.sigla}</TableCell>
                     <TableCell className="font-medium">{servidor.hostname}</TableCell>
                     <TableCell>

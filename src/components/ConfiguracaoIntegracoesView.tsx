@@ -944,7 +944,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                     {filterSubjects.length > 0 && (
                       <div className="border rounded-lg">
                         <table className="w-full">
-                          <thead className="border-b bg-muted/50">
+                          <thead className="border-b bg-gray-100">
                             <tr>
                               <th className="text-left p-3 text-sm font-medium">Aplicação</th>
                               <th className="text-left p-3 text-sm font-medium">Subject</th>
@@ -973,7 +973,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                     )}
 
                     {filterSubjects.length === 0 && (
-                      <div className="text-center py-8 border rounded-lg bg-muted/20">
+                      <div className="text-center py-8 border rounded-lg bg-white">
                         <p className="text-sm text-muted-foreground">
                           Nenhum filtro de assunto configurado. Adicione filtros para segmentar os e-mails por aplicação.
                         </p>
@@ -1095,7 +1095,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                 <div>
                   <h4 className="text-sm font-semibold mb-3">Escopos Disponíveis</h4>
                   <div className="space-y-3">
-                    <div className="p-3 border rounded-lg bg-muted/30">
+                    <div className="p-3 border rounded-lg bg-white">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <p className="font-medium text-sm">gmail.readonly</p>
@@ -1109,7 +1109,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                       </div>
                     </div>
 
-                    <div className="p-3 border rounded-lg bg-muted/30">
+                    <div className="p-3 border rounded-lg bg-white">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <p className="font-medium text-sm">gmail.modify</p>
@@ -1123,7 +1123,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                       </div>
                     </div>
 
-                    <div className="p-3 border rounded-lg bg-muted/30">
+                    <div className="p-3 border rounded-lg bg-white">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <p className="font-medium text-sm">mail.google.com</p>
@@ -1193,7 +1193,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                     {gmailFilterSubjects.length > 0 && (
                       <div className="border rounded-lg">
                         <table className="w-full">
-                          <thead className="border-b bg-muted/50">
+                          <thead className="border-b bg-gray-100">
                             <tr>
                               <th className="text-left p-3 text-sm font-medium">Aplicação</th>
                               <th className="text-left p-3 text-sm font-medium">Subject</th>
@@ -1222,7 +1222,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                     )}
 
                     {gmailFilterSubjects.length === 0 && (
-                      <div className="text-center py-8 border rounded-lg bg-muted/20">
+                      <div className="text-center py-8 border rounded-lg bg-white">
                         <p className="text-sm text-muted-foreground">
                           Nenhum filtro de assunto configurado. Adicione filtros para segmentar os e-mails por aplicação.
                         </p>
@@ -1251,7 +1251,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                   </Button>
                 </div>
 
-                <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
+                <div className="p-4 bg-white border rounded-lg">
                   <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">
                     ℹ️ Como configurar no Google Cloud Console
                   </p>
@@ -1443,7 +1443,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                     <p className="text-xs text-muted-foreground">Cor do texto e ícones da barra de menus</p>
                   </div>
                 </div>
-                <div className="mt-4 p-4 bg-muted rounded-lg">
+                <div className="mt-4 p-4 bg-white border rounded-lg">
                   <p className="text-sm text-muted-foreground">
                     <strong>Dica:</strong> Use o formato OKLCH para melhor controle de cores. Exemplo: <code className="bg-background px-1 py-0.5 rounded">oklch(0.5 0.2 180)</code> onde os valores são: luminosidade (0-1), croma (0-0.4), e matiz (0-360).
                   </p>
@@ -1622,7 +1622,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                   </p>
                 </div>
 
-                <div className="mt-4 p-4 bg-muted rounded-lg">
+                <div className="mt-4 p-4 bg-white border rounded-lg">
                   <p className="text-sm text-muted-foreground">
                     <strong>Dica:</strong> Use cores hexadecimais (#ffffff) ou RGBA (rgba(255, 255, 255, 1)). As alterações serão aplicadas em todos os componentes Card do sistema.
                   </p>
@@ -1873,7 +1873,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                   </div>
                 </div>
 
-                <div className="mt-4 p-4 bg-muted rounded-lg">
+                <div className="mt-4 p-4 bg-white border rounded-lg">
                   <p className="text-sm text-muted-foreground">
                     <strong>Dica:</strong> As configurações de tela afetam o layout geral do sistema. Teste as alterações em diferentes páginas antes de salvar definitivamente.
                   </p>
@@ -2135,7 +2135,7 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                       </div>
                     </div>
 
-                    <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg">
+                    <div className="p-4 bg-white border rounded-lg">
                       <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">
                         ℹ️ Sobre os Templates
                       </p>

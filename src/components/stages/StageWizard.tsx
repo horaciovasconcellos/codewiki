@@ -201,7 +201,7 @@ export function StageWizard({ stage, onSave, onCancel }: StageWizardProps) {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-white">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -218,7 +218,7 @@ export function StageWizard({ stage, onSave, onCancel }: StageWizardProps) {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Seção de Importação YAML */}
-          <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
+          <div className="space-y-4 p-4 border rounded-lg bg-white">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold">Importar configuração YAML</h3>
@@ -256,20 +256,20 @@ type: Build
 description: Compila o código fonte
 timeout: 3600
 reusable: true`}
-                rows={8}
-                className="font-mono text-sm"
+                rows={10}
+                className="font-mono text-sm overflow-auto"
               />
             </div>
 
             {yamlValid !== null && (
-              <Alert variant={yamlValid ? "default" : "destructive"}>
-                <div className="flex items-start gap-2">
+              <Alert variant={yamlValid ? "default" : "destructive"} className="bg-white">
+                <div className="flex items-center gap-2">
                   {yamlValid ? (
-                    <CheckCircle className="h-4 w-4 mt-0.5" />
+                    <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   ) : (
-                    <Warning className="h-4 w-4 mt-0.5" />
+                    <Warning className="h-4 w-4 flex-shrink-0" />
                   )}
-                  <AlertDescription>
+                  <AlertDescription className="whitespace-nowrap overflow-hidden text-ellipsis">
                     {yamlValid ? 'YAML válido e importado' : yamlError}
                   </AlertDescription>
                 </div>
@@ -281,7 +281,7 @@ reusable: true`}
           <div className="space-y-4">
             <h3 className="font-semibold">Informações do Stage</h3>
             
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
               <Label htmlFor="nome">Nome *</Label>
               <Input
@@ -310,29 +310,17 @@ reusable: true`}
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="descricao">Descrição</Label>
-            <Textarea
-              id="descricao"
-              value={formData.descricao}
-              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-              placeholder="Descreva o propósito e funcionamento deste stage"
-              rows={4}
-            />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="reutilizavel"
-                checked={formData.reutilizavel}
-                onCheckedChange={(checked) => setFormData({ ...formData, reutilizavel: checked })}
-              />
-              <Label htmlFor="reutilizavel" className="cursor-pointer">
-                Stage reutilizável
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="reutilizavel" className="block">Stage Reutilizável</Label>
+              <div className="flex items-center h-10">
+                <Switch
+                  id="reutilizavel"
+                  checked={formData.reutilizavel}
+                  onCheckedChange={(checked) => setFormData({ ...formData, reutilizavel: checked })}
+                />
+                <span className="ml-2 text-sm">{formData.reutilizavel ? 'Sim' : 'Não'}</span>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -345,6 +333,17 @@ reusable: true`}
                 onChange={(e) => setFormData({ ...formData, timeoutSeconds: parseInt(e.target.value) || 3600 })}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="descricao">Descrição</Label>
+            <Textarea
+              id="descricao"
+              value={formData.descricao}
+              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+              placeholder="Descreva o propósito e funcionamento deste stage"
+              rows={4}
+            />
           </div>
           </div>
 

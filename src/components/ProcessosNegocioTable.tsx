@@ -85,7 +85,7 @@ export function ProcessosNegocioTable({ processos, onProcessoSave, onProcessoDel
         </div>
       </div>
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-gray-100">
           <TableRow>
             <TableHead>Identificação</TableHead>
             <TableHead>Descrição</TableHead>
@@ -100,7 +100,7 @@ export function ProcessosNegocioTable({ processos, onProcessoSave, onProcessoDel
         </TableHeader>
         <TableBody>
           {paginatedProcessos.map((processo) => (
-            <TableRow key={processo.id}>
+            <TableRow key={processo.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
               <TableCell className="font-medium font-mono">{processo.identificacao}</TableCell>
               <TableCell>{processo.descricao}</TableCell>
               <TableCell>

@@ -337,7 +337,7 @@ export function ReportBookView() {
               <>
                 <div className="rounded-md border">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-gray-100">
                       <TableRow>
                         <TableHead 
                           className="cursor-pointer select-none"
@@ -381,7 +381,7 @@ export function ReportBookView() {
                     </TableHeader>
                     <TableBody>
                       {paginatedReports.map((report) => (
-                        <TableRow key={report.id} className="hover:bg-muted/50">
+                        <TableRow key={report.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
                           <TableCell className="font-medium">{report.nome}</TableCell>
                           <TableCell className="max-w-md truncate">
                             {report.descricao}

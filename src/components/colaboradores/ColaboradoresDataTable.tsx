@@ -252,7 +252,7 @@ export function ColaboradoresDataTable({
             </div>
           ) : (
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-gray-100">
                 <TableRow>
                   <TableHead>
                     <Button
@@ -307,7 +307,7 @@ export function ColaboradoresDataTable({
               </TableHeader>
               <TableBody>
                 {paginatedColaboradores.map((colaborador) => (
-                  <TableRow key={colaborador.id} className="hover:bg-muted/50">
+                  <TableRow key={colaborador.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
                     <TableCell className="font-medium">{colaborador.matricula}</TableCell>
                     <TableCell>{colaborador.nome}</TableCell>
                     <TableCell>{colaborador.setor}</TableCell>

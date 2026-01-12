@@ -151,7 +151,7 @@ export function TiposAfastamentoDataTable({ tiposAfastamento, onEdit, onDelete }
       <CardContent>
         <div className="rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-gray-100">
               <TableRow>
                 <TableHead>
                   <Button
@@ -188,7 +188,7 @@ export function TiposAfastamentoDataTable({ tiposAfastamento, onEdit, onDelete }
                 </TableRow>
               ) : (
                 paginatedTipos.map((tipo) => (
-                  <TableRow key={tipo.id} className="hover:bg-muted/50">
+                  <TableRow key={tipo.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
                     <TableCell className="font-medium font-mono">{tipo.sigla}</TableCell>
                     <TableCell>{tipo.descricao}</TableCell>
                     <TableCell>

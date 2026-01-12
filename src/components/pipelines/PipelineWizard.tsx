@@ -24,7 +24,7 @@ interface PipelineWizardProps {
 const STATUS_OPTIONS: StatusPipeline[] = ['Ativa', 'Em avaliação', 'Obsoleta', 'Descontinuada'];
 
 export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [availableStages, setAvailableStages] = useState<Stage[]>([]);
   const [showAddStageDialog, setShowAddStageDialog] = useState(false);
@@ -207,11 +207,11 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
   };
 
   const steps = [
-    { title: 'Informações Básicas', description: 'Dados principais da pipeline' },
-    { title: 'Trigger & PR', description: 'Configuração de gatilhos' },
-    { title: 'Resources', description: 'Recursos utilizados' },
-    { title: 'Schedules & Variables', description: 'Agendamentos e variáveis' },
-    { title: 'Stages', description: 'Estágios da pipeline' },
+    { number: 1, title: 'Informações Básicas', description: 'Dados principais da pipeline' },
+    { number: 2, title: 'Trigger & PR', description: 'Configuração de gatilhos' },
+    { number: 3, title: 'Resources', description: 'Recursos utilizados' },
+    { number: 4, title: 'Schedules & Variables', description: 'Agendamentos e variáveis' },
+    { number: 5, title: 'Stages', description: 'Estágios da pipeline' },
   ];
 
   const formatDate = (date?: string) => {
@@ -222,7 +222,7 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0:
+      case 1:
         return (
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
@@ -281,7 +281,7 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
           </div>
         );
 
-      case 1:
+      case 2:
         return (
           <div className="space-y-6">
             <div className="space-y-4">
@@ -324,7 +324,7 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
           </div>
         );
 
-      case 2:
+      case 3:
         return (
           <div className="space-y-4">
             <h3 className="font-semibold">Grupo Resources</h3>
@@ -361,7 +361,7 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -381,13 +381,13 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
                 value={formData.variables}
                 onChange={(e) => setFormData({ ...formData, variables: e.target.value })}
                 placeholder="Ex: VAR1=value1, VAR2=value2"
-                rows={4}
+                rows={10}
               />
             </div>
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -532,70 +532,160 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>{pipeline ? 'Editar Pipeline' : 'Nova Pipeline'}</CardTitle>
-            <CardDescription>
-              {steps[currentStep].description}
-            </CardDescription>
+    <div className="min-h-screen bg-background">
+      <div className="border-b">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={onCancel}>
+              <ArrowLeft className="mr-2" />
+              Voltar
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {pipeline ? 'Editar Pipeline' : 'Nova Pipeline'}
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Passo {currentStep} de {steps.length}: {steps[currentStep - 1].description}
+              </p>
+            </div>
           </div>
-          <Button variant="outline" onClick={onCancel}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
-          </Button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
+      </div>
+
+      <div className="container mx-auto px-6 py-6">
         {/* Progress Steps */}
-        <div className="flex items-center justify-between">
-          {steps.map((step, index) => (
-            <div key={index} className="flex flex-col items-center flex-1">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  index === currentStep
-                    ? 'bg-primary text-primary-foreground'
-                    : index < currentStep
-                    ? 'bg-primary/20 text-primary'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {index + 1}
+        <div className="flex items-center justify-center mb-8 gap-4">
+          {steps.map((step) => (
+            <div key={step.number} className="flex items-center">
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                    currentStep === step.number
+                      ? 'bg-primary text-primary-foreground'
+                      : currentStep > step.number
+                      ? 'bg-green-500 text-white'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {step.number}
+                </div>
+                <span className="text-xs mt-2 text-center max-w-[100px]">
+                  {step.title}
+                </span>
               </div>
-              <span className="text-xs mt-1 text-center">{step.title}</span>
+              {step.number < steps.length && (
+                <div className="w-16 h-0.5 bg-muted mx-2 mt-[-20px]" />
+              )}
             </div>
           ))}
         </div>
 
         {/* Step Content */}
-        <div className="min-h-[400px]">
-          {renderStep()}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>{steps[currentStep - 1].title}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="min-h-[400px]">
+              {renderStep()}
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Navigation */}
-        <div className="flex justify-between pt-4 border-t">
+        {/* Navigation Buttons */}
+        <div className="flex justify-between mt-6">
           <Button
             variant="outline"
-            onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-            disabled={currentStep === 0}
+            onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+            disabled={currentStep === 1}
           >
             Anterior
           </Button>
-          
-          {currentStep < steps.length - 1 ? (
-            <Button onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
-              Próximo
-            </Button>
-          ) : (
-            <Button onClick={handleSave} disabled={saving}>
-              <FloppyDisk className="mr-2 h-4 w-4" />
-              {saving ? 'Salvando...' : 'Salvar Pipeline'}
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {currentStep < steps.length ? (
+              <Button onClick={() => setCurrentStep(currentStep + 1)}>
+                Próximo
+              </Button>
+            ) : (
+              <Button onClick={handleSave} disabled={saving}>
+                <FloppyDisk className="mr-2 h-4 w-4" />
+                {saving ? 'Salvando...' : 'Salvar Pipeline'}
+              </Button>
+            )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Dialog para adicionar stage */}
+      <Dialog open={showAddStageDialog} onOpenChange={setShowAddStageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Stage</DialogTitle>
+            <DialogDescription>Selecione um stage existente para adicionar à pipeline</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Stage</Label>
+              <Select
+                value={editingStage.stageId}
+                onValueChange={(value) => setEditingStage({ ...editingStage, stageId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableStages
+                    .filter(s => !pipelineStages.some(ps => ps.stageId === s.id))
+                    .map(stage => (
+                      <SelectItem key={stage.id} value={stage.id}>
+                        {stage.nome} ({stage.tipo})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Data Início</Label>
+                <Input
+                  type="date"
+                  value={editingStage.dataInicio}
+                  onChange={(e) => setEditingStage({ ...editingStage, dataInicio: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Data Término</Label>
+                <Input
+                  type="date"
+                  value={editingStage.dataTermino}
+                  onChange={(e) => setEditingStage({ ...editingStage, dataTermino: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={editingStage.status}
+                onValueChange={(value) => setEditingStage({ ...editingStage, status: value as StatusPipeline })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((status) => (
+                    <SelectItem key={status} value={status}>{status}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancelar</Button>
+            <Button onClick={handleAddStage}>Adicionar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 

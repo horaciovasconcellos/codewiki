@@ -179,7 +179,7 @@ export function InnerSourceDataTable({ projects, onEdit, onDelete }: InnerSource
         <div className="border rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="border-b bg-muted/50">
+              <thead className="border-b bg-gray-100">
                 <tr>
                   <th className="text-left p-3 text-sm font-medium">
                     <Button
@@ -221,7 +221,7 @@ export function InnerSourceDataTable({ projects, onEdit, onDelete }: InnerSource
               </thead>
               <tbody>
                 {paginatedProjects.map((project) => (
-                  <tr key={project.id} className="border-b last:border-0 hover:bg-muted/30">
+                  <tr key={project.id} className="border-b last:border-0 hover:bg-gray-100">
                 <td className="p-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">

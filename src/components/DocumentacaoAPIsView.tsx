@@ -1144,7 +1144,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega tipos de afastamento do arquivo CSV</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-tipos-afastamento.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/tipos-afastamento.csv</p>
@@ -1160,7 +1160,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega habilidades técnicas do JSON</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-habilidades.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/habilidades.json</p>
@@ -1176,7 +1176,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega capacidades de negócio</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-capacidades-negocio.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/capacidades-negocio.json</p>
@@ -1192,7 +1192,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega dados de colaboradores</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-colaboradores.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/colaboradores.json</p>
@@ -1208,7 +1208,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega tecnologias do catálogo</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-tecnologias.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/tecnologias.csv</p>
@@ -1224,7 +1224,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega processos de negócio</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-processos.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/processos-negocio.csv</p>
@@ -1240,7 +1240,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega SLAs (Service Level Agreements)</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-slas.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/slas.csv</p>
@@ -1256,7 +1256,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega aplicações/sistemas</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-aplicacoes.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/aplicacoes.csv</p>
@@ -1272,7 +1272,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <p className="text-sm">Carrega servidores (físicos, virtuais e cloud)</p>
-                              <div className="bg-muted p-3 rounded-md">
+                              <div className="bg-white border p-3 rounded-md">
                                 <code className="text-xs">./scripts/load-servidores.sh</code>
                               </div>
                               <p className="text-xs text-muted-foreground">Origem: data-templates/servidores.csv</p>
@@ -1285,7 +1285,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
 
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold">Pré-requisitos</h3>
-                        <div className="bg-muted p-4 rounded-md space-y-2">
+                        <div className="bg-white border p-4 rounded-md space-y-2">
                           <p className="text-sm font-semibold">Ferramentas necessárias:</p>
                           <ul className="text-sm space-y-1 list-disc list-inside">
                             <li><code className="bg-background px-1 py-0.5 rounded">bash</code> - Shell script interpreter</li>
@@ -1303,21 +1303,21 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
                         <div className="space-y-3">
                           <div>
                             <p className="text-sm font-semibold mb-2">1. Executar um script individual:</p>
-                            <div className="bg-muted p-3 rounded-md">
+                            <div className="bg-white border p-3 rounded-md">
                               <code className="text-xs">chmod +x scripts/load-tipos-afastamento.sh</code><br/>
                               <code className="text-xs">./scripts/load-tipos-afastamento.sh</code>
                             </div>
                           </div>
                           <div>
                             <p className="text-sm font-semibold mb-2">2. Executar todos os scripts:</p>
-                            <div className="bg-muted p-3 rounded-md">
+                            <div className="bg-white border p-3 rounded-md">
                               <code className="text-xs">chmod +x scripts/load-*.sh</code><br/>
                               <code className="text-xs">for script in scripts/load-*.sh; do $script; done</code>
                             </div>
                           </div>
                           <div>
                             <p className="text-sm font-semibold mb-2">3. Verificar logs:</p>
-                            <div className="bg-muted p-3 rounded-md">
+                            <div className="bg-white border p-3 rounded-md">
                               <code className="text-xs">tail -f logs/carga-dados.log</code>
                             </div>
                           </div>
@@ -1328,7 +1328,7 @@ export function DocumentacaoAPIsView({}: DocumentacaoAPIsViewProps) {
 
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold">Estrutura dos Scripts</h3>
-                        <div className="bg-muted p-4 rounded-md">
+                        <div className="bg-white border p-4 rounded-md">
                           <pre className="text-xs overflow-x-auto">{`#!/bin/bash
 
 # Configurações
@@ -1360,7 +1360,7 @@ echo "Carga concluída!"`}</pre>
                         <p className="text-sm text-muted-foreground">
                           Para cargas mais complexas, use Python com <code className="text-xs bg-muted px-1 py-0.5 rounded">requests</code> e <code className="text-xs bg-muted px-1 py-0.5 rounded">pandas</code>
                         </p>
-                        <div className="bg-muted p-4 rounded-md">
+                        <div className="bg-white border p-4 rounded-md">
                           <pre className="text-xs overflow-x-auto">{`import requests
 import json
 import pandas as pd
@@ -1396,7 +1396,7 @@ print("Carga concluída!")`}</pre>
                             </CardHeader>
                             <CardContent>
                               <p className="text-sm mb-2">Instale o jq:</p>
-                              <div className="bg-muted p-2 rounded">
+                              <div className="bg-white border p-2 rounded">
                                 <code className="text-xs">brew install jq</code> (macOS)<br/>
                                 <code className="text-xs">sudo apt install jq</code> (Ubuntu/Debian)
                               </div>
@@ -1409,7 +1409,7 @@ print("Carga concluída!")`}</pre>
                             </CardHeader>
                             <CardContent>
                               <p className="text-sm">Verifique se a API está rodando:</p>
-                              <div className="bg-muted p-2 rounded">
+                              <div className="bg-white border p-2 rounded">
                                 <code className="text-xs">curl http://localhost:3000/health</code>
                               </div>
                             </CardContent>
@@ -1421,7 +1421,7 @@ print("Carga concluída!")`}</pre>
                             </CardHeader>
                             <CardContent>
                               <p className="text-sm">Dê permissão de execução:</p>
-                              <div className="bg-muted p-2 rounded">
+                              <div className="bg-white border p-2 rounded">
                                 <code className="text-xs">chmod +x scripts/*.sh</code>
                               </div>
                             </CardContent>
@@ -1467,7 +1467,7 @@ print("Carga concluída!")`}</pre>
                                   <Copy />
                                 </Button>
                               </div>
-                              <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
+                              <pre className="bg-white border p-4 rounded-lg overflow-x-auto">
                                 <code className="text-xs font-mono">{endpoint.requestBody}</code>
                               </pre>
                             </div>
@@ -1484,7 +1484,7 @@ print("Carga concluída!")`}</pre>
                                   <Copy />
                                 </Button>
                               </div>
-                              <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
+                              <pre className="bg-white border p-4 rounded-lg overflow-x-auto">
                                 <code className="text-xs font-mono">{endpoint.response}</code>
                               </pre>
                             </div>
@@ -1509,7 +1509,7 @@ print("Carga concluída!")`}</pre>
               <div className="space-y-4">
                 <div>
                   <h4 className="text-sm font-semibold mb-2">Header de Autenticação</h4>
-                  <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
+                  <div className="flex items-center justify-between bg-white border p-4 rounded-lg">
                     <code className="text-xs font-mono">
                       Authorization: Bearer {'{'}token{'}'}
                     </code>
@@ -1524,7 +1524,7 @@ print("Carga concluída!")`}</pre>
                 </div>
                 <div>
                   <h4 className="text-sm font-semibold mb-2">Content-Type</h4>
-                  <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
+                  <div className="flex items-center justify-between bg-white border p-4 rounded-lg">
                     <code className="text-xs font-mono">
                       Content-Type: application/json
                     </code>

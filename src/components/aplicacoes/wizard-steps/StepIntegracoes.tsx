@@ -197,7 +197,7 @@ export function StepIntegracoes({
             </TableHeader>
             <TableBody>
               {integracoes.map((integ) => (
-                <TableRow key={integ.id} className={integ.status === 'Inativo' ? 'opacity-50' : ''}>
+                <TableRow key={integ.id} className={`hover:bg-gray-100 ${integ.status === 'Inativo' ? 'opacity-50' : ''}`}>
                   <TableCell className="font-medium">{getAplicacaoNome(integ.aplicacaoDestinoId)}</TableCell>
                   <TableCell>{formatDate(integ.dataInicio)}</TableCell>
                   <TableCell>{formatDate(integ.dataTermino)}</TableCell>

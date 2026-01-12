@@ -79,7 +79,7 @@ export function RepositoriosDataTable({ repositorios, onUpdateNome, onDelete, pr
   return (
     <div className="border rounded-md">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-gray-100">
           <TableRow>
             <TableHead className="w-[40px]"></TableHead>
             <TableHead className="min-w-[200px]">Nome do Repositório</TableHead>
@@ -91,7 +91,7 @@ export function RepositoriosDataTable({ repositorios, onUpdateNome, onDelete, pr
         </TableHeader>
         <TableBody>
           {repositorios.map((repo) => (
-            <TableRow key={repo.id}>
+            <TableRow key={repo.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
               <TableCell>
                 {repo.criado ? (
                   <CheckCircle size={20} className="text-green-600" weight="fill" />

@@ -3,7 +3,8 @@ import { CapacidadeNegocio } from '@/lib/types';
 import { CapacidadeForm } from './CapacidadeForm';
 import { CapacidadesTable } from './CapacidadesTable';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Plus } from '@phosphor-icons/react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -14,6 +15,41 @@ interface CapacidadesViewProps {
 }
 
 export function CapacidadesView({ capacidades, onCapacidadeSave, onCapacidadeDelete }: CapacidadesViewProps) {
+  const [showWizard, setShowWizard] = useState(false);
+  const [editingCapacidade, setEditingCapacidade] = useState<CapacidadeNegocio | undefined>(undefined);
+
+  const handleEdit = (capacidade: CapacidadeNegocio) => {
+    setEditingCapacidade(capacidade);
+    setShowWizard(true);
+  };
+
+  const handleNew = () => {
+    setEditingCapacidade(undefined);
+    setShowWizard(true);
+  };
+
+  const handleCancel = () => {
+    setShowWizard(false);
+    setEditingCapacidade(undefined);
+  };
+
+  const handleSave = async (capacidade: CapacidadeNegocio) => {
+    await onCapacidadeSave(capacidade);
+    setShowWizard(false);
+    setEditingCapacidade(undefined);
+  };
+
+  if (showWizard) {
+    return (
+      <CapacidadeForm
+        capacidades={capacidades}
+        capacidadeToEdit={editingCapacidade}
+        onSave={handleSave}
+        onCancel={handleCancel}
+      />
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
       <div className="flex items-center gap-4 mb-6">
@@ -24,10 +60,10 @@ export function CapacidadesView({ capacidades, onCapacidadeSave, onCapacidadeDel
             Gerenciamento de capacidades de negócio e cobertura estratégica
           </p>
         </div>
-        <CapacidadeForm
-          capacidades={capacidades}
-          onSave={onCapacidadeSave}
-        />
+        <Button onClick={handleNew}>
+          <Plus className="mr-2" />
+          Nova Capacidade
+        </Button>
       </div>
 
       <Card>
@@ -40,6 +76,7 @@ export function CapacidadesView({ capacidades, onCapacidadeSave, onCapacidadeDel
         <CardContent>
           <CapacidadesTable
             capacidades={capacidades}
+            onEdit={handleEdit}
             onCapacidadeSave={onCapacidadeSave}
             onCapacidadeDelete={onCapacidadeDelete}
           />

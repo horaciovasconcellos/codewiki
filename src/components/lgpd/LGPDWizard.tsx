@@ -349,54 +349,53 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="min-h-screen bg-background">
+      <div className="border-b">
         <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={onCancel}>
+              <X className="mr-2" />
+              Voltar
+            </Button>
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
                 {isEditing ? 'Editar Registro LGPD' : 'Novo Registro LGPD'}
               </h1>
-              <p className="text-muted-foreground mt-1">
-                {steps[currentStep - 1].description}
+              <p className="text-muted-foreground mt-2">
+                Passo {currentStep} de {totalSteps}: {steps[currentStep - 1].description}
               </p>
-            </div>
-            <Button variant="ghost" onClick={onCancel}>
-              <X className="mr-2" />
-              Cancelar
-            </Button>
-          </div>
-
-          <div className="mb-6">
-            <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
-            <div className="flex justify-between mt-4">
-              {steps.map((step) => (
-                <div
-                  key={step.number}
-                  className={`flex flex-col items-center flex-1 ${
-                    step.number === currentStep ? 'text-primary' : 'text-muted-foreground'
-                  }`}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                      step.number < currentStep
-                        ? 'bg-primary text-primary-foreground'
-                        : step.number === currentStep
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    {step.number < currentStep ? <Check size={20} /> : step.number}
-                  </div>
-                  <p className="text-xs font-medium text-center">{step.title}</p>
-                </div>
-              ))}
             </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-6 py-6">
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center mb-8 gap-4">
+          {steps.map((step) => (
+            <div key={step.number} className="flex items-center">
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                    currentStep === step.number
+                      ? 'bg-primary text-primary-foreground'
+                      : currentStep > step.number
+                      ? 'bg-green-500 text-white'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {step.number}
+                </div>
+                <span className="text-xs mt-2 text-center max-w-[100px]">
+                  {step.title}
+                </span>
+              </div>
+              {step.number < totalSteps && (
+                <div className="w-16 h-0.5 bg-muted mx-2 mt-[-20px]" />
+              )}
+            </div>
+          ))}
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>{steps[currentStep - 1].title}</CardTitle>
@@ -734,26 +733,25 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
             </div>
             )}
 
-            <div className="flex justify-between mt-8 pt-6 border-t">
+            <div className="flex justify-between mt-6">
               <Button
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 1}
               >
-                <ArrowLeft className="mr-2" />
                 Anterior
               </Button>
-              {currentStep < totalSteps ? (
-                <Button onClick={handleNext}>
-                  Próximo
-                  <ArrowRight className="ml-2" />
-                </Button>
-              ) : (
-                <Button onClick={handleSubmit} disabled={loading || campos.length === 0}>
-                  <Check className="mr-2" />
-                  {loading ? 'Salvando...' : (isEditing ? 'Salvar Alterações' : 'Criar Registro')}
-                </Button>
-              )}
+              <div className="flex gap-2">
+                {currentStep < totalSteps ? (
+                  <Button onClick={handleNext}>
+                    Próximo
+                  </Button>
+                ) : (
+                  <Button onClick={handleSubmit} disabled={loading || campos.length === 0}>
+                    {loading ? 'Salvando...' : (isEditing ? 'Salvar Alterações' : 'Criar Registro')}
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

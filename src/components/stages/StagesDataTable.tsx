@@ -202,7 +202,7 @@ export function StagesDataTable({
       ) : (
         <div className="rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-gray-100">
               <TableRow>
                 <TableHead>
                   <Button
@@ -244,7 +244,7 @@ export function StagesDataTable({
             </TableHeader>
             <TableBody>
               {paginatedStages.map((stage) => (
-                <TableRow key={stage.id} className="hover:bg-muted/50">
+                <TableRow key={stage.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
               <TableCell className="font-medium">{stage.nome}</TableCell>
               <TableCell>
                 <Badge className={TIPO_COLORS[stage.tipo] || 'bg-gray-100 text-gray-800'}>

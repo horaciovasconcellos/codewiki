@@ -27,7 +27,7 @@ export function ADRsView() {
   const { logClick, logEvent, logError } = useLogging('adrs-view');
   const [adrs, setAdrs] = useState<ADR[]>([]);
   const [loading, setLoading] = useState(true);
-  const [wizardOpen, setWizardOpen] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editingADR, setEditingADR] = useState<ADR | undefined>(undefined);
   const [viewingADR, setViewingADR] = useState<ADR | null>(null);
@@ -81,11 +81,11 @@ export function ADRsView() {
     } else {
       setEditingADR(undefined);
     }
-    setWizardOpen(true);
+    setShowWizard(true);
   };
 
   const handleCloseWizard = () => {
-    setWizardOpen(false);
+    setShowWizard(false);
     setEditingADR(undefined);
   };
 
@@ -364,12 +364,13 @@ export function ADRsView() {
         </CardContent>
       </Card>
 
-      <ADRWizard
-        open={wizardOpen}
-        onClose={handleCloseWizard}
-        onSuccess={handleWizardSuccess}
-        editingADR={editingADR}
-      />
+      {showWizard && (
+        <ADRWizard
+          onClose={handleCloseWizard}
+          onSuccess={handleWizardSuccess}
+          editingADR={editingADR}
+        />
+      )}
 
       <ADRView
         open={viewDialogOpen}

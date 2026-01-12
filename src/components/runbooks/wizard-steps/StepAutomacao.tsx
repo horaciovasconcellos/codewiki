@@ -34,8 +34,9 @@ export function StepAutomacao({ data, updateData }: StepAutomacaoProps) {
           value={data.execucaoAutomatizada?.scriptsRelacionados || ''}
           onChange={(e) => updateAutomacao('scriptsRelacionados', e.target.value)}
           placeholder="Liste os scripts relacionados a este procedimento"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Scripts disponíveis para automação do procedimento
@@ -49,8 +50,9 @@ export function StepAutomacao({ data, updateData }: StepAutomacaoProps) {
           value={data.execucaoAutomatizada?.jobsAssociados || ''}
           onChange={(e) => updateAutomacao('jobsAssociados', e.target.value)}
           placeholder="Descreva os jobs agendados (cron, scheduler, pipelines CI/CD, etc.)"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Jobs automatizados e configurações de agendamento
@@ -64,8 +66,9 @@ export function StepAutomacao({ data, updateData }: StepAutomacaoProps) {
           value={data.execucaoAutomatizada?.urlLocalizacaoScripts || ''}
           onChange={(e) => updateAutomacao('urlLocalizacaoScripts', e.target.value)}
           placeholder="Informe URLs ou caminhos onde os scripts estão localizados (repositório Git, servidor, etc.)"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Localização física ou repositório dos scripts
@@ -79,8 +82,9 @@ export function StepAutomacao({ data, updateData }: StepAutomacaoProps) {
           value={data.execucaoAutomatizada?.condicoesAutomacao || ''}
           onChange={(e) => updateAutomacao('condicoesAutomacao', e.target.value)}
           placeholder="Descreva as condições e pré-requisitos para automação do procedimento"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="resize-none overflow-auto"
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Condições necessárias para execução automatizada

@@ -214,7 +214,7 @@ export function IntegracaoDataTable({ data, onEdit, onDelete }: IntegracaoDataTa
                 </TableRow>
               ) : (
                 paginatedIntegracoes.map((integracao) => (
-                  <TableRow key={integracao.id} className="hover:bg-muted/50">
+                  <TableRow key={integracao.id} className="hover:bg-gray-100">
                     <TableCell className="font-medium font-mono">{integracao.sigla}</TableCell>
                     <TableCell>{integracao.nome}</TableCell>
                     <TableCell className="text-sm">

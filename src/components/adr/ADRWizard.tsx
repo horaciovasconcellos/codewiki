@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,7 +11,6 @@ import { ADR, StatusADR, StatusAplicacaoADR, Aplicacao } from '@/lib/types';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, 
-  ArrowRight, 
   Check,
   Plus,
   Trash,
@@ -25,7 +21,6 @@ import {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 interface ADRWizardProps {
-  open: boolean;
   onClose: () => void;
   onSuccess: () => void;
   editingADR?: ADR;
@@ -39,7 +34,7 @@ interface AplicacaoAssociacao {
   observacoes: string;
 }
 
-export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardProps) {
+export function ADRWizard({ onClose, onSuccess, editingADR }: ADRWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [adrs, setAdrs] = useState<ADR[]>([]);
   const [aplicacoes, setAplicacoes] = useState<Aplicacao[]>([]);
@@ -74,10 +69,8 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
 
   // Carregar dados iniciais
   useEffect(() => {
-    if (open) {
-      fetchData();
-    }
-  }, [open]);
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     setLoadingData(true);
@@ -118,7 +111,8 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
         riscos: editingADR.riscos || '',
         alternativasConsideradas: editingADR.alternativasConsideradas || '',
         complianceConstitution: editingADR.complianceConstitution || '',
-        adrSubstitutaId: editingADR.adrSubstitutaId || ''
+        // Só manter adrSubstitutaId se o status for "Substituido"
+        adrSubstitutaId: (editingADR.status === 'Substituido' ? editingADR.adrSubstitutaId : '') || ''
       });
 
       // Carregar aplicações associadas
@@ -131,28 +125,40 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
           observacoes: app.observacoes || ''
         })));
       }
-    } else if (!open) {
-      // Resetar formulário quando fechar
-      setCurrentStep(0);
-      setFormData({
-        descricao: '',
-        status: 'Proposto',
-        contexto: '',
-        decisao: '',
-        justificativa: '',
-        consequenciasPositivas: '',
-        consequenciasNegativas: '',
-        riscos: '',
-        alternativasConsideradas: '',
-        complianceConstitution: '',
-        adrSubstitutaId: ''
-      });
-      setAplicacoesAssociadas([]);
     }
-  }, [editingADR, open]);
+  }, [editingADR]);
+
+  // useEffect para garantir que adrSubstitutaId seja limpo quando status não for "Substituido"
+  useEffect(() => {
+    if (formData.status !== 'Substituido' && formData.adrSubstitutaId) {
+      console.log('🧹 Limpeza automática: status não é Substituido mas adrSubstitutaId tem valor');
+      setFormData(prev => ({ ...prev, adrSubstitutaId: '' }));
+    }
+  }, [formData.status, formData.adrSubstitutaId]);
 
   const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    console.log('handleChange chamado:', { field, value, statusAtual: formData.status });
+    
+    if (field === 'status') {
+      // Se o status não for "Substituido", limpar o campo adrSubstitutaId
+      if (value !== 'Substituido') {
+        console.log('Limpando adrSubstitutaId porque status mudou para:', value);
+        setFormData(prev => ({ 
+          ...prev, 
+          status: value, 
+          adrSubstitutaId: '' 
+        }));
+      } else {
+        console.log('Status mudou para Substituido');
+        setFormData(prev => ({ ...prev, status: value }));
+      }
+    } else if (field === 'adrSubstitutaId') {
+      console.log('Atualizando adrSubstitutaId para:', value);
+      // Garantir que adrSubstitutaId seja string vazia quando não tiver valor
+      setFormData(prev => ({ ...prev, adrSubstitutaId: value || '' }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleAddOrUpdateAplicacao = () => {
@@ -241,10 +247,16 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
       return;
     }
 
-    if (formData.status === 'Substituído' && !formData.adrSubstitutaId) {
-      toast.error('ADR Substituta é obrigatória quando status é Substituído');
+    if (formData.status === 'Substituido' && !formData.adrSubstitutaId) {
+      toast.error('ADR Substituta é obrigatória quando status é Substituido');
       return;
     }
+
+    console.log('📝 Antes de criar payload:', {
+      formDataStatus: formData.status,
+      formDataAdrSubstitutaId: formData.adrSubstitutaId,
+      formDataCompleto: formData
+    });
 
     try {
       setSaving(true);
@@ -257,13 +269,23 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
 
       const payload = {
         ...formData,
+        // Se status não for "Substituido", garantir que adrSubstitutaId seja null
+        // Também converter string vazia para null
+        adrSubstitutaId: formData.status === 'Substituido' 
+          ? (formData.adrSubstitutaId || null) 
+          : null,
         aplicacoes: aplicacoesAssociadas.filter(app => app.aplicacaoId)
       };
 
-      console.log('🔍 Salvando ADR:', {
+      console.log('🔍 Salvando ADR - PAYLOAD COMPLETO:', {
         method: adrMethod,
+        url: adrUrl,
+        payloadCompleto: payload,
+        status: formData.status,
+        statusNoPayload: payload.status,
+        adrSubstitutaIdOriginal: formData.adrSubstitutaId,
+        adrSubstitutaIdFinal: payload.adrSubstitutaId,
         aplicacoesCount: payload.aplicacoes.length,
-        aplicacoes: payload.aplicacoes,
       });
 
       const adrResponse = await fetch(adrUrl, {
@@ -274,8 +296,17 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
 
       if (!adrResponse.ok) {
         const error = await adrResponse.json();
+        console.error('❌ Erro na resposta do servidor:', error);
         throw new Error(error.error || 'Erro ao salvar ADR');
       }
+
+      const savedADR = await adrResponse.json();
+      console.log('✅ ADR salvo com sucesso:', {
+        id: savedADR.id,
+        status: savedADR.status,
+        adrSubstitutaId: savedADR.adr_substituta_id,
+        sequencia: savedADR.sequencia
+      });
 
       toast.success(editingADR ? 'ADR atualizado com sucesso' : 'ADR criado com sucesso');
       onSuccess();
@@ -310,7 +341,7 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-3">
               <Label htmlFor="status">Status *</Label>
-              <Select value={formData.status} onValueChange={(value) => handleChange('status', value)}>
+              <Select value={formData.status || 'Proposto'} onValueChange={(value) => handleChange('status', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -318,17 +349,20 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
                   <SelectItem value="Proposto">Proposto</SelectItem>
                   <SelectItem value="Aceito">Aceito</SelectItem>
                   <SelectItem value="Rejeitado">Rejeitado</SelectItem>
-                  <SelectItem value="Substituído">Substituído</SelectItem>
+                  <SelectItem value="Substituido">Substituido</SelectItem>
                   <SelectItem value="Obsoleto">Obsoleto</SelectItem>
                   <SelectItem value="Adiado/Retirado">Adiado/Retirado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {formData.status === 'Substituído' && (
+            {formData.status === 'Substituido' && (
               <div className="space-y-3">
                 <Label htmlFor="adrSubstituta">ADR Substituta *</Label>
-                <Select value={formData.adrSubstitutaId} onValueChange={(value) => handleChange('adrSubstitutaId', value)}>
+                <Select 
+                  value={formData.adrSubstitutaId || ''} 
+                  onValueChange={(value) => handleChange('adrSubstitutaId', value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o ADR..." />
                   </SelectTrigger>
@@ -453,7 +487,7 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
     // Etapa 2: Aplicações Associadas
     return (
       <div className="space-y-6">
-        <div className="border rounded-lg p-4 bg-muted/30">
+        <div className="border rounded-lg p-4 bg-white">
           <h3 className="font-semibold mb-4">
             {editingAppIndex !== null ? 'Editar Aplicação' : 'Adicionar Aplicação'}
           </h3>
@@ -581,62 +615,93 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
     );
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="min-w-[1120px] w-[95vw] max-w-[95vw] h-[95vh] max-h-[95vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle>
-            {editingADR ? `Editar ADR-${editingADR.sequencia}` : 'Novo ADR'}
-          </DialogTitle>
-          <DialogDescription>
-            {currentStep === 0 && 'Dados básicos da decisão arquitetônica'}
-            {currentStep === 1 && 'Análise de impacto e compliance'}
-            {currentStep === 2 && 'Aplicações que utilizam esta decisão'}
-          </DialogDescription>
-        </DialogHeader>
+  const steps = [
+    { id: 0, label: 'Dados Básicos' },
+    { id: 1, label: 'Análise de Impacto' },
+    { id: 2, label: 'Aplicações' }
+  ];
 
-        {/* Progress Steps */}
-        <div className="flex items-center gap-2 px-1 flex-shrink-0">
-          {Array.from({ length: totalSteps }).map((_, index) => (
-            <div key={index} className="flex items-center flex-1">
-              <div
-                className={`h-2 rounded-full transition-colors flex-1 ${
-                  index <= currentStep ? 'bg-primary' : 'bg-muted'
-                }`}
-              />
-              {index < totalSteps - 1 && <div className="w-2" />}
+  return (
+    <div className="fixed inset-0 z-50 bg-background">
+      {/* Header */}
+      <div className="border-b">
+        <div className="flex items-center h-14 px-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="gap-2"
+          >
+            <ArrowLeft size={16} />
+            Voltar
+          </Button>
+          <div className="ml-6">
+            <h1 className="text-lg font-semibold">
+              {editingADR ? `Editar ADR-${editingADR.sequencia}` : 'Novo ADR'}
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Steps */}
+      <div className="border-b bg-muted/30">
+        <div className="flex items-center px-6 h-16">
+          {steps.map((step, index) => (
+            <div key={step.id} className="flex items-center flex-1">
+              <div className="flex items-center gap-3 flex-1">
+                <div
+                  className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-colors ${
+                    index < currentStep
+                      ? 'bg-green-500 border-green-500 text-white'
+                      : index === currentStep
+                      ? 'bg-primary border-primary text-primary-foreground'
+                      : 'bg-background border-muted-foreground/25 text-muted-foreground'
+                  }`}
+                >
+                  {index < currentStep ? (
+                    <Check size={16} weight="bold" />
+                  ) : (
+                    <span className="text-sm font-medium">{index + 1}</span>
+                  )}
+                </div>
+                <span
+                  className={`text-sm font-medium ${
+                    index <= currentStep ? 'text-foreground' : 'text-muted-foreground'
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </div>
+              {index < steps.length - 1 && (
+                <div className="flex-1 h-[2px] bg-muted mx-4" />
+              )}
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Step Content */}
-        <ScrollArea className="flex-1 overflow-y-auto pr-4 min-h-0">
-          <div className="py-4">
-            {renderStepContent()}
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden" style={{ height: 'calc(100vh - 180px)' }}>
+        <div className="h-full overflow-y-auto">
+          <div className="max-w-5xl mx-auto p-6">
+            <Card className="border-black">
+              <div className="p-6 bg-white">
+                {renderStepContent()}
+              </div>
+            </Card>
           </div>
-        </ScrollArea>
+        </div>
+      </div>
 
-        <Separator className="flex-shrink-0" />
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between items-center pt-4 flex-shrink-0">
+      {/* Footer */}
+      <div className="border-t bg-background">
+        <div className="flex items-center justify-between h-16 px-6">
           <div className="text-sm text-muted-foreground">
             Etapa {currentStep + 1} de {totalSteps}
           </div>
-          
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={saving}
-            >
-              Cancelar
-            </Button>
-
             {currentStep > 0 && (
               <Button
-                type="button"
                 variant="outline"
                 onClick={handleBack}
                 disabled={saving}
@@ -645,22 +710,12 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
                 Voltar
               </Button>
             )}
-
             {currentStep < totalSteps - 1 ? (
-              <Button
-                type="button"
-                onClick={handleNext}
-                disabled={saving}
-              >
+              <Button onClick={handleNext} disabled={saving}>
                 Próximo
-                <ArrowRight size={16} className="ml-2" />
               </Button>
             ) : (
-              <Button
-                type="button"
-                onClick={handleSubmit}
-                disabled={saving}
-              >
+              <Button onClick={handleSubmit} disabled={saving}>
                 {saving ? (
                   'Salvando...'
                 ) : (
@@ -673,7 +728,7 @@ export function ADRWizard({ open, onClose, onSuccess, editingADR }: ADRWizardPro
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

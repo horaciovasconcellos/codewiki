@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS adrs (
     sequencia INT AUTO_INCREMENT UNIQUE NOT NULL,
     descricao VARCHAR(500) NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Proposto', 'Aceito', 'Rejeitado', 'Substituído', 'Obsoleto', 'Adiado/Retirado') DEFAULT 'Proposto',
+    status ENUM('Proposto', 'Aceito', 'Rejeitado', 'Substituido', 'Obsoleto', 'Adiado/Retirado') DEFAULT 'Proposto',
     contexto TEXT,
     decisao TEXT,
     justificativa TEXT,

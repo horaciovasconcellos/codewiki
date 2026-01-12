@@ -10,15 +10,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ADR } from '@/lib/types';
-import { PencilSimple, Trash, DotsThree, Eye, MagnifyingGlass } from '@phosphor-icons/react';
+import { PencilSimple, Trash, Eye, MagnifyingGlass } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -82,37 +76,20 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
           />
         </div>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              Status: {statusFilter === 'all' ? 'Todos' : statusFilter}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setStatusFilter('all')}>
-              Todos
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setStatusFilter('Proposto')}>
-              Proposto
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter('Aceito')}>
-              Aceito
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter('Rejeitado')}>
-              Rejeitado
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter('Substituído')}>
-              Substituído
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter('Obsoleto')}>
-              Obsoleto
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setStatusFilter('Adiado/Retirado')}>
-              Adiado/Retirado
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os Status</SelectItem>
+            <SelectItem value="Proposto">Proposto</SelectItem>
+            <SelectItem value="Aceito">Aceito</SelectItem>
+            <SelectItem value="Rejeitado">Rejeitado</SelectItem>
+            <SelectItem value="Substituído">Substituído</SelectItem>
+            <SelectItem value="Obsoleto">Obsoleto</SelectItem>
+            <SelectItem value="Adiado/Retirado">Adiado/Retirado</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Contador */}
@@ -123,7 +100,7 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
       {/* Tabela */}
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-100">
             <TableRow>
               <TableHead className="w-[100px]">Sequência</TableHead>
               <TableHead>Descrição</TableHead>
@@ -145,7 +122,7 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
               </TableRow>
             ) : (
               filteredADRs.map((adr) => (
-                <TableRow key={adr.id}>
+                <TableRow key={adr.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
                   <TableCell className="font-mono font-semibold">
                     ADR-{adr.sequencia}
                   </TableCell>
@@ -180,31 +157,32 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <DotsThree size={20} weight="bold" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onView(adr)}>
-                          <Eye size={16} className="mr-2" />
-                          Visualizar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(adr)}>
-                          <PencilSimple size={16} className="mr-2" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => onDelete(adr.id)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash size={16} className="mr-2" />
-                          Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex gap-1 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onView(adr)}
+                        title="Visualizar"
+                      >
+                        <Eye size={16} className="text-blue-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEdit(adr)}
+                        title="Editar"
+                      >
+                        <PencilSimple size={16} className="text-blue-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDelete(adr.id)}
+                        title="Excluir"
+                      >
+                        <Trash size={16} className="text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

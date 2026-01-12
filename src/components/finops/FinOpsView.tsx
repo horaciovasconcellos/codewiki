@@ -126,11 +126,11 @@ export function FinOpsView() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-8 grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="providers">Provedores</TabsTrigger>
-          <TabsTrigger value="resources">Recursos</TabsTrigger>
-          <TabsTrigger value="ingest">Ingestão de Dados</TabsTrigger>
+        <TabsList className="mb-8 grid w-full grid-cols-4 lg:w-auto lg:inline-grid bg-white border">
+          <TabsTrigger value="dashboard" className="text-black data-[state=active]:bg-white">Dashboard</TabsTrigger>
+          <TabsTrigger value="providers" className="text-black data-[state=active]:bg-white">Provedores</TabsTrigger>
+          <TabsTrigger value="resources" className="text-black data-[state=active]:bg-white">Recursos</TabsTrigger>
+          <TabsTrigger value="ingest" className="text-black data-[state=active]:bg-white">Ingestão de Dados</TabsTrigger>
         </TabsList>
 
         {/* Tab: Dashboard */}
@@ -324,7 +324,7 @@ export function FinOpsView() {
                       <p className="text-xs text-muted-foreground">4 recursos (EC2, S3, RDS, Lambda) - $883/dia</p>
                     </div>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-4 border">
+                  <div className="bg-white rounded-lg p-4 border">
                     <code className="text-xs font-mono break-all">
                       curl -X POST http://localhost:3000/api/finops/ingest -H "Content-Type: application/json" -d @data-templates/finops-carga.json
                     </code>
@@ -342,7 +342,7 @@ export function FinOpsView() {
                       <p className="text-xs text-muted-foreground">4 recursos (VM, Storage, SQL, App Service) - $870.75/dia</p>
                     </div>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-4 border">
+                  <div className="bg-white rounded-lg p-4 border">
                     <code className="text-xs font-mono break-all">
                       curl -X POST http://localhost:3000/api/finops/ingest -H "Content-Type: application/json" -d @data-templates/finops-azure-carga.json
                     </code>
@@ -360,7 +360,7 @@ export function FinOpsView() {
                       <p className="text-xs text-muted-foreground">4 recursos (Compute, Storage, SQL, Functions) - $871.50/dia</p>
                     </div>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-4 border">
+                  <div className="bg-white rounded-lg p-4 border">
                     <code className="text-xs font-mono break-all">
                       curl -X POST http://localhost:3000/api/finops/ingest -H "Content-Type: application/json" -d @data-templates/finops-gcp-carga.json
                     </code>
@@ -378,7 +378,7 @@ export function FinOpsView() {
                       <p className="text-xs text-muted-foreground">12 recursos de todos os provedores - $2,625.25/dia</p>
                     </div>
                   </div>
-                  <div className="bg-muted/50 rounded-lg p-4 border">
+                  <div className="bg-white rounded-lg p-4 border">
                     <p className="text-xs text-muted-foreground mb-2">Arquivo: data-templates/finops.csv</p>
                     <p className="text-xs text-muted-foreground">
                       Processe o CSV com um script Python ou ferramenta ETL. Consulte 
@@ -397,18 +397,18 @@ export function FinOpsView() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-semibold text-sm mb-2">Endpoint de Ingestão</h3>
-                  <code className="text-sm bg-muted px-3 py-2 rounded border inline-block">
+                  <h3 className="font-semibold text-sm mb-2 text-black">Endpoint de Ingestão</h3>
+                  <code className="text-sm bg-white px-3 py-2 rounded border inline-block text-black">
                     POST /api/finops/ingest
                   </code>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-sm mb-2">Guias Disponíveis</h3>
-                  <ul className="text-sm space-y-2 text-muted-foreground">
-                    <li>• <code className="text-xs bg-muted px-2 py-0.5 rounded">docs/FINOPS-INGESTION-GUIDE.md</code> - Exemplos de JSON para cada provedor</li>
-                    <li>• <code className="text-xs bg-muted px-2 py-0.5 rounded">data-templates/README-FINOPS.md</code> - Guia completo de carga de dados</li>
-                    <li>• <code className="text-xs bg-muted px-2 py-0.5 rounded">database/create-finops-tables.sql</code> - Estrutura das tabelas</li>
+                  <h3 className="font-semibold text-sm mb-2 text-black">Guias Disponíveis</h3>
+                  <ul className="text-sm space-y-2 text-black">
+                    <li>• <code className="text-xs bg-white px-2 py-0.5 rounded border text-black">docs/FINOPS-INGESTION-GUIDE.md</code> - Exemplos de JSON para cada provedor</li>
+                    <li>• <code className="text-xs bg-white px-2 py-0.5 rounded border text-black">data-templates/README-FINOPS.md</code> - Guia completo de carga de dados</li>
+                    <li>• <code className="text-xs bg-white px-2 py-0.5 rounded border text-black">database/create-finops-tables.sql</code> - Estrutura das tabelas</li>
                   </ul>
                 </div>
 

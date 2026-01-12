@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { CapacidadeNegocio } from '@/lib/types';
-import { CapacidadeForm } from './CapacidadeForm';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +29,7 @@ import { Separator } from '@/components/ui/separator';
 
 interface CapacidadesTableProps {
   capacidades: CapacidadeNegocio[];
+  onEdit: (capacidade: CapacidadeNegocio) => void;
   onCapacidadeSave: (capacidade: CapacidadeNegocio) => void | Promise<void>;
   onCapacidadeDelete: (id: string) => void | Promise<void>;
 }
@@ -69,7 +69,7 @@ const getCategoriaColor = (categoria: string) => {
   }
 };
 
-export function CapacidadesTable({ capacidades, onCapacidadeSave, onCapacidadeDelete }: CapacidadesTableProps) {
+export function CapacidadesTable({ capacidades, onEdit, onCapacidadeSave, onCapacidadeDelete }: CapacidadesTableProps) {
   const [selectedCapacidade, setSelectedCapacidade] = useState<CapacidadeNegocio | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -295,16 +295,14 @@ export function CapacidadesTable({ capacidades, onCapacidadeSave, onCapacidadeDe
                       >
                         <Eye />
                       </Button>
-                      <CapacidadeForm
-                        capacidades={capacidades}
-                        capacidadeToEdit={capacidade}
-                        onSave={onCapacidadeSave}
-                        trigger={
-                          <Button variant="ghost" size="icon" title="Editar">
-                            <PencilSimple />
-                          </Button>
-                        }
-                      />
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        title="Editar"
+                        onClick={() => onEdit(capacidade)}
+                      >
+                        <PencilSimple />
+                      </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="ghost" size="icon" title="Excluir">

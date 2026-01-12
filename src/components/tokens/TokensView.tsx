@@ -9,7 +9,7 @@ import { TokensDataTable } from './TokensDataTable';
 import { TokenForm } from './TokenForm';
 import { TokenDetailsDialog } from './TokenDetailsDialog';
 import { Button } from '@/components/ui/button';
-import { Key, Plus } from '@phosphor-icons/react';
+import { Plus } from '@phosphor-icons/react';
 import { StatusToken, HistoricoTokenAcesso } from '@/lib/types';
 import { generateUUID } from '@/utils/uuid';
 
@@ -19,7 +19,7 @@ export function TokensView() {
   const [selectedToken, setSelectedToken] = useState<TokenAcesso | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editToken, setEditToken] = useState<TokenAcesso | undefined>(undefined);
-  const [formOpen, setFormOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   const handleView = (token: TokenAcesso) => {
     setSelectedToken(token);
@@ -28,12 +28,12 @@ export function TokensView() {
 
   const handleEdit = (token: TokenAcesso) => {
     setEditToken(token);
-    setFormOpen(true);
+    setShowForm(true);
   };
 
   const handleNewToken = () => {
     setEditToken(undefined);
-    setFormOpen(true);
+    setShowForm(true);
   };
 
   const handleTokenSave = (token: TokenAcesso) => {
@@ -45,7 +45,12 @@ export function TokensView() {
       }
       return [...currentList, token];
     });
-    setFormOpen(false);
+    setShowForm(false);
+    setEditToken(undefined);
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
     setEditToken(undefined);
   };
 
@@ -126,34 +131,42 @@ export function TokensView() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex-none border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger />
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <Key size={32} weight="duotone" className="text-primary" />
-                Tokens de Acesso
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Gerenciamento de tokens para autenticação de usuários, aplicações e integrações
-              </p>
-            </div>
-            <Button onClick={handleNewToken} size="lg">
-              <Plus className="mr-2" size={20} />
-              Novo Token
-            </Button>
+    <div className="container mx-auto py-8 px-4 max-w-7xl">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <SidebarTrigger />
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold tracking-tight">Tokens de Acesso</h1>
+            <p className="text-muted-foreground mt-2">
+              Gerenciamento de tokens para autenticação de usuários, aplicações e integrações
+            </p>
           </div>
         </div>
-      </div>
 
-      <div className="flex-1 overflow-auto">
-        <div className="container mx-auto px-6 py-6">
-          <Card className="h-full">
+        <Separator />
+
+        {showForm ? (
+          <TokenForm
+            tokens={tokens || []}
+            onSave={handleTokenSave}
+            editToken={editToken}
+            onCancel={handleCancel}
+          />
+        ) : (
+          <Card>
             <CardHeader>
-              <CardTitle>Lista de Tokens</CardTitle>
-              <CardDescription>{tokens.length} token(s) cadastrado(s)</CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Lista de Tokens</CardTitle>
+                  <CardDescription>
+                    {tokens.length} token(s) cadastrado(s)
+                  </CardDescription>
+                </div>
+                <Button onClick={handleNewToken}>
+                  <Plus className="mr-2" size={16} />
+                  Novo Token
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <TokensDataTable
@@ -166,18 +179,10 @@ export function TokensView() {
               />
             </CardContent>
           </Card>
-        </div>
+        )}
+
+        <TokenDetailsDialog token={selectedToken} open={detailsOpen} onOpenChange={setDetailsOpen} />
       </div>
-
-      <TokenDetailsDialog token={selectedToken} open={detailsOpen} onOpenChange={setDetailsOpen} />
-
-      <TokenForm
-        tokens={tokens || []}
-        onSave={handleTokenSave}
-        editToken={editToken}
-        open={formOpen}
-        onOpenChange={setFormOpen}
-      />
     </div>
   );
 }

@@ -235,7 +235,7 @@ export function OnPremiseToCloudDataTable({ data, aplicacoes, onEdit, onDelete }
                 </TableRow>
               ) : (
                 paginatedData.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-muted/50">
+                  <TableRow key={item.id} className="hover:bg-gray-100">
                     <TableCell className="font-medium">{getAplicacaoNome(item.aplicacaoOrigemId)}</TableCell>
                     <TableCell>{getAplicacaoNome(item.aplicacaoDestinoId)}</TableCell>
                     <TableCell>{item.tipoAutenticacao}</TableCell>

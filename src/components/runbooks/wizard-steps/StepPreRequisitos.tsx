@@ -34,8 +34,8 @@ export function StepPreRequisitos({ data, updateData }: StepPreRequisitosProps) 
           value={data.preRequisitos?.acessosNecessarios || ''}
           onChange={(e) => updatePreRequisitos('acessosNecessarios', e.target.value)}
           placeholder="Liste os acessos necessários para execução (VPN, SSH, credenciais, etc.)"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Liste todos os acessos necessários, um por linha
@@ -49,8 +49,8 @@ export function StepPreRequisitos({ data, updateData }: StepPreRequisitosProps) 
           value={data.preRequisitos?.validacoesAntesIniciar || ''}
           onChange={(e) => updatePreRequisitos('validacoesAntesIniciar', e.target.value)}
           placeholder="Liste as validações que devem ser feitas antes de iniciar o procedimento"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Validações e verificações prévias necessárias
@@ -64,8 +64,8 @@ export function StepPreRequisitos({ data, updateData }: StepPreRequisitosProps) 
           value={data.preRequisitos?.ferramentasNecessarias || ''}
           onChange={(e) => updatePreRequisitos('ferramentasNecessarias', e.target.value)}
           placeholder="Liste as ferramentas necessárias (SSH, console, browser, scripts específicos, etc.)"
-          rows={6}
-          className="font-mono"
+          rows={3}
+          className="font-mono resize-none overflow-auto"
         />
         <p className="text-xs text-muted-foreground">
           Ferramentas e softwares necessários para execução
