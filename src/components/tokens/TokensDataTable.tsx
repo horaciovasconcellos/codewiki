@@ -112,9 +112,10 @@ export function TokensDataTable({
   const filteredTokens = tokens.filter((token) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      token.nomeEntidade.toLowerCase().includes(searchLower) ||
-      token.identificadorEntidade.toLowerCase().includes(searchLower) ||
-      token.tipoEntidade.toLowerCase().includes(searchLower)
+      token.nome?.toLowerCase().includes(searchLower) ||
+      token.entidadeNome?.toLowerCase().includes(searchLower) ||
+      token.entidadeTipo?.toLowerCase().includes(searchLower) ||
+      token.descricao?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -147,21 +148,19 @@ export function TokensDataTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Entidade</TableHead>
+              <TableHead>Nome</TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead>Token</TableHead>
-              <TableHead>Ambiente</TableHead>
               <TableHead>Escopos</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Expira em</TableHead>
-              <TableHead>Acessos</TableHead>
               <TableHead className="w-[70px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredTokens.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   Nenhum token encontrado com os critérios de busca
                 </TableCell>
               </TableRow>
@@ -171,16 +170,15 @@ export function TokensDataTable({
                   key={token.id}
                   className={isExpired(token) ? 'opacity-60' : ''}
                 >
-                  <TableCell className="font-medium">{token.nomeEntidade}</TableCell>
+                  <TableCell className="font-medium">{token.nome || token.entidadeNome}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{token.tipoEntidade}</Badge>
+                    <Badge variant="outline">{token.entidadeTipo}</Badge>
                   </TableCell>
                   <TableCell className="font-mono text-xs max-w-[200px]">
                     <div className="truncate" title="Token mascarado por segurança">
-                      {'*'.repeat(Math.min(token.tokenHash.length, 40))}
+                      {'*'.repeat(40)}
                     </div>
                   </TableCell>
-                  <TableCell>{getAmbienteBadge(token.ambiente)}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {token.escopos.slice(0, 3).map((escopo) => (
@@ -201,7 +199,6 @@ export function TokensDataTable({
                       ? formatarData(token.dataExpiracao)
                       : 'Sem expiração'}
                   </TableCell>
-                  <TableCell className="text-center">{token.quantidadeAcessos}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Button
@@ -271,7 +268,7 @@ export function TokensDataTable({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja deletar o token "{selectedToken?.nomeEntidade}"? Esta
+              Tem certeza que deseja deletar o token "{selectedToken?.nome || selectedToken?.entidadeNome}"? Esta
               ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -290,7 +287,7 @@ export function TokensDataTable({
           <AlertDialogHeader>
             <AlertDialogTitle>Revogar Token</AlertDialogTitle>
             <AlertDialogDescription>
-              Informe o motivo da revogação do token "{selectedToken?.nomeEntidade}":
+              Informe o motivo da revogação do token "{selectedToken?.nome || selectedToken?.entidadeNome}":
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">

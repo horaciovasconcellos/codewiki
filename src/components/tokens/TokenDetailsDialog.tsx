@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatarData } from '@/lib/utils';
-import { Key, ShieldCheck, Clock, Globe, ChartLineUp } from '@phosphor-icons/react';
+import { Key, ShieldCheck, Clock } from '@phosphor-icons/react';
 import { TokenHistoryPanel } from './TokenHistoryPanel';
 
 interface TokenDetailsDialogProps {
@@ -49,21 +49,23 @@ export function TokenDetailsDialog({ token, open, onOpenChange }: TokenDetailsDi
                 <p className="font-mono text-sm mt-1">{token.id}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Hash</p>
-                <p className="font-mono text-sm mt-1 truncate">{token.tokenHash}</p>
+                <p className="text-sm text-muted-foreground">Nome</p>
+                <p className="font-medium mt-1">{token.nome}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Tipo de Entidade</p>
-                <p className="font-medium mt-1">{token.tipoEntidade}</p>
+                <p className="font-medium mt-1">{token.entidadeTipo}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Identificador</p>
-                <p className="font-medium mt-1">{token.identificadorEntidade}</p>
+                <p className="text-sm text-muted-foreground">Nome da Entidade</p>
+                <p className="font-medium mt-1">{token.entidadeNome}</p>
               </div>
-              <div className="col-span-2">
-                <p className="text-sm text-muted-foreground">Nome / Descrição</p>
-                <p className="font-medium mt-1">{token.nomeEntidade}</p>
-              </div>
+              {token.descricao && (
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Descrição</p>
+                  <p className="font-medium mt-1">{token.descricao}</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -86,10 +88,6 @@ export function TokenDetailsDialog({ token, open, onOpenChange }: TokenDetailsDi
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Ambiente</p>
-                <Badge variant="outline" className="mt-1">{token.ambiente}</Badge>
-              </div>
-              <div>
                 <p className="text-sm text-muted-foreground">Status</p>
                 <Badge 
                   variant={token.status === 'Ativo' ? 'default' : 'destructive'} 
@@ -110,8 +108,8 @@ export function TokenDetailsDialog({ token, open, onOpenChange }: TokenDetailsDi
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">Data de Geração</p>
-                <p className="font-medium mt-1">{formatarData(token.dataGeracao)}</p>
+                <p className="text-sm text-muted-foreground">Criado em</p>
+                <p className="font-medium mt-1">{formatarData(token.createdAt)}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Início da Validade</p>
@@ -125,17 +123,9 @@ export function TokenDetailsDialog({ token, open, onOpenChange }: TokenDetailsDi
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Token Temporário</p>
-                <Badge variant={token.tokenTemporario ? 'secondary' : 'outline'} className="mt-1">
-                  {token.tokenTemporario ? 'SIM' : 'NÃO'}
-                </Badge>
+                <p className="text-sm text-muted-foreground">Última Atualização</p>
+                <p className="font-medium mt-1">{formatarData(token.updatedAt)}</p>
               </div>
-              {token.motivoExpiracao && (
-                <div className="col-span-2">
-                  <p className="text-sm text-muted-foreground">Motivo / Observação</p>
-                  <p className="text-sm mt-1 p-2 bg-muted rounded">{token.motivoExpiracao}</p>
-                </div>
-              )}
             </div>
           </div>
 
@@ -159,24 +149,6 @@ export function TokenDetailsDialog({ token, open, onOpenChange }: TokenDetailsDi
                   {token.requerMFA ? 'SIM' : 'NÃO'}
                 </Badge>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Rate Limit</p>
-                <p className="font-medium mt-1">{token.rateLimitPorHora} chamadas/hora</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Origens Permitidas</p>
-                {token.origensPermitidas.length > 0 ? (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {token.origensPermitidas.map((ip, idx) => (
-                      <code key={idx} className="text-xs bg-muted px-2 py-1 rounded">
-                        {ip}
-                      </code>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm mt-1 text-muted-foreground">Todas as origens</p>
-                )}
-              </div>
             </div>
           </div>
 
@@ -191,58 +163,12 @@ export function TokenDetailsDialog({ token, open, onOpenChange }: TokenDetailsDi
               </div>
             </>
           )}
-
-          <Separator />
-
-          <div>
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-              <ChartLineUp size={16} />
-              Auditoria
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Criado Por</p>
-                <p className="font-medium mt-1">{token.criadoPor}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Data de Criação</p>
-                <p className="font-medium mt-1">{formatarData(token.dataHoraCriacao)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Última Atualização</p>
-                <p className="font-medium mt-1">{formatarData(token.ultimaAtualizacao)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Último Uso</p>
-                <p className="font-medium mt-1">
-                  {token.ultimoUso ? formatarData(token.ultimoUso) : 'Nunca utilizado'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Quantidade de Acessos</p>
-                <p className="font-bold mt-1 text-lg">{token.quantidadeAcessos.toLocaleString()}</p>
-              </div>
-              {token.origemUltimoAcesso && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Origem do Último Acesso</p>
-                  <p className="font-mono text-sm mt-1">{token.origemUltimoAcesso}</p>
-                </div>
-              )}
-              {token.localizacaoUltimoAcesso && (
-                <div className="col-span-2">
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Globe size={14} />
-                    Localização do Último Acesso
-                  </p>
-                  <p className="font-medium mt-1">{token.localizacaoUltimoAcesso}</p>
-                </div>
-              )}
-            </div>
-          </div>
         </TabsContent>
 
         <TabsContent value="historico" className="py-4">
-          <TokenHistoryPanel historico={token.historico || []} />
+          <p className="text-sm text-muted-foreground text-center py-8">
+            Histórico de alterações não disponível nesta versão
+          </p>
         </TabsContent>
       </Tabs>
       </DialogContent>

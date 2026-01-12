@@ -28,7 +28,14 @@ export function TokenForm({ onSave, editToken, onCancel }: TokenFormProps) {
   const [saving, setSaving] = useState(false);
   
   const getInitialFormData = (): Partial<TokenAcesso> => {
-    if (editToken) return editToken;
+    if (editToken) {
+      // Converter datas do formato ISO para yyyy-MM-dd
+      return {
+        ...editToken,
+        dataInicioValidade: editToken.dataInicioValidade?.split('T')[0],
+        dataExpiracao: editToken.dataExpiracao?.split('T')[0],
+      };
+    }
     
     // Data atual para início da validade
     const hoje = new Date();
