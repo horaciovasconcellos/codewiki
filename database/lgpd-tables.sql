@@ -2,24 +2,33 @@
 CREATE TABLE IF NOT EXISTS lgpd_registros (
   id INT AUTO_INCREMENT PRIMARY KEY,
   identificacao_dados VARCHAR(255) NOT NULL COMMENT 'Nome/Identificação do conjunto de dados',
+  hierarquia_sensibilidade ENUM(
+    'Dados Publicos',
+    'Dados Corporativos',
+    'Dados Pessoais',
+    'Dados Identificadores',
+    'Dados Sensíveis'
+  ) NOT NULL DEFAULT 'Dados Pessoais' COMMENT 'Hierarquia de sensibilidade dos dados',
   tipo_dados ENUM(
-    'Dados Identificadores Diretos',
-    'Dados Identificadores Indiretos',
-    'Dados Sensíveis',
-    'Dados Financeiros',
-    'Dados de Localização'
+    'Identificadores Direto',
+    'Identificadores Indireto',
+    'Sensível',
+    'Financeiro',
+    'Localização'
   ) NOT NULL COMMENT 'Tipo de dados pessoais',
   tecnica_anonimizacao ENUM(
-    'Anonimização por Supressão',
-    'Anonimização por Generalização',
-    'Pseudonimização (Embaralhamento Reversível)',
-    'Anonimização por Permutação'
+    'Supressão',
+    'Generalização',
+    'Embaralhamento',
+    'Permutação',
+    'Sem Anonimização'
   ) NOT NULL COMMENT 'Técnica padrão de anonimização',
   data_inicio DATE NOT NULL DEFAULT (CURDATE()) COMMENT 'Data de início do tratamento',
   data_termino DATE NULL COMMENT 'Data de término do tratamento',
   ativo BOOLEAN DEFAULT true COMMENT 'Registro ativo ou inativo',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_hierarquia_sensibilidade (hierarquia_sensibilidade),
   INDEX idx_tipo_dados (tipo_dados),
   INDEX idx_data_inicio (data_inicio),
   INDEX idx_ativo (ativo)
@@ -32,48 +41,56 @@ CREATE TABLE IF NOT EXISTS lgpd_campos (
   lgpd_id INT NOT NULL COMMENT 'ID do registro LGPD pai',
   nome_campo VARCHAR(255) NOT NULL COMMENT 'Nome do campo da tabela',
   descricao TEXT NOT NULL COMMENT 'Descrição do campo',
+  base_legal VARCHAR(500) COMMENT 'Base legal para tratamento do dado',
   matriz_vendas ENUM(
-    'Anonimização por Supressão',
-    'Anonimização por Generalização',
-    'Pseudonimização (Embaralhamento Reversível)',
-    'Anonimização por Permutação'
-  ) NOT NULL COMMENT 'Técnica para departamento de Vendas',
+    'Supressão',
+    'Generalização',
+    'Embaralhamento',
+    'Permutação',
+    'Sem Anonimização'
+  ) NOT NULL DEFAULT 'Sem Anonimização' COMMENT 'Técnica para departamento de Vendas',
   matriz_marketing ENUM(
-    'Anonimização por Supressão',
-    'Anonimização por Generalização',
-    'Pseudonimização (Embaralhamento Reversível)',
-    'Anonimização por Permutação'
-  ) NOT NULL COMMENT 'Técnica para departamento de Marketing',
+    'Supressão',
+    'Generalização',
+    'Embaralhamento',
+    'Permutação',
+    'Sem Anonimização'
+  ) NOT NULL DEFAULT 'Sem Anonimização' COMMENT 'Técnica para departamento de Marketing',
   matriz_financeiro ENUM(
-    'Anonimização por Supressão',
-    'Anonimização por Generalização',
-    'Pseudonimização (Embaralhamento Reversível)',
-    'Anonimização por Permutação'
-  ) NOT NULL COMMENT 'Técnica para departamento Financeiro',
+    'Supressão',
+    'Generalização',
+    'Embaralhamento',
+    'Permutação',
+    'Sem Anonimização'
+  ) NOT NULL DEFAULT 'Sem Anonimização' COMMENT 'Técnica para departamento Financeiro',
   matriz_rh ENUM(
-    'Anonimização por Supressão',
-    'Anonimização por Generalização',
-    'Pseudonimização (Embaralhamento Reversível)',
-    'Anonimização por Permutação'
-  ) NOT NULL COMMENT 'Técnica para departamento de RH',
+    'Supressão',
+    'Generalização',
+    'Embaralhamento',
+    'Permutação',
+    'Sem Anonimização'
+  ) NOT NULL DEFAULT 'Sem Anonimização' COMMENT 'Técnica para departamento de RH',
   matriz_logistica ENUM(
-    'Anonimização por Supressão',
-    'Anonimização por Generalização',
-    'Pseudonimização (Embaralhamento Reversível)',
-    'Anonimização por Permutação'
-  ) NOT NULL COMMENT 'Técnica para departamento de Logística',
+    'Supressão',
+    'Generalização',
+    'Embaralhamento',
+    'Permutação',
+    'Sem Anonimização'
+  ) NOT NULL DEFAULT 'Sem Anonimização' COMMENT 'Técnica para departamento de Logística',
   matriz_assistencia_tecnica ENUM(
-    'Anonimização por Supressão',
-    'Anonimização por Generalização',
-    'Pseudonimização (Embaralhamento Reversível)',
-    'Anonimização por Permutação'
-  ) NOT NULL COMMENT 'Técnica para departamento de Assistência Técnica',
+    'Supressão',
+    'Generalização',
+    'Embaralhamento',
+    'Permutação',
+    'Sem Anonimização'
+  ) NOT NULL DEFAULT 'Sem Anonimização' COMMENT 'Técnica para departamento de Assistência Técnica',
   matriz_analytics ENUM(
-    'Anonimização por Supressão',
-    'Anonimização por Generalização',
-    'Pseudonimização (Embaralhamento Reversível)',
-    'Anonimização por Permutação'
-  ) NOT NULL COMMENT 'Técnica para departamento de Analytics',
+    'Supressão',
+    'Generalização',
+    'Embaralhamento',
+    'Permutação',
+    'Sem Anonimização'
+  ) NOT NULL DEFAULT 'Sem Anonimização' COMMENT 'Técnica para departamento de Analytics',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (lgpd_id) REFERENCES lgpd_registros(id) ON DELETE CASCADE,

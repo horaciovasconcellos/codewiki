@@ -9,7 +9,26 @@ repo_name: sistema-de-auditoria
 nav:
   - "🏠 Início":
       - "Bem-vindo": "index.md"
+      - "Índice Geral": "INDEX.md"
+      - "Convenções do Projeto": "PROJECT-CONVENTIONS.md"
       - "Constituição": "constitution.md"
+  
+  - "🚀 Deployment":
+      - "Guia de Deploy": "deployment/DEPLOY-GUIDE.md"
+      - "Resumo de Deploy": "deployment/DEPLOY-SUMMARY.md"
+      - "Docker Produção": "deployment/DOCKER-PRODUCTION-SETUP.md"
+      - "Testes de Produção": "deployment/TEST-PRODUCTION.md"
+  
+  - "📖 Guias":
+      - "Teste PBIS Azure": "guides/GUIA-TESTE-PBIS-AZURE.md"
+  
+  - "⚙️ Setup e Configuração":
+      - "LGPD Implementation": "setup/LGPD-IMPLEMENTATION.md"
+      - "LGPD Setup Instructions": "setup/LGPD-SETUP-INSTRUCTIONS.md"
+      - "MySQL Replication Fix": "setup/MYSQL-REPLICATION-FIX.md"
+  
+  - "🐛 Issues e Troubleshooting":
+      - "Issue Colaborador Wizard": "issues/ISSUE-COLABORADOR-WIZARD.md"
   
   - "📚 Documentação de Telas":
       - "📑 Índice Geral": "TELAS-INDICE.md"
@@ -270,6 +289,61 @@ extra:
       link: https://gitter.im/squidfunk/mkdocs-material
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/u/77678117787
+
+# Configurações adicionais para melhor organização
+plugins:
+  - search:
+      lang: 
+        - pt
+        - en
+  - minify:
+      minify_html: true
+  - awesome-pages
+  
+# Validação de links e arquivos
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  
+# Markdown extensions para recursos avançados
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      permalink_title: Link para esta seção
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/in/hor%C3%A1cio-correa-t-de-vasconcellos-j%C3%BAnior-b7788467/
     - icon: fontawesome/brands/instagram

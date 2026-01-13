@@ -124,10 +124,11 @@ services:
       dockerfile: Dockerfile.mkdocs
     container_name: auditoria-mkdocs
     ports:
-      - "8000:8082"
+      - "8082:8082"
     volumes:
       - ./docs:/docs/docs:ro
-      - ./mkdocs-simple.yml:/docs/mkdocs.yml:ro
+      - ./mkdocs.yml:/docs/mkdocs.yml:ro
+      - ./theme:/docs/theme:ro
     networks:
       - auditoria-network
     restart: unless-stopped

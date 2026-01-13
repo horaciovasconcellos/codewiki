@@ -20,6 +20,7 @@
 - [Desenvolvimento](#desenvolvimento)
 - [Testes](#testes)
 - [Deploy](#deploy)
+- [Documentação](#documentação)
 - [Contribuindo](#contribuindo)
 - [Licença](#licença)
 
@@ -545,7 +546,24 @@ Contribuições são bem-vindas! Por favor:
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## 👥 Autores
+## � Documentação
+
+Toda a documentação do projeto está organizada na pasta [`docs/`](docs/):
+
+- 📋 [**Índice Completo**](docs/INDEX.md) - Navegação por toda documentação
+- 📐 [**Convenções do Projeto**](docs/PROJECT-CONVENTIONS.md) - Padrões e regras de desenvolvimento
+- 🚀 [**Guia de Deploy**](docs/deployment/DEPLOY-GUIDE.md) - Instruções de deployment
+- ⚙️ [**Setup LGPD**](docs/setup/LGPD-SETUP-INSTRUCTIONS.md) - Configuração do sistema LGPD
+- 🔧 [**Guia de Execução**](docs/EXECUTION-GUIDE.md) - Como executar o sistema
+- 🔌 [**Referência de APIs**](docs/API-REFERENCIA-COMPLETA.md) - Documentação completa das APIs
+
+### Regra Importante
+
+⚠️ **Todos os arquivos Markdown (`.md`) devem estar na pasta `docs/`**, exceto o `README.md` na raiz.
+
+Consulte [PROJECT-CONVENTIONS.md](docs/PROJECT-CONVENTIONS.md) para detalhes completos sobre organização e nomenclatura.
+
+## �👥 Autores
 
 - **Horacio Vasconcellos** - [@horaciovasconcellos](https://github.com/horaciovasconcellos)
 

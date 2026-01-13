@@ -5246,6 +5246,7 @@ app.get('/api/lgpd', async (req, res) => {
       SELECT 
         id,
         identificacao_dados as identificacaoDados,
+        hierarquia_sensibilidade as hierarquiaSensibilidade,
         tipo_dados as tipoDados,
         tecnica_anonimizacao as tecnicaAnonimizacao,
         data_inicio as dataInicio,
@@ -5273,6 +5274,7 @@ app.get('/api/lgpd/:id', async (req, res) => {
       SELECT 
         id,
         identificacao_dados as identificacaoDados,
+        hierarquia_sensibilidade as hierarquiaSensibilidade,
         tipo_dados as tipoDados,
         tecnica_anonimizacao as tecnicaAnonimizacao,
         data_inicio as dataInicio,
@@ -5295,6 +5297,7 @@ app.get('/api/lgpd/:id', async (req, res) => {
         lgpd_id as lgpdId,
         nome_campo as nomeCampo,
         descricao,
+        base_legal as baseLegal,
         matriz_vendas as vendas,
         matriz_marketing as marketing,
         matriz_financeiro as financeiro,
@@ -5315,6 +5318,7 @@ app.get('/api/lgpd/:id', async (req, res) => {
       lgpdId: campo.lgpdId,
       nomeCampo: campo.nomeCampo,
       descricao: campo.descricao,
+      baseLegal: campo.baseLegal,
       matrizAnonimizacao: {
         vendas: campo.vendas,
         marketing: campo.marketing,
@@ -5349,6 +5353,7 @@ app.post('/api/lgpd', async (req, res) => {
 
     const {
       identificacaoDados,
+      hierarquiaSensibilidade,
       tipoDados,
       tecnicaAnonimizacao,
       dataInicio,
@@ -5361,14 +5366,16 @@ app.post('/api/lgpd', async (req, res) => {
     const [result] = await connection.query(`
       INSERT INTO lgpd_registros (
         identificacao_dados,
+        hierarquia_sensibilidade,
         tipo_dados,
         tecnica_anonimizacao,
         data_inicio,
         data_termino,
         ativo
-      ) VALUES (?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
     `, [
       identificacaoDados,
+      hierarquiaSensibilidade || 'Dados Pessoais',
       tipoDados,
       tecnicaAnonimizacao,
       dataInicio || new Date().toISOString().split('T')[0],
@@ -5384,6 +5391,7 @@ app.post('/api/lgpd', async (req, res) => {
         lgpdId,
         campo.nomeCampo,
         campo.descricao,
+        campo.baseLegal || null,
         campo.matrizAnonimizacao.vendas,
         campo.matrizAnonimizacao.marketing,
         campo.matrizAnonimizacao.financeiro,
@@ -5398,6 +5406,7 @@ app.post('/api/lgpd', async (req, res) => {
           lgpd_id,
           nome_campo,
           descricao,
+          base_legal,
           matriz_vendas,
           matriz_marketing,
           matriz_financeiro,
@@ -5416,6 +5425,7 @@ app.post('/api/lgpd', async (req, res) => {
       SELECT 
         id,
         identificacao_dados as identificacaoDados,
+        hierarquia_sensibilidade as hierarquiaSensibilidade,
         tipo_dados as tipoDados,
         tecnica_anonimizacao as tecnicaAnonimizacao,
         data_inicio as dataInicio,
@@ -5447,6 +5457,7 @@ app.put('/api/lgpd/:id', async (req, res) => {
     const { id } = req.params;
     const {
       identificacaoDados,
+      hierarquiaSensibilidade,
       tipoDados,
       tecnicaAnonimizacao,
       dataInicio,
@@ -5455,12 +5466,13 @@ app.put('/api/lgpd/:id', async (req, res) => {
       campos = []
     } = req.body;
 
-    console.log('PUT /api/lgpd/:id - Dados recebidos:', { id, identificacaoDados, tipoDados, dataInicio, dataTermino, ativo, camposCount: campos.length });
+    console.log('PUT /api/lgpd/:id - Dados recebidos:', { id, identificacaoDados, hierarquiaSensibilidade, tipoDados, dataInicio, dataTermino, ativo, camposCount: campos.length });
 
     // Atualizar registro principal
     await connection.query(`
       UPDATE lgpd_registros
       SET identificacao_dados = ?,
+          hierarquia_sensibilidade = ?,
           tipo_dados = ?,
           tecnica_anonimizacao = ?,
           data_inicio = ?,
@@ -5470,6 +5482,7 @@ app.put('/api/lgpd/:id', async (req, res) => {
       WHERE id = ?
     `, [
       identificacaoDados,
+      hierarquiaSensibilidade || 'Dados Pessoais',
       tipoDados,
       tecnicaAnonimizacao,
       dataInicio,
@@ -5491,6 +5504,7 @@ app.put('/api/lgpd/:id', async (req, res) => {
         id,
         campo.nomeCampo,
         campo.descricao,
+        campo.baseLegal || null,
         campo.matrizAnonimizacao.vendas,
         campo.matrizAnonimizacao.marketing,
         campo.matrizAnonimizacao.financeiro,
@@ -5507,6 +5521,7 @@ app.put('/api/lgpd/:id', async (req, res) => {
           lgpd_id,
           nome_campo,
           descricao,
+          base_legal,
           matriz_vendas,
           matriz_marketing,
           matriz_financeiro,
@@ -5525,6 +5540,7 @@ app.put('/api/lgpd/:id', async (req, res) => {
       SELECT 
         id,
         identificacao_dados as identificacaoDados,
+        hierarquia_sensibilidade as hierarquiaSensibilidade,
         tipo_dados as tipoDados,
         tecnica_anonimizacao as tecnicaAnonimizacao,
         data_inicio as dataInicio,
@@ -14458,7 +14474,7 @@ app.post('/api/sdd/projetos/:id/extrair-requisitos-prd', async (req, res) => {
         await pool.query(`
           INSERT INTO requisitos_sdd 
           (id, projeto_id, sequencia, nome, descricao, status, origem_prd, secao_prd)
-          VALUES (?, ?, ?, ?, ?, 'BACKLOG', TRUE, ?)
+          VALUES (?, ?, ?, ?, ?, 'PRONTO P/DEV', TRUE, ?)
         `, [id, projetoId, sequencia, nome.substring(0, 150), descricao || null, currentSection]);
         
         requisitosExtraidos.push({
@@ -14531,7 +14547,7 @@ app.post('/api/sdd/projetos/:id/extrair-requisitos-prd', async (req, res) => {
         await pool.query(`
           INSERT INTO requisitos_sdd 
           (id, projeto_id, sequencia, nome, descricao, status, origem_prd, secao_prd)
-          VALUES (?, ?, ?, ?, ?, 'BACKLOG', TRUE, ?)
+          VALUES (?, ?, ?, ?, ?, 'PRONTO P/DEV', TRUE, ?)
         `, [id, projetoId, sequencia, nome.substring(0, 150), descricao.substring(0, 5000) || null, currentSection]);
         
         requisitosExtraidos.push({

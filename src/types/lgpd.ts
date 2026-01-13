@@ -1,15 +1,23 @@
+export type HierarquiaSensibilidade =
+  | 'Dados Publicos'
+  | 'Dados Corporativos'
+  | 'Dados Pessoais'
+  | 'Dados Identificadores'
+  | 'Dados Sensíveis';
+
 export type TipoDadoLGPD = 
-  | 'Dados Identificadores Diretos'
-  | 'Dados Identificadores Indiretos'
-  | 'Dados Sensíveis'
-  | 'Dados Financeiros'
-  | 'Dados de Localização';
+  | 'Identificadores Direto'
+  | 'Identificadores Indireto'
+  | 'Sensível'
+  | 'Financeiro'
+  | 'Localização';
 
 export type TecnicaAnonimizacao = 
-  | 'Anonimização por Supressão'
-  | 'Anonimização por Generalização'
-  | 'Pseudonimização (Embaralhamento Reversível)'
-  | 'Anonimização por Permutação';
+  | 'Supressão'
+  | 'Generalização'
+  | 'Embaralhamento'
+  | 'Permutação'
+  | 'Sem Anonimização';
 
 export type DepartamentoLGPD = 
   | 'Vendas'
@@ -35,6 +43,7 @@ export interface LGPDCampo {
   lgpdId: number;
   nomeCampo: string;
   descricao: string;
+  baseLegal?: string;
   matrizAnonimizacao: MatrizAnonimizacao;
   createdAt?: string;
   updatedAt?: string;
@@ -43,6 +52,7 @@ export interface LGPDCampo {
 export interface LGPDRegistro {
   id: number;
   identificacaoDados: string;
+  hierarquiaSensibilidade: HierarquiaSensibilidade;
   tipoDados: TipoDadoLGPD;
   tecnicaAnonimizacao: TecnicaAnonimizacao;
   dataInicio: string;
@@ -55,6 +65,7 @@ export interface LGPDRegistro {
 
 export interface LGPDRegistroFormData {
   identificacaoDados: string;
+  hierarquiaSensibilidade: HierarquiaSensibilidade;
   tipoDados: TipoDadoLGPD;
   tecnicaAnonimizacao: TecnicaAnonimizacao;
   dataInicio: string;
@@ -65,5 +76,6 @@ export interface LGPDRegistroFormData {
 export interface LGPDCampoFormData {
   nomeCampo: string;
   descricao: string;
+  baseLegal?: string;
   matrizAnonimizacao: MatrizAnonimizacao;
 }

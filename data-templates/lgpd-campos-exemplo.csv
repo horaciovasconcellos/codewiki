@@ -1,0 +1,11 @@
+Nome do Campo,Descrição,Identificação dos Dados,Hierarquia de Sensibilidade,Tipo de Dado,Base Legal,Técnica de Anonimização,Vendas,Marketing,Financeiro,RH,Logística,Assistência Técnica,Analytics
+nome_empresa,Razão social da empresa,Dados Públicos,Dados Públicos,Dados Públicos,Art. 7º I LGPD,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização
+cnpj,Cadastro Nacional de Pessoa Jurídica,Dados Públicos,Dados Públicos,Identificadores Direto,Art. 7º I LGPD,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização
+email_corporativo,E-mail corporativo do colaborador,Dados Pessoais,Dados Pessoais,Identificadores Direto,Art. 7º VI LGPD,Generalização,Generalização,Supressão,Supressão,Generalização,Generalização,Generalização,Generalização
+cpf,Cadastro de Pessoa Física,Dados Identificadores,Dados Identificadores,Identificadores Direto,Art. 7º II LGPD,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão
+telefone_pessoal,Telefone pessoal do colaborador,Dados Pessoais,Dados Pessoais,Identificadores Indireto,Art. 7º I LGPD,Generalização,Generalização,Generalização,Supressão,Generalização,Generalização,Generalização,Generalização
+endereco_residencial,Endereço residencial completo,Dados Pessoais,Dados Pessoais,Localização,Art. 7º I LGPD,Generalização,Generalização,Generalização,Supressão,Generalização,Generalização,Generalização,Embaralhamento
+salario_base,Salário base mensal do colaborador,Dados Financeiros,Dados Pessoais,Financeiro,Art. 7º II LGPD,Generalização,Sem Anonimização,Supressão,Supressão,Generalização,Sem Anonimização,Sem Anonimização,Generalização
+data_nascimento,Data de nascimento do colaborador,Dados Pessoais,Dados Pessoais,Identificadores Indireto,Art. 7º I LGPD,Generalização,Generalização,Generalização,Supressão,Generalização,Generalização,Generalização,Generalização
+numero_cartao,Número do cartão de crédito,Dados Sensíveis,Dados Sensíveis,Financeiro,Art. 7º II LGPD,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão
+historico_medico,Histórico médico e exames,Dados Sensíveis,Dados Sensíveis,Sensível,Art. 11 II LGPD,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão

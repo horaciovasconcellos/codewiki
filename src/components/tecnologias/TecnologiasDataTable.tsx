@@ -33,7 +33,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   PencilSimple, 
   Trash, 
-  Eye,
   CaretUp,
   CaretDown,
   CaretUpDown,
@@ -379,14 +378,6 @@ export function TecnologiasDataTable({ tecnologias, onSelect, onEdit, onDelete }
                     <TableCell>{tecnologia.maturidadeInterna}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => onSelect(tecnologia)}
-                          title="Ver detalhes"
-                        >
-                          <Eye size={16} />
-                        </Button>
                         <Button 
                           size="sm" 
                           variant="ghost"

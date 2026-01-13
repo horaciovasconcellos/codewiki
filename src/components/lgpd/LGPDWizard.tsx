@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LGPDRegistro, LGPDCampoFormData, TipoDadoLGPD, TecnicaAnonimizacao, MatrizAnonimizacao } from '@/types/lgpd';
+import { LGPDRegistro, LGPDCampoFormData, HierarquiaSensibilidade, TipoDadoLGPD, TecnicaAnonimizacao, MatrizAnonimizacao } from '@/types/lgpd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,19 +19,28 @@ interface LGPDWizardProps {
   onCancel: () => void;
 }
 
+const HIERARQUIAS_SENSIBILIDADE: HierarquiaSensibilidade[] = [
+  'Dados Publicos',
+  'Dados Corporativos',
+  'Dados Pessoais',
+  'Dados Identificadores',
+  'Dados Sensíveis'
+];
+
 const TIPOS_DADOS: TipoDadoLGPD[] = [
-  'Dados Identificadores Diretos',
-  'Dados Identificadores Indiretos',
-  'Dados Sensíveis',
-  'Dados Financeiros',
-  'Dados de Localização'
+  'Identificadores Direto',
+  'Identificadores Indireto',
+  'Sensível',
+  'Financeiro',
+  'Localização'
 ];
 
 const TECNICAS_ANONIMIZACAO: TecnicaAnonimizacao[] = [
-  'Anonimização por Supressão',
-  'Anonimização por Generalização',
-  'Pseudonimização (Embaralhamento Reversível)',
-  'Anonimização por Permutação'
+  'Supressão',
+  'Generalização',
+  'Embaralhamento',
+  'Permutação',
+  'Sem Anonimização'
 ];
 
 const DEPARTAMENTOS = [
@@ -50,8 +59,9 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
   
   // Step 1: Dados Mestres
   const [identificacaoDados, setIdentificacaoDados] = useState('');
-  const [tipoDados, setTipoDados] = useState<TipoDadoLGPD>('Dados Sensíveis');
-  const [tecnicaAnonimizacao, setTecnicaAnonimizacao] = useState<TecnicaAnonimizacao>('Anonimização por Generalização');
+  const [hierarquiaSensibilidade, setHierarquiaSensibilidade] = useState<HierarquiaSensibilidade>('Dados Pessoais');
+  const [tipoDados, setTipoDados] = useState<TipoDadoLGPD>('Sensível');
+  const [tecnicaAnonimizacao, setTecnicaAnonimizacao] = useState<TecnicaAnonimizacao>('Generalização');
   const [dataInicio, setDataInicio] = useState(new Date().toISOString().split('T')[0]);
   const [dataTermino, setDataTermino] = useState('');
   const [ativo, setAtivo] = useState(true);
@@ -68,13 +78,14 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
   // Formulário de Campo
   const [nomeCampo, setNomeCampo] = useState('');
   const [descricaoCampo, setDescricaoCampo] = useState('');
-  const [matrizVendas, setMatrizVendas] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
-  const [matrizMarketing, setMatrizMarketing] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
-  const [matrizFinanceiro, setMatrizFinanceiro] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
-  const [matrizRH, setMatrizRH] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
-  const [matrizLogistica, setMatrizLogistica] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
-  const [matrizAssistenciaTecnica, setMatrizAssistenciaTecnica] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
-  const [matrizAnalytics, setMatrizAnalytics] = useState<TecnicaAnonimizacao>(tecnicaAnonimizacao);
+  const [baseLegal, setBaseLegal] = useState('');
+  const [matrizVendas, setMatrizVendas] = useState<TecnicaAnonimizacao>('Sem Anonimização');
+  const [matrizMarketing, setMatrizMarketing] = useState<TecnicaAnonimizacao>('Sem Anonimização');
+  const [matrizFinanceiro, setMatrizFinanceiro] = useState<TecnicaAnonimizacao>('Sem Anonimização');
+  const [matrizRH, setMatrizRH] = useState<TecnicaAnonimizacao>('Sem Anonimização');
+  const [matrizLogistica, setMatrizLogistica] = useState<TecnicaAnonimizacao>('Sem Anonimização');
+  const [matrizAssistenciaTecnica, setMatrizAssistenciaTecnica] = useState<TecnicaAnonimizacao>('Sem Anonimização');
+  const [matrizAnalytics, setMatrizAnalytics] = useState<TecnicaAnonimizacao>('Sem Anonimização');
 
   const isEditing = !!registro;
   const totalSteps = 2;
@@ -87,6 +98,7 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
   useEffect(() => {
     if (registro) {
       setIdentificacaoDados(registro.identificacaoDados);
+      setHierarquiaSensibilidade(registro.hierarquiaSensibilidade || 'Dados Pessoais');
       setTipoDados(registro.tipoDados);
       setTecnicaAnonimizacao(registro.tecnicaAnonimizacao);
       // Converter data ISO para formato yyyy-MM-dd
@@ -98,6 +110,7 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
         setCampos(registro.campos.map(c => ({
           nomeCampo: c.nomeCampo,
           descricao: c.descricao,
+          baseLegal: c.baseLegal,
           matrizAnonimizacao: c.matrizAnonimizacao
         })));
       }
@@ -106,22 +119,23 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
     }
   }, [registro]);
 
-  // Resetar matriz ao mudar técnica padrão
-  useEffect(() => {
-    setMatrizVendas(tecnicaAnonimizacao);
-    setMatrizMarketing(tecnicaAnonimizacao);
-    setMatrizFinanceiro(tecnicaAnonimizacao);
-    setMatrizRH(tecnicaAnonimizacao);
-    setMatrizLogistica(tecnicaAnonimizacao);
-    setMatrizAssistenciaTecnica(tecnicaAnonimizacao);
-    setMatrizAnalytics(tecnicaAnonimizacao);
-  }, [tecnicaAnonimizacao]);
+  // Resetar matriz ao mudar técnica padrão - REMOVIDO, agora usa 'Sem Anonimização' como padrão
+  // useEffect(() => {
+  //   setMatrizVendas(tecnicaAnonimizacao);
+  //   setMatrizMarketing(tecnicaAnonimizacao);
+  //   setMatrizFinanceiro(tecnicaAnonimizacao);
+  //   setMatrizRH(tecnicaAnonimizacao);
+  //   setMatrizLogistica(tecnicaAnonimizacao);
+  //   setMatrizAssistenciaTecnica(tecnicaAnonimizacao);
+  //   setMatrizAnalytics(tecnicaAnonimizacao);
+  // }, [tecnicaAnonimizacao]);
 
   const resetForm = () => {
     setCurrentStep(1);
     setIdentificacaoDados('');
-    setTipoDados('Dados Sensíveis');
-    setTecnicaAnonimizacao('Anonimização por Generalização');
+    setHierarquiaSensibilidade('Dados Pessoais');
+    setTipoDados('Sensível');
+    setTecnicaAnonimizacao('Generalização');
     setDataInicio(new Date().toISOString().split('T')[0]);
     setDataTermino('');
     setAtivo(true);
@@ -134,13 +148,14 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
   const resetCampoForm = () => {
     setNomeCampo('');
     setDescricaoCampo('');
-    setMatrizVendas(tecnicaAnonimizacao);
-    setMatrizMarketing(tecnicaAnonimizacao);
-    setMatrizFinanceiro(tecnicaAnonimizacao);
-    setMatrizRH(tecnicaAnonimizacao);
-    setMatrizLogistica(tecnicaAnonimizacao);
-    setMatrizAssistenciaTecnica(tecnicaAnonimizacao);
-    setMatrizAnalytics(tecnicaAnonimizacao);
+    setBaseLegal('');
+    setMatrizVendas('Sem Anonimização');
+    setMatrizMarketing('Sem Anonimização');
+    setMatrizFinanceiro('Sem Anonimização');
+    setMatrizRH('Sem Anonimização');
+    setMatrizLogistica('Sem Anonimização');
+    setMatrizAssistenciaTecnica('Sem Anonimização');
+    setMatrizAnalytics('Sem Anonimização');
     setEditingCampoIndex(null);
   };
 
@@ -153,6 +168,7 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
     const campo = campos[index];
     setNomeCampo(campo.nomeCampo);
     setDescricaoCampo(campo.descricao);
+    setBaseLegal(campo.baseLegal || '');
     setMatrizVendas(campo.matrizAnonimizacao.vendas);
     setMatrizMarketing(campo.matrizAnonimizacao.marketing);
     setMatrizFinanceiro(campo.matrizAnonimizacao.financeiro);
@@ -173,6 +189,7 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
     const novoCampo: LGPDCampoFormData = {
       nomeCampo: nomeCampo.toUpperCase(),
       descricao: descricaoCampo,
+      baseLegal: baseLegal || undefined,
       matrizAnonimizacao: {
         vendas: matrizVendas,
         marketing: matrizMarketing,
@@ -236,11 +253,12 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
       // Mapear técnicas simplificadas para valores completos
       const mapTecnica = (valor: string): TecnicaAnonimizacao => {
         const v = valor.trim().toLowerCase();
-        if (v.includes('supress')) return 'Anonimização por Supressão';
-        if (v.includes('generaliz')) return 'Anonimização por Generalização';
-        if (v.includes('pseudo')) return 'Pseudonimização (Embaralhamento Reversível)';
-        if (v.includes('permut')) return 'Anonimização por Permutação';
-        return 'Anonimização por Generalização'; // default
+        if (v.includes('supress')) return 'Supressão';
+        if (v.includes('generaliz')) return 'Generalização';
+        if (v.includes('embaralh') || v.includes('pseudo')) return 'Embaralhamento';
+        if (v.includes('permut')) return 'Permutação';
+        if (v.includes('sem')) return 'Sem Anonimização';
+        return 'Generalização'; // default
       };
 
       // Primeira linha pode ser cabeçalho ou dados
@@ -252,19 +270,25 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
         
         const nomeCampo = (cols[0] || '').toUpperCase();
         const descricao = cols[1] || '';
+        // cols[2] = Identificação dos Dados (não usado)
+        // cols[3] = Hierarquia de Sensibilidade (não usado)
+        // cols[4] = Tipo de Dado (não usado)
+        const baseLegal = cols[5] || ''; // Base Legal
+        // cols[6] = Técnica de Anonimização (não usado, pois cada depto tem o seu)
         
-        // Mapear técnicas de anonimização para cada departamento
-        const vendas = mapTecnica(cols[2] || 'Generalização');
-        const marketing = mapTecnica(cols[3] || 'Generalização');
-        const financeiro = mapTecnica(cols[4] || 'Generalização');
-        const rh = mapTecnica(cols[5] || 'Generalização');
-        const logistica = mapTecnica(cols[6] || 'Generalização');
-        const assistenciaTecnica = mapTecnica(cols[7] || 'Generalização');
-        const analytics = mapTecnica(cols[8] || 'Generalização');
+        // Mapear técnicas de anonimização para cada departamento (colunas 7-13)
+        const vendas = mapTecnica(cols[7] || 'Sem Anonimização');
+        const marketing = mapTecnica(cols[8] || 'Sem Anonimização');
+        const financeiro = mapTecnica(cols[9] || 'Sem Anonimização');
+        const rh = mapTecnica(cols[10] || 'Sem Anonimização');
+        const logistica = mapTecnica(cols[11] || 'Sem Anonimização');
+        const assistenciaTecnica = mapTecnica(cols[12] || 'Sem Anonimização');
+        const analytics = mapTecnica(cols[13] || 'Sem Anonimização');
 
         return {
           nomeCampo,
           descricao,
+          baseLegal: baseLegal || undefined,
           matrizAnonimizacao: {
             vendas,
             marketing,
@@ -329,6 +353,7 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
     try {
       const data = {
         identificacaoDados,
+        hierarquiaSensibilidade,
         tipoDados,
         tecnicaAnonimizacao,
         dataInicio,
@@ -421,7 +446,23 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hierarquiaSensibilidade" className="text-base font-medium">
+                      Hierarquia de Sensibilidade *
+                    </Label>
+                    <Select value={hierarquiaSensibilidade} onValueChange={(v) => setHierarquiaSensibilidade(v as HierarquiaSensibilidade)}>
+                      <SelectTrigger id="hierarquiaSensibilidade" className="h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {HIERARQUIAS_SENSIBILIDADE.map(hierarquia => (
+                          <SelectItem key={hierarquia} value={hierarquia}>{hierarquia}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="tipoDados" className="text-base font-medium">
                       Tipo de Dados *
@@ -453,7 +494,9 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="dataInicio" className="text-base font-medium">
                       Data de Início *
@@ -611,7 +654,7 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
                     className="mt-2"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Formato esperado: Nome do Campo, Descrição, Vendas, Marketing, Financeiro, RH, Logística, Assistência Técnica, Analytics
+                    Formato: Nome,Descrição,Identificação,Hierarquia,Tipo,Base Legal,Técnica,Vendas,Marketing,Financeiro,RH,Logística,Assistência Técnica,Analytics
                   </p>
                 </div>
 
@@ -621,13 +664,15 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
                     id="csvText"
                     value={csvText}
                     onChange={(e) => setCsvText(e.target.value)}
-                    placeholder="Nome do Campo,Descrição,Vendas,Marketing,Financeiro,RH,Logística,Assistência Técnica,Analytics&#10;CPF,Cadastro de Pessoa Física,Supressão,Generalização,Supressão,Supressão,Generalização,Generalização,Pseudonimização"
+                    placeholder="Nome do Campo,Descrição,Identificação,Hierarquia,Tipo,Base Legal,Técnica,Vendas,Marketing,Financeiro,RH,Logística,Assistência Técnica,Analytics&#10;nome_empresa,Razão social da empresa,Dados Públicos,Dados Públicos,Dados Públicos,Art. 7º I LGPD,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização,Sem Anonimização"
                     className="font-mono text-sm"
                     rows={10}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     • Nome do Campo será convertido para MAIÚSCULO automaticamente<br />
-                    • Valores não informados receberão "Generalização" como padrão<br />
+                    • Base Legal (coluna 6) será importada para cada campo<br />
+                    • Valores de matriz não informados receberão "Sem Anonimização" como padrão<br />
+                    • Colunas 3, 4, 5 e 7 são ignoradas (reservadas para uso futuro)<br />
                     • Primeira linha pode ser cabeçalho ou dados
                   </p>
                 </div>
@@ -671,10 +716,20 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="baseLegal">Base Legal</Label>
+                <Input
+                  id="baseLegal"
+                  value={baseLegal}
+                  onChange={(e) => setBaseLegal(e.target.value)}
+                  placeholder="Ex: Consentimento, Legítimo Interesse, Contrato, etc."
+                />
+              </div>
+
               <div className="border rounded-md p-4 space-y-3">
                 <h4 className="font-medium">Matriz de Anonimização por Departamento</h4>
                 <p className="text-xs text-muted-foreground">
-                  Técnica padrão: <strong>{tecnicaAnonimizacao}</strong> (configurada na etapa anterior)
+                  Padrão: <strong>Sem Anonimização</strong>. Altere conforme necessário para cada departamento.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
@@ -710,10 +765,11 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Anonimização por Supressão">Supressão</SelectItem>
-                            <SelectItem value="Anonimização por Generalização">Generalização</SelectItem>
-                            <SelectItem value="Pseudonimização (Embaralhamento Reversível)">Pseudonimização</SelectItem>
-                            <SelectItem value="Anonimização por Permutação">Permutação</SelectItem>
+                            <SelectItem value="Supressão">Supressão</SelectItem>
+                            <SelectItem value="Generalização">Generalização</SelectItem>
+                            <SelectItem value="Embaralhamento">Embaralhamento</SelectItem>
+                            <SelectItem value="Permutação">Permutação</SelectItem>
+                            <SelectItem value="Sem Anonimização">Sem Anonimização</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -762,6 +818,9 @@ export function LGPDWizard({ registro, onSave, onCancel }: LGPDWizardProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Matriz de Anonimização</AlertDialogTitle>
+            <AlertDialogDescription>
+              Visualize as técnicas de anonimização configuradas para cada departamento.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           {viewingCampoIndex !== null && campos[viewingCampoIndex] && (
             <div className="space-y-3">

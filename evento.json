@@ -1,0 +1,26 @@
+{
+  "event_id": "uuid",
+  "event_type": "sla.incident.opened",
+  "occurred_at": "2026-01-12T17:45:00Z",
+  "reported_at": "2026-01-12T17:45:03Z",
+  "source": "monitoring|manual|api",
+  "service": {
+    "id": "billing-api",
+    "tier": "critical"
+  },
+  "contract": {
+    "contract_id": "CTR-001",
+    "sla_type": "availability"
+  },
+  "impact": {
+    "scope": "total|partial",
+    "severity": "sev1|sev2|sev3"
+  },
+  "sla_eligible": true,
+  "correlation_id": "INC-456",
+  "evidence": {
+    "metrics": ["latency", "error_rate"],
+    "logs_ref": "trace-id"
+  }
+}
+

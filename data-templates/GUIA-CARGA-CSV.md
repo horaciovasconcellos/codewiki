@@ -4,6 +4,28 @@ Este guia explica como usar os arquivos CSV de exemplo para carregar dados no si
 
 ## 📋 Arquivos Disponíveis
 
+### lgpd-campos-exemplo.csv (NOVO ✨)
+**Campos obrigatórios:** `Nome do Campo`, `Descrição`, `Vendas`, `Marketing`, `Financeiro`, `RH`, `Logística`, `Assistência Técnica`, `Analytics`
+
+**Campos recomendados:** `Base Legal` (coluna 6)
+
+**Colunas ignoradas (reservadas):** `Identificação dos Dados`, `Hierarquia de Sensibilidade`, `Tipo de Dado`, `Técnica de Anonimização` (colunas 3, 4, 5, 7)
+
+**Estrutura do arquivo (14 colunas):**
+```csv
+Nome do Campo,Descrição,Identificação,Hierarquia,Tipo,Base Legal,Técnica,Vendas,Marketing,Financeiro,RH,Logística,Assistência Técnica,Analytics
+cpf,Cadastro de Pessoa Física,Dados Identificadores,Dados Identificadores,Identificadores Direto,Art. 7º II LGPD,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão,Supressão
+```
+
+**Observações:**
+- Base Legal (coluna 6) é capturada para compliance LGPD ✅
+- Nome do Campo convertido para MAIÚSCULO automaticamente
+- Valores vazios recebem "Sem Anonimização" como padrão
+- **Importação via:** LGPD > Novo Registro > Step 2 > Importar CSV
+- **Documentação completa:** `README-LGPD.md`
+
+---
+
 ### exemplo-tecnologias.csv
 **Campos obrigatórios:** `sigla`, `nome`
 

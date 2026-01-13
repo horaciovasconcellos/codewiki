@@ -385,16 +385,18 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-7xl">
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <SidebarTrigger />
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Catálogo de Tecnologias</h1>
-              <p className="text-muted-foreground mt-2">
-                Gerencie todas as tecnologias utilizadas na instituição
-              </p>
+    <div className="min-h-screen bg-background">
+      <div className="border-b">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Catálogo de Tecnologias</h1>
+                <p className="text-muted-foreground mt-2">
+                  Gerencie todas as tecnologias utilizadas na instituição
+                </p>
+              </div>
             </div>
             <Button onClick={handleNewTecnologia} size="lg">
               <Plus className="mr-2" />
@@ -402,7 +404,9 @@ export function TecnologiasView({ colaboradores }: TecnologiasViewProps) {
             </Button>
           </div>
         </div>
+      </div>
 
+      <div className="container mx-auto px-6 py-6">
         {loading ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">Carregando tecnologias...</p>

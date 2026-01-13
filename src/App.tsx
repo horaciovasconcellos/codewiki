@@ -24,6 +24,7 @@ import { ADRsView } from '@/components/adr/ADRsView';
 import { DocumentacaoProjetosView } from '@/components/documentacao-projetos/DocumentacaoProjetosView';
 import { PesquisaPeriodoView } from '@/components/pesquisa/PesquisaPeriodoView';
 import { FinOpsView } from '@/components/finops/FinOpsView';
+import { GestaoEventosSLAView } from '@/components/eventos-sla/GestaoEventosSLAView';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
@@ -72,7 +73,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo' | 'finops' | 'gestao-eventos-sla';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -416,6 +417,8 @@ function App() {
         return <PesquisaPeriodoView />;
       case 'finops':
         return <FinOpsView />;
+      case 'gestao-eventos-sla':
+        return <GestaoEventosSLAView />;
       case 'tokens-acesso':
         return <TokensView />;
       case 'configuracoes':
@@ -639,6 +642,14 @@ function App() {
                         <span>Dashboard SPACE</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+
+              <SidebarGroup>
+                <SidebarGroupLabel>FinOps</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
                     <SidebarMenuItem>
                       <SidebarMenuButton
                         isActive={currentView === 'finops'}
@@ -649,6 +660,18 @@ function App() {
                       >
                         <CurrencyDollar />
                         <span>FinOps-Focus</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'gestao-eventos-sla'}
+                        onClick={() => {
+                          logClick('nav_gestao_eventos_sla');
+                          setCurrentView('gestao-eventos-sla');
+                        }}
+                      >
+                        <ClipboardText />
+                        <span>Gestão de Eventos</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>

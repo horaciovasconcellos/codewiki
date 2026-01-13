@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { SLA, TipoSLA } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Check, Plus, Trash, Star } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Check, Plus, Trash, Star, X } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { getTodayDate } from '@/lib/utils';
 import { SLASuporteForm } from './forms/SLASuporteForm';
@@ -519,95 +519,90 @@ export function SLAWizard({ slas, onSave, onCancel, editingSLA }: SLAWizardProps
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="border-b bg-background">
+    <div className="min-h-screen bg-background">
+      <div className="border-b">
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onCancel}>
-              Cancelar
+            <Button variant="ghost" size="sm" onClick={onCancel}>
+              <ArrowLeft className="mr-2" />
+              Voltar
             </Button>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
                 {editingSLA ? 'Editar SLA' : 'Novo SLA'}
               </h1>
-              <p className="text-muted-foreground mt-1">
-                Etapa {currentStep + 1} de {steps.length}: {steps[currentStep].title}
+              <p className="text-muted-foreground mt-2">
+                Passo {currentStep + 1} de {steps.length}: {steps[currentStep].title}
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex items-center flex-1">
-                  <div
-                    className={`h-2 w-full rounded ${
-                      index <= currentStep
-                        ? 'bg-primary'
-                        : 'bg-muted'
-                    }`}
-                  />
-                  {index < steps.length - 1 && (
-                    <div className="w-2" />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between mt-2">
-              {steps.map((step, index) => (
-                <span
-                  key={step.id}
-                  className={`text-xs ${
-                    index <= currentStep
-                      ? 'text-primary font-medium'
-                      : 'text-muted-foreground'
+      <div className="container mx-auto px-6 py-6">
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center mb-8 gap-4">
+          {steps.map((step, index) => (
+            <div key={step.id} className="flex items-center">
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                    currentStep === index
+                      ? 'bg-primary text-primary-foreground'
+                      : currentStep > index
+                      ? 'bg-green-500 text-white'
+                      : 'bg-muted text-muted-foreground'
                   }`}
-                  style={{ flex: 1 }}
                 >
+                  {index + 1}
+                </div>
+                <span className="text-xs mt-2 text-center max-w-[100px]">
                   {step.title}
                 </span>
-              ))}
+              </div>
+              {index < steps.length - 1 && (
+                <div className="w-16 h-0.5 bg-muted mx-2 mt-[-20px]" />
+              )}
             </div>
-          </div>
+          ))}
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{steps[currentStep].title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {renderCurrentStep()}
+        <Card>
+          <CardHeader>
+            <CardTitle>{steps[currentStep].title}</CardTitle>
+            <CardDescription>
+              {currentStep === 0 && 'Preencha as informações básicas do SLA'}
+              {currentStep === 1 && 'Selecione os tipos de SLA que deseja configurar'}
+              {currentStep > 1 && `Configure os detalhes para ${steps[currentStep].title}`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {renderCurrentStep()}
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between pt-6 border-t">
-                <Button
-                  variant="outline"
-                  onClick={handleBack}
-                  disabled={currentStep === 0}
-                  className="gap-2"
-                >
-                  <ArrowLeft />
-                  Anterior
-                </Button>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-6 border-t">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={currentStep === 0}
+              >
+                Anterior
+              </Button>
 
+              <div className="flex gap-2">
                 {currentStep === steps.length - 1 ? (
-                  <Button onClick={handleSubmit} className="gap-2">
-                    <Check />
+                  <Button onClick={handleSubmit}>
                     Salvar SLA
                   </Button>
                 ) : (
-                  <Button onClick={handleNext} className="gap-2">
+                  <Button onClick={handleNext}>
                     Próximo
                   </Button>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
