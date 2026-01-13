@@ -1,5 +1,5 @@
 {
-  "event_id": "uuid",
+  "event_id": "0000-00000-00000-00111-00001",
   "event_type": "sla.incident.opened",
   "occurred_at": "2026-01-12T17:45:00Z",
   "reported_at": "2026-01-12T17:45:03Z",

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,18 +20,45 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
+interface EventoSLA {
+  id: string;
+  event_id: string;
+  event_type: string;
+  occurred_at: string;
+  source: 'monitoring' | 'manual' | 'api';
+  sla_eligible: boolean;
+}
+
 interface EventoSLADialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (evento: any) => void;
+  evento?: EventoSLA;
 }
 
-export function EventoSLADialog({ open, onClose, onSave }: EventoSLADialogProps) {
+export function EventoSLADialog({ open, onClose, onSave, evento }: EventoSLADialogProps) {
   const [eventId, setEventId] = useState('');
   const [eventType, setEventType] = useState('');
   const [occurredAt, setOccurredAt] = useState('');
   const [source, setSource] = useState<'monitoring' | 'manual' | 'api'>('manual');
   const [slaEligible, setSlaEligible] = useState(true);
+
+  useEffect(() => {
+    if (evento) {
+      setEventId(evento.event_id || '');
+      setEventType(evento.event_type || '');
+      setOccurredAt(evento.occurred_at ? evento.occurred_at.substring(0, 16) : '');
+      setSource(evento.source || 'manual');
+      setSlaEligible(evento.sla_eligible ?? true);
+    } else {
+      // Reset para novo evento
+      setEventId('');
+      setEventType('');
+      setOccurredAt('');
+      setSource('manual');
+      setSlaEligible(true);
+    }
+  }, [evento, open]);
 
   const handleSubmit = () => {
     if (!eventType || !occurredAt) {
@@ -59,7 +86,7 @@ export function EventoSLADialog({ open, onClose, onSave }: EventoSLADialogProps)
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Incluir Evento</DialogTitle>
+          <DialogTitle>{evento ? 'Editar Evento' : 'Incluir Evento'}</DialogTitle>
           <DialogDescription>
             Preencha os dados do evento. Se o Event ID já existir, apenas campos vazios serão preenchidos.
           </DialogDescription>

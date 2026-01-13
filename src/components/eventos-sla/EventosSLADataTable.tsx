@@ -21,9 +21,10 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash, Upload } from '@phosphor-icons/react';
+import { Trash, PencilSimple } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Tecnologia } from '@/lib/types';
 
 interface EventoSLA {
   id: string;
@@ -42,15 +43,18 @@ interface EventoSLA {
   dataIncidenteRetomado?: string;
   dataInicioManutencao?: string;
   dataFimManutencao?: string;
+  tecnologiaId?: string;
+  tipoSLAId?: string;
 }
 
 interface EventosSLADataTableProps {
   eventos: EventoSLA[];
+  tecnologias: Tecnologia[];
+  onEdit: (evento: EventoSLA) => void;
   onDelete: (id: string) => void;
-  onImportJSON: (evento: EventoSLA) => void;
 }
 
-export function EventosSLADataTable({ eventos, onDelete, onImportJSON }: EventosSLADataTableProps) {
+export function EventosSLADataTable({ eventos, tecnologias, onEdit, onDelete }: EventosSLADataTableProps) {
   const formatDate = (date?: string) => {
     if (!date) return '-';
     try {
@@ -91,17 +95,10 @@ export function EventosSLADataTable({ eventos, onDelete, onImportJSON }: Eventos
     }
   };
 
-  const getSourceLabel = (source: string) => {
-    const labels: Record<string, string> = {
-      'monitoring': 'Monitoramento',
-      'manual': 'Manual',
-      'api': 'API',
-    };
-    return labels[source] || source;
-  };
-
-  const isEventoClosed = (evento: EventoSLA) => {
-    return !!evento.dataFechamentoIncidente;
+  const getTecnologiaNome = (tecnologiaId?: string) => {
+    if (!tecnologiaId) return '-';
+    const tech = tecnologias.find(t => t.id === tecnologiaId);
+    return tech ? `${tech.sigla} - ${tech.nome}` : '-';
   };
 
   return (
@@ -117,59 +114,42 @@ export function EventosSLADataTable({ eventos, onDelete, onImportJSON }: Eventos
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Tecnologia</TableHead>
+                <TableHead>Contrato</TableHead>
                 <TableHead>ID Evento</TableHead>
-                <TableHead>Tipo de Evento</TableHead>
-                <TableHead>Origem</TableHead>
-                <TableHead>Elegível SLA</TableHead>
-                <TableHead>Abertura</TableHead>
-                <TableHead>Fechamento</TableHead>
-                <TableHead>Pausado</TableHead>
-                <TableHead>Retomado</TableHead>
-                <TableHead>Início Manutenção</TableHead>
-                <TableHead>Fim Manutenção</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Data Abertura</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {eventos.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     Nenhum evento registrado
                   </TableCell>
                 </TableRow>
               ) : (
                 eventos.map((evento) => (
-                  <TableRow key={evento.id} className={isEventoClosed(evento) ? 'opacity-60' : ''}>
+                  <TableRow key={evento.id}>
+                    <TableCell>{getTecnologiaNome(evento.tecnologiaId)}</TableCell>
+                    <TableCell>{evento.contract.contract_id}</TableCell>
                     <TableCell className="font-mono text-xs">{evento.event_id.substring(0, 8)}...</TableCell>
                     <TableCell>
                       <Badge variant={getEventTypeVariant(evento.event_type)}>
                         {getEventTypeLabel(evento.event_type)}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{getSourceLabel(evento.source)}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={evento.sla_eligible ? 'default' : 'secondary'}>
-                        {evento.sla_eligible ? 'Sim' : 'Não'}
-                      </Badge>
-                    </TableCell>
                     <TableCell className="text-sm">{formatDate(evento.dataAberturaIncidente)}</TableCell>
-                    <TableCell className="text-sm">{formatDate(evento.dataFechamentoIncidente)}</TableCell>
-                    <TableCell className="text-sm">{formatDate(evento.dataIncidentePausado)}</TableCell>
-                    <TableCell className="text-sm">{formatDate(evento.dataIncidenteRetomado)}</TableCell>
-                    <TableCell className="text-sm">{formatDate(evento.dataInicioManutencao)}</TableCell>
-                    <TableCell className="text-sm">{formatDate(evento.dataFimManutencao)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => onImportJSON(evento)}
-                          disabled={isEventoClosed(evento)}
-                          title={isEventoClosed(evento) ? 'Evento fechado não pode ser modificado' : 'Importar JSON para atualizar'}
+                          onClick={() => onEdit(evento)}
+                          title="Editar"
                         >
-                          <Upload size={16} />
+                          <PencilSimple size={16} />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>

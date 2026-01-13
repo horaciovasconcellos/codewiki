@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Upload, Plus, FileArrowDown } from '@phosphor-icons/react';
+import { Plus } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { EventosSLADataTable } from './EventosSLADataTable';
-import { EventoSLADialog } from './EventoSLADialog';
+import { EventoSLADetailsDialog } from './EventoSLADetailsDialog';
 import { Tecnologia, SLA } from '@/lib/types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -50,12 +47,10 @@ interface EventoSLA {
 export function GestaoEventosSLAView() {
   const [tecnologias, setTecnologias] = useState<Tecnologia[]>([]);
   const [slas, setSLAs] = useState<SLA[]>([]);
-  const [tecnologiaSelecionada, setTecnologiaSelecionada] = useState<string>('');
-  const [contratoSelecionado, setContratoSelecionado] = useState<string>('');
-  const [tipoSLASelecionado, setTipoSLASelecionado] = useState<string>('');
   const [eventos, setEventos] = useState<EventoSLA[]>([]);
-  const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedEvento, setSelectedEvento] = useState<EventoSLA | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     loadTecnologias();
@@ -135,15 +130,15 @@ export function GestaoEventosSLAView() {
       source: data.source || 'manual',
       service: existingEvent?.service || data.service,
       contract: {
-        contract_id: existingEvent?.contract.contract_id || data.contract.contract_id,
-        sla_type: existingEvent?.contract.sla_type || data.contract.sla_type
+        contract_id: existingEvent?.contract?.contract_id || data.contract?.contract_id || '',
+        sla_type: existingEvent?.contract?.sla_type || data.contract?.sla_type || ''
       },
       impact: existingEvent?.impact || data.impact,
       sla_eligible: existingEvent?.sla_eligible !== undefined ? existingEvent.sla_eligible : data.sla_eligible,
       correlation_id: existingEvent?.correlation_id || data.correlation_id,
       evidence: existingEvent?.evidence || data.evidence,
-      tecnologiaId: existingEvent?.tecnologiaId || tecnologiaSelecionada,
-      tipoSLAId: existingEvent?.tipoSLAId || tipoSLASelecionado,
+      tecnologiaId: existingEvent?.tecnologiaId,
+      tipoSLAId: existingEvent?.tipoSLAId,
     };
 
     // Preencher campos de data baseado no tipo de evento, apenas se não existirem
@@ -193,6 +188,24 @@ export function GestaoEventosSLAView() {
     return baseEvent;
   };
 
+  const saveEvento = async (evento: EventoSLA) => {
+    try {
+      const response = await fetch(`${API_URL}/api/eventos-sla/${evento.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(evento)
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao salvar evento');
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar evento:', error);
+      toast.error('Erro ao salvar evento no servidor');
+      throw error;
+    }
+  };
+
   const handleImportJSON = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -239,66 +252,17 @@ export function GestaoEventosSLAView() {
     event.target.value = '';
   };
 
-  const saveEvento = async (evento: EventoSLA) => {
-    try {
-      const response = await fetch(`${API_URL}/api/eventos-sla`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(evento)
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao salvar evento');
-      }
-    } catch (error) {
-      console.error('Erro ao salvar evento:', error);
-      toast.error('Erro ao salvar evento no servidor');
-    }
+  const handleNovoEvento = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => handleImportJSON(e as any);
+    input.click();
   };
 
-  const handleAddEvento = async (novoEvento: Partial<EventoSLA>) => {
-    try {
-      const evento: EventoSLA = {
-        id: crypto.randomUUID(),
-        event_id: novoEvento.event_id || crypto.randomUUID(),
-        event_type: novoEvento.event_type!,
-        occurred_at: novoEvento.occurred_at!,
-        source: novoEvento.source || 'manual',
-        contract: {
-          contract_id: contratoSelecionado,
-          sla_type: tipoSLASelecionado
-        },
-        sla_eligible: novoEvento.sla_eligible ?? true,
-        tecnologiaId: tecnologiaSelecionada,
-        tipoSLAId: tipoSLASelecionado,
-      };
-
-      // Verificar se event_id já existe
-      const existingEvent = eventos.find(e => e.event_id === evento.event_id);
-      
-      if (existingEvent && existingEvent.dataFechamentoIncidente) {
-        toast.error('Evento já fechado, não pode ser modificado');
-        return;
-      }
-
-      const processedEvent = processEventData(evento, existingEvent);
-
-      if (existingEvent) {
-        const updatedEventos = eventos.map(e => 
-          e.event_id === evento.event_id ? processedEvent : e
-        );
-        setEventos(updatedEventos);
-      } else {
-        setEventos([...eventos, processedEvent]);
-      }
-
-      await saveEvento(processedEvent);
-      setShowDialog(false);
-      toast.success(existingEvent ? 'Evento atualizado com sucesso' : 'Evento adicionado com sucesso');
-    } catch (error) {
-      console.error('Erro ao adicionar evento:', error);
-      toast.error('Erro ao adicionar evento');
-    }
+  const handleEditEvento = (evento: EventoSLA) => {
+    setSelectedEvento(evento);
+    setDetailsOpen(true);
   };
 
   const handleDeleteEvento = async (id: string) => {
@@ -317,182 +281,45 @@ export function GestaoEventosSLAView() {
     }
   };
 
-  const handleExportTemplate = () => {
-    const template = {
-      event_id: "uuid",
-      event_type: "sla.incident.opened",
-      occurred_at: new Date().toISOString(),
-      reported_at: new Date().toISOString(),
-      source: "monitoring",
-      service: {
-        id: "billing-api",
-        tier: "critical"
-      },
-      contract: {
-        contract_id: "CTR-001",
-        sla_type: "availability"
-      },
-      impact: {
-        scope: "total",
-        severity: "sev1"
-      },
-      sla_eligible: true,
-      correlation_id: "INC-456",
-      evidence: {
-        metrics: ["latency", "error_rate"],
-        logs_ref: "trace-id"
-      }
-    };
-
-    const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'template-evento-sla.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">Gestão de Eventos para Controle de SLA</h1>
-                <p className="text-muted-foreground mt-2">
-                  Registro e acompanhamento de eventos que impactam SLA
-                </p>
-              </div>
+      <div className="border-b bg-background">
+        <div className="flex h-16 items-center px-6">
+          <SidebarTrigger />
+          <div className="flex items-center gap-4 ml-4">
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-bold tracking-tight">Gestão de Eventos SLA</h1>
+              <p className="text-sm text-muted-foreground">
+                Importe eventos via JSON para controle de SLA
+              </p>
             </div>
+          </div>
+          <div className="ml-auto">
+            <Button onClick={handleNovoEvento}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Evento
+            </Button>
           </div>
         </div>
       </div>
-
+      
       <div className="container mx-auto px-6 py-6">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configuração</CardTitle>
-              <CardDescription>Selecione a tecnologia, contrato e tipo de SLA</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="tecnologia">Tecnologia *</Label>
-                  <Select value={tecnologiaSelecionada} onValueChange={setTecnologiaSelecionada}>
-                    <SelectTrigger id="tecnologia">
-                      <SelectValue placeholder="Selecione a tecnologia" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tecnologias.map((tech) => (
-                        <SelectItem key={tech.id} value={tech.id}>
-                          {tech.sigla} - {tech.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="contrato">Contrato *</Label>
-                  <Select value={contratoSelecionado} onValueChange={setContratoSelecionado}>
-                    <SelectTrigger id="contrato">
-                      <SelectValue placeholder="Selecione o contrato" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tecnologias
-                        .find(t => t.id === tecnologiaSelecionada)
-                        ?.contratos?.map((contrato) => (
-                          <SelectItem key={contrato.id} value={contrato.numeroContrato}>
-                            {contrato.numeroContrato}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tipoSLA">Tipo de SLA *</Label>
-                  <Select value={tipoSLASelecionado} onValueChange={setTipoSLASelecionado}>
-                    <SelectTrigger id="tipoSLA">
-                      <SelectValue placeholder="Selecione o tipo de SLA" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {slas.map((sla) => (
-                        <SelectItem key={sla.id} value={sla.id}>
-                          {sla.sigla} - {sla.tipoSLA}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex gap-2 mt-4">
-                <Button
-                  onClick={() => setShowDialog(true)}
-                  disabled={!tecnologiaSelecionada || !contratoSelecionado || !tipoSLASelecionado}
-                >
-                  <Plus className="mr-2" />
-                  Incluir Evento
-                </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={() => document.getElementById('file-upload')?.click()}
-                  disabled={!tecnologiaSelecionada || !contratoSelecionado || !tipoSLASelecionado}
-                >
-                  <Upload className="mr-2" />
-                  Importar JSON
-                </Button>
-                <input
-                  id="file-upload"
-                  type="file"
-                  accept=".json"
-                  className="hidden"
-                  onChange={handleImportJSON}
-                />
-
-                <Button variant="outline" onClick={handleExportTemplate}>
-                  <FileArrowDown className="mr-2" />
-                  Baixar Template JSON
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {loading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Carregando eventos...</p>
-            </div>
-          ) : (
-            <EventosSLADataTable
-              eventos={eventos}
-              onDelete={handleDeleteEvento}
-              onImportJSON={(evento) => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.json';
-                input.onchange = (e) => handleImportJSON(e as any);
-                input.click();
-              }}
-            />
-          )}
-        </div>
+        <EventosSLADataTable
+          eventos={eventos}
+          tecnologias={tecnologias}
+          slas={slas}
+          onEdit={handleEditEvento}
+          onDelete={handleDeleteEvento}
+          loading={loading}
+        />
       </div>
 
-      {showDialog && (
-        <EventoSLADialog
-          open={showDialog}
-          onClose={() => setShowDialog(false)}
-          onSave={handleAddEvento}
-        />
-      )}
+      <EventoSLADetailsDialog
+        evento={selectedEvento}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        onImportUpdate={handleImportJSON}
+      />
     </div>
   );
 }
