@@ -2535,9 +2535,48 @@ Este projeto foi gerado automaticamente pelo Sistema de Auditoria e Gestão de D
       }
 
       const result = await this.request('GET', url);
-      return result.value || [];
+      const commits = result.value || [];
+
+      // Buscar detalhes de changeCounts para cada commit (em lotes para performance)
+      const commitsWithChanges = await Promise.all(
+        commits.slice(0, 100).map(async (commit) => { // Limitar a 100 para performance
+          try {
+            const changes = await this.getCommitChanges(projectName, repositoryId, commit.commitId);
+            return {
+              ...commit,
+              changeCounts: changes.changeCounts || { Add: 0, Edit: 0, Delete: 0 }
+            };
+          } catch (error) {
+            console.warn(`Erro ao buscar changes do commit ${commit.commitId}:`, error.message);
+            return {
+              ...commit,
+              changeCounts: { Add: 0, Edit: 0, Delete: 0 }
+            };
+          }
+        })
+      );
+
+      return commitsWithChanges;
     } catch (error) {
       throw new Error(`Erro ao buscar commits: ${error.message}`);
+    }
+  }
+
+  /**
+   * Busca as mudanças (changes) de um commit específico
+   * 
+   * @param {string} projectName - Nome do projeto
+   * @param {string} repositoryId - ID do repositório
+   * @param {string} commitId - ID do commit
+   * @returns {Promise<object>} Detalhes do commit com changeCounts
+   */
+  async getCommitChanges(projectName, repositoryId, commitId) {
+    try {
+      const url = `/${projectName}/_apis/git/repositories/${repositoryId}/commits/${commitId}/changes?api-version=${this.apiVersion}`;
+      const result = await this.request('GET', url);
+      return result;
+    } catch (error) {
+      throw new Error(`Erro ao buscar changes do commit: ${error.message}`);
     }
   }
 

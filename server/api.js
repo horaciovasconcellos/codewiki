@@ -11237,6 +11237,7 @@ async function startServer() {
           inicio: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
           fim: endDate || new Date().toISOString()
         },
+        autores: {}, // Consolidar autores de todos os projetos
         totais: {
           deploymentsCount: 0,
           commitsCount: 0,
@@ -11261,6 +11262,31 @@ async function startServer() {
             
             if (result.success && result.data) {
               unifiedMetrics.projetos.push(result.data);
+              
+              // Consolidar autores
+              if (result.data.autores) {
+                for (const [authorKey, authorData] of Object.entries(result.data.autores)) {
+                  if (!unifiedMetrics.autores[authorKey]) {
+                    unifiedMetrics.autores[authorKey] = {
+                      name: authorData.name,
+                      email: authorData.email,
+                      commits: 0,
+                      linesAdded: 0,
+                      linesDeleted: 0,
+                      prs: 0,
+                      bugCommits: 0,
+                      featureCommits: 0
+                    };
+                  }
+                  
+                  unifiedMetrics.autores[authorKey].commits += authorData.commits || 0;
+                  unifiedMetrics.autores[authorKey].linesAdded += authorData.linesAdded || 0;
+                  unifiedMetrics.autores[authorKey].linesDeleted += authorData.linesDeleted || 0;
+                  unifiedMetrics.autores[authorKey].prs += authorData.prs || 0;
+                  unifiedMetrics.autores[authorKey].bugCommits += authorData.bugCommits || 0;
+                  unifiedMetrics.autores[authorKey].featureCommits += authorData.featureCommits || 0;
+                }
+              }
               
               // Acumular totais
               unifiedMetrics.totais.deploymentsCount += result.data.totais.deploymentsCount || 0;
@@ -11412,6 +11438,7 @@ async function startServer() {
           fim: toDate.toISOString()
         },
         repositorios: [],
+        autores: {}, // Mapa de autor -> {commits, linesAdded, linesDeleted, prs}
         totais: {
           deploymentsCount: 0,
           commitsCount: 0,
@@ -11436,6 +11463,45 @@ async function startServer() {
             fromDate,
             toDate
           );
+
+          // Analisar commits por autor
+          for (const commit of commits) {
+            const authorName = commit.author?.name || 'Desconhecido';
+            const authorEmail = commit.author?.email || '';
+            const authorKey = `${authorName} <${authorEmail}>`;
+
+            if (!metrics.autores[authorKey]) {
+              metrics.autores[authorKey] = {
+                name: authorName,
+                email: authorEmail,
+                commits: 0,
+                linesAdded: 0,
+                linesDeleted: 0,
+                prs: 0,
+                bugCommits: 0,
+                featureCommits: 0
+              };
+            }
+
+            metrics.autores[authorKey].commits++;
+
+            // Obter estatísticas de LOC do commit (changeCounts do Azure DevOps)
+            if (commit.changeCounts) {
+              // Azure DevOps retorna Add (linhas adicionadas), Edit (pode incluir add/delete), Delete (linhas removidas)
+              // Vamos considerar Add como linhas adicionadas e Delete como linhas removidas
+              // Edit geralmente representa arquivos modificados, não contabilizamos em LOC direto
+              metrics.autores[authorKey].linesAdded += (commit.changeCounts.Add || 0) + (commit.changeCounts.Edit || 0);
+              metrics.autores[authorKey].linesDeleted += (commit.changeCounts.Delete || 0);
+            }
+
+            // Classificar tipo de commit
+            const comment = commit.comment?.toLowerCase() || '';
+            if (comment.includes('bug') || comment.includes('fix') || comment.includes('hotfix')) {
+              metrics.autores[authorKey].bugCommits++;
+            } else if (comment.includes('feature') || comment.includes('feat')) {
+              metrics.autores[authorKey].featureCommits++;
+            }
+          }
 
           // Classificar commits por tipo (bug, feature, outros)
           const bugCommits = commits.filter(c => 
@@ -11471,6 +11537,25 @@ async function startServer() {
           let prWithLeadTime = 0;
 
           for (const pr of filteredPRs) {
+            // Contar PRs por autor
+            const prAuthorName = pr.createdBy?.displayName || 'Desconhecido';
+            const prAuthorEmail = pr.createdBy?.uniqueName || '';
+            const prAuthorKey = `${prAuthorName} <${prAuthorEmail}>`;
+
+            if (!metrics.autores[prAuthorKey]) {
+              metrics.autores[prAuthorKey] = {
+                name: prAuthorName,
+                email: prAuthorEmail,
+                commits: 0,
+                linesAdded: 0,
+                linesDeleted: 0,
+                prs: 0,
+                bugCommits: 0,
+                featureCommits: 0
+              };
+            }
+            metrics.autores[prAuthorKey].prs++;
+
             if (pr.creationDate && pr.closedDate) {
               const created = new Date(pr.creationDate);
               const closed = new Date(pr.closedDate);

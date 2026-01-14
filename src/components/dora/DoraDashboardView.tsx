@@ -42,6 +42,16 @@ interface DoraMetrics {
       leadTimeAvgHours: number;
     };
   }>;
+  autores: Record<string, {
+    name: string;
+    email: string;
+    commits: number;
+    linesAdded: number;
+    linesDeleted: number;
+    prs: number;
+    bugCommits: number;
+    featureCommits: number;
+  }>;
   totais: {
     deploymentsCount: number;
     commitsCount: number;
@@ -60,6 +70,7 @@ interface UnifiedMetrics {
     inicio: string;
     fim: string;
   };
+  autores: DoraMetrics['autores'];
   totais: DoraMetrics['totais'];
   projetos: DoraMetrics[];
 }
@@ -169,6 +180,65 @@ export function DoraDashboardView() {
     { name: '15-30 dias', commits: agingData['15-30dias'] },
     { name: '+30 dias', commits: agingData['mais30dias'] }
   ] : [];
+
+  // Preparar dados para gráfico de Commits por Autor
+  const autoresArray = currentData?.autores ? Object.values(currentData.autores) : [];
+  const commitsPorAutorData = autoresArray
+    .sort((a, b) => b.commits - a.commits)
+    .slice(0, 10)
+    .map(autor => ({
+      name: autor.name.split(' ')[0], // Apenas primeiro nome
+      commits: autor.commits
+    }));
+
+  // Preparar dados para LOC Churn por Autor
+  const locChurnData = autoresArray
+    .sort((a, b) => (b.linesAdded + b.linesDeleted) - (a.linesAdded + a.linesDeleted))
+    .slice(0, 10)
+    .map(autor => ({
+      name: autor.name.split(' ')[0],
+      adicionadas: autor.linesAdded,
+      removidas: autor.linesDeleted,
+      total: autor.linesAdded + autor.linesDeleted
+    }));
+
+  // Preparar dados para Percentual de Contribuição
+  const totalCommits = autoresArray.reduce((sum, a) => sum + a.commits, 0);
+  const contribuicaoData = autoresArray
+    .sort((a, b) => b.commits - a.commits)
+    .slice(0, 8)
+    .map((autor, idx) => ({
+      name: autor.name.split(' ')[0],
+      commits: autor.commits,
+      percentual: totalCommits > 0 ? ((autor.commits / totalCommits) * 100) : 0,
+      fill: COLORS[idx % COLORS.length]
+    }));
+
+  // Calcular Impact Score (métrica composta)
+  const impactScoreData = autoresArray
+    .map(autor => {
+      // Score = commits * 1 + (linesAdded + linesDeleted) * 0.01 + prs * 5
+      const commitScore = autor.commits * 1;
+      const locScore = (autor.linesAdded + autor.linesDeleted) * 0.01;
+      const prScore = autor.prs * 5;
+      const totalScore = commitScore + locScore + prScore;
+
+      return {
+        name: autor.name,
+        commits: autor.commits,
+        loc: autor.linesAdded + autor.linesDeleted,
+        prs: autor.prs,
+        score: Math.round(totalScore),
+        bugCommits: autor.bugCommits,
+        featureCommits: autor.featureCommits
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10)
+    .map(autor => ({
+      ...autor,
+      name: autor.name.split(' ')[0]
+    }));
 
   return (
     <div className="space-y-6">
@@ -364,6 +434,193 @@ export function DoraDashboardView() {
               </Card>
             )}
           </div>
+
+          {/* Novos Gráficos de Análise de Contribuições */}
+          {autoresArray.length > 0 && (
+            <>
+              <div className="mt-6">
+                <h2 className="text-2xl font-bold mb-4">Análise de Contribuições por Autor</h2>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* 1. Número de Commits por Autor */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Commits por Autor</CardTitle>
+                    <CardDescription>Top 10 autores com mais commits</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={commitsPorAutorData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" />
+                        <YAxis type="category" dataKey="name" width={80} />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="commits" fill="#0088FE" name="Commits" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* 2. Linhas de Código Alteradas (LOC Churn) */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>LOC Churn por Autor</CardTitle>
+                    <CardDescription>Linhas adicionadas e removidas</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={locChurnData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" />
+                        <YAxis type="category" dataKey="name" width={80} />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="adicionadas" stackId="a" fill="#00C49F" name="Adicionadas" />
+                        <Bar dataKey="removidas" stackId="a" fill="#FF8042" name="Removidas" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* 3. Percentual de Contribuição por Autor */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Percentual de Contribuição</CardTitle>
+                    <CardDescription>Distribuição de commits entre autores</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={contribuicaoData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={(entry) => `${entry.name}: ${entry.percentual.toFixed(1)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="commits"
+                        >
+                          {contribuicaoData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: any, name: any, props: any) => [
+                          `${value} commits (${props.payload.percentual.toFixed(1)}%)`,
+                          'Commits'
+                        ]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* 4. Impact Score - Métrica Composta */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Impact Score</CardTitle>
+                    <CardDescription>Métrica composta (commits + LOC + PRs)</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={impactScoreData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis type="number" />
+                        <YAxis type="category" dataKey="name" width={80} />
+                        <Tooltip 
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="bg-white p-3 border rounded shadow-lg">
+                                  <p className="font-bold">{data.name}</p>
+                                  <p className="text-sm">Score: {data.score}</p>
+                                  <p className="text-sm">Commits: {data.commits}</p>
+                                  <p className="text-sm">LOC: {data.loc.toLocaleString()}</p>
+                                  <p className="text-sm">PRs: {data.prs}</p>
+                                  <p className="text-sm text-green-600">Features: {data.featureCommits}</p>
+                                  <p className="text-sm text-red-600">Bugs: {data.bugCommits}</p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Legend />
+                        <Bar dataKey="score" fill="#FFBB28" name="Impact Score" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* 5. Tabela de Ownership de Código (Blame-based) */}
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Ownership de Código (Análise de Contribuições)</CardTitle>
+                  <CardDescription>Detalhamento completo das contribuições por autor</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Autor</TableHead>
+                          <TableHead className="text-right">Commits</TableHead>
+                          <TableHead className="text-right">LOC+</TableHead>
+                          <TableHead className="text-right">LOC-</TableHead>
+                          <TableHead className="text-right">Churn Total</TableHead>
+                          <TableHead className="text-right">PRs</TableHead>
+                          <TableHead className="text-right">Features</TableHead>
+                          <TableHead className="text-right">Bugs</TableHead>
+                          <TableHead className="text-right">Impact Score</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {autoresArray
+                          .map(autor => ({
+                            ...autor,
+                            churnTotal: autor.linesAdded + autor.linesDeleted,
+                            impactScore: Math.round(
+                              autor.commits * 1 +
+                              (autor.linesAdded + autor.linesDeleted) * 0.01 +
+                              autor.prs * 5
+                            )
+                          }))
+                          .sort((a, b) => b.impactScore - a.impactScore)
+                          .map(autor => (
+                            <TableRow key={autor.email}>
+                              <TableCell className="font-medium">{autor.name}</TableCell>
+                              <TableCell className="text-right">{autor.commits}</TableCell>
+                              <TableCell className="text-right text-green-600">
+                                +{autor.linesAdded.toLocaleString()}
+                              </TableCell>
+                              <TableCell className="text-right text-red-600">
+                                -{autor.linesDeleted.toLocaleString()}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {autor.churnTotal.toLocaleString()}
+                              </TableCell>
+                              <TableCell className="text-right">{autor.prs}</TableCell>
+                              <TableCell className="text-right text-green-600">
+                                {autor.featureCommits}
+                              </TableCell>
+                              <TableCell className="text-right text-red-600">
+                                {autor.bugCommits}
+                              </TableCell>
+                              <TableCell className="text-right font-bold">
+                                {autor.impactScore}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
 
           {/* Tabela de Repositórios (só para projeto individual) */}
           {!isUnified && metrics?.repositorios && metrics.repositorios.length > 0 && (
