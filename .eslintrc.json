@@ -1,0 +1,126 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": [
+    "react",
+    "react-hooks",
+    "@typescript-eslint"
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "rules": {
+    // Melhorias SonarQube/SonarLint
+    "no-nested-ternary": "error",
+    "no-negated-condition": "warn",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    
+    // Imports
+    "import/no-deprecated": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "fs",
+            "message": "Use 'node:fs' instead"
+          },
+          {
+            "name": "path",
+            "message": "Use 'node:path' instead"
+          },
+          {
+            "name": "crypto",
+            "message": "Use 'node:crypto' instead"
+          },
+          {
+            "name": "util",
+            "message": "Use 'node:util' instead"
+          },
+          {
+            "name": "child_process",
+            "message": "Use 'node:child_process' instead"
+          }
+        ]
+      }
+    ],
+    
+    // React
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "react/jsx-no-leaked-render": "error",
+    
+    // TypeScript
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/prefer-readonly-parameter-types": "off",
+    
+    // Code Quality
+    "prefer-const": "error",
+    "no-var": "error",
+    "object-shorthand": "error",
+    "prefer-template": "warn",
+    "prefer-arrow-callback": "warn",
+    
+    // Number methods
+    "no-restricted-globals": [
+      "error",
+      {
+        "name": "parseInt",
+        "message": "Use Number.parseInt instead"
+      },
+      {
+        "name": "parseFloat",
+        "message": "Use Number.parseFloat instead"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["*.tsx", "*.ts"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_"
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
+}

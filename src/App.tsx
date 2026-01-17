@@ -28,7 +28,7 @@ import { GestaoEventosSLAView } from '@/components/eventos-sla/GestaoEventosSLAV
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
-import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope, MagnifyingGlass, CurrencyDollar } from '@phosphor-icons/react';
+import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope, MagnifyingGlass, CurrencyDollar, ShieldCheck } from '@phosphor-icons/react';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarTrigger } from '@/components/ui/sidebar';
 import { IntegracaoView } from '@/components/integracoes/IntegracaoView';
 import { DocumentacaoAPIsView } from '@/components/DocumentacaoAPIsView';
@@ -47,6 +47,7 @@ import { LGPDView } from '@/views/LGPDView';
 import { SincronismoView } from '@/views/SincronismoView';
 import { ExecucoesTesteView } from '@/components/execucoes-teste/ExecucoesTesteView';
 import { CheckpointsView } from '@/components/checkpoints/CheckpointsView';
+import { UsuariosView } from '@/components/usuarios/UsuariosView';
 import { useLogging } from '@/hooks/use-logging';
 import { useApi, apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -75,7 +76,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo' | 'finops' | 'gestao-eventos-sla' | 'execucoes-teste' | 'checkpoints';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo' | 'finops' | 'gestao-eventos-sla' | 'execucoes-teste' | 'checkpoints' | 'usuarios-seguranca';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -464,6 +465,8 @@ function App() {
         );
       case 'checkpoints':
         return <CheckpointsView />;
+      case 'usuarios-seguranca':
+        return <UsuariosView colaboradores={colaboradores || []} />;
       case 'tipos-afastamento':
         return <TiposAfastamentoView tiposAfastamento={tiposAfastamento || []} onRefresh={refetchTipos} />;
       default:
@@ -1010,6 +1013,23 @@ function App() {
                       >
                         <BookOpen />
                         <span>Catálogo de APIs</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+
+              <SidebarGroup>
+                <SidebarGroupLabel>Segurança</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'usuarios-seguranca'}
+                        onClick={() => setCurrentView('usuarios-seguranca')}
+                      >
+                        <ShieldCheck />
+                        <span>Usuários</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>

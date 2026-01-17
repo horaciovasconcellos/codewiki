@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MagnifyingGlass, Pencil, Trash, Eye, CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { MagnifyingGlass, Pencil, Trash, Eye, CaretLeft, CaretRight, Printer } from '@phosphor-icons/react';
 import { formatarData } from '@/lib/utils';
 
 interface DocumentacaoDataTableProps {
@@ -26,6 +26,7 @@ interface DocumentacaoDataTableProps {
   onView: (doc: DocumentacaoProjeto) => void;
   onEdit: (doc: DocumentacaoProjeto) => void;
   onDelete: (doc: DocumentacaoProjeto) => void;
+  onPrint?: (doc: DocumentacaoProjeto) => void;
 }
 
 export function DocumentacaoDataTable({
@@ -33,6 +34,7 @@ export function DocumentacaoDataTable({
   onView,
   onEdit,
   onDelete,
+  onPrint,
 }: DocumentacaoDataTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState<string>('all');
@@ -233,6 +235,16 @@ export function DocumentacaoDataTable({
                       >
                         <Eye weight="bold" />
                       </Button>
+                      {onPrint && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onPrint(doc)}
+                          title="Imprimir"
+                        >
+                          <Printer weight="bold" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"

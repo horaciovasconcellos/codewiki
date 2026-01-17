@@ -1,0 +1,2424 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Auditoria de Sistemas" name="description"/>
+<meta content="Horacio Vasconcellos" name="author"/>
+<link href="../img/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.6.11" name="generator"/>
+<title>🚀 Guia de Execução - Sistema de Auditoria - Sistema de Auditoria</title>
+<link href="../assets/stylesheets/main.4af4bdda.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.06af60db.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<link href="../styles/app-theme.css" rel="stylesheet"/>
+<link href="https://unpkg.com/mermaid@8.5.1/dist/mermaid.css" rel="stylesheet"/>
+<link href="../styles/tablesort.css" rel="stylesheet"/>
+<link href="../styles/60pthemas.css" rel="stylesheet"/>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-1234567890"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-1234567890",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-1234567890",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+<script>if("undefined"!=typeof __md_analytics){var consent=__md_get("__consent");consent&&consent.analytics&&__md_analytics()}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="deep-purple" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#guia-de-execucao-sistema-de-auditoria">
+          Pular para conteúdo
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-color-scheme="default" data-md-component="outdated" hidden="">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Cabeçalho" class="md-header__inner md-grid">
+<a aria-label="Sistema de Auditoria" class="md-header__button md-logo" data-md-component="logo" href=".." title="Sistema de Auditoria">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Sistema de Auditoria
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              🚀 Guia de Execução - Sistema de Auditoria
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-hidden="true" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="deep-purple" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme)" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"></path></svg>
+</label>
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme: light)" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_3" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to system preference" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_3" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to system preference">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Buscar" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Buscar" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Pesquisar" class="md-search__options">
+<a aria-label="Compartilhar" class="md-search__icon md-icon" data-clipboard="" data-clipboard-text="" data-md-component="search-share" href="javascript:void(0)" tabindex="-1" title="Compartilhar">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"></path></svg>
+</a>
+<button aria-label="Limpar" class="md-search__icon md-icon" tabindex="-1" title="Limpar" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/horaciovasconcellos/sistema-de-auditoria" title="Ir para repositório">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"></path></svg>
+</div>
+<div class="md-source__repository">
+    sistema-de-auditoria
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Abas" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../index.md">
+          
+  
+  
+    
+  
+  Início
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../deployment/">
+          
+  
+  
+    
+  
+  Deployment
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../guides/">
+          
+  
+  
+    
+  
+  Guias
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../setup/">
+          
+  
+  
+    
+  
+  Setup e Configuração
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../SONARQUBE-CORRECOES-APLICADAS/">
+          
+  
+  
+    
+  
+  Qualidade de Código
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../issues/">
+          
+  
+  
+    
+  
+  Issues e Troubleshooting
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../TELAS-INDICE/">
+          
+  
+  
+    
+  
+  Documentação de Telas
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../DASHBOARD-DORA/">
+          
+  
+  
+    
+  
+  Métricas e Dashboards
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../FEATURE-STATUS-REPOSITORIO/">
+          
+  
+  
+    
+  
+  Features Implementadas
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../SISTEMA-ADR/">
+          
+  
+  
+    
+  
+  Sistema ADR
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../PIPELINE-DATABASE/">
+          
+  
+  
+    
+  
+  Pipelines
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../README-AZURE-DEVOPS-TEMPLATES/">
+          
+  
+  
+    
+  
+  Azure DevOps
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../SCRIPTS-README/">
+          
+  
+  
+    
+  
+  Scripts
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../LOGGING-QUICK-REFERENCE/">
+          
+  
+  
+    
+  
+  Logging e Auditoria
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../API-REFERENCIA-COMPLETA/">
+          
+  
+  
+    
+  
+  API
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../data-templates/GUIA-CARGA-CSV/">
+          
+  
+  
+    
+  
+  Data Templates
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../runbooks/">
+          
+  
+  
+    
+  
+  Runbooks
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navegação" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Sistema de Auditoria" class="md-nav__button md-logo" data-md-component="logo" href=".." title="Sistema de Auditoria">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    Sistema de Auditoria
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/horaciovasconcellos/sistema-de-auditoria" title="Ir para repositório">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"></path></svg>
+</div>
+<div class="md-source__repository">
+    sistema-de-auditoria
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../index.md">
+<span class="md-ellipsis">
+    Início
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../deployment/">
+<span class="md-ellipsis">
+    Deployment
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../guides/">
+<span class="md-ellipsis">
+    Guias
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../setup/">
+<span class="md-ellipsis">
+    Setup e Configuração
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../SONARQUBE-CORRECOES-APLICADAS/">
+<span class="md-ellipsis">
+    Qualidade de Código
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../issues/">
+<span class="md-ellipsis">
+    Issues e Troubleshooting
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../TELAS-INDICE/">
+<span class="md-ellipsis">
+    Documentação de Telas
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../DASHBOARD-DORA/">
+<span class="md-ellipsis">
+    Métricas e Dashboards
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../FEATURE-STATUS-REPOSITORIO/">
+<span class="md-ellipsis">
+    Features Implementadas
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../SISTEMA-ADR/">
+<span class="md-ellipsis">
+    Sistema ADR
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../PIPELINE-DATABASE/">
+<span class="md-ellipsis">
+    Pipelines
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../README-AZURE-DEVOPS-TEMPLATES/">
+<span class="md-ellipsis">
+    Azure DevOps
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../SCRIPTS-README/">
+<span class="md-ellipsis">
+    Scripts
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../LOGGING-QUICK-REFERENCE/">
+<span class="md-ellipsis">
+    Logging e Auditoria
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../API-REFERENCIA-COMPLETA/">
+<span class="md-ellipsis">
+    API
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../data-templates/GUIA-CARGA-CSV/">
+<span class="md-ellipsis">
+    Data Templates
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../runbooks/">
+<span class="md-ellipsis">
+    Runbooks
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Índice" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#visao-geral">
+<span class="md-ellipsis">
+      📋 Visão Geral
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#o-poder-do-vibe-coding-faafo">
+<span class="md-ellipsis">
+      O Poder do Vibe Coding (FAAFO)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#arquitetura-do-sistema">
+<span class="md-ellipsis">
+      🎯 Arquitetura do Sistema
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#requisitos-do-sistema">
+<span class="md-ellipsis">
+      📦 Requisitos do Sistema
+    </span>
+</a>
+<nav aria-label="📦 Requisitos do Sistema" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hardware-minimo">
+<span class="md-ellipsis">
+      Hardware Mínimo
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#software-obrigatorio">
+<span class="md-ellipsis">
+      Software Obrigatório
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#sistema-operacional">
+<span class="md-ellipsis">
+      Sistema Operacional
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#instalacao-do-docker">
+<span class="md-ellipsis">
+      🛠️ Instalação do Docker
+    </span>
+</a>
+<nav aria-label="🛠️ Instalação do Docker" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#linux-ubuntudebian">
+<span class="md-ellipsis">
+      Linux (Ubuntu/Debian)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#macos">
+<span class="md-ellipsis">
+      macOS
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#windows-wsl2">
+<span class="md-ellipsis">
+      Windows (WSL2)
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#clonando-o-repositorio">
+<span class="md-ellipsis">
+      📥 Clonando o Repositório
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuracao-do-banco-de-dados-persistente">
+<span class="md-ellipsis">
+      🗄️ Configuração do Banco de Dados Persistente
+    </span>
+</a>
+<nav aria-label="🗄️ Configuração do Banco de Dados Persistente" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#diretorios-de-persistencia">
+<span class="md-ellipsis">
+      Diretórios de Persistência
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#criar-estrutura-de-diretorios">
+<span class="md-ellipsis">
+      Criar Estrutura de Diretórios
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuracao-do-mysql-master">
+<span class="md-ellipsis">
+      Configuração do MySQL Master
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuracao-do-mysql-slave">
+<span class="md-ellipsis">
+      Configuração do MySQL Slave
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#configuracao-de-variaveis-de-ambiente">
+<span class="md-ellipsis">
+      🔧 Configuração de Variáveis de Ambiente
+    </span>
+</a>
+<nav aria-label="🔧 Configuração de Variáveis de Ambiente" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#arquivo-env-desenvolvimento">
+<span class="md-ellipsis">
+      Arquivo .env (Desenvolvimento)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#arquivo-envproduction-producao">
+<span class="md-ellipsis">
+      Arquivo .env.production (Produção)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#gerar-senhas-seguras">
+<span class="md-ellipsis">
+      Gerar Senhas Seguras
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ambiente-de-desenvolvimento-dev">
+<span class="md-ellipsis">
+      🚀 Ambiente de Desenvolvimento (Dev)
+    </span>
+</a>
+<nav aria-label="🚀 Ambiente de Desenvolvimento (Dev)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-iniciar-containers">
+<span class="md-ellipsis">
+      1. Iniciar Containers
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-verificar-logs">
+<span class="md-ellipsis">
+      2. Verificar Logs
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-acessar-a-aplicacao">
+<span class="md-ellipsis">
+      3. Acessar a Aplicação
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-verificar-health-checks">
+<span class="md-ellipsis">
+      4. Verificar Health Checks
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-modo-de-desenvolvimento-com-hot-reload">
+<span class="md-ellipsis">
+      5. Modo de Desenvolvimento com Hot Reload
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-executar-comandos-dentro-dos-containers">
+<span class="md-ellipsis">
+      6. Executar Comandos Dentro dos Containers
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-parar-containers">
+<span class="md-ellipsis">
+      7. Parar Containers
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#ambiente-de-producao-prod">
+<span class="md-ellipsis">
+      🏭 Ambiente de Produção (Prod)
+    </span>
+</a>
+<nav aria-label="🏭 Ambiente de Produção (Prod)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-preparacao-do-servidor">
+<span class="md-ellipsis">
+      1. Preparação do Servidor
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-clonar-e-configurar">
+<span class="md-ellipsis">
+      2. Clonar e Configurar
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-build-de-producao">
+<span class="md-ellipsis">
+      3. Build de Produção
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-configurar-nginx-opcional-para-https">
+<span class="md-ellipsis">
+      4. Configurar Nginx (Opcional - para HTTPS)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-backup-automatizado">
+<span class="md-ellipsis">
+      5. Backup Automatizado
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-monitoramento">
+<span class="md-ellipsis">
+      6. Monitoramento
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#manutencao-e-operacao">
+<span class="md-ellipsis">
+      🔄 Manutenção e Operação
+    </span>
+</a>
+<nav aria-label="🔄 Manutenção e Operação" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#atualizar-aplicacao">
+<span class="md-ellipsis">
+      Atualizar Aplicação
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#resetar-banco-de-dados-dev">
+<span class="md-ellipsis">
+      Resetar Banco de Dados (Dev)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#restaurar-backup">
+<span class="md-ellipsis">
+      Restaurar Backup
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#replicacao-master-slave">
+<span class="md-ellipsis">
+      Replicação Master-Slave
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#troubleshooting">
+<span class="md-ellipsis">
+      🐛 Troubleshooting
+    </span>
+</a>
+<nav aria-label="🐛 Troubleshooting" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#container-nao-inicia">
+<span class="md-ellipsis">
+      Container não inicia
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-de-conexao-com-banco">
+<span class="md-ellipsis">
+      Erro de conexão com banco
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#aplicacao-lenta">
+<span class="md-ellipsis">
+      Aplicação lenta
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#porta-ja-em-uso">
+<span class="md-ellipsis">
+      Porta já em uso
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#estrutura-de-dados">
+<span class="md-ellipsis">
+      📊 Estrutura de Dados
+    </span>
+</a>
+<nav aria-label="📊 Estrutura de Dados" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#tabelas-principais">
+<span class="md-ellipsis">
+      Tabelas Principais
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scripts-de-inicializacao">
+<span class="md-ellipsis">
+      Scripts de Inicialização
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#seguranca">
+<span class="md-ellipsis">
+      🔐 Segurança
+    </span>
+</a>
+<nav aria-label="🔐 Segurança" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#checklist-de-seguranca-producao">
+<span class="md-ellipsis">
+      Checklist de Segurança (Produção)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#limitar-acesso-ao-mysql">
+<span class="md-ellipsis">
+      Limitar Acesso ao MySQL
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#recursos-adicionais">
+<span class="md-ellipsis">
+      📚 Recursos Adicionais
+    </span>
+</a>
+<nav aria-label="📚 Recursos Adicionais" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#documentacao">
+<span class="md-ellipsis">
+      Documentação
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#comandos-uteis">
+<span class="md-ellipsis">
+      Comandos Úteis
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#suporte">
+<span class="md-ellipsis">
+      📞 Suporte
+    </span>
+</a>
+<nav aria-label="📞 Suporte" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#logs-e-diagnostico">
+<span class="md-ellipsis">
+      Logs e Diagnóstico
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#contato">
+<span class="md-ellipsis">
+      Contato
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#changelog">
+<span class="md-ellipsis">
+      📝 Changelog
+    </span>
+</a>
+<nav aria-label="📝 Changelog" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v100-24122025">
+<span class="md-ellipsis">
+      v1.0.0 - 24/12/2025
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#arquitetura-geral">
+<span class="md-ellipsis">
+      🏗️ ARQUITETURA GERAL
+    </span>
+</a>
+<nav aria-label="🏗️ ARQUITETURA GERAL" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#tipo-de-aplicacao">
+<span class="md-ellipsis">
+      Tipo de Aplicação
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#stack-tecnologico">
+<span class="md-ellipsis">
+      Stack Tecnológico
+    </span>
+</a>
+<nav aria-label="Stack Tecnológico" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#frontend-66-typescript">
+<span class="md-ellipsis">
+      Frontend (66% TypeScript)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backend-25-6-javascript">
+<span class="md-ellipsis">
+      Backend (25. 6% JavaScript)
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#estrutura-de-diretorios">
+<span class="md-ellipsis">
+      📁 ESTRUTURA DE DIRETÓRIOS
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pontos-fortes">
+<span class="md-ellipsis">
+      ✅ PONTOS FORTES
+    </span>
+</a>
+<nav aria-label="✅ PONTOS FORTES" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-modernidade-do-stack">
+<span class="md-ellipsis">
+      1. Modernidade do Stack
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-componentizacao">
+<span class="md-ellipsis">
+      2. Componentização
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-boas-praticas">
+<span class="md-ellipsis">
+      3. Boas Práticas
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-integracoes">
+<span class="md-ellipsis">
+      4. Integrações
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-devops">
+<span class="md-ellipsis">
+      5. DevOps
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pontos-de-atencao-e-melhorias">
+<span class="md-ellipsis">
+      ⚠️ PONTOS DE ATENÇÃO E MELHORIAS
+    </span>
+</a>
+<nav aria-label="⚠️ PONTOS DE ATENÇÃO E MELHORIAS" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#critico">
+<span class="md-ellipsis">
+      🔴 CRÍTICO
+    </span>
+</a>
+<nav aria-label="🔴 CRÍTICO" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-arquivo-api-monolitico">
+<span class="md-ellipsis">
+      1. Arquivo API Monolítico
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-componente-apptsx-sobrecarregado">
+<span class="md-ellipsis">
+      2. Componente App.tsx Sobrecarregado
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#importante">
+<span class="md-ellipsis">
+      🟡 IMPORTANTE
+    </span>
+</a>
+<nav aria-label="🟡 IMPORTANTE" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-multiplos-arquivos-de-backup">
+<span class="md-ellipsis">
+      3. Múltiplos Arquivos de Backup
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-configuracao-duplicada">
+<span class="md-ellipsis">
+      4. Configuração Duplicada
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-falta-de-testes">
+<span class="md-ellipsis">
+      5. Falta de Testes
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-documentacao">
+<span class="md-ellipsis">
+      6. Documentação
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#plano-de-refatoracao-sugerido">
+<span class="md-ellipsis">
+      🎯 PLANO DE REFATORAÇÃO SUGERIDO
+    </span>
+</a>
+<nav aria-label="🎯 PLANO DE REFATORAÇÃO SUGERIDO" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#fase-1-backend-prioridade-alta">
+<span class="md-ellipsis">
+      Fase 1: Backend (Prioridade Alta)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#fase-2-frontend-prioridade-media">
+<span class="md-ellipsis">
+      Fase 2: Frontend (Prioridade Média)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#fase-3-qualidade-prioridade-media">
+<span class="md-ellipsis">
+      Fase 3: Qualidade (Prioridade Média)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#fase-4-devops-prioridade-baixa">
+<span class="md-ellipsis">
+      Fase 4: DevOps (Prioridade Baixa)
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#metricas-de-complexidade">
+<span class="md-ellipsis">
+      📈 MÉTRICAS DE COMPLEXIDADE
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#funcionalidades-positivas">
+<span class="md-ellipsis">
+      🎁 FUNCIONALIDADES POSITIVAS
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#recomendacoes-prioritarias">
+<span class="md-ellipsis">
+      🚀 RECOMENDAÇÕES PRIORITÁRIAS
+    </span>
+</a>
+<nav aria-label="🚀 RECOMENDAÇÕES PRIORITÁRIAS" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#curto-prazo-1-2-semanas">
+<span class="md-ellipsis">
+      Curto Prazo (1-2 semanas)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#medio-prazo-1-mes">
+<span class="md-ellipsis">
+      Médio Prazo (1 mês)
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#longo-prazo-3-meses">
+<span class="md-ellipsis">
+      Longo Prazo (3 meses)
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#conclusao">
+<span class="md-ellipsis">
+      🎓 CONCLUSÃO
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="guia-de-execucao-sistema-de-auditoria">🚀 Guia de Execução - Sistema de Auditoria<a class="headerlink" href="#guia-de-execucao-sistema-de-auditoria" title="Permanent link">¶</a></h1>
+<p><strong>Versão:</strong> 1.0.0<br/>
+<strong>Data:</strong> 24 de Dezembro de 2025<br/>
+<strong>Autor:</strong> Horacio Vasconcellos</p>
+<hr/>
+<h2 id="visao-geral">📋 Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">¶</a></h2>
+<p>O Sistema de Auditoria é uma aplicação web completa para gestão de aplicações, tecnologias, processos de negócio, colaboradores e contratos. Este guia descreve como executar o sistema em ambientes de <strong>Desenvolvimento (Dev)</strong> e <strong>Produção (Prod)</strong>.</p>
+<h2 id="o-poder-do-vibe-coding-faafo">O Poder do Vibe Coding (FAAFO)<a class="headerlink" href="#o-poder-do-vibe-coding-faafo" title="Permanent link">¶</a></h2>
+<p>O uso de agentes de codificação leva a imensos aumentos de produtividade e a uma produção de software muito mais rápida [3]. Os benefícios dessa transformação são resumidos no acrônimo FAAFO:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input checked="" disabled="" type="checkbox"><span class="task-list-indicator"></span></input></label> Fast (Rápido): Entregar funcionalidades em minutos que antes levariam semanas.</li>
+<li class="task-list-item"><label class="task-list-control"><input checked="" disabled="" type="checkbox"><span class="task-list-indicator"></span></input></label> Ambitious (Ambicioso): Ser capaz de realizar grandes aspirações e metas.</li>
+<li class="task-list-item"><label class="task-list-control"><input checked="" disabled="" type="checkbox"><span class="task-list-indicator"></span></input></label> Autonomous (Autônomo): Um único desenvolvedor com vários agentes pode operar como uma equipe.</li>
+<li class="task-list-item"><label class="task-list-control"><input checked="" disabled="" type="checkbox"><span class="task-list-indicator"></span></input></label> Fun (Divertido): Eliminação do trabalho tedioso de digitar código, liberando a criatividade.</li>
+<li class="task-list-item"><label class="task-list-control"><input checked="" disabled="" type="checkbox"><span class="task-list-indicator"></span></input></label> Optionality (Opcionalidade): A possibilidade de realizar experimentos paralelos e explorar múltiplas abordagens, pois o custo da experimentação é baixo.</li>
+</ul>
+<p>A IA é vista como um "leading indicator" (indicador principal) do impacto da IA no mercado de trabalho [13]. Pesquisas indicam que 80% dos trabalhadores americanos podem ter pelo menos 10% de suas tarefas impactadas pela IA, sendo os trabalhadores do conhecimento de altos salários (como analistas financeiros, advogados e desenvolvedores) os mais expostos [14, 15].</p>
+<p>Embora a IA se destaque em tarefas de "nó folha" (tarefas tipicamente júnior), a demanda geral por programadores deve aumentar à medida que a programação se torna mais fácil, seguindo o padrão da Revolução da Web [16-18]. O papel dos desenvolvedores está evoluindo; aqueles que usam IA substituirão aqueles que não a usam [19].</p>
+<hr/>
+<h2 id="arquitetura-do-sistema">🎯 Arquitetura do Sistema<a class="headerlink" href="#arquitetura-do-sistema" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a>┌─────────────────────────────────────────────────────┐
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a>│                  FRONTEND (React)                   │
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>│           Vite + TypeScript + TailwindCSS           │
+<a href="#__codelineno-0-4" id="__codelineno-0-4" name="__codelineno-0-4"></a>│                  Porta: 3000 / 5173                 │
+<a href="#__codelineno-0-5" id="__codelineno-0-5" name="__codelineno-0-5"></a>└──────────────────────┬──────────────────────────────┘
+<a href="#__codelineno-0-6" id="__codelineno-0-6" name="__codelineno-0-6"></a>                       │
+<a href="#__codelineno-0-7" id="__codelineno-0-7" name="__codelineno-0-7"></a>                       ▼
+<a href="#__codelineno-0-8" id="__codelineno-0-8" name="__codelineno-0-8"></a>┌─────────────────────────────────────────────────────┐
+<a href="#__codelineno-0-9" id="__codelineno-0-9" name="__codelineno-0-9"></a>│              BACKEND (Node.js/Express)              │
+<a href="#__codelineno-0-10" id="__codelineno-0-10" name="__codelineno-0-10"></a>│              API REST + Logging                     │
+<a href="#__codelineno-0-11" id="__codelineno-0-11" name="__codelineno-0-11"></a>│                  Porta: 3000                        │
+<a href="#__codelineno-0-12" id="__codelineno-0-12" name="__codelineno-0-12"></a>└──────────────────────┬──────────────────────────────┘
+<a href="#__codelineno-0-13" id="__codelineno-0-13" name="__codelineno-0-13"></a>                       │
+<a href="#__codelineno-0-14" id="__codelineno-0-14" name="__codelineno-0-14"></a>                       ▼
+<a href="#__codelineno-0-15" id="__codelineno-0-15" name="__codelineno-0-15"></a>┌─────────────────────────────────────────────────────┐
+<a href="#__codelineno-0-16" id="__codelineno-0-16" name="__codelineno-0-16"></a>│                 MYSQL MASTER                        │
+<a href="#__codelineno-0-17" id="__codelineno-0-17" name="__codelineno-0-17"></a>│            Banco de Dados Principal                 │
+<a href="#__codelineno-0-18" id="__codelineno-0-18" name="__codelineno-0-18"></a>│                  Porta: 3306                        │
+<a href="#__codelineno-0-19" id="__codelineno-0-19" name="__codelineno-0-19"></a>└──────────────────────┬──────────────────────────────┘
+<a href="#__codelineno-0-20" id="__codelineno-0-20" name="__codelineno-0-20"></a>                       │
+<a href="#__codelineno-0-21" id="__codelineno-0-21" name="__codelineno-0-21"></a>                       ▼
+<a href="#__codelineno-0-22" id="__codelineno-0-22" name="__codelineno-0-22"></a>┌─────────────────────────────────────────────────────┐
+<a href="#__codelineno-0-23" id="__codelineno-0-23" name="__codelineno-0-23"></a>│                 MYSQL SLAVE                         │
+<a href="#__codelineno-0-24" id="__codelineno-0-24" name="__codelineno-0-24"></a>│            Réplica (Leitura)                        │
+<a href="#__codelineno-0-25" id="__codelineno-0-25" name="__codelineno-0-25"></a>│                  Porta: 3307                        │
+<a href="#__codelineno-0-26" id="__codelineno-0-26" name="__codelineno-0-26"></a>└─────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr/>
+<h2 id="requisitos-do-sistema">📦 Requisitos do Sistema<a class="headerlink" href="#requisitos-do-sistema" title="Permanent link">¶</a></h2>
+<h3 id="hardware-minimo">Hardware Mínimo<a class="headerlink" href="#hardware-minimo" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>CPU:</strong> 2 cores (recomendado 4 cores)</li>
+<li><strong>RAM:</strong> 4GB (recomendado 8GB)</li>
+<li><strong>Disco:</strong> 20GB de espaço livre</li>
+</ul>
+<h3 id="software-obrigatorio">Software Obrigatório<a class="headerlink" href="#software-obrigatorio" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Docker:</strong> versão 20.10 ou superior</li>
+<li><strong>Docker Compose:</strong> versão 2.0 ou superior</li>
+<li><strong>Git:</strong> para clonar o repositório</li>
+</ul>
+<h3 id="sistema-operacional">Sistema Operacional<a class="headerlink" href="#sistema-operacional" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Linux:</strong> Ubuntu 20.04+, CentOS 8+, Debian 11+</li>
+<li><strong>macOS:</strong> 11.0 (Big Sur) ou superior</li>
+<li><strong>Windows:</strong> 10/11 com WSL2</li>
+</ul>
+<hr/>
+<h2 id="instalacao-do-docker">🛠️ Instalação do Docker<a class="headerlink" href="#instalacao-do-docker" title="Permanent link">¶</a></h2>
+<h3 id="linux-ubuntudebian">Linux (Ubuntu/Debian)<a class="headerlink" href="#linux-ubuntudebian" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Remover versões antigas</span>
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>remove<span class="w"> </span>docker<span class="w"> </span>docker-engine<span class="w"> </span>docker.io<span class="w"> </span>containerd<span class="w"> </span>runc
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a>
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="c1"># Instalar dependências</span>
+<a href="#__codelineno-1-5" id="__codelineno-1-5" name="__codelineno-1-5"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a href="#__codelineno-1-6" id="__codelineno-1-6" name="__codelineno-1-6"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>ca-certificates<span class="w"> </span>curl<span class="w"> </span>gnupg<span class="w"> </span>lsb-release
+<a href="#__codelineno-1-7" id="__codelineno-1-7" name="__codelineno-1-7"></a>
+<a href="#__codelineno-1-8" id="__codelineno-1-8" name="__codelineno-1-8"></a><span class="c1"># Adicionar chave GPG oficial do Docker</span>
+<a href="#__codelineno-1-9" id="__codelineno-1-9" name="__codelineno-1-9"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/apt/keyrings
+<a href="#__codelineno-1-10" id="__codelineno-1-10" name="__codelineno-1-10"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://download.docker.com/linux/ubuntu/gpg<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span>-o<span class="w"> </span>/etc/apt/keyrings/docker.gpg
+<a href="#__codelineno-1-11" id="__codelineno-1-11" name="__codelineno-1-11"></a>
+<a href="#__codelineno-1-12" id="__codelineno-1-12" name="__codelineno-1-12"></a><span class="c1"># Configurar repositório</span>
+<a href="#__codelineno-1-13" id="__codelineno-1-13" name="__codelineno-1-13"></a><span class="nb">echo</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-1-14" id="__codelineno-1-14" name="__codelineno-1-14"></a><span class="w">  </span><span class="s2">"deb [arch=</span><span class="k">$(</span>dpkg<span class="w"> </span>--print-architecture<span class="k">)</span><span class="s2"> signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \</span>
+<a href="#__codelineno-1-15" id="__codelineno-1-15" name="__codelineno-1-15"></a><span class="s2">  </span><span class="k">$(</span>lsb_release<span class="w"> </span>-cs<span class="k">)</span><span class="s2"> stable"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/docker.list<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+<a href="#__codelineno-1-16" id="__codelineno-1-16" name="__codelineno-1-16"></a>
+<a href="#__codelineno-1-17" id="__codelineno-1-17" name="__codelineno-1-17"></a><span class="c1"># Instalar Docker</span>
+<a href="#__codelineno-1-18" id="__codelineno-1-18" name="__codelineno-1-18"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a href="#__codelineno-1-19" id="__codelineno-1-19" name="__codelineno-1-19"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>docker-ce<span class="w"> </span>docker-ce-cli<span class="w"> </span>containerd.io<span class="w"> </span>docker-compose-plugin
+<a href="#__codelineno-1-20" id="__codelineno-1-20" name="__codelineno-1-20"></a>
+<a href="#__codelineno-1-21" id="__codelineno-1-21" name="__codelineno-1-21"></a><span class="c1"># Verificar instalação</span>
+<a href="#__codelineno-1-22" id="__codelineno-1-22" name="__codelineno-1-22"></a>docker<span class="w"> </span>--version
+<a href="#__codelineno-1-23" id="__codelineno-1-23" name="__codelineno-1-23"></a>docker<span class="w"> </span>compose<span class="w"> </span>version
+<a href="#__codelineno-1-24" id="__codelineno-1-24" name="__codelineno-1-24"></a>
+<a href="#__codelineno-1-25" id="__codelineno-1-25" name="__codelineno-1-25"></a><span class="c1"># Adicionar usuário ao grupo docker</span>
+<a href="#__codelineno-1-26" id="__codelineno-1-26" name="__codelineno-1-26"></a>sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>docker<span class="w"> </span><span class="nv">$USER</span>
+<a href="#__codelineno-1-27" id="__codelineno-1-27" name="__codelineno-1-27"></a>newgrp<span class="w"> </span>docker
+</code></pre></div>
+<h3 id="macos">macOS<a class="headerlink" href="#macos" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1"># Baixar Docker Desktop</span>
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a><span class="c1"># https://www.docker.com/products/docker-desktop</span>
+<a href="#__codelineno-2-3" id="__codelineno-2-3" name="__codelineno-2-3"></a>
+<a href="#__codelineno-2-4" id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="c1"># Ou usando Homebrew</span>
+<a href="#__codelineno-2-5" id="__codelineno-2-5" name="__codelineno-2-5"></a>brew<span class="w"> </span>install<span class="w"> </span>--cask<span class="w"> </span>docker
+<a href="#__codelineno-2-6" id="__codelineno-2-6" name="__codelineno-2-6"></a>
+<a href="#__codelineno-2-7" id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="c1"># Iniciar Docker Desktop</span>
+<a href="#__codelineno-2-8" id="__codelineno-2-8" name="__codelineno-2-8"></a>open<span class="w"> </span>-a<span class="w"> </span>Docker
+<a href="#__codelineno-2-9" id="__codelineno-2-9" name="__codelineno-2-9"></a>
+<a href="#__codelineno-2-10" id="__codelineno-2-10" name="__codelineno-2-10"></a><span class="c1"># Verificar instalação</span>
+<a href="#__codelineno-2-11" id="__codelineno-2-11" name="__codelineno-2-11"></a>docker<span class="w"> </span>--version
+<a href="#__codelineno-2-12" id="__codelineno-2-12" name="__codelineno-2-12"></a>docker<span class="w"> </span>compose<span class="w"> </span>version
+</code></pre></div>
+<h3 id="windows-wsl2">Windows (WSL2)<a class="headerlink" href="#windows-wsl2" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c"># 1. Habilitar WSL2</span>
+<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="n">wsl</span> <span class="p">-</span><span class="n">-install</span>
+<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a>
+<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="c"># 2. Baixar e instalar Docker Desktop</span>
+<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="c"># https://www.docker.com/products/docker-desktop</span>
+<a href="#__codelineno-3-6" id="__codelineno-3-6" name="__codelineno-3-6"></a>
+<a href="#__codelineno-3-7" id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="c"># 3. Configurar Docker para usar WSL2</span>
+<a href="#__codelineno-3-8" id="__codelineno-3-8" name="__codelineno-3-8"></a>
+<a href="#__codelineno-3-9" id="__codelineno-3-9" name="__codelineno-3-9"></a><span class="c"># 4. Verificar instalação no WSL2</span>
+<a href="#__codelineno-3-10" id="__codelineno-3-10" name="__codelineno-3-10"></a><span class="n">docker</span> <span class="p">-</span><span class="n">-version</span>
+<a href="#__codelineno-3-11" id="__codelineno-3-11" name="__codelineno-3-11"></a><span class="n">docker</span> <span class="n">compose</span> <span class="n">version</span>
+</code></pre></div>
+<hr/>
+<h2 id="clonando-o-repositorio">📥 Clonando o Repositório<a class="headerlink" href="#clonando-o-repositorio" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1"># Clonar o repositório</span>
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/horaciovasconcellos/sistema-de-auditoria.git
+<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a>
+<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="c1"># Acessar o diretório</span>
+<a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="nb">cd</span><span class="w"> </span>sistema-de-auditoria
+<a href="#__codelineno-4-6" id="__codelineno-4-6" name="__codelineno-4-6"></a>
+<a href="#__codelineno-4-7" id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="c1"># Verificar a branch</span>
+<a href="#__codelineno-4-8" id="__codelineno-4-8" name="__codelineno-4-8"></a>git<span class="w"> </span>branch
+</code></pre></div>
+<hr/>
+<h2 id="configuracao-do-banco-de-dados-persistente">🗄️ Configuração do Banco de Dados Persistente<a class="headerlink" href="#configuracao-do-banco-de-dados-persistente" title="Permanent link">¶</a></h2>
+<h3 id="diretorios-de-persistencia">Diretórios de Persistência<a class="headerlink" href="#diretorios-de-persistencia" title="Permanent link">¶</a></h3>
+<p>O sistema utiliza volumes Docker montados em diretórios do host para garantir a persistência dos dados:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="c1"># Estrutura de diretórios (criados automaticamente)</span>
+<a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a>~/docker/mysql/
+<a href="#__codelineno-5-3" id="__codelineno-5-3" name="__codelineno-5-3"></a>├──<span class="w"> </span>master/
+<a href="#__codelineno-5-4" id="__codelineno-5-4" name="__codelineno-5-4"></a>│<span class="w">   </span>├──<span class="w"> </span>data/<span class="w">          </span><span class="c1"># Dados do MySQL Master</span>
+<a href="#__codelineno-5-5" id="__codelineno-5-5" name="__codelineno-5-5"></a>│<span class="w">   </span>├──<span class="w"> </span>logs/<span class="w">          </span><span class="c1"># Logs do MySQL Master</span>
+<a href="#__codelineno-5-6" id="__codelineno-5-6" name="__codelineno-5-6"></a>│<span class="w">   </span>├──<span class="w"> </span>backup/<span class="w">        </span><span class="c1"># Backups do MySQL Master</span>
+<a href="#__codelineno-5-7" id="__codelineno-5-7" name="__codelineno-5-7"></a>│<span class="w">   </span>└──<span class="w"> </span>config/<span class="w">        </span><span class="c1"># Configurações customizadas</span>
+<a href="#__codelineno-5-8" id="__codelineno-5-8" name="__codelineno-5-8"></a>│<span class="w">       </span>└──<span class="w"> </span>master.cnf
+<a href="#__codelineno-5-9" id="__codelineno-5-9" name="__codelineno-5-9"></a>└──<span class="w"> </span>slave/
+<a href="#__codelineno-5-10" id="__codelineno-5-10" name="__codelineno-5-10"></a><span class="w">    </span>├──<span class="w"> </span>data/<span class="w">          </span><span class="c1"># Dados do MySQL Slave</span>
+<a href="#__codelineno-5-11" id="__codelineno-5-11" name="__codelineno-5-11"></a><span class="w">    </span>├──<span class="w"> </span>logs/<span class="w">          </span><span class="c1"># Logs do MySQL Slave</span>
+<a href="#__codelineno-5-12" id="__codelineno-5-12" name="__codelineno-5-12"></a><span class="w">    </span>├──<span class="w"> </span>backup/<span class="w">        </span><span class="c1"># Backups do MySQL Slave</span>
+<a href="#__codelineno-5-13" id="__codelineno-5-13" name="__codelineno-5-13"></a><span class="w">    </span>└──<span class="w"> </span>config/<span class="w">        </span><span class="c1"># Configurações customizadas</span>
+<a href="#__codelineno-5-14" id="__codelineno-5-14" name="__codelineno-5-14"></a><span class="w">        </span>└──<span class="w"> </span>slave.cnf
+</code></pre></div>
+<h3 id="criar-estrutura-de-diretorios">Criar Estrutura de Diretórios<a class="headerlink" href="#criar-estrutura-de-diretorios" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-6-1" id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="c1"># Criar diretórios para MySQL Master</span>
+<a href="#__codelineno-6-2" id="__codelineno-6-2" name="__codelineno-6-2"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/docker/mysql/master/<span class="o">{</span>data,logs,backup,config<span class="o">}</span>
+<a href="#__codelineno-6-3" id="__codelineno-6-3" name="__codelineno-6-3"></a>
+<a href="#__codelineno-6-4" id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="c1"># Criar diretórios para MySQL Slave</span>
+<a href="#__codelineno-6-5" id="__codelineno-6-5" name="__codelineno-6-5"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>~/docker/mysql/slave/<span class="o">{</span>data,logs,backup,config<span class="o">}</span>
+<a href="#__codelineno-6-6" id="__codelineno-6-6" name="__codelineno-6-6"></a>
+<a href="#__codelineno-6-7" id="__codelineno-6-7" name="__codelineno-6-7"></a><span class="c1"># Definir permissões (Linux)</span>
+<a href="#__codelineno-6-8" id="__codelineno-6-8" name="__codelineno-6-8"></a>sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="nv">$USER</span>:<span class="nv">$USER</span><span class="w"> </span>~/docker/mysql
+<a href="#__codelineno-6-9" id="__codelineno-6-9" name="__codelineno-6-9"></a>chmod<span class="w"> </span>-R<span class="w"> </span><span class="m">755</span><span class="w"> </span>~/docker/mysql
+</code></pre></div>
+<h3 id="configuracao-do-mysql-master">Configuração do MySQL Master<a class="headerlink" href="#configuracao-do-mysql-master" title="Permanent link">¶</a></h3>
+<p>Criar arquivo de configuração:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-7-1" id="__codelineno-7-1" name="__codelineno-7-1"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>~/docker/mysql/master/config/master.cnf<span class="w"> </span><span class="s">&lt;&lt; 'EOF'</span>
+<a href="#__codelineno-7-2" id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="s">[mysqld]</span>
+<a href="#__codelineno-7-3" id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="s"># Configurações de Replicação</span>
+<a href="#__codelineno-7-4" id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="s">server-id = 1</span>
+<a href="#__codelineno-7-5" id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="s">log_bin = mysql-bin</span>
+<a href="#__codelineno-7-6" id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="s">binlog_format = ROW</span>
+<a href="#__codelineno-7-7" id="__codelineno-7-7" name="__codelineno-7-7"></a><span class="s">binlog_do_db = auditoria_db</span>
+<a href="#__codelineno-7-8" id="__codelineno-7-8" name="__codelineno-7-8"></a>
+<a href="#__codelineno-7-9" id="__codelineno-7-9" name="__codelineno-7-9"></a><span class="s"># Performance</span>
+<a href="#__codelineno-7-10" id="__codelineno-7-10" name="__codelineno-7-10"></a><span class="s">max_connections = 200</span>
+<a href="#__codelineno-7-11" id="__codelineno-7-11" name="__codelineno-7-11"></a><span class="s">innodb_buffer_pool_size = 1G</span>
+<a href="#__codelineno-7-12" id="__codelineno-7-12" name="__codelineno-7-12"></a><span class="s">innodb_log_file_size = 256M</span>
+<a href="#__codelineno-7-13" id="__codelineno-7-13" name="__codelineno-7-13"></a>
+<a href="#__codelineno-7-14" id="__codelineno-7-14" name="__codelineno-7-14"></a><span class="s"># Logs</span>
+<a href="#__codelineno-7-15" id="__codelineno-7-15" name="__codelineno-7-15"></a><span class="s">slow_query_log = 1</span>
+<a href="#__codelineno-7-16" id="__codelineno-7-16" name="__codelineno-7-16"></a><span class="s">slow_query_log_file = /var/log/mysql/slow-query.log</span>
+<a href="#__codelineno-7-17" id="__codelineno-7-17" name="__codelineno-7-17"></a><span class="s">long_query_time = 2</span>
+<a href="#__codelineno-7-18" id="__codelineno-7-18" name="__codelineno-7-18"></a>
+<a href="#__codelineno-7-19" id="__codelineno-7-19" name="__codelineno-7-19"></a><span class="s"># Character Set</span>
+<a href="#__codelineno-7-20" id="__codelineno-7-20" name="__codelineno-7-20"></a><span class="s">character-set-server = utf8mb4</span>
+<a href="#__codelineno-7-21" id="__codelineno-7-21" name="__codelineno-7-21"></a><span class="s">collation-server = utf8mb4_unicode_ci</span>
+<a href="#__codelineno-7-22" id="__codelineno-7-22" name="__codelineno-7-22"></a><span class="s">EOF</span>
+</code></pre></div>
+<h3 id="configuracao-do-mysql-slave">Configuração do MySQL Slave<a class="headerlink" href="#configuracao-do-mysql-slave" title="Permanent link">¶</a></h3>
+<p>Criar arquivo de configuração:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-8-1" id="__codelineno-8-1" name="__codelineno-8-1"></a>cat<span class="w"> </span>&gt;<span class="w"> </span>~/docker/mysql/slave/config/slave.cnf<span class="w"> </span><span class="s">&lt;&lt; 'EOF'</span>
+<a href="#__codelineno-8-2" id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="s">[mysqld]</span>
+<a href="#__codelineno-8-3" id="__codelineno-8-3" name="__codelineno-8-3"></a><span class="s"># Configurações de Replicação</span>
+<a href="#__codelineno-8-4" id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="s">server-id = 2</span>
+<a href="#__codelineno-8-5" id="__codelineno-8-5" name="__codelineno-8-5"></a><span class="s">relay-log = relay-bin</span>
+<a href="#__codelineno-8-6" id="__codelineno-8-6" name="__codelineno-8-6"></a><span class="s">read_only = 1</span>
+<a href="#__codelineno-8-7" id="__codelineno-8-7" name="__codelineno-8-7"></a><span class="s">log_bin = mysql-bin</span>
+<a href="#__codelineno-8-8" id="__codelineno-8-8" name="__codelineno-8-8"></a><span class="s">binlog_format = ROW</span>
+<a href="#__codelineno-8-9" id="__codelineno-8-9" name="__codelineno-8-9"></a>
+<a href="#__codelineno-8-10" id="__codelineno-8-10" name="__codelineno-8-10"></a><span class="s"># Performance</span>
+<a href="#__codelineno-8-11" id="__codelineno-8-11" name="__codelineno-8-11"></a><span class="s">max_connections = 200</span>
+<a href="#__codelineno-8-12" id="__codelineno-8-12" name="__codelineno-8-12"></a><span class="s">innodb_buffer_pool_size = 512M</span>
+<a href="#__codelineno-8-13" id="__codelineno-8-13" name="__codelineno-8-13"></a>
+<a href="#__codelineno-8-14" id="__codelineno-8-14" name="__codelineno-8-14"></a><span class="s"># Logs</span>
+<a href="#__codelineno-8-15" id="__codelineno-8-15" name="__codelineno-8-15"></a><span class="s">slow_query_log = 1</span>
+<a href="#__codelineno-8-16" id="__codelineno-8-16" name="__codelineno-8-16"></a><span class="s">slow_query_log_file = /var/log/mysql/slow-query.log</span>
+<a href="#__codelineno-8-17" id="__codelineno-8-17" name="__codelineno-8-17"></a><span class="s">long_query_time = 2</span>
+<a href="#__codelineno-8-18" id="__codelineno-8-18" name="__codelineno-8-18"></a>
+<a href="#__codelineno-8-19" id="__codelineno-8-19" name="__codelineno-8-19"></a><span class="s"># Character Set</span>
+<a href="#__codelineno-8-20" id="__codelineno-8-20" name="__codelineno-8-20"></a><span class="s">character-set-server = utf8mb4</span>
+<a href="#__codelineno-8-21" id="__codelineno-8-21" name="__codelineno-8-21"></a><span class="s">collation-server = utf8mb4_unicode_ci</span>
+<a href="#__codelineno-8-22" id="__codelineno-8-22" name="__codelineno-8-22"></a><span class="s">EOF</span>
+</code></pre></div>
+<hr/>
+<h2 id="configuracao-de-variaveis-de-ambiente">🔧 Configuração de Variáveis de Ambiente<a class="headerlink" href="#configuracao-de-variaveis-de-ambiente" title="Permanent link">¶</a></h2>
+<h3 id="arquivo-env-desenvolvimento">Arquivo .env (Desenvolvimento)<a class="headerlink" href="#arquivo-env-desenvolvimento" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-9-1" id="__codelineno-9-1" name="__codelineno-9-1"></a><span class="c1"># Copiar arquivo de exemplo</span>
+<a href="#__codelineno-9-2" id="__codelineno-9-2" name="__codelineno-9-2"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+<a href="#__codelineno-9-3" id="__codelineno-9-3" name="__codelineno-9-3"></a>
+<a href="#__codelineno-9-4" id="__codelineno-9-4" name="__codelineno-9-4"></a><span class="c1"># Editar configurações</span>
+<a href="#__codelineno-9-5" id="__codelineno-9-5" name="__codelineno-9-5"></a>nano<span class="w"> </span>.env
+</code></pre></div>
+<p>Conteúdo do <code>.env</code>:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-10-1" id="__codelineno-10-1" name="__codelineno-10-1"></a># Banco de Dados
+<a href="#__codelineno-10-2" id="__codelineno-10-2" name="__codelineno-10-2"></a>MYSQL_ROOT_PASSWORD=rootpass123
+<a href="#__codelineno-10-3" id="__codelineno-10-3" name="__codelineno-10-3"></a>MYSQL_DATABASE=auditoria_db
+<a href="#__codelineno-10-4" id="__codelineno-10-4" name="__codelineno-10-4"></a>MYSQL_USER=app_user
+<a href="#__codelineno-10-5" id="__codelineno-10-5" name="__codelineno-10-5"></a>MYSQL_PASSWORD=apppass123
+<a href="#__codelineno-10-6" id="__codelineno-10-6" name="__codelineno-10-6"></a>
+<a href="#__codelineno-10-7" id="__codelineno-10-7" name="__codelineno-10-7"></a># API
+<a href="#__codelineno-10-8" id="__codelineno-10-8" name="__codelineno-10-8"></a>NODE_ENV=development
+<a href="#__codelineno-10-9" id="__codelineno-10-9" name="__codelineno-10-9"></a>API_PORT=3000
+<a href="#__codelineno-10-10" id="__codelineno-10-10" name="__codelineno-10-10"></a>
+<a href="#__codelineno-10-11" id="__codelineno-10-11" name="__codelineno-10-11"></a># Aplicação
+<a href="#__codelineno-10-12" id="__codelineno-10-12" name="__codelineno-10-12"></a>VITE_API_URL=http://localhost:3000
+</code></pre></div>
+<h3 id="arquivo-envproduction-producao">Arquivo .env.production (Produção)<a class="headerlink" href="#arquivo-envproduction-producao" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-11-1" id="__codelineno-11-1" name="__codelineno-11-1"></a># Banco de Dados
+<a href="#__codelineno-11-2" id="__codelineno-11-2" name="__codelineno-11-2"></a>MYSQL_ROOT_PASSWORD=&lt;SENHA_FORTE_ROOT&gt;
+<a href="#__codelineno-11-3" id="__codelineno-11-3" name="__codelineno-11-3"></a>MYSQL_DATABASE=auditoria_db
+<a href="#__codelineno-11-4" id="__codelineno-11-4" name="__codelineno-11-4"></a>MYSQL_USER=app_user
+<a href="#__codelineno-11-5" id="__codelineno-11-5" name="__codelineno-11-5"></a>MYSQL_PASSWORD=&lt;SENHA_FORTE_APP&gt;
+<a href="#__codelineno-11-6" id="__codelineno-11-6" name="__codelineno-11-6"></a>
+<a href="#__codelineno-11-7" id="__codelineno-11-7" name="__codelineno-11-7"></a># API
+<a href="#__codelineno-11-8" id="__codelineno-11-8" name="__codelineno-11-8"></a>NODE_ENV=production
+<a href="#__codelineno-11-9" id="__codelineno-11-9" name="__codelineno-11-9"></a>API_PORT=3000
+<a href="#__codelineno-11-10" id="__codelineno-11-10" name="__codelineno-11-10"></a>
+<a href="#__codelineno-11-11" id="__codelineno-11-11" name="__codelineno-11-11"></a># Aplicação
+<a href="#__codelineno-11-12" id="__codelineno-11-12" name="__codelineno-11-12"></a>VITE_API_URL=https://seu-dominio.com
+</code></pre></div>
+<p><strong>⚠️ IMPORTANTE:</strong> Sempre altere as senhas padrão em produção!</p>
+<h3 id="gerar-senhas-seguras">Gerar Senhas Seguras<a class="headerlink" href="#gerar-senhas-seguras" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-12-1" id="__codelineno-12-1" name="__codelineno-12-1"></a><span class="c1"># Gerar senha aleatória</span>
+<a href="#__codelineno-12-2" id="__codelineno-12-2" name="__codelineno-12-2"></a>openssl<span class="w"> </span>rand<span class="w"> </span>-base64<span class="w"> </span><span class="m">32</span>
+<a href="#__codelineno-12-3" id="__codelineno-12-3" name="__codelineno-12-3"></a>
+<a href="#__codelineno-12-4" id="__codelineno-12-4" name="__codelineno-12-4"></a><span class="c1"># Exemplo de saída:</span>
+<a href="#__codelineno-12-5" id="__codelineno-12-5" name="__codelineno-12-5"></a><span class="c1"># xK8pQ2mN5vL9wR7tY3nJ6bH4cF1dG8sA</span>
+</code></pre></div>
+<hr/>
+<h2 id="ambiente-de-desenvolvimento-dev">🚀 Ambiente de Desenvolvimento (Dev)<a class="headerlink" href="#ambiente-de-desenvolvimento-dev" title="Permanent link">¶</a></h2>
+<h3 id="1-iniciar-containers">1. Iniciar Containers<a class="headerlink" href="#1-iniciar-containers" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-13-1" id="__codelineno-13-1" name="__codelineno-13-1"></a><span class="c1"># Acessar diretório do projeto</span>
+<a href="#__codelineno-13-2" id="__codelineno-13-2" name="__codelineno-13-2"></a><span class="nb">cd</span><span class="w"> </span>sistema-de-auditoria
+<a href="#__codelineno-13-3" id="__codelineno-13-3" name="__codelineno-13-3"></a>
+<a href="#__codelineno-13-4" id="__codelineno-13-4" name="__codelineno-13-4"></a><span class="c1"># Iniciar todos os containers</span>
+<a href="#__codelineno-13-5" id="__codelineno-13-5" name="__codelineno-13-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<a href="#__codelineno-13-6" id="__codelineno-13-6" name="__codelineno-13-6"></a>
+<a href="#__codelineno-13-7" id="__codelineno-13-7" name="__codelineno-13-7"></a><span class="c1"># Verificar status</span>
+<a href="#__codelineno-13-8" id="__codelineno-13-8" name="__codelineno-13-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
+</code></pre></div>
+<h3 id="2-verificar-logs">2. Verificar Logs<a class="headerlink" href="#2-verificar-logs" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-14-1" id="__codelineno-14-1" name="__codelineno-14-1"></a><span class="c1"># Logs de todos os containers</span>
+<a href="#__codelineno-14-2" id="__codelineno-14-2" name="__codelineno-14-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f
+<a href="#__codelineno-14-3" id="__codelineno-14-3" name="__codelineno-14-3"></a>
+<a href="#__codelineno-14-4" id="__codelineno-14-4" name="__codelineno-14-4"></a><span class="c1"># Logs da aplicação</span>
+<a href="#__codelineno-14-5" id="__codelineno-14-5" name="__codelineno-14-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>app
+<a href="#__codelineno-14-6" id="__codelineno-14-6" name="__codelineno-14-6"></a>
+<a href="#__codelineno-14-7" id="__codelineno-14-7" name="__codelineno-14-7"></a><span class="c1"># Logs do MySQL Master</span>
+<a href="#__codelineno-14-8" id="__codelineno-14-8" name="__codelineno-14-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>mysql-master
+<a href="#__codelineno-14-9" id="__codelineno-14-9" name="__codelineno-14-9"></a>
+<a href="#__codelineno-14-10" id="__codelineno-14-10" name="__codelineno-14-10"></a><span class="c1"># Logs do MySQL Slave</span>
+<a href="#__codelineno-14-11" id="__codelineno-14-11" name="__codelineno-14-11"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>mysql-slave
+<a href="#__codelineno-14-12" id="__codelineno-14-12" name="__codelineno-14-12"></a>
+<a href="#__codelineno-14-13" id="__codelineno-14-13" name="__codelineno-14-13"></a><span class="c1"># Logs do MkDocs</span>
+<a href="#__codelineno-14-14" id="__codelineno-14-14" name="__codelineno-14-14"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>mkdocs
+</code></pre></div>
+<h3 id="3-acessar-a-aplicacao">3. Acessar a Aplicação<a class="headerlink" href="#3-acessar-a-aplicacao" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Serviço</th>
+<th>URL</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Frontend</strong></td>
+<td><a href="http://localhost:3000">http://localhost:3000</a></td>
+<td>Interface principal</td>
+</tr>
+<tr>
+<td><strong>API</strong></td>
+<td><a href="http://localhost:3000/api">http://localhost:3000/api</a></td>
+<td>API REST</td>
+</tr>
+<tr>
+<td><strong>Vite Dev</strong></td>
+<td><a href="http://localhost:5173">http://localhost:5173</a></td>
+<td>Hot reload (dev)</td>
+</tr>
+<tr>
+<td><strong>Docs</strong></td>
+<td><a href="http://localhost:8000">http://localhost:8000</a></td>
+<td>Documentação MkDocs</td>
+</tr>
+<tr>
+<td><strong>MySQL Master</strong></td>
+<td>localhost:3306</td>
+<td>Banco principal</td>
+</tr>
+<tr>
+<td><strong>MySQL Slave</strong></td>
+<td>localhost:3307</td>
+<td>Banco réplica</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-verificar-health-checks">4. Verificar Health Checks<a class="headerlink" href="#4-verificar-health-checks" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-15-1" id="__codelineno-15-1" name="__codelineno-15-1"></a><span class="c1"># Health check da aplicação</span>
+<a href="#__codelineno-15-2" id="__codelineno-15-2" name="__codelineno-15-2"></a>curl<span class="w"> </span>http://localhost:3000/health
+<a href="#__codelineno-15-3" id="__codelineno-15-3" name="__codelineno-15-3"></a>
+<a href="#__codelineno-15-4" id="__codelineno-15-4" name="__codelineno-15-4"></a><span class="c1"># Resposta esperada:</span>
+<a href="#__codelineno-15-5" id="__codelineno-15-5" name="__codelineno-15-5"></a><span class="c1"># {"status":"healthy","timestamp":"...","database":"connected"}</span>
+<a href="#__codelineno-15-6" id="__codelineno-15-6" name="__codelineno-15-6"></a>
+<a href="#__codelineno-15-7" id="__codelineno-15-7" name="__codelineno-15-7"></a><span class="c1"># Health check do MySQL Master</span>
+<a href="#__codelineno-15-8" id="__codelineno-15-8" name="__codelineno-15-8"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-master<span class="w"> </span>mysqladmin<span class="w"> </span>ping<span class="w"> </span>-h<span class="w"> </span>localhost<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123
+<a href="#__codelineno-15-9" id="__codelineno-15-9" name="__codelineno-15-9"></a>
+<a href="#__codelineno-15-10" id="__codelineno-15-10" name="__codelineno-15-10"></a><span class="c1"># Resposta esperada:</span>
+<a href="#__codelineno-15-11" id="__codelineno-15-11" name="__codelineno-15-11"></a><span class="c1"># mysqld is alive</span>
+</code></pre></div>
+<h3 id="5-modo-de-desenvolvimento-com-hot-reload">5. Modo de Desenvolvimento com Hot Reload<a class="headerlink" href="#5-modo-de-desenvolvimento-com-hot-reload" title="Permanent link">¶</a></h3>
+<p>O ambiente de desenvolvimento está configurado com volumes montados para permitir alterações em tempo real:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-16-1" id="__codelineno-16-1" name="__codelineno-16-1"></a><span class="nt">volumes</span><span class="p">:</span>
+<a href="#__codelineno-16-2" id="__codelineno-16-2" name="__codelineno-16-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./src:/app/src</span><span class="w">              </span><span class="c1"># Frontend</span>
+<a href="#__codelineno-16-3" id="__codelineno-16-3" name="__codelineno-16-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./server:/app/server</span><span class="w">        </span><span class="c1"># Backend</span>
+<a href="#__codelineno-16-4" id="__codelineno-16-4" name="__codelineno-16-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./public:/app/public</span><span class="w">        </span><span class="c1"># Assets públicos</span>
+<a href="#__codelineno-16-5" id="__codelineno-16-5" name="__codelineno-16-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./database:/app/database</span><span class="w">    </span><span class="c1"># Scripts SQL</span>
+</code></pre></div>
+<p><strong>Fluxo de trabalho:</strong>
+1. Edite arquivos em <code>src/</code> ou <code>server/</code>
+2. As alterações são detectadas automaticamente
+3. Frontend recarrega via Vite (Hot Module Replacement)
+4. Backend recarrega via Nodemon</p>
+<h3 id="6-executar-comandos-dentro-dos-containers">6. Executar Comandos Dentro dos Containers<a class="headerlink" href="#6-executar-comandos-dentro-dos-containers" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-17-1" id="__codelineno-17-1" name="__codelineno-17-1"></a><span class="c1"># Acessar shell do container da aplicação</span>
+<a href="#__codelineno-17-2" id="__codelineno-17-2" name="__codelineno-17-2"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>auditoria-app<span class="w"> </span>sh
+<a href="#__codelineno-17-3" id="__codelineno-17-3" name="__codelineno-17-3"></a>
+<a href="#__codelineno-17-4" id="__codelineno-17-4" name="__codelineno-17-4"></a><span class="c1"># Acessar MySQL Master</span>
+<a href="#__codelineno-17-5" id="__codelineno-17-5" name="__codelineno-17-5"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>mysql-master<span class="w"> </span>mysql<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>auditoria_db
+<a href="#__codelineno-17-6" id="__codelineno-17-6" name="__codelineno-17-6"></a>
+<a href="#__codelineno-17-7" id="__codelineno-17-7" name="__codelineno-17-7"></a><span class="c1"># Acessar MySQL Slave</span>
+<a href="#__codelineno-17-8" id="__codelineno-17-8" name="__codelineno-17-8"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>mysql-slave<span class="w"> </span>mysql<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>auditoria_db
+</code></pre></div>
+<h3 id="7-parar-containers">7. Parar Containers<a class="headerlink" href="#7-parar-containers" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-18-1" id="__codelineno-18-1" name="__codelineno-18-1"></a><span class="c1"># Parar containers (mantém dados)</span>
+<a href="#__codelineno-18-2" id="__codelineno-18-2" name="__codelineno-18-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>stop
+<a href="#__codelineno-18-3" id="__codelineno-18-3" name="__codelineno-18-3"></a>
+<a href="#__codelineno-18-4" id="__codelineno-18-4" name="__codelineno-18-4"></a><span class="c1"># Parar e remover containers (mantém volumes)</span>
+<a href="#__codelineno-18-5" id="__codelineno-18-5" name="__codelineno-18-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>down
+<a href="#__codelineno-18-6" id="__codelineno-18-6" name="__codelineno-18-6"></a>
+<a href="#__codelineno-18-7" id="__codelineno-18-7" name="__codelineno-18-7"></a><span class="c1"># Parar, remover containers e volumes (⚠️ PERDE DADOS)</span>
+<a href="#__codelineno-18-8" id="__codelineno-18-8" name="__codelineno-18-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span>-v
+</code></pre></div>
+<hr/>
+<h2 id="ambiente-de-producao-prod">🏭 Ambiente de Produção (Prod)<a class="headerlink" href="#ambiente-de-producao-prod" title="Permanent link">¶</a></h2>
+<h3 id="1-preparacao-do-servidor">1. Preparação do Servidor<a class="headerlink" href="#1-preparacao-do-servidor" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-19-1" id="__codelineno-19-1" name="__codelineno-19-1"></a><span class="c1"># Atualizar sistema</span>
+<a href="#__codelineno-19-2" id="__codelineno-19-2" name="__codelineno-19-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>upgrade<span class="w"> </span>-y
+<a href="#__codelineno-19-3" id="__codelineno-19-3" name="__codelineno-19-3"></a>
+<a href="#__codelineno-19-4" id="__codelineno-19-4" name="__codelineno-19-4"></a><span class="c1"># Instalar dependências</span>
+<a href="#__codelineno-19-5" id="__codelineno-19-5" name="__codelineno-19-5"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>git
+<a href="#__codelineno-19-6" id="__codelineno-19-6" name="__codelineno-19-6"></a>
+<a href="#__codelineno-19-7" id="__codelineno-19-7" name="__codelineno-19-7"></a><span class="c1"># Instalar Docker (veja seção anterior)</span>
+<a href="#__codelineno-19-8" id="__codelineno-19-8" name="__codelineno-19-8"></a>
+<a href="#__codelineno-19-9" id="__codelineno-19-9" name="__codelineno-19-9"></a><span class="c1"># Configurar firewall</span>
+<a href="#__codelineno-19-10" id="__codelineno-19-10" name="__codelineno-19-10"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">80</span>/tcp
+<a href="#__codelineno-19-11" id="__codelineno-19-11" name="__codelineno-19-11"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">443</span>/tcp
+<a href="#__codelineno-19-12" id="__codelineno-19-12" name="__codelineno-19-12"></a>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">22</span>/tcp
+<a href="#__codelineno-19-13" id="__codelineno-19-13" name="__codelineno-19-13"></a>sudo<span class="w"> </span>ufw<span class="w"> </span><span class="nb">enable</span>
+</code></pre></div>
+<h3 id="2-clonar-e-configurar">2. Clonar e Configurar<a class="headerlink" href="#2-clonar-e-configurar" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-20-1" id="__codelineno-20-1" name="__codelineno-20-1"></a><span class="c1"># Clonar repositório</span>
+<a href="#__codelineno-20-2" id="__codelineno-20-2" name="__codelineno-20-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/horaciovasconcellos/sistema-de-auditoria.git
+<a href="#__codelineno-20-3" id="__codelineno-20-3" name="__codelineno-20-3"></a><span class="nb">cd</span><span class="w"> </span>sistema-de-auditoria
+<a href="#__codelineno-20-4" id="__codelineno-20-4" name="__codelineno-20-4"></a>
+<a href="#__codelineno-20-5" id="__codelineno-20-5" name="__codelineno-20-5"></a><span class="c1"># Criar .env de produção</span>
+<a href="#__codelineno-20-6" id="__codelineno-20-6" name="__codelineno-20-6"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env.production
+<a href="#__codelineno-20-7" id="__codelineno-20-7" name="__codelineno-20-7"></a>
+<a href="#__codelineno-20-8" id="__codelineno-20-8" name="__codelineno-20-8"></a><span class="c1"># Editar configurações</span>
+<a href="#__codelineno-20-9" id="__codelineno-20-9" name="__codelineno-20-9"></a>nano<span class="w"> </span>.env.production
+<a href="#__codelineno-20-10" id="__codelineno-20-10" name="__codelineno-20-10"></a>
+<a href="#__codelineno-20-11" id="__codelineno-20-11" name="__codelineno-20-11"></a><span class="c1"># Gerar senhas seguras</span>
+<a href="#__codelineno-20-12" id="__codelineno-20-12" name="__codelineno-20-12"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"MYSQL_ROOT_PASSWORD=</span><span class="k">$(</span>openssl<span class="w"> </span>rand<span class="w"> </span>-base64<span class="w"> </span><span class="m">32</span><span class="k">)</span><span class="s2">"</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env.production
+<a href="#__codelineno-20-13" id="__codelineno-20-13" name="__codelineno-20-13"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"MYSQL_PASSWORD=</span><span class="k">$(</span>openssl<span class="w"> </span>rand<span class="w"> </span>-base64<span class="w"> </span><span class="m">32</span><span class="k">)</span><span class="s2">"</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env.production
+</code></pre></div>
+<h3 id="3-build-de-producao">3. Build de Produção<a class="headerlink" href="#3-build-de-producao" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-21-1" id="__codelineno-21-1" name="__codelineno-21-1"></a><span class="c1"># Usar docker-compose de produção</span>
+<a href="#__codelineno-21-2" id="__codelineno-21-2" name="__codelineno-21-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.prod.yml<span class="w"> </span>build
+<a href="#__codelineno-21-3" id="__codelineno-21-3" name="__codelineno-21-3"></a>
+<a href="#__codelineno-21-4" id="__codelineno-21-4" name="__codelineno-21-4"></a><span class="c1"># Iniciar containers</span>
+<a href="#__codelineno-21-5" id="__codelineno-21-5" name="__codelineno-21-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.prod.yml<span class="w"> </span>up<span class="w"> </span>-d
+<a href="#__codelineno-21-6" id="__codelineno-21-6" name="__codelineno-21-6"></a>
+<a href="#__codelineno-21-7" id="__codelineno-21-7" name="__codelineno-21-7"></a><span class="c1"># Verificar status</span>
+<a href="#__codelineno-21-8" id="__codelineno-21-8" name="__codelineno-21-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.prod.yml<span class="w"> </span>ps
+</code></pre></div>
+<h3 id="4-configurar-nginx-opcional-para-https">4. Configurar Nginx (Opcional - para HTTPS)<a class="headerlink" href="#4-configurar-nginx-opcional-para-https" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-22-1" id="__codelineno-22-1" name="__codelineno-22-1"></a><span class="c1"># Instalar Nginx</span>
+<a href="#__codelineno-22-2" id="__codelineno-22-2" name="__codelineno-22-2"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nginx<span class="w"> </span>certbot<span class="w"> </span>python3-certbot-nginx
+<a href="#__codelineno-22-3" id="__codelineno-22-3" name="__codelineno-22-3"></a>
+<a href="#__codelineno-22-4" id="__codelineno-22-4" name="__codelineno-22-4"></a><span class="c1"># Criar configuração</span>
+<a href="#__codelineno-22-5" id="__codelineno-22-5" name="__codelineno-22-5"></a>sudo<span class="w"> </span>nano<span class="w"> </span>/etc/nginx/sites-available/auditoria
+</code></pre></div>
+<p>Conteúdo:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-23-1" id="__codelineno-23-1" name="__codelineno-23-1"></a><span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<a href="#__codelineno-23-2" id="__codelineno-23-2" name="__codelineno-23-2"></a><span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">80</span><span class="p">;</span>
+<a href="#__codelineno-23-3" id="__codelineno-23-3" name="__codelineno-23-3"></a><span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">seu-dominio.com</span><span class="p">;</span>
+<a href="#__codelineno-23-4" id="__codelineno-23-4" name="__codelineno-23-4"></a>
+<a href="#__codelineno-23-5" id="__codelineno-23-5" name="__codelineno-23-5"></a><span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+<a href="#__codelineno-23-6" id="__codelineno-23-6" name="__codelineno-23-6"></a><span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://localhost:3000</span><span class="p">;</span>
+<a href="#__codelineno-23-7" id="__codelineno-23-7" name="__codelineno-23-7"></a><span class="w">        </span><span class="kn">proxy_http_version</span><span class="w"> </span><span class="mi">1</span><span class="s">.1</span><span class="p">;</span>
+<a href="#__codelineno-23-8" id="__codelineno-23-8" name="__codelineno-23-8"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Upgrade</span><span class="w"> </span><span class="nv">$http_upgrade</span><span class="p">;</span>
+<a href="#__codelineno-23-9" id="__codelineno-23-9" name="__codelineno-23-9"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">'upgrade'</span><span class="p">;</span>
+<a href="#__codelineno-23-10" id="__codelineno-23-10" name="__codelineno-23-10"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<a href="#__codelineno-23-11" id="__codelineno-23-11" name="__codelineno-23-11"></a><span class="w">        </span><span class="kn">proxy_cache_bypass</span><span class="w"> </span><span class="nv">$http_upgrade</span><span class="p">;</span>
+<a href="#__codelineno-23-12" id="__codelineno-23-12" name="__codelineno-23-12"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<a href="#__codelineno-23-13" id="__codelineno-23-13" name="__codelineno-23-13"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<a href="#__codelineno-23-14" id="__codelineno-23-14" name="__codelineno-23-14"></a><span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+<a href="#__codelineno-23-15" id="__codelineno-23-15" name="__codelineno-23-15"></a><span class="w">    </span><span class="p">}</span>
+<a href="#__codelineno-23-16" id="__codelineno-23-16" name="__codelineno-23-16"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-24-1" id="__codelineno-24-1" name="__codelineno-24-1"></a><span class="c1"># Ativar site</span>
+<a href="#__codelineno-24-2" id="__codelineno-24-2" name="__codelineno-24-2"></a>sudo<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>/etc/nginx/sites-available/auditoria<span class="w"> </span>/etc/nginx/sites-enabled/
+<a href="#__codelineno-24-3" id="__codelineno-24-3" name="__codelineno-24-3"></a>
+<a href="#__codelineno-24-4" id="__codelineno-24-4" name="__codelineno-24-4"></a><span class="c1"># Testar configuração</span>
+<a href="#__codelineno-24-5" id="__codelineno-24-5" name="__codelineno-24-5"></a>sudo<span class="w"> </span>nginx<span class="w"> </span>-t
+<a href="#__codelineno-24-6" id="__codelineno-24-6" name="__codelineno-24-6"></a>
+<a href="#__codelineno-24-7" id="__codelineno-24-7" name="__codelineno-24-7"></a><span class="c1"># Recarregar Nginx</span>
+<a href="#__codelineno-24-8" id="__codelineno-24-8" name="__codelineno-24-8"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>nginx
+<a href="#__codelineno-24-9" id="__codelineno-24-9" name="__codelineno-24-9"></a>
+<a href="#__codelineno-24-10" id="__codelineno-24-10" name="__codelineno-24-10"></a><span class="c1"># Configurar SSL (Let's Encrypt)</span>
+<a href="#__codelineno-24-11" id="__codelineno-24-11" name="__codelineno-24-11"></a>sudo<span class="w"> </span>certbot<span class="w"> </span>--nginx<span class="w"> </span>-d<span class="w"> </span>seu-dominio.com
+</code></pre></div>
+<h3 id="5-backup-automatizado">5. Backup Automatizado<a class="headerlink" href="#5-backup-automatizado" title="Permanent link">¶</a></h3>
+<p>Criar script de backup:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-25-1" id="__codelineno-25-1" name="__codelineno-25-1"></a>sudo<span class="w"> </span>nano<span class="w"> </span>/usr/local/bin/backup-auditoria.sh
+</code></pre></div>
+<p>Conteúdo:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-26-1" id="__codelineno-26-1" name="__codelineno-26-1"></a><span class="ch">#!/bin/bash</span>
+<a href="#__codelineno-26-2" id="__codelineno-26-2" name="__codelineno-26-2"></a><span class="nv">BACKUP_DIR</span><span class="o">=</span>~/docker/mysql/master/backup
+<a href="#__codelineno-26-3" id="__codelineno-26-3" name="__codelineno-26-3"></a><span class="nv">DATE</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%Y%m%d_%H%M%S<span class="k">)</span>
+<a href="#__codelineno-26-4" id="__codelineno-26-4" name="__codelineno-26-4"></a><span class="nv">BACKUP_FILE</span><span class="o">=</span><span class="s2">"auditoria_backup_</span><span class="si">${</span><span class="nv">DATE</span><span class="si">}</span><span class="s2">.sql"</span>
+<a href="#__codelineno-26-5" id="__codelineno-26-5" name="__codelineno-26-5"></a>
+<a href="#__codelineno-26-6" id="__codelineno-26-6" name="__codelineno-26-6"></a><span class="c1"># Criar backup</span>
+<a href="#__codelineno-26-7" id="__codelineno-26-7" name="__codelineno-26-7"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-master<span class="w"> </span>mysqldump<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-26-8" id="__codelineno-26-8" name="__codelineno-26-8"></a><span class="w">  </span>--single-transaction<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-26-9" id="__codelineno-26-9" name="__codelineno-26-9"></a><span class="w">  </span>--routines<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-26-10" id="__codelineno-26-10" name="__codelineno-26-10"></a><span class="w">  </span>--triggers<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-26-11" id="__codelineno-26-11" name="__codelineno-26-11"></a><span class="w">  </span>auditoria_db<span class="w"> </span>&gt;<span class="w"> </span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span>/<span class="si">${</span><span class="nv">BACKUP_FILE</span><span class="si">}</span>
+<a href="#__codelineno-26-12" id="__codelineno-26-12" name="__codelineno-26-12"></a>
+<a href="#__codelineno-26-13" id="__codelineno-26-13" name="__codelineno-26-13"></a><span class="c1"># Comprimir backup</span>
+<a href="#__codelineno-26-14" id="__codelineno-26-14" name="__codelineno-26-14"></a>gzip<span class="w"> </span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span>/<span class="si">${</span><span class="nv">BACKUP_FILE</span><span class="si">}</span>
+<a href="#__codelineno-26-15" id="__codelineno-26-15" name="__codelineno-26-15"></a>
+<a href="#__codelineno-26-16" id="__codelineno-26-16" name="__codelineno-26-16"></a><span class="c1"># Manter apenas últimos 30 dias</span>
+<a href="#__codelineno-26-17" id="__codelineno-26-17" name="__codelineno-26-17"></a>find<span class="w"> </span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span><span class="w"> </span>-name<span class="w"> </span><span class="s2">"auditoria_backup_*.sql.gz"</span><span class="w"> </span>-mtime<span class="w"> </span>+30<span class="w"> </span>-delete
+<a href="#__codelineno-26-18" id="__codelineno-26-18" name="__codelineno-26-18"></a>
+<a href="#__codelineno-26-19" id="__codelineno-26-19" name="__codelineno-26-19"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"Backup criado: </span><span class="si">${</span><span class="nv">BACKUP_FILE</span><span class="si">}</span><span class="s2">.gz"</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-27-1" id="__codelineno-27-1" name="__codelineno-27-1"></a><span class="c1"># Dar permissão de execução</span>
+<a href="#__codelineno-27-2" id="__codelineno-27-2" name="__codelineno-27-2"></a>sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/backup-auditoria.sh
+<a href="#__codelineno-27-3" id="__codelineno-27-3" name="__codelineno-27-3"></a>
+<a href="#__codelineno-27-4" id="__codelineno-27-4" name="__codelineno-27-4"></a><span class="c1"># Configurar cron para backup diário às 2h</span>
+<a href="#__codelineno-27-5" id="__codelineno-27-5" name="__codelineno-27-5"></a><span class="o">(</span>crontab<span class="w"> </span>-l<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="p">;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"0 2 * * * /usr/local/bin/backup-auditoria.sh"</span><span class="o">)</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>crontab<span class="w"> </span>-
+</code></pre></div>
+<h3 id="6-monitoramento">6. Monitoramento<a class="headerlink" href="#6-monitoramento" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-28-1" id="__codelineno-28-1" name="__codelineno-28-1"></a><span class="c1"># Verificar uso de recursos</span>
+<a href="#__codelineno-28-2" id="__codelineno-28-2" name="__codelineno-28-2"></a>docker<span class="w"> </span>stats
+<a href="#__codelineno-28-3" id="__codelineno-28-3" name="__codelineno-28-3"></a>
+<a href="#__codelineno-28-4" id="__codelineno-28-4" name="__codelineno-28-4"></a><span class="c1"># Verificar logs em tempo real</span>
+<a href="#__codelineno-28-5" id="__codelineno-28-5" name="__codelineno-28-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.prod.yml<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span>
+<a href="#__codelineno-28-6" id="__codelineno-28-6" name="__codelineno-28-6"></a>
+<a href="#__codelineno-28-7" id="__codelineno-28-7" name="__codelineno-28-7"></a><span class="c1"># Verificar espaço em disco</span>
+<a href="#__codelineno-28-8" id="__codelineno-28-8" name="__codelineno-28-8"></a>df<span class="w"> </span>-h<span class="w"> </span>~/docker/mysql
+<a href="#__codelineno-28-9" id="__codelineno-28-9" name="__codelineno-28-9"></a>
+<a href="#__codelineno-28-10" id="__codelineno-28-10" name="__codelineno-28-10"></a><span class="c1"># Verificar tamanho do banco</span>
+<a href="#__codelineno-28-11" id="__codelineno-28-11" name="__codelineno-28-11"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-master<span class="w"> </span>mysql<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>-e<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-28-12" id="__codelineno-28-12" name="__codelineno-28-12"></a><span class="w">  </span><span class="s2">"SELECT table_schema AS 'Database', </span>
+<a href="#__codelineno-28-13" id="__codelineno-28-13" name="__codelineno-28-13"></a><span class="s2">   ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Size (MB)' </span>
+<a href="#__codelineno-28-14" id="__codelineno-28-14" name="__codelineno-28-14"></a><span class="s2">   FROM information_schema.tables </span>
+<a href="#__codelineno-28-15" id="__codelineno-28-15" name="__codelineno-28-15"></a><span class="s2">   WHERE table_schema = 'auditoria_db';"</span>
+</code></pre></div>
+<hr/>
+<h2 id="manutencao-e-operacao">🔄 Manutenção e Operação<a class="headerlink" href="#manutencao-e-operacao" title="Permanent link">¶</a></h2>
+<h3 id="atualizar-aplicacao">Atualizar Aplicação<a class="headerlink" href="#atualizar-aplicacao" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-29-1" id="__codelineno-29-1" name="__codelineno-29-1"></a><span class="c1"># Parar containers</span>
+<a href="#__codelineno-29-2" id="__codelineno-29-2" name="__codelineno-29-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>down
+<a href="#__codelineno-29-3" id="__codelineno-29-3" name="__codelineno-29-3"></a>
+<a href="#__codelineno-29-4" id="__codelineno-29-4" name="__codelineno-29-4"></a><span class="c1"># Atualizar código</span>
+<a href="#__codelineno-29-5" id="__codelineno-29-5" name="__codelineno-29-5"></a>git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>main
+<a href="#__codelineno-29-6" id="__codelineno-29-6" name="__codelineno-29-6"></a>
+<a href="#__codelineno-29-7" id="__codelineno-29-7" name="__codelineno-29-7"></a><span class="c1"># Reconstruir imagens</span>
+<a href="#__codelineno-29-8" id="__codelineno-29-8" name="__codelineno-29-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>--no-cache
+<a href="#__codelineno-29-9" id="__codelineno-29-9" name="__codelineno-29-9"></a>
+<a href="#__codelineno-29-10" id="__codelineno-29-10" name="__codelineno-29-10"></a><span class="c1"># Iniciar containers</span>
+<a href="#__codelineno-29-11" id="__codelineno-29-11" name="__codelineno-29-11"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<a href="#__codelineno-29-12" id="__codelineno-29-12" name="__codelineno-29-12"></a>
+<a href="#__codelineno-29-13" id="__codelineno-29-13" name="__codelineno-29-13"></a><span class="c1"># Verificar logs</span>
+<a href="#__codelineno-29-14" id="__codelineno-29-14" name="__codelineno-29-14"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f
+</code></pre></div>
+<h3 id="resetar-banco-de-dados-dev">Resetar Banco de Dados (Dev)<a class="headerlink" href="#resetar-banco-de-dados-dev" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-30-1" id="__codelineno-30-1" name="__codelineno-30-1"></a><span class="c1"># ⚠️ ATENÇÃO: Isso apaga TODOS os dados!</span>
+<a href="#__codelineno-30-2" id="__codelineno-30-2" name="__codelineno-30-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"> </span>-v
+<a href="#__codelineno-30-3" id="__codelineno-30-3" name="__codelineno-30-3"></a>
+<a href="#__codelineno-30-4" id="__codelineno-30-4" name="__codelineno-30-4"></a><span class="c1"># Remover diretórios de dados</span>
+<a href="#__codelineno-30-5" id="__codelineno-30-5" name="__codelineno-30-5"></a>rm<span class="w"> </span>-rf<span class="w"> </span>~/docker/mysql/master/data/*
+<a href="#__codelineno-30-6" id="__codelineno-30-6" name="__codelineno-30-6"></a>rm<span class="w"> </span>-rf<span class="w"> </span>~/docker/mysql/slave/data/*
+<a href="#__codelineno-30-7" id="__codelineno-30-7" name="__codelineno-30-7"></a>
+<a href="#__codelineno-30-8" id="__codelineno-30-8" name="__codelineno-30-8"></a><span class="c1"># Reiniciar containers (irá recriar o banco)</span>
+<a href="#__codelineno-30-9" id="__codelineno-30-9" name="__codelineno-30-9"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d
+<a href="#__codelineno-30-10" id="__codelineno-30-10" name="__codelineno-30-10"></a>
+<a href="#__codelineno-30-11" id="__codelineno-30-11" name="__codelineno-30-11"></a><span class="c1"># Aguardar inicialização (30-60 segundos)</span>
+<a href="#__codelineno-30-12" id="__codelineno-30-12" name="__codelineno-30-12"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>mysql-master
+</code></pre></div>
+<h3 id="restaurar-backup">Restaurar Backup<a class="headerlink" href="#restaurar-backup" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-31-1" id="__codelineno-31-1" name="__codelineno-31-1"></a><span class="c1"># Parar aplicação</span>
+<a href="#__codelineno-31-2" id="__codelineno-31-2" name="__codelineno-31-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>stop<span class="w"> </span>app
+<a href="#__codelineno-31-3" id="__codelineno-31-3" name="__codelineno-31-3"></a>
+<a href="#__codelineno-31-4" id="__codelineno-31-4" name="__codelineno-31-4"></a><span class="c1"># Restaurar backup</span>
+<a href="#__codelineno-31-5" id="__codelineno-31-5" name="__codelineno-31-5"></a>gunzip<span class="w"> </span>&lt;<span class="w"> </span>~/docker/mysql/master/backup/auditoria_backup_20251224.sql.gz<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-31-6" id="__codelineno-31-6" name="__codelineno-31-6"></a><span class="w">  </span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>mysql-master<span class="w"> </span>mysql<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>auditoria_db
+<a href="#__codelineno-31-7" id="__codelineno-31-7" name="__codelineno-31-7"></a>
+<a href="#__codelineno-31-8" id="__codelineno-31-8" name="__codelineno-31-8"></a><span class="c1"># Reiniciar aplicação</span>
+<a href="#__codelineno-31-9" id="__codelineno-31-9" name="__codelineno-31-9"></a>docker<span class="w"> </span>compose<span class="w"> </span>start<span class="w"> </span>app
+</code></pre></div>
+<h3 id="replicacao-master-slave">Replicação Master-Slave<a class="headerlink" href="#replicacao-master-slave" title="Permanent link">¶</a></h3>
+<p>Verificar status da replicação:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-32-1" id="__codelineno-32-1" name="__codelineno-32-1"></a><span class="c1"># No Master - verificar binlog</span>
+<a href="#__codelineno-32-2" id="__codelineno-32-2" name="__codelineno-32-2"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-master<span class="w"> </span>mysql<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SHOW MASTER STATUS;"</span>
+<a href="#__codelineno-32-3" id="__codelineno-32-3" name="__codelineno-32-3"></a>
+<a href="#__codelineno-32-4" id="__codelineno-32-4" name="__codelineno-32-4"></a><span class="c1"># No Slave - verificar replicação</span>
+<a href="#__codelineno-32-5" id="__codelineno-32-5" name="__codelineno-32-5"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-slave<span class="w"> </span>mysql<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>-e<span class="w"> </span><span class="s2">"SHOW SLAVE STATUS\G"</span>
+</code></pre></div>
+<p>Saída esperada no Slave:
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-33-1" id="__codelineno-33-1" name="__codelineno-33-1"></a>Slave_IO_Running: Yes
+<a href="#__codelineno-33-2" id="__codelineno-33-2" name="__codelineno-33-2"></a>Slave_SQL_Running: Yes
+<a href="#__codelineno-33-3" id="__codelineno-33-3" name="__codelineno-33-3"></a>Seconds_Behind_Master: 0
+</code></pre></div></p>
+<hr/>
+<h2 id="troubleshooting">🐛 Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="container-nao-inicia">Container não inicia<a class="headerlink" href="#container-nao-inicia" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-34-1" id="__codelineno-34-1" name="__codelineno-34-1"></a><span class="c1"># Verificar logs</span>
+<a href="#__codelineno-34-2" id="__codelineno-34-2" name="__codelineno-34-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>mysql-master
+<a href="#__codelineno-34-3" id="__codelineno-34-3" name="__codelineno-34-3"></a>
+<a href="#__codelineno-34-4" id="__codelineno-34-4" name="__codelineno-34-4"></a><span class="c1"># Verificar permissões</span>
+<a href="#__codelineno-34-5" id="__codelineno-34-5" name="__codelineno-34-5"></a>ls<span class="w"> </span>-la<span class="w"> </span>~/docker/mysql/master/data
+<a href="#__codelineno-34-6" id="__codelineno-34-6" name="__codelineno-34-6"></a>
+<a href="#__codelineno-34-7" id="__codelineno-34-7" name="__codelineno-34-7"></a><span class="c1"># Verificar espaço em disco</span>
+<a href="#__codelineno-34-8" id="__codelineno-34-8" name="__codelineno-34-8"></a>df<span class="w"> </span>-h
+<a href="#__codelineno-34-9" id="__codelineno-34-9" name="__codelineno-34-9"></a>
+<a href="#__codelineno-34-10" id="__codelineno-34-10" name="__codelineno-34-10"></a><span class="c1"># Limpar volumes órfãos</span>
+<a href="#__codelineno-34-11" id="__codelineno-34-11" name="__codelineno-34-11"></a>docker<span class="w"> </span>volume<span class="w"> </span>prune
+</code></pre></div>
+<h3 id="erro-de-conexao-com-banco">Erro de conexão com banco<a class="headerlink" href="#erro-de-conexao-com-banco" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-35-1" id="__codelineno-35-1" name="__codelineno-35-1"></a><span class="c1"># Verificar se MySQL está rodando</span>
+<a href="#__codelineno-35-2" id="__codelineno-35-2" name="__codelineno-35-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps<span class="w"> </span>mysql-master
+<a href="#__codelineno-35-3" id="__codelineno-35-3" name="__codelineno-35-3"></a>
+<a href="#__codelineno-35-4" id="__codelineno-35-4" name="__codelineno-35-4"></a><span class="c1"># Testar conexão</span>
+<a href="#__codelineno-35-5" id="__codelineno-35-5" name="__codelineno-35-5"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-master<span class="w"> </span>mysqladmin<span class="w"> </span>ping<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123
+<a href="#__codelineno-35-6" id="__codelineno-35-6" name="__codelineno-35-6"></a>
+<a href="#__codelineno-35-7" id="__codelineno-35-7" name="__codelineno-35-7"></a><span class="c1"># Verificar porta</span>
+<a href="#__codelineno-35-8" id="__codelineno-35-8" name="__codelineno-35-8"></a>netstat<span class="w"> </span>-tulpn<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">3306</span>
+<a href="#__codelineno-35-9" id="__codelineno-35-9" name="__codelineno-35-9"></a>
+<a href="#__codelineno-35-10" id="__codelineno-35-10" name="__codelineno-35-10"></a><span class="c1"># Verificar health check</span>
+<a href="#__codelineno-35-11" id="__codelineno-35-11" name="__codelineno-35-11"></a>docker<span class="w"> </span>inspect<span class="w"> </span>mysql-master<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>Health<span class="w"> </span>-A<span class="w"> </span><span class="m">10</span>
+</code></pre></div>
+<h3 id="aplicacao-lenta">Aplicação lenta<a class="headerlink" href="#aplicacao-lenta" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-36-1" id="__codelineno-36-1" name="__codelineno-36-1"></a><span class="c1"># Verificar uso de recursos</span>
+<a href="#__codelineno-36-2" id="__codelineno-36-2" name="__codelineno-36-2"></a>docker<span class="w"> </span>stats
+<a href="#__codelineno-36-3" id="__codelineno-36-3" name="__codelineno-36-3"></a>
+<a href="#__codelineno-36-4" id="__codelineno-36-4" name="__codelineno-36-4"></a><span class="c1"># Verificar queries lentas</span>
+<a href="#__codelineno-36-5" id="__codelineno-36-5" name="__codelineno-36-5"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-master<span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span><span class="w"> </span>/var/log/mysql/slow-query.log
+<a href="#__codelineno-36-6" id="__codelineno-36-6" name="__codelineno-36-6"></a>
+<a href="#__codelineno-36-7" id="__codelineno-36-7" name="__codelineno-36-7"></a><span class="c1"># Otimizar banco (dev)</span>
+<a href="#__codelineno-36-8" id="__codelineno-36-8" name="__codelineno-36-8"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-master<span class="w"> </span>mysqlcheck<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>--optimize<span class="w"> </span>--all-databases
+</code></pre></div>
+<h3 id="porta-ja-em-uso">Porta já em uso<a class="headerlink" href="#porta-ja-em-uso" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-37-1" id="__codelineno-37-1" name="__codelineno-37-1"></a><span class="c1"># Verificar quem está usando a porta 3000</span>
+<a href="#__codelineno-37-2" id="__codelineno-37-2" name="__codelineno-37-2"></a>lsof<span class="w"> </span>-i<span class="w"> </span>:3000
+<a href="#__codelineno-37-3" id="__codelineno-37-3" name="__codelineno-37-3"></a>
+<a href="#__codelineno-37-4" id="__codelineno-37-4" name="__codelineno-37-4"></a><span class="c1"># Matar processo</span>
+<a href="#__codelineno-37-5" id="__codelineno-37-5" name="__codelineno-37-5"></a><span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span>&lt;PID&gt;
+<a href="#__codelineno-37-6" id="__codelineno-37-6" name="__codelineno-37-6"></a>
+<a href="#__codelineno-37-7" id="__codelineno-37-7" name="__codelineno-37-7"></a><span class="c1"># Ou alterar porta no docker-compose.yml</span>
+</code></pre></div>
+<hr/>
+<h2 id="estrutura-de-dados">📊 Estrutura de Dados<a class="headerlink" href="#estrutura-de-dados" title="Permanent link">¶</a></h2>
+<h3 id="tabelas-principais">Tabelas Principais<a class="headerlink" href="#tabelas-principais" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>aplicacoes</strong> - Cadastro de aplicações</li>
+<li><strong>tecnologias</strong> - Tecnologias utilizadas</li>
+<li><strong>colaboradores</strong> - Gestão de colaboradores</li>
+<li><strong>capacidades_negocio</strong> - Capacidades de negócio</li>
+<li><strong>processos_negocio</strong> - Processos de negócio</li>
+<li><strong>contratos</strong> - Contratos e SLAs</li>
+<li><strong>runbooks</strong> - Procedimentos operacionais</li>
+<li><strong>logs_auditoria</strong> - Logs de auditoria do sistema</li>
+</ul>
+<h3 id="scripts-de-inicializacao">Scripts de Inicialização<a class="headerlink" href="#scripts-de-inicializacao" title="Permanent link">¶</a></h3>
+<p>Os scripts SQL são executados automaticamente na primeira inicialização:</p>
+<ol>
+<li><code>01-init-schema-data.sql</code> - Cria esquema e tabelas principais</li>
+<li><code>03-create-configuracoes.sql</code> - Tabelas de configuração</li>
+<li><code>04-create-logs.sql</code> - Sistema de logging</li>
+<li><code>15-create-avaliacoes-colaborador.sql</code> - Avaliações</li>
+<li><code>16-create-colaborador-habilidades.sql</code> - Habilidades</li>
+</ol>
+<hr/>
+<h2 id="seguranca">🔐 Segurança<a class="headerlink" href="#seguranca" title="Permanent link">¶</a></h2>
+<h3 id="checklist-de-seguranca-producao">Checklist de Segurança (Produção)<a class="headerlink" href="#checklist-de-seguranca-producao" title="Permanent link">¶</a></h3>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"><span class="task-list-indicator"></span></input></label> Alterar todas as senhas padrão</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"><span class="task-list-indicator"></span></input></label> Configurar firewall (UFW/iptables)</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"/><span class="task-list-indicator"></span></label> Habilitar HTTPS com Let's Encrypt</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"/><span class="task-list-indicator"></span></label> Limitar acesso ao MySQL (bind localhost)</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"/><span class="task-list-indicator"></span></label> Configurar backups automáticos</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"/><span class="task-list-indicator"></span></label> Monitorar logs de acesso</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"/><span class="task-list-indicator"></span></label> Atualizar sistema operacional regularmente</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"/><span class="task-list-indicator"></span></label> Implementar política de senha forte</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"/><span class="task-list-indicator"></span></label> Configurar fail2ban para proteção contra brute force</li>
+<li class="task-list-item"><label class="task-list-control"><input disabled="" type="checkbox"/><span class="task-list-indicator"></span></label> Desabilitar acesso root via SSH</li>
+</ul>
+<h3 id="limitar-acesso-ao-mysql">Limitar Acesso ao MySQL<a class="headerlink" href="#limitar-acesso-ao-mysql" title="Permanent link">¶</a></h3>
+<p>Editar <code>docker-compose.yml</code>:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-38-1" id="__codelineno-38-1" name="__codelineno-38-1"></a><span class="nt">mysql-master</span><span class="p">:</span>
+<a href="#__codelineno-38-2" id="__codelineno-38-2" name="__codelineno-38-2"></a><span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<a href="#__codelineno-38-3" id="__codelineno-38-3" name="__codelineno-38-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"127.0.0.1:3306:3306"</span><span class="w">  </span><span class="c1"># Apenas localhost</span>
+</code></pre></div>
+<hr/>
+<h2 id="recursos-adicionais">📚 Recursos Adicionais<a class="headerlink" href="#recursos-adicionais" title="Permanent link">¶</a></h2>
+<h3 id="documentacao">Documentação<a class="headerlink" href="#documentacao" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>API:</strong> <a href="http://localhost:8000/api-catalog/">http://localhost:8000/api-catalog/</a></li>
+<li><strong>Runbooks:</strong> <a href="http://localhost:8000/runbooks/">http://localhost:8000/runbooks/</a></li>
+<li><strong>Este Guia:</strong> <a href="http://localhost:8000">http://localhost:8000</a></li>
+</ul>
+<h3 id="comandos-uteis">Comandos Úteis<a class="headerlink" href="#comandos-uteis" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-39-1" id="__codelineno-39-1" name="__codelineno-39-1"></a><span class="c1"># Visualizar todos os containers</span>
+<a href="#__codelineno-39-2" id="__codelineno-39-2" name="__codelineno-39-2"></a>docker<span class="w"> </span>ps<span class="w"> </span>-a
+<a href="#__codelineno-39-3" id="__codelineno-39-3" name="__codelineno-39-3"></a>
+<a href="#__codelineno-39-4" id="__codelineno-39-4" name="__codelineno-39-4"></a><span class="c1"># Visualizar volumes</span>
+<a href="#__codelineno-39-5" id="__codelineno-39-5" name="__codelineno-39-5"></a>docker<span class="w"> </span>volume<span class="w"> </span>ls
+<a href="#__codelineno-39-6" id="__codelineno-39-6" name="__codelineno-39-6"></a>
+<a href="#__codelineno-39-7" id="__codelineno-39-7" name="__codelineno-39-7"></a><span class="c1"># Visualizar uso de espaço</span>
+<a href="#__codelineno-39-8" id="__codelineno-39-8" name="__codelineno-39-8"></a>docker<span class="w"> </span>system<span class="w"> </span>df
+<a href="#__codelineno-39-9" id="__codelineno-39-9" name="__codelineno-39-9"></a>
+<a href="#__codelineno-39-10" id="__codelineno-39-10" name="__codelineno-39-10"></a><span class="c1"># Limpar sistema Docker</span>
+<a href="#__codelineno-39-11" id="__codelineno-39-11" name="__codelineno-39-11"></a>docker<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-a
+<a href="#__codelineno-39-12" id="__codelineno-39-12" name="__codelineno-39-12"></a>
+<a href="#__codelineno-39-13" id="__codelineno-39-13" name="__codelineno-39-13"></a><span class="c1"># Exportar banco de dados</span>
+<a href="#__codelineno-39-14" id="__codelineno-39-14" name="__codelineno-39-14"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>mysql-master<span class="w"> </span>mysqldump<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>auditoria_db<span class="w"> </span>&gt;<span class="w"> </span>backup.sql
+<a href="#__codelineno-39-15" id="__codelineno-39-15" name="__codelineno-39-15"></a>
+<a href="#__codelineno-39-16" id="__codelineno-39-16" name="__codelineno-39-16"></a><span class="c1"># Importar banco de dados</span>
+<a href="#__codelineno-39-17" id="__codelineno-39-17" name="__codelineno-39-17"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>mysql-master<span class="w"> </span>mysql<span class="w"> </span>-uroot<span class="w"> </span>-prootpass123<span class="w"> </span>auditoria_db<span class="w"> </span>&lt;<span class="w"> </span>backup.sql
+</code></pre></div>
+<hr/>
+<h2 id="suporte">📞 Suporte<a class="headerlink" href="#suporte" title="Permanent link">¶</a></h2>
+<h3 id="logs-e-diagnostico">Logs e Diagnóstico<a class="headerlink" href="#logs-e-diagnostico" title="Permanent link">¶</a></h3>
+<p>Antes de reportar problemas, colete as seguintes informações:</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-40-1" id="__codelineno-40-1" name="__codelineno-40-1"></a><span class="c1"># Versão do Docker</span>
+<a href="#__codelineno-40-2" id="__codelineno-40-2" name="__codelineno-40-2"></a>docker<span class="w"> </span>--version
+<a href="#__codelineno-40-3" id="__codelineno-40-3" name="__codelineno-40-3"></a>
+<a href="#__codelineno-40-4" id="__codelineno-40-4" name="__codelineno-40-4"></a><span class="c1"># Versão do Docker Compose</span>
+<a href="#__codelineno-40-5" id="__codelineno-40-5" name="__codelineno-40-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>version
+<a href="#__codelineno-40-6" id="__codelineno-40-6" name="__codelineno-40-6"></a>
+<a href="#__codelineno-40-7" id="__codelineno-40-7" name="__codelineno-40-7"></a><span class="c1"># Status dos containers</span>
+<a href="#__codelineno-40-8" id="__codelineno-40-8" name="__codelineno-40-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>ps
+<a href="#__codelineno-40-9" id="__codelineno-40-9" name="__codelineno-40-9"></a>
+<a href="#__codelineno-40-10" id="__codelineno-40-10" name="__codelineno-40-10"></a><span class="c1"># Logs da aplicação (últimas 100 linhas)</span>
+<a href="#__codelineno-40-11" id="__codelineno-40-11" name="__codelineno-40-11"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span><span class="w"> </span>&gt;<span class="w"> </span>logs.txt
+<a href="#__codelineno-40-12" id="__codelineno-40-12" name="__codelineno-40-12"></a>
+<a href="#__codelineno-40-13" id="__codelineno-40-13" name="__codelineno-40-13"></a><span class="c1"># Uso de recursos</span>
+<a href="#__codelineno-40-14" id="__codelineno-40-14" name="__codelineno-40-14"></a>docker<span class="w"> </span>stats<span class="w"> </span>--no-stream<span class="w"> </span>&gt;<span class="w"> </span>stats.txt
+</code></pre></div>
+<h3 id="contato">Contato<a class="headerlink" href="#contato" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>GitHub:</strong> <a href="https://github.com/horaciovasconcellos/sistema-de-auditoria">https://github.com/horaciovasconcellos/sistema-de-auditoria</a></li>
+<li><strong>Issues:</strong> <a href="https://github.com/horaciovasconcellos/sistema-de-auditoria/issues">https://github.com/horaciovasconcellos/sistema-de-auditoria/issues</a></li>
+<li><strong>Email:</strong> <a href="mailto:horaciovasconcellos@example.com">horaciovasconcellos@example.com</a></li>
+</ul>
+<hr/>
+<h2 id="changelog">📝 Changelog<a class="headerlink" href="#changelog" title="Permanent link">¶</a></h2>
+<h3 id="v100-24122025">v1.0.0 - 24/12/2025<a class="headerlink" href="#v100-24122025" title="Permanent link">¶</a></h3>
+<ul>
+<li>✅ Release inicial</li>
+<li>✅ Suporte a Docker Compose</li>
+<li>✅ Replicação Master-Slave</li>
+<li>✅ Sistema de logging completo</li>
+<li>✅ Ambiente Dev e Prod</li>
+</ul>
+<hr/>
+<p><strong>Última atualização:</strong> 24 de Dezembro de 2025<br/>
+<strong>Autor:</strong> Horacio Vasconcellos<br/>
+<strong>Licença:</strong> MIT</p>
+<p>Vou analisar a estrutura de programas do seu repositório <strong>horaciovasconcellos/codewiki</strong>. Deixe-me investigar a organização e arquitetura do projeto. Vou buscar mais informações sobre as estruturas de diretórios principais: Vou analisar o package.json para entender melhor a estrutura do projeto: Agora vou buscar informações mais detalhadas sobre os componentes e a estrutura do servidor. # 📊 AVALIAÇÃO DA ESTRUTURA DO REPOSITÓRIO CODEWIKI</p>
+<p>Com base na análise do repositório <strong>horaciovasconcellos/codewiki</strong>, aqui está uma avaliação detalhada da estrutura de programas existentes:</p>
+<h2 id="arquitetura-geral">🏗️ <strong>ARQUITETURA GERAL</strong><a class="headerlink" href="#arquitetura-geral" title="Permanent link">¶</a></h2>
+<h3 id="tipo-de-aplicacao"><strong>Tipo de Aplicação</strong><a class="headerlink" href="#tipo-de-aplicacao" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Full-Stack Application</strong> com React (frontend) e Node.js/Express (backend)</li>
+<li><strong>Single Page Application (SPA)</strong> usando Vite como bundler</li>
+<li>Sistema de <strong>Gestão e Auditoria de Tecnologias</strong></li>
+</ul>
+<h3 id="stack-tecnologico"><strong>Stack Tecnológico</strong><a class="headerlink" href="#stack-tecnologico" title="Permanent link">¶</a></h3>
+<h4 id="frontend-66-typescript"><strong>Frontend (66% TypeScript)</strong><a class="headerlink" href="#frontend-66-typescript" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Framework</strong>: React 19.0.0 com TypeScript</li>
+<li><strong>Build Tool</strong>: Vite 6.4.1</li>
+<li><strong>UI Components</strong>: Radix UI + Tailwind CSS 4.x</li>
+<li><strong>State Management</strong>: Zustand + React Query (<a class="magiclink magiclink-github magiclink-repository" href="https://github.com/tanstack/react-query" title="GitHub Repository: tanstack/react-query">tanstack/react-query</a>)</li>
+<li><strong>Routing</strong>: React Router</li>
+<li><strong>Forms</strong>: React Hook Form + Zod para validação</li>
+</ul>
+<h4 id="backend-25-6-javascript"><strong>Backend (25. 6% JavaScript)</strong><a class="headerlink" href="#backend-25-6-javascript" title="Permanent link">¶</a></h4>
+<ul>
+<li><strong>Runtime</strong>: Node.js com Express. js</li>
+<li><strong>Database</strong>: MySQL 2 (mysql2 package)</li>
+<li><strong>Migrations</strong>: Liquibase (Java-based)</li>
+<li><strong>API</strong>:  RESTful architecture</li>
+</ul>
+<hr/>
+<h2 id="estrutura-de-diretorios">📁 <strong>ESTRUTURA DE DIRETÓRIOS</strong><a class="headerlink" href="#estrutura-de-diretorios" title="Permanent link">¶</a></h2>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-41-1" id="__codelineno-41-1" name="__codelineno-41-1"></a>codewiki/
+<a href="#__codelineno-41-2" id="__codelineno-41-2" name="__codelineno-41-2"></a>├── src/                    # Código frontend (React/TypeScript)
+<a href="#__codelineno-41-3" id="__codelineno-41-3" name="__codelineno-41-3"></a>│   ├── components/         # Componentes React organizados por feature
+<a href="#__codelineno-41-4" id="__codelineno-41-4" name="__codelineno-41-4"></a>│   ├── hooks/             # Custom React hooks
+<a href="#__codelineno-41-5" id="__codelineno-41-5" name="__codelineno-41-5"></a>│   ├── lib/               # Utilitários e tipos
+<a href="#__codelineno-41-6" id="__codelineno-41-6" name="__codelineno-41-6"></a>│   ├── main/              # Ponto de entrada da aplicação
+<a href="#__codelineno-41-7" id="__codelineno-41-7" name="__codelineno-41-7"></a>│   ├── styles/            # Estilos CSS
+<a href="#__codelineno-41-8" id="__codelineno-41-8" name="__codelineno-41-8"></a>│   └── types/             # Definições TypeScript
+<a href="#__codelineno-41-9" id="__codelineno-41-9" name="__codelineno-41-9"></a>├── server/                # Código backend (Node.js/Express)
+<a href="#__codelineno-41-10" id="__codelineno-41-10" name="__codelineno-41-10"></a>│   ├── api.js             # Arquivo principal da API (458 KB!)
+<a href="#__codelineno-41-11" id="__codelineno-41-11" name="__codelineno-41-11"></a>│   └── azure-devops-service. js
+<a href="#__codelineno-41-12" id="__codelineno-41-12" name="__codelineno-41-12"></a>├── database/              # Scripts e migrações do banco
+<a href="#__codelineno-41-13" id="__codelineno-41-13" name="__codelineno-41-13"></a>├── docs/                  # Documentação (provavelmente MkDocs)
+<a href="#__codelineno-41-14" id="__codelineno-41-14" name="__codelineno-41-14"></a>├── scripts/               # Scripts auxiliares
+<a href="#__codelineno-41-15" id="__codelineno-41-15" name="__codelineno-41-15"></a>├── public/                # Assets estáticos
+<a href="#__codelineno-41-16" id="__codelineno-41-16" name="__codelineno-41-16"></a>├── theme/                 # Temas customizáveis
+<a href="#__codelineno-41-17" id="__codelineno-41-17" name="__codelineno-41-17"></a>├── uploads/               # Diretório de uploads
+<a href="#__codelineno-41-18" id="__codelineno-41-18" name="__codelineno-41-18"></a>└── docker-compose.yml     # Containerização
+</code></pre></div>
+<hr/>
+<h2 id="pontos-fortes">✅ <strong>PONTOS FORTES</strong><a class="headerlink" href="#pontos-fortes" title="Permanent link">¶</a></h2>
+<h3 id="1-modernidade-do-stack">1. <strong>Modernidade do Stack</strong><a class="headerlink" href="#1-modernidade-do-stack" title="Permanent link">¶</a></h3>
+<ul>
+<li>✅ React 19 com TypeScript</li>
+<li>✅ Vite para build rápido</li>
+<li>✅ Tailwind CSS 4.x para estilização</li>
+<li>✅ Radix UI para componentes acessíveis</li>
+</ul>
+<h3 id="2-componentizacao">2. <strong>Componentização</strong><a class="headerlink" href="#2-componentizacao" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-42-1" id="__codelineno-42-1" name="__codelineno-42-1"></a><span class="c1">// Componentes bem organizados por domínio</span>
+<a href="#__codelineno-42-2" id="__codelineno-42-2" name="__codelineno-42-2"></a><span class="o">-</span><span class="w"> </span><span class="nx">ColaboradoresView</span>
+<a href="#__codelineno-42-3" id="__codelineno-42-3" name="__codelineno-42-3"></a><span class="o">-</span><span class="w"> </span><span class="nx">TecnologiasView</span>
+<a href="#__codelineno-42-4" id="__codelineno-42-4" name="__codelineno-42-4"></a><span class="o">-</span><span class="w"> </span><span class="nx">ProcessosView</span>
+<a href="#__codelineno-42-5" id="__codelineno-42-5" name="__codelineno-42-5"></a><span class="o">-</span><span class="w"> </span><span class="nx">AplicacoesView</span>
+<a href="#__codelineno-42-6" id="__codelineno-42-6" name="__codelineno-42-6"></a><span class="o">-</span><span class="w"> </span><span class="nx">RunbooksView</span>
+<a href="#__codelineno-42-7" id="__codelineno-42-7" name="__codelineno-42-7"></a><span class="o">-</span><span class="w"> </span><span class="nx">DashboardView</span>
+<a href="#__codelineno-42-8" id="__codelineno-42-8" name="__codelineno-42-8"></a><span class="c1">// ...  + 20 outros componentes especializados</span>
+</code></pre></div>
+<h3 id="3-boas-praticas">3. <strong>Boas Práticas</strong><a class="headerlink" href="#3-boas-praticas" title="Permanent link">¶</a></h3>
+<ul>
+<li>✅ Error Boundaries implementados</li>
+<li>✅ Custom hooks para lógica reutilizável</li>
+<li>✅ Logging estruturado</li>
+<li>✅ Validação de formulários com Zod</li>
+<li>✅ TypeScript para type safety</li>
+</ul>
+<h3 id="4-integracoes">4. <strong>Integrações</strong><a class="headerlink" href="#4-integracoes" title="Permanent link">¶</a></h3>
+<ul>
+<li>Azure DevOps integration</li>
+<li>GitHub/Octokit integration</li>
+<li>Microsoft Graph API</li>
+<li>DORA metrics dashboard</li>
+<li>SPACE metrics dashboard</li>
+</ul>
+<h3 id="5-devops">5. <strong>DevOps</strong><a class="headerlink" href="#5-devops" title="Permanent link">¶</a></h3>
+<ul>
+<li>Docker e Docker Compose configurados</li>
+<li>Múltiplos Dockerfiles (dev, prod, mkdocs)</li>
+<li>Nginx como reverse proxy</li>
+<li>Liquibase para database migrations</li>
+</ul>
+<hr/>
+<h2 id="pontos-de-atencao-e-melhorias">⚠️ <strong>PONTOS DE ATENÇÃO E MELHORIAS</strong><a class="headerlink" href="#pontos-de-atencao-e-melhorias" title="Permanent link">¶</a></h2>
+<h3 id="critico">🔴 <strong>CRÍTICO</strong><a class="headerlink" href="#critico" title="Permanent link">¶</a></h3>
+<h4 id="1-arquivo-api-monolitico">1. <strong>Arquivo API Monolítico</strong><a class="headerlink" href="#1-arquivo-api-monolitico" title="Permanent link">¶</a></h4>
+<p><div class="highlight"><pre><span></span><code><a href="#__codelineno-43-1" id="__codelineno-43-1" name="__codelineno-43-1"></a><span class="c1">// server/api.js - 458 KB!  (13. 800+ linhas estimadas)</span>
+</code></pre></div>
+<strong>Problema</strong>: Um único arquivo com toda a lógica da API
+<strong>Impacto</strong>: 
+- Difícil manutenção
+- Risco de conflitos em merges
+- Performance de IDE degradada
+- Dificuldade para testes unitários</p>
+<p><strong>Recomendação</strong>:
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-44-1" id="__codelineno-44-1" name="__codelineno-44-1"></a>server/
+<a href="#__codelineno-44-2" id="__codelineno-44-2" name="__codelineno-44-2"></a>├── routes/
+<a href="#__codelineno-44-3" id="__codelineno-44-3" name="__codelineno-44-3"></a>│   ├── colaboradores.js
+<a href="#__codelineno-44-4" id="__codelineno-44-4" name="__codelineno-44-4"></a>│   ├── tecnologias.js
+<a href="#__codelineno-44-5" id="__codelineno-44-5" name="__codelineno-44-5"></a>│   ├── aplicacoes.js
+<a href="#__codelineno-44-6" id="__codelineno-44-6" name="__codelineno-44-6"></a>│   └── ... 
+<a href="#__codelineno-44-7" id="__codelineno-44-7" name="__codelineno-44-7"></a>├── controllers/
+<a href="#__codelineno-44-8" id="__codelineno-44-8" name="__codelineno-44-8"></a>├── services/
+<a href="#__codelineno-44-9" id="__codelineno-44-9" name="__codelineno-44-9"></a>├── middlewares/
+<a href="#__codelineno-44-10" id="__codelineno-44-10" name="__codelineno-44-10"></a>└── utils/
+</code></pre></div></p>
+<h4 id="2-componente-apptsx-sobrecarregado">2. <strong>Componente App.tsx Sobrecarregado</strong><a class="headerlink" href="#2-componente-apptsx-sobrecarregado" title="Permanent link">¶</a></h4>
+<p><div class="highlight"><pre><span></span><code><a href="#__codelineno-45-1" id="__codelineno-45-1" name="__codelineno-45-1"></a><span class="c1">// src/App.tsx - 40 KB (975 linhas)</span>
+</code></pre></div>
+<strong>Problema</strong>: Lógica de roteamento, estado e handlers no mesmo arquivo
+<strong>Recomendação</strong>:<br/>
+- Extrair roteamento para React Router
+- Criar context providers específicos
+- Mover handlers para custom hooks</p>
+<h3 id="importante">🟡 <strong>IMPORTANTE</strong><a class="headerlink" href="#importante" title="Permanent link">¶</a></h3>
+<h4 id="3-multiplos-arquivos-de-backup">3. <strong>Múltiplos Arquivos de Backup</strong><a class="headerlink" href="#3-multiplos-arquivos-de-backup" title="Permanent link">¶</a></h4>
+<p><div class="highlight"><pre><span></span><code><a href="#__codelineno-46-1" id="__codelineno-46-1" name="__codelineno-46-1"></a>server/
+<a href="#__codelineno-46-2" id="__codelineno-46-2" name="__codelineno-46-2"></a>├── api.js
+<a href="#__codelineno-46-3" id="__codelineno-46-3" name="__codelineno-46-3"></a>├── api.js.backup-20251215-194326
+<a href="#__codelineno-46-4" id="__codelineno-46-4" name="__codelineno-46-4"></a>├── api.js.backup-pre-remove
+<a href="#__codelineno-46-5" id="__codelineno-46-5" name="__codelineno-46-5"></a>├── api.js.bak2
+<a href="#__codelineno-46-6" id="__codelineno-46-6" name="__codelineno-46-6"></a>└── api.js.bak3
+</code></pre></div>
+<strong>Recomendação</strong>: Usar Git para versionamento, remover backups manuais</p>
+<h4 id="4-configuracao-duplicada">4. <strong>Configuração Duplicada</strong><a class="headerlink" href="#4-configuracao-duplicada" title="Permanent link">¶</a></h4>
+<ul>
+<li><code>package.json</code> na raiz</li>
+<li><code>data-templates/package.json</code></li>
+<li><code>package-production/package.json</code></li>
+</ul>
+<p><strong>Recomendação</strong>: Clarificar propósito de cada um ou consolidar</p>
+<h4 id="5-falta-de-testes">5. <strong>Falta de Testes</strong><a class="headerlink" href="#5-falta-de-testes" title="Permanent link">¶</a></h4>
+<ul>
+<li>Não foram encontrados diretórios de testes (<code>__tests__</code>, <code>test/</code>, <code>spec/</code>)</li>
+<li>Configuração de testes ausente</li>
+</ul>
+<p><strong>Recomendação</strong>:
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-47-1" id="__codelineno-47-1" name="__codelineno-47-1"></a><span class="c1">// Adicionar vitest</span>
+<a href="#__codelineno-47-2" id="__codelineno-47-2" name="__codelineno-47-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">describe</span><span class="p">,</span><span class="w"> </span><span class="nx">it</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'vitest'</span>
+<a href="#__codelineno-47-3" id="__codelineno-47-3" name="__codelineno-47-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">render</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@testing-library/react'</span>
+</code></pre></div></p>
+<h4 id="6-documentacao">6. <strong>Documentação</strong><a class="headerlink" href="#6-documentacao" title="Permanent link">¶</a></h4>
+<ul>
+<li><code>README.md</code> principal não encontrado</li>
+<li>Docs em MkDocs (boa prática)</li>
+</ul>
+<hr/>
+<h2 id="plano-de-refatoracao-sugerido">🎯 <strong>PLANO DE REFATORAÇÃO SUGERIDO</strong><a class="headerlink" href="#plano-de-refatoracao-sugerido" title="Permanent link">¶</a></h2>
+<h3 id="fase-1-backend-prioridade-alta"><strong>Fase 1: Backend (Prioridade Alta)</strong><a class="headerlink" href="#fase-1-backend-prioridade-alta" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-48-1" id="__codelineno-48-1" name="__codelineno-48-1"></a><span class="c1">// 1. Dividir server/api.js em módulos</span>
+<a href="#__codelineno-48-2" id="__codelineno-48-2" name="__codelineno-48-2"></a><span class="nx">server</span><span class="o">/</span>
+<a href="#__codelineno-48-3" id="__codelineno-48-3" name="__codelineno-48-3"></a><span class="err">├──</span><span class="w"> </span><span class="nx">app</span><span class="p">.</span><span class="nx">js</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="nx">point</span><span class="p">)</span>
+<a href="#__codelineno-48-4" id="__codelineno-48-4" name="__codelineno-48-4"></a><span class="err">├──</span><span class="w"> </span><span class="nx">config</span><span class="o">/</span>
+<a href="#__codelineno-48-5" id="__codelineno-48-5" name="__codelineno-48-5"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">database</span><span class="p">.</span><span class="nx">js</span>
+<a href="#__codelineno-48-6" id="__codelineno-48-6" name="__codelineno-48-6"></a><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="nx">environment</span><span class="p">.</span><span class="nx">js</span>
+<a href="#__codelineno-48-7" id="__codelineno-48-7" name="__codelineno-48-7"></a><span class="err">├──</span><span class="w"> </span><span class="nx">routes</span><span class="o">/</span>
+<a href="#__codelineno-48-8" id="__codelineno-48-8" name="__codelineno-48-8"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">index</span><span class="p">.</span><span class="nx">js</span>
+<a href="#__codelineno-48-9" id="__codelineno-48-9" name="__codelineno-48-9"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">colaboradores</span><span class="p">.</span><span class="nx">routes</span><span class="p">.</span><span class="nx">js</span>
+<a href="#__codelineno-48-10" id="__codelineno-48-10" name="__codelineno-48-10"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">tecnologias</span><span class="p">.</span><span class="nx">routes</span><span class="p">.</span><span class="nx">js</span>
+<a href="#__codelineno-48-11" id="__codelineno-48-11" name="__codelineno-48-11"></a><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="p">...</span><span class="w"> </span>
+<a href="#__codelineno-48-12" id="__codelineno-48-12" name="__codelineno-48-12"></a><span class="err">├──</span><span class="w"> </span><span class="nx">controllers</span><span class="o">/</span>
+<a href="#__codelineno-48-13" id="__codelineno-48-13" name="__codelineno-48-13"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">colaboradores</span><span class="p">.</span><span class="nx">controller</span><span class="p">.</span><span class="w"> </span><span class="nx">js</span>
+<a href="#__codelineno-48-14" id="__codelineno-48-14" name="__codelineno-48-14"></a><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="p">...</span><span class="w"> </span>
+<a href="#__codelineno-48-15" id="__codelineno-48-15" name="__codelineno-48-15"></a><span class="err">├──</span><span class="w"> </span><span class="nx">services</span><span class="o">/</span>
+<a href="#__codelineno-48-16" id="__codelineno-48-16" name="__codelineno-48-16"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">colaboradores</span><span class="p">.</span><span class="nx">service</span><span class="p">.</span><span class="w"> </span><span class="nx">js</span>
+<a href="#__codelineno-48-17" id="__codelineno-48-17" name="__codelineno-48-17"></a><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="nx">database</span><span class="p">.</span><span class="nx">service</span><span class="p">.</span><span class="nx">js</span>
+<a href="#__codelineno-48-18" id="__codelineno-48-18" name="__codelineno-48-18"></a><span class="err">└──</span><span class="w"> </span><span class="nx">middlewares</span><span class="o">/</span>
+<a href="#__codelineno-48-19" id="__codelineno-48-19" name="__codelineno-48-19"></a><span class="w">    </span><span class="err">├──</span><span class="w"> </span><span class="nx">auth</span><span class="p">.</span><span class="nx">middleware</span><span class="p">.</span><span class="nx">js</span>
+<a href="#__codelineno-48-20" id="__codelineno-48-20" name="__codelineno-48-20"></a><span class="w">    </span><span class="err">└──</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">middleware</span><span class="p">.</span><span class="nx">js</span>
+</code></pre></div>
+<h3 id="fase-2-frontend-prioridade-media"><strong>Fase 2: Frontend (Prioridade Média)</strong><a class="headerlink" href="#fase-2-frontend-prioridade-media" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-49-1" id="__codelineno-49-1" name="__codelineno-49-1"></a><span class="c1">// 2. Implementar React Router</span>
+<a href="#__codelineno-49-2" id="__codelineno-49-2" name="__codelineno-49-2"></a><span class="nx">src</span><span class="o">/</span>
+<a href="#__codelineno-49-3" id="__codelineno-49-3" name="__codelineno-49-3"></a><span class="err">├──</span><span class="w"> </span><span class="nx">routes</span><span class="o">/</span>
+<a href="#__codelineno-49-4" id="__codelineno-49-4" name="__codelineno-49-4"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">index</span><span class="p">.</span><span class="nx">tsx</span>
+<a href="#__codelineno-49-5" id="__codelineno-49-5" name="__codelineno-49-5"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">ProtectedRoute</span><span class="p">.</span><span class="nx">tsx</span>
+<a href="#__codelineno-49-6" id="__codelineno-49-6" name="__codelineno-49-6"></a><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="nx">routes</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">ts</span>
+<a href="#__codelineno-49-7" id="__codelineno-49-7" name="__codelineno-49-7"></a><span class="err">├──</span><span class="w"> </span><span class="nx">contexts</span><span class="o">/</span>
+<a href="#__codelineno-49-8" id="__codelineno-49-8" name="__codelineno-49-8"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">AuthContext</span><span class="p">.</span><span class="nx">tsx</span>
+<a href="#__codelineno-49-9" id="__codelineno-49-9" name="__codelineno-49-9"></a><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="nx">ConfigContext</span><span class="p">.</span><span class="nx">tsx</span>
+<a href="#__codelineno-49-10" id="__codelineno-49-10" name="__codelineno-49-10"></a><span class="err">└──</span><span class="w"> </span><span class="nx">App</span><span class="p">.</span><span class="nx">tsx</span><span class="w"> </span><span class="p">(</span><span class="nx">simplificado</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">apenas</span><span class="w"> </span><span class="nx">providers</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="fase-3-qualidade-prioridade-media"><strong>Fase 3: Qualidade (Prioridade Média)</strong><a class="headerlink" href="#fase-3-qualidade-prioridade-media" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-50-1" id="__codelineno-50-1" name="__codelineno-50-1"></a><span class="c1">// 3. Adicionar testes</span>
+<a href="#__codelineno-50-2" id="__codelineno-50-2" name="__codelineno-50-2"></a><span class="nx">src</span><span class="o">/</span>
+<a href="#__codelineno-50-3" id="__codelineno-50-3" name="__codelineno-50-3"></a><span class="err">├──</span><span class="w"> </span><span class="nx">__tests__</span><span class="o">/</span>
+<a href="#__codelineno-50-4" id="__codelineno-50-4" name="__codelineno-50-4"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">components</span><span class="o">/</span>
+<a href="#__codelineno-50-5" id="__codelineno-50-5" name="__codelineno-50-5"></a><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">hooks</span><span class="o">/</span>
+<a href="#__codelineno-50-6" id="__codelineno-50-6" name="__codelineno-50-6"></a><span class="err">│</span><span class="w">   </span><span class="err">└─���</span><span class="w"> </span><span class="nx">utils</span><span class="o">/</span>
+<a href="#__codelineno-50-7" id="__codelineno-50-7" name="__codelineno-50-7"></a><span class="err">└──</span><span class="w"> </span><span class="nx">vitest</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">ts</span>
+</code></pre></div>
+<h3 id="fase-4-devops-prioridade-baixa"><strong>Fase 4: DevOps (Prioridade Baixa)</strong><a class="headerlink" href="#fase-4-devops-prioridade-baixa" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-51-1" id="__codelineno-51-1" name="__codelineno-51-1"></a><span class="c1"># 4. CI/CD</span>
+<a href="#__codelineno-51-2" id="__codelineno-51-2" name="__codelineno-51-2"></a><span class="l l-Scalar l-Scalar-Plain">. github/workflows/</span>
+<a href="#__codelineno-51-3" id="__codelineno-51-3" name="__codelineno-51-3"></a><span class="l l-Scalar l-Scalar-Plain">├── ci. yml</span>
+<a href="#__codelineno-51-4" id="__codelineno-51-4" name="__codelineno-51-4"></a><span class="l l-Scalar l-Scalar-Plain">├── deploy-dev.yml</span>
+<a href="#__codelineno-51-5" id="__codelineno-51-5" name="__codelineno-51-5"></a><span class="l l-Scalar l-Scalar-Plain">└── deploy-prod.yml</span>
+</code></pre></div>
+<hr/>
+<h2 id="metricas-de-complexidade">📈 <strong>MÉTRICAS DE COMPLEXIDADE</strong><a class="headerlink" href="#metricas-de-complexidade" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor Atual</th>
+<th>Ideal</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tamanho do arquivo backend</td>
+<td><strong>458 KB</strong></td>
+<td>&lt; 50 KB</td>
+<td>🔴 Crítico</td>
+</tr>
+<tr>
+<td>Tamanho do App.tsx</td>
+<td><strong>40 KB</strong></td>
+<td>&lt; 15 KB</td>
+<td>🟡 Atenção</td>
+</tr>
+<tr>
+<td>Cobertura de testes</td>
+<td><strong>0%</strong></td>
+<td>&gt; 70%</td>
+<td>🔴 Crítico</td>
+</tr>
+<tr>
+<td>Componentes documentados</td>
+<td>Parcial</td>
+<td>100%</td>
+<td>🟡 Atenção</td>
+</tr>
+<tr>
+<td>Uso de TypeScript (frontend)</td>
+<td><strong>66%</strong></td>
+<td>&gt; 90%</td>
+<td>🟢 Bom</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="funcionalidades-positivas">🎁 <strong>FUNCIONALIDADES POSITIVAS</strong><a class="headerlink" href="#funcionalidades-positivas" title="Permanent link">¶</a></h2>
+<ol>
+<li><strong>Dashboard Completo</strong>:  Visualizações de métricas DORA e SPACE</li>
+<li><strong>Integrações Robustas</strong>: Azure DevOps, GitHub, Microsoft Graph</li>
+<li><strong>UI Moderna</strong>: Radix UI + Tailwind para experiência consistente</li>
+<li><strong>Observabilidade</strong>: Sistema de logs e traces implementado</li>
+<li><strong>Documentação</strong>: MkDocs configurado para docs técnicas</li>
+<li><strong>Containerização</strong>: Docker pronto para deploy</li>
+</ol>
+<hr/>
+<h2 id="recomendacoes-prioritarias">🚀 <strong>RECOMENDAÇÕES PRIORITÁRIAS</strong><a class="headerlink" href="#recomendacoes-prioritarias" title="Permanent link">¶</a></h2>
+<h3 id="curto-prazo-1-2-semanas"><strong>Curto Prazo (1-2 semanas)</strong><a class="headerlink" href="#curto-prazo-1-2-semanas" title="Permanent link">¶</a></h3>
+<ol>
+<li>⚠️ <strong>Refatorar <code>server/api.js</code></strong> em módulos menores</li>
+<li>📝 <strong>Criar README.md</strong> principal com instruções</li>
+<li>🗑️ <strong>Remover arquivos de backup</strong> (. bak, .backup-*)</li>
+<li>✅ <strong>Adicionar <code>.gitattributes</code></strong> para evitar arquivos grandes</li>
+</ol>
+<h3 id="medio-prazo-1-mes"><strong>Médio Prazo (1 mês)</strong><a class="headerlink" href="#medio-prazo-1-mes" title="Permanent link">¶</a></h3>
+<ol>
+<li>🧪 <strong>Implementar testes unitários</strong> (mínimo 50% cobertura)</li>
+<li>🎨 <strong>Refatorar App.tsx</strong> com React Router</li>
+<li>📚 <strong>Documentar APIs</strong> com Swagger/OpenAPI</li>
+<li>🔐 <strong>Implementar autenticação</strong> (se ainda não existir)</li>
+</ol>
+<h3 id="longo-prazo-3-meses"><strong>Longo Prazo (3 meses)</strong><a class="headerlink" href="#longo-prazo-3-meses" title="Permanent link">¶</a></h3>
+<ol>
+<li>🏗️ <strong>Considerar migração para monorepo</strong> (Turborepo/Nx)</li>
+<li>📊 <strong>Implementar telemetria</strong> (OpenTelemetry)</li>
+<li>🔄 <strong>CI/CD completo</strong> com GitHub Actions</li>
+<li>🌍 <strong>I18n</strong> (internacionalização)</li>
+</ol>
+<hr/>
+<h2 id="conclusao">🎓 <strong>CONCLUSÃO</strong><a class="headerlink" href="#conclusao" title="Permanent link">¶</a></h2>
+<p>O projeto <strong>codewiki</strong> apresenta uma <strong>base sólida</strong> com stack moderno e funcionalidades abrangentes. No entanto, sofre de <strong>dívida técnica</strong> principalmente no backend (arquivo monolítico) e falta de <strong>cobertura de testes</strong>. </p>
+<p><strong>Classificação Geral</strong>:  ⭐⭐⭐☆☆ (⅗)
+- <strong>Funcionalidade</strong>: ⭐⭐⭐⭐⭐ (5/5)
+- <strong>Manutenibilidade</strong>: ⭐⭐☆☆☆ (⅖)
+- <strong>Escalabilidade</strong>: ⭐⭐⭐☆☆ (⅗)
+- <strong>Testabilidade</strong>: ⭐☆☆☆☆ (⅕)</p>
+<p><strong>Veredicto</strong>: Com refatorações estratégicas focadas na modularização do backend e adição de testes, o projeto pode evoluir para <strong>⭐⭐⭐⭐☆ (⅘)</strong> em 2-3 meses.</p>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+<div class="md-copyright__highlight">
+      Copyright © 2024 Documentação <a href="#__consent">Change cookie settings</a>
+</div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+<div class="md-social">
+<a class="md-social__link" href="https://github.com/horaciovasconcellos" rel="noopener" target="_blank" title="github.com">
+<svg viewbox="0 0 496 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+</a>
+<a class="md-social__link" href="https://gitlab.com/horaciovasconcellos" rel="noopener" target="_blank" title="gitlab.com">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="m503.5 204.6-.7-1.8-69.7-181.78c-1.4-3.57-3.9-6.59-7.2-8.64-2.4-1.55-5.1-2.515-8-2.81s-5.7.083-8.4 1.11c-2.7 1.02-5.1 2.66-7.1 4.78-1.9 2.12-3.3 4.67-4.1 7.44l-47 144H160.8l-47.1-144c-.8-2.77-2.2-5.31-4.1-7.43-2-2.12-4.4-3.75-7.1-4.77a18.1 18.1 0 0 0-8.38-1.113 18.4 18.4 0 0 0-8.04 2.793 18.1 18.1 0 0 0-7.16 8.64L9.267 202.8l-.724 1.8a129.57 129.57 0 0 0-3.52 82c7.747 26.9 24.047 50.7 46.447 67.6l.27.2.59.4 105.97 79.5 52.6 39.7 32 24.2c3.7 1.9 8.3 4.3 13 4.3s9.3-2.4 13-4.3l32-24.2 52.6-39.7 106.7-79.9.3-.3c22.4-16.9 38.7-40.6 45.6-67.5 8.6-27 7.4-55.8-2.6-82"></path></svg>
+</a>
+<a class="md-social__link" href="https://twitter.com/Horacio_Junior" rel="noopener" target="_blank" title="Horacio.Vasconcellos on Twitter">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253"></path></svg>
+</a>
+<a class="md-social__link" href="" rel="noopener me" target="_blank" title="Horaci.Vasconcellos on Mastodon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M433 179.11c0-97.2-63.71-125.7-63.71-125.7-62.52-28.7-228.56-28.4-290.48 0 0 0-63.72 28.5-63.72 125.7 0 115.7-6.6 259.4 105.63 289.1 40.51 10.7 75.32 13 103.33 11.4 50.81-2.8 79.32-18.1 79.32-18.1l-1.7-36.9s-36.31 11.4-77.12 10.1c-40.41-1.4-83-4.4-89.63-54a102.5 102.5 0 0 1-.9-13.9c85.63 20.9 158.65 9.1 178.75 6.7 56.12-6.7 105-41.3 111.23-72.9 9.8-49.8 9-121.5 9-121.5m-75.12 125.2h-46.63v-114.2c0-49.7-64-51.6-64 6.9v62.5h-46.33V197c0-58.5-64-56.6-64-6.9v114.2H90.19c0-122.1-5.2-147.9 18.41-175 25.9-28.9 79.82-30.8 103.83 6.1l11.6 19.5 11.6-19.5c24.11-37.1 78.12-34.8 103.83-6.1 23.71 27.3 18.4 53 18.4 175z"></path></svg>
+</a>
+<a class="md-social__link" href="https://gitter.im/squidfunk/mkdocs-material" rel="noopener" target="_blank" title="gitter.im">
+<svg viewbox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M66.4 322.5H16V0h50.4zM166.9 76.1h-50.4V512h50.4zm100.6 0h-50.4V512h50.4zM368 76h-50.4v247H368z"></path></svg>
+</a>
+<a class="md-social__link" href="https://hub.docker.com/u/77678117787" rel="noopener" target="_blank" title="hub.docker.com">
+<svg viewbox="0 0 640 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1zm0-204.3h-66.1v60.7h66.1zm78.2 144.8H362v59.4h66.1zm-156.3-72.1h-66.1v60.1h66.1zm78.1 0h-66.1v60.1h66.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1zm78.1 0h-66.1v59.4h66.1zm-78.1-72.1h-66.1v60.1h66.1z"></path></svg>
+</a>
+<a class="md-social__link" href="https://www.linkedin.com/in/hor%C3%A1cio-correa-t-de-vasconcellos-j%C3%BAnior-b7788467/" rel="noopener" target="_blank" title="www.linkedin.com">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"></path></svg>
+</a>
+<a class="md-social__link" href="https://www.instagram.com/horacio.vasconcellos/" rel="noopener" target="_blank" title="www.instagram.com">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141m0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7m146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8m76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8M398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1"></path></svg>
+</a>
+<a class="md-social__link" href="https://www.facebook.com/horacio.vasconcellos" rel="noopener" target="_blank" title="www.facebook.com">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256c0 120 82.7 220.8 194.2 248.5V334.2h-52.8V256h52.8v-33.7c0-87.1 39.4-127.5 125-127.5 16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287v175.9C413.8 494.8 512 386.9 512 256"></path></svg>
+</a>
+<a class="md-social__link" href="http://60pportunities.com.br" rel="noopener" target="_blank" title="60pportunities.com.br">
+<svg viewbox="0 0 640 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M180.5 74.262C80.813 74.262 0 155.633 0 256s80.819 181.738 180.5 181.738S361 356.373 361 256 280.191 74.262 180.5 74.262m288.25 10.646c-49.845 0-90.245 76.619-90.245 171.095s40.406 171.1 90.251 171.1 90.251-76.619 90.251-171.1H559c0-94.503-40.4-171.095-90.248-171.095Zm139.506 17.821c-17.526 0-31.735 68.628-31.735 153.274s14.2 153.274 31.735 153.274S640 340.631 640 256c0-84.649-14.215-153.271-31.742-153.271Z"></path></svg>
+</a>
+<a class="md-social__link" href="https://www.producthunt.com/@horacio_vasconcellos" rel="noopener" target="_blank" title="www.producthunt.com">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M326.3 218.8c0 20.5-16.7 37.2-37.2 37.2h-70.3v-74.4h70.3c20.5 0 37.2 16.7 37.2 37.2M504 256c0 137-111 248-248 248S8 393 8 256 119 8 256 8s248 111 248 248m-128.1-37.2c0-47.9-38.9-86.8-86.8-86.8H169.2v248h49.6v-74.4h70.3c47.9 0 86.8-38.9 86.8-86.8"></path></svg>
+</a>
+<a class="md-social__link" href="mailto:horacio.vasconcellos@gmail.com" rel="noopener" target="_blank" title="">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480v-83.6c0-4 1.5-7.8 4.2-10.8l167.6-182.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8l-88.3-44.2C7.1 311.3.3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4"></path></svg>
+</a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<div class="md-consent" data-md-component="consent" hidden="" id="__consent">
+<div class="md-consent__overlay"></div>
+<aside class="md-consent__inner">
+<form class="md-consent__form md-grid md-typeset" name="consent">
+<h4>Consentimento</h4>
+<p>Utilizamos cookies para reconhecer as suas repetidas visitas e preferências, bem como para medir a eficácia da nossa documentação e se os usuários encontre o que eles estão procurando. Com o seu consentimento, você está nos ajudando a melhorar nossa documentação.</p>
+<input class="md-toggle" id="__settings" type="checkbox"/>
+<div class="md-consent__settings">
+<ul class="task-list">
+<li class="task-list-item">
+<label class="task-list-control">
+<input checked="" name="analytics" type="checkbox"/>
+<span class="task-list-indicator"></span>
+      Google Analytics
+    </label>
+</li>
+<li class="task-list-item">
+<label class="task-list-control">
+<input checked="" name="github" type="checkbox"/>
+<span class="task-list-indicator"></span>
+      GitHub
+    </label>
+</li>
+</ul>
+</div>
+<div class="md-consent__controls">
+<button class="md-button md-button--primary">Aceitar</button>
+<label class="md-button" for="__settings">Gerenciar configurações</label>
+</div>
+</form>
+</aside>
+</div>
+<script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
+<script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss", "commit", "content.action.edit", "content.code.annotate", "content.code.annotation", "content.code.copy", "content.footnote.tooltips", "navigation.instant", "navigation.prune", "navigation.sections", "navigation.indexes", "navigation.tabs", "navigation.expand", "search.highlight", "search.share", "search.suggest", "version"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": {"default": "latest", "provider": "mike"}}</script>
+<script src="../assets/javascripts/bundle.c8b220af.min.js"></script>
+<script src="../javascripts/tables.js"></script>
+<script src="../javascripts/tablesort.js"></script>
+<script>document$.subscribe(() => {
+            window.update_swagger_ui_iframe_height = function (id) {
+                var iFrameID = document.getElementById(id);
+                if (iFrameID) {
+                    full_height = (iFrameID.contentWindow.document.body.scrollHeight + 80) + "px";
+                    iFrameID.height = full_height;
+                    iFrameID.style.height = full_height;
+                }
+            }
+        
+            let iframe_id_list = []
+            var iframes = document.getElementsByClassName("swagger-ui-iframe");
+            for (var i = 0; i < iframes.length; i++) { 
+                iframe_id_list.push(iframes[i].getAttribute("id"))
+            }
+        
+            let ticking = true;
+            
+            document.addEventListener('scroll', function(e) {
+                if (!ticking) {
+                    window.requestAnimationFrame(()=> {
+                        let half_vh = window.innerHeight/2;
+                        for(var i = 0; i < iframe_id_list.length; i++) {
+                            let element = document.getElementById(iframe_id_list[i])
+                            if(element==null){
+                                return
+                            }
+                            let diff = element.getBoundingClientRect().top
+                            if(element.contentWindow.update_top_val){
+                                element.contentWindow.update_top_val(half_vh - diff)
+                            }
+                        }
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+        
+            const dark_scheme_name = "slate"
+            
+            window.scheme = document.body.getAttribute("data-md-color-scheme")
+            const options = {
+                attributeFilter: ['data-md-color-scheme'],
+            };
+            function color_scheme_callback(mutations) {
+                for (let mutation of mutations) {
+                    if (mutation.attributeName === "data-md-color-scheme") {
+                        scheme = document.body.getAttribute("data-md-color-scheme")
+                        var iframe_list = document.getElementsByClassName("swagger-ui-iframe")
+                        for(var i = 0; i < iframe_list.length; i++) {
+                            var ele = iframe_list.item(i);
+                            if (ele) {
+                                if (scheme === dark_scheme_name) {
+                                    ele.contentWindow.enable_dark_mode();
+                                } else {
+                                    ele.contentWindow.disable_dark_mode();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            observer = new MutationObserver(color_scheme_callback);
+            observer.observe(document.body, options);
+            })</script></body>
+</html>

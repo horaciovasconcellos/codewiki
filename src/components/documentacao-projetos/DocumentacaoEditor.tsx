@@ -131,8 +131,6 @@ export function DocumentacaoEditor({ documentacao, onSave, onCancel }: Documenta
       autor: autor.trim(),
       aplicacaoId: aplicacaoId || undefined,
       status: status as any,
-      dataPublicacao: status === 'Publicado' && !documentacao?.dataPublicacao ? new Date().toISOString() : documentacao?.dataPublicacao,
-      dataUltimaAtualizacao: new Date().toISOString(),
     };
 
     onSave(doc);

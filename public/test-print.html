@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Impressão</title>
+    <style>
+        /* Estilos de tela */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .print-content {
+            margin-top: 20px;
+        }
+
+        /* CSS de impressão */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            @page {
+                margin: 20mm;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: white !important;
+            }
+
+            /* Ocultar botão e container de UI */
+            button, .container {
+                display: none !important;
+            }
+
+            /* Mostrar apenas conteúdo */
+            .print-content {
+                display: block !important;
+                visibility: visible !important;
+                position: static !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .print-content * {
+                visibility: visible !important;
+            }
+
+            /* Cabeçalho de informações */
+            .print-header {
+                margin-bottom: 20pt !important;
+                border-bottom: 2pt solid #333 !important;
+                padding-bottom: 15pt !important;
+            }
+
+            .header-line {
+                padding: 6pt 0 !important;
+                color: #000 !important;
+            }
+
+            .header-line.titulo {
+                font-size: 24pt !important;
+                font-weight: bold !important;
+                margin-bottom: 8pt !important;
+            }
+
+            .header-line.aplicacao {
+                font-size: 14pt !important;
+                font-weight: 600 !important;
+                color: #333 !important;
+            }
+
+            .header-line.info {
+                font-size: 12pt !important;
+                color: #555 !important;
+            }
+
+            .header-line.data {
+                font-size: 10pt !important;
+                color: #666 !important;
+                font-style: italic !important;
+                margin-top: 8pt !important;
+            }
+
+            .print-divider {
+                height: 2pt !important;
+                background: #333 !important;
+                margin: 20pt 0 !important;
+                border: none !important;
+            }
+
+            .print-content-body {
+                margin-top: 15pt !important;
+            }
+
+            .print-content-body h1,
+            .print-content h1:not(.print-title) {
+                display: block !important;
+                font-size: 24pt !important;
+                font-weight: bold !important;
+                margin: 0 0 12pt 0 !important;
+                color: #000 !important;
+                border-bottom: 2pt solid #000 !important;
+                padding-bottom: 6pt !important;
+            }
+
+            .print-content-body h2,
+            .print-content h2 {
+                display: block !important;
+                font-size: 20pt !important;
+                font-weight: bold !important;
+                margin: 16pt 0 10pt 0 !important;
+                color: #000 !important;
+            }
+
+            .print-content-body h3,
+            .print-content h3 {
+                display: block !important;
+                font-size: 16pt !important;
+                margin: 14pt 0 8pt 0 !important;
+                color: #000 !important;
+            }
+
+            .print-content-body p,
+            .print-content p {
+                display: block !important;
+                margin: 0 0 8pt 0 !important;
+                color: #000 !important;
+                line-height: 1.5 !important;
+            }
+
+            .print-content-body ul,
+            .print-content ul {
+                display: block !important;
+                margin: 8pt 0 8pt 20pt !important;
+            }
+
+            .print-content-body li,
+            .print-content li {
+                display: list-item !important;
+                margin-bottom: 4pt !important;
+                color: #000 !important;
+            }
+
+            .print-content-body code,
+            .print-content code {
+                background: #f5f5f5 !important;
+                padding: 2pt 4pt !important;
+                border: 1pt solid #ddd !important;
+                font-family: 'Courier New', monospace !important;
+                color: #000 !important;
+            }
+
+            .print-content-body pre,
+            .print-content pre {
+                display: block !important;
+                background: #f8f8f8 !important;
+                padding: 10pt !important;
+                border: 1pt solid #ccc !important;
+                margin: 10pt 0 !important;
+            }
+
+            .print-content-body pre code,
+            .print-content pre code {
+                background: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+
+            .print-content-body table:not(.info-table),
+            .print-content table:not(.info-table) {
+                display: table !important;
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin: 10pt 0 !important;
+            }
+
+            .print-content-body th:not(.info-table th),
+            .print-content-body td:not(.info-table td),
+            .print-content th:not(.info-table th),
+            .print-content td:not(.info-table td) {
+                display: table-cell !important;
+                border: 1pt solid #000 !important;
+                padding: 6pt !important;
+                color: #000 !important;
+            }
+
+            .print-content-body th:not(.info-table th),
+            .print-content th:not(.info-table th) {
+                background: #e0e0e0 !important;
+                font-weight: bold !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button onclick="window.print()">🖨️ Testar Impressão</button>
+        <p>Clique no botão acima para testar a impressão. O PDF deve mostrar o cabeçalho com informações tabulares e depois o conteúdo.</p>
+    </div>
+
+    <div class="print-content">
+        <div class="print-header">
+            <div class="header-line titulo">Guia de Teste de Impressão</div>
+            <div class="header-line aplicacao">CodeWiki</div>
+            <div class="header-line info">Testes - 1.0 - Sistema</div>
+            <div class="header-line data">Data da Impressão: 17/01/2026 10:30</div>
+        </div>
+        
+        <div class="print-divider"></div>
+
+        <div class="print-content-body">
+            <h2>Introdução</h2>
+        <p>Este é um <strong>documento de teste</strong> para validar a funcionalidade de impressão. Se você está vendo esta página em um PDF, significa que a impressão está <em>funcionando corretamente</em>.</p>
+
+        <h3>Lista de Verificação</h3>
+        <ul>
+            <li>Cabeçalho tabular com informações do documento</li>
+            <li>Linha divisória após cabeçalho</li>
+            <li>Título principal grande e negrito</li>
+            <li>Subtítulos hierárquicos formatados</li>
+            <li>Parágrafos com espaçamento adequado</li>
+            <li>Listas com bullets funcionando</li>
+            <li>Código inline como <code>console.log("teste")</code></li>
+        </ul>
+
+        <h3>Exemplo de Código</h3>
+        <pre><code>function teste() {
+  console.log("Olá, mundo!");
+  return true;
+}</code></pre>
+
+        <h3>Tabela de Exemplo</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Status</th>
+                    <th>Resultado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Cabeçalho</td>
+                    <td>✓</td>
+                    <td>OK</td>
+                </tr>
+                <tr>
+                    <td>Título</td>
+                    <td>✓</td>
+                    <td>OK</td>
+                </tr>
+                <tr>
+                    <td>Parágrafos</td>
+                    <td>✓</td>
+                    <td>OK</td>
+                </tr>
+                <tr>
+                    <td>Código</td>
+                    <td>✓</td>
+                    <td>OK</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Conclusão</h2>
+        <p>Se você consegue ler este texto no PDF com o cabeçalho formatado no topo, a impressão está <strong>100% funcional</strong>!</p>
+        </div>
+    </div>
+
+    <script>
+        console.log('📄 Página carregada');
+        console.log('🖨️ Elemento .print-content:', document.querySelector('.print-content'));
+        console.log('📝 Conteúdo:', document.querySelector('.print-content')?.innerHTML.substring(0, 100));
+    </script>
+</body>
+</html>

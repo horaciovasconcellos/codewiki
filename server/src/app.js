@@ -46,6 +46,15 @@ app.get('/', (req, res) => {
   });
 });
 
+// Health check endpoint (alternative)
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // API Routes
 app.use('/api', routes);
 

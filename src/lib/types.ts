@@ -1617,3 +1617,85 @@ export interface Checkpoint {
   updatedAt?: string;
 }
 
+// =====================================================
+// TIPOS DE USUÁRIOS E CONTROLE DE ACESSO
+// =====================================================
+
+export type RoleSistema = 'Administrador' | 'Back-office' | 'Usuário' | 'Consulta';
+
+export interface PermissaoTela {
+  tela: string;
+  create: boolean;
+  read: boolean;
+  update: boolean;
+  delete: boolean;
+}
+
+export interface PermissoesPorSetor {
+  setor: string;
+  permissoes: PermissaoTela[];
+}
+
+export interface Usuario {
+  id: string;
+  colaboradorId: string;
+  colaboradorNome?: string;
+  colaboradorMatricula?: string;
+  colaboradorSetor?: string;
+  email: string;
+  senha?: string;
+  role: RoleSistema;
+  ativo: boolean;
+  permissoesPorSetor: PermissoesPorSetor[];
+  dataUltimoAcesso?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Lista completa de telas do sistema (baseado em App.tsx)
+export const TELAS_SISTEMA = [
+  { id: 'dashboard', nome: 'Dashboard', categoria: 'Principal' },
+  { id: 'aplicacoes', nome: 'Aplicações', categoria: 'Registros' },
+  { id: 'colaboradores', nome: 'Colaboradores', categoria: 'Integrações Externas' },
+  { id: 'capacidades-negocio', nome: 'Capacidades de Negócio', categoria: 'Integrações Externas' },
+  { id: 'processos-negocio', nome: 'Processos de Negócio', categoria: 'Integrações Externas' },
+  { id: 'habilidades', nome: 'Habilidades', categoria: 'Integrações Externas' },
+  { id: 'tipos-afastamento', nome: 'Tipos de Afastamento', categoria: 'Integrações Externas' },
+  { id: 'tecnologias', nome: 'Tecnologias', categoria: 'Registros' },
+  { id: 'servidores', nome: 'Servidores', categoria: 'Registros' },
+  { id: 'comunicacao', nome: 'Comunicação', categoria: 'Registros' },
+  { id: 'integracoes', nome: 'Integrações', categoria: 'Registros' },
+  { id: 'adrs', nome: 'Decisões Arquitetônicas (ADRs)', categoria: 'Registros' },
+  { id: 'notificacoes', nome: 'Notificações', categoria: 'Registros' },
+  { id: 'runbooks', nome: 'Runbooks', categoria: 'Registros' },
+  { id: 'scripts', nome: 'Scripts', categoria: 'Registros' },
+  { id: 'slas', nome: 'SLAs', categoria: 'Registros' },
+  { id: 'execucoes-teste', nome: 'Execução de Testes', categoria: 'Registros' },
+  { id: 'checkpoints', nome: 'Checkpoints', categoria: 'Registros' },
+  { id: 'pipelines', nome: 'Pipelines', categoria: 'DevOps' },
+  { id: 'stages', nome: 'Stages', categoria: 'DevOps' },
+  { id: 'payloads', nome: 'Payloads', categoria: 'DevOps' },
+  { id: 'gerador-projetos', nome: 'Gerador de Projetos', categoria: 'DevOps' },
+  { id: 'azure-work-items', nome: 'Azure Work Items', categoria: 'DevOps' },
+  { id: 'innersource', nome: 'InnerSource', categoria: 'DevOps' },
+  { id: 'documentacao-apis', nome: 'Documentação de APIs', categoria: 'Documentação' },
+  { id: 'documentacao-sdd', nome: 'Documentação SDD', categoria: 'Documentação' },
+  { id: 'documentacao-projetos', nome: 'Documentação de Projetos', categoria: 'Documentação' },
+  { id: 'dora-dashboard', nome: 'DORA Dashboard', categoria: 'Métricas' },
+  { id: 'space-dashboard', nome: 'SPACE Dashboard', categoria: 'Métricas' },
+  { id: 'reportbook', nome: 'Relatórios', categoria: 'Métricas' },
+  { id: 'similarity-analyzer', nome: 'Analisador de Similaridade', categoria: 'Métricas' },
+  { id: 'finops', nome: 'FinOps', categoria: 'Financeiro' },
+  { id: 'gestao-eventos-sla', nome: 'Gestão de Eventos SLA', categoria: 'Governança' },
+  { id: 'lgpd', nome: 'LGPD', categoria: 'Governança e Compliance' },
+  { id: 'sincronismo', nome: 'Sincronismo', categoria: 'Integrações' },
+  { id: 'carga-dados', nome: 'Carga de Dados', categoria: 'Cargas' },
+  { id: 'carga-lockfiles', nome: 'Carga Lockfiles', categoria: 'Cargas' },
+  { id: 'logs-traces', nome: 'Logs e Traces', categoria: 'Observabilidade' },
+  { id: 'pesquisa-periodo', nome: 'Pesquisa por Período', categoria: 'Ferramentas' },
+  { id: 'tokens-acesso', nome: 'Tokens de Acesso', categoria: 'Configurações' },
+  { id: 'configuracoes', nome: 'Configurações de Integrações', categoria: 'Configurações' },
+  { id: 'usuarios', nome: 'Usuários', categoria: 'Segurança' },
+  { id: 'usuarios-seguranca', nome: 'Usuários de Segurança', categoria: 'Segurança' }
+] as const;
+

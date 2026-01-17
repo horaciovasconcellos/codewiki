@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import crypto from 'crypto';
 import AzureDevOpsService from './azure-devops-service.js';
 
 const execAsync = promisify(exec);
@@ -64,7 +65,7 @@ const uploadScript = multer({
       cb(null, dir);
     },
     filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const uniqueSuffix = Date.now() + '-' + crypto.randomInt(0, 1E9);
       cb(null, uniqueSuffix + '-' + file.originalname);
     }
   }),
@@ -358,7 +359,13 @@ const getUtf8Connection = async () => {
 };
 
 // Middleware
-app.use(cors());
+// CORS configurado com origens específicas para segurança
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' })); // Aumentado para 50MB
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -425,6 +432,92 @@ function extractRequestInfo(req) {
     userLogin: req.get('x-user-login') || 'system'
   };
 }
+
+// ==================== HELPERS PARA REDUZIR DUPLICAÇÃO ====================
+
+/**
+ * Helper para tratar erros de forma consistente
+ * Reduz duplicação de código em tratamento de erros
+ */
+function handleError(res, error, message, statusCode = 500) {
+  console.error(`[ERROR] ${message}:`, error);
+  
+  // Não expor detalhes internos em produção
+  const errorMessage = process.env.NODE_ENV === 'production' 
+    ? message 
+    : `${message}: ${error.message}`;
+  
+  res.status(statusCode).json({ 
+    error: errorMessage,
+    code: 'DATABASE_ERROR'
+  });
+}
+
+/**
+ * Helper para queries de listagem (GET all)
+ * Reduz duplicação em endpoints de listagem
+ */
+async function handleListQuery(res, tableName, orderBy = 'id') {
+  try {
+    const [rows] = await pool.query(`SELECT * FROM ${tableName} ORDER BY ${orderBy}`);
+    res.json(rows);
+  } catch (error) {
+    handleError(res, error, `Erro ao listar ${tableName}`);
+  }
+}
+
+/**
+ * Helper para queries de busca por ID (GET by id)
+ * Reduz duplicação em endpoints de detalhes
+ */
+async function handleGetByIdQuery(res, tableName, id) {
+  try {
+    const [rows] = await pool.query(`SELECT * FROM ${tableName} WHERE id = ?`, [id]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Registro não encontrado' });
+    }
+    
+    res.json(rows[0]);
+  } catch (error) {
+    handleError(res, error, `Erro ao buscar ${tableName}`);
+  }
+}
+
+/**
+ * Cache em memória para melhorar performance de queries frequentes
+ */
+const cache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+
+function getCached(key) {
+  const cached = cache.get(key);
+  if (!cached) return null;
+  
+  if (Date.now() - cached.timestamp > CACHE_TTL) {
+    cache.delete(key);
+    return null;
+  }
+  
+  return cached.data;
+}
+
+function setCache(key, data) {
+  cache.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+}
+
+function clearCache(pattern) {
+  for (const key of cache.keys()) {
+    if (key.includes(pattern)) {
+      cache.delete(key);
+    }
+  }
+}
+
+// ==================== FIM DOS HELPERS ====================
 
 // Helper para mapear snake_case para camelCase
 function mapTipoAfastamento(row) {
@@ -562,11 +655,11 @@ async function mapColaborador(row) {
     })),
     avaliacoes: avaliacoes.map(av => {
       const notas = [
-        parseFloat(av.resultados_entregas),
-        parseFloat(av.competencias_tecnicas),
-        parseFloat(av.qualidade_seguranca),
-        parseFloat(av.comportamento_cultura),
-        parseFloat(av.evolucao_aprendizado)
+        Number.parseFloat(av.resultados_entregas),
+        Number.parseFloat(av.competencias_tecnicas),
+        Number.parseFloat(av.qualidade_seguranca),
+        Number.parseFloat(av.comportamento_cultura),
+        Number.parseFloat(av.evolucao_aprendizado)
       ];
       const notaFinal = notas.reduce((acc, nota) => acc + nota, 0) / notas.length;
       
@@ -574,11 +667,11 @@ async function mapColaborador(row) {
         id: av.id,
         colaboradorId: av.colaborador_id,
         dataAvaliacao: formatDate(av.data_avaliacao),
-        resultadosEntregas: parseFloat(av.resultados_entregas),
-        competenciasTecnicas: parseFloat(av.competencias_tecnicas),
-        qualidadeSeguranca: parseFloat(av.qualidade_seguranca),
-        comportamentoCultura: parseFloat(av.comportamento_cultura),
-        evolucaoAprendizado: parseFloat(av.evolucao_aprendizado),
+        resultadosEntregas: Number.parseFloat(av.resultados_entregas),
+        competenciasTecnicas: Number.parseFloat(av.competencias_tecnicas),
+        qualidadeSeguranca: Number.parseFloat(av.qualidade_seguranca),
+        comportamentoCultura: Number.parseFloat(av.comportamento_cultura),
+        evolucaoAprendizado: Number.parseFloat(av.evolucao_aprendizado),
         notaFinal: notaFinal,
         observacoes: av.motivo,
         motivo: av.motivo,
@@ -738,7 +831,7 @@ app.post('/api/tipos-afastamento', async (req, res) => {
     const id = uuidv4();
     await pool.query(
       'INSERT INTO tipos_afastamento (id, sigla, descricao, argumentacao_legal, numero_dias, tipo_tempo) VALUES (?, ?, ?, ?, ?, ?)',
-      [id, sigla.toUpperCase(), descricao, argumentacaoLegal, parseInt(numeroDias), tipoTempo]
+      [id, sigla.toUpperCase(), descricao, argumentacaoLegal, Number.parseInt(numeroDias), tipoTempo]
     );
     
     const novoTipo = {
@@ -746,7 +839,7 @@ app.post('/api/tipos-afastamento', async (req, res) => {
       sigla: sigla.toUpperCase(),
       descricao,
       argumentacaoLegal,
-      numeroDias: parseInt(numeroDias),
+      numeroDias: Number.parseInt(numeroDias),
       tipoTempo
     };
     
@@ -8289,8 +8382,8 @@ app.put('/api/configuracoes/:chave', async (req, res) => {
   try {
     const valorJson = typeof valor === 'string' ? valor : JSON.stringify(valor);
     
-    // Gerar UUID v4 para o campo id
-    const id = `conf-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    // Gerar ID seguro usando crypto
+    const id = `conf-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     
     // Usar INSERT ... ON DUPLICATE KEY UPDATE para criar ou atualizar
     await pool.query(
@@ -8304,6 +8397,373 @@ app.put('/api/configuracoes/:chave', async (req, res) => {
   } catch (error) {
     console.error('Erro ao salvar configuração:', error);
     res.status(500).json({ error: 'Erro ao salvar configuração' });
+  }
+});
+
+// ==================== SEGURANÇA ====================
+
+// Função para criptografar senha com SALT
+function hashPassword(login, password, salt) {
+  const combined = `${login}:${password}:${salt}`;
+  return crypto.createHash('sha256').update(combined).digest('hex');
+}
+
+// GET /api/usuarios - Listar todos os usuários (alias para compatibilidade)
+app.get('/api/usuarios', async (req, res) => {
+  try {
+    // Adicionar coluna colaborador_id se não existir
+    try {
+      await pool.query(`ALTER TABLE usuarios_seguranca ADD COLUMN colaborador_id VARCHAR(36) NULL`);
+      await pool.query(`ALTER TABLE usuarios_seguranca ADD INDEX idx_colaborador (colaborador_id)`);
+    } catch (err) {
+      // Coluna já existe, ignorar erro
+    }
+
+    const [rows] = await pool.query(`
+      SELECT 
+        u.id,
+        u.login AS email,
+        u.data_vigencia_inicial AS createdAt,
+        u.data_vigencia_termino,
+        u.status AS ativo,
+        'admin' AS role,
+        u.colaborador_id AS colaboradorId,
+        c.nome AS colaboradorNome,
+        c.matricula AS colaboradorMatricula,
+        c.setor AS colaboradorSetor,
+        '[]' AS permissoesPorSetor,
+        u.created_at,
+        u.updated_at
+      FROM usuarios_seguranca u
+      LEFT JOIN colaboradores c ON u.colaborador_id = c.id
+      ORDER BY u.created_at DESC
+    `);
+    
+    // Formatar resposta para compatibilidade com o frontend
+    const usuariosFormatados = rows.map(u => ({
+      ...u,
+      ativo: u.ativo === 'ATIVO' ? 1 : 0,
+      permissoesPorSetor: []
+    }));
+    
+    res.json(usuariosFormatados);
+  } catch (error) {
+    console.error('Erro ao buscar usuários:', error);
+    res.status(500).json({ 
+      error: 'Erro ao buscar usuários',
+      details: error.message 
+    });
+  }
+});
+
+// GET /api/usuarios/:id - Buscar usuário por ID (alias)
+app.get('/api/usuarios/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT 
+        u.id,
+        u.login AS email,
+        u.data_vigencia_inicial AS createdAt,
+        u.data_vigencia_termino,
+        u.status AS ativo,
+        'admin' AS role,
+        u.colaborador_id AS colaboradorId,
+        c.nome AS colaboradorNome,
+        c.matricula AS colaboradorMatricula,
+        c.setor AS colaboradorSetor,
+        '[]' AS permissoesPorSetor,
+        u.created_at,
+        u.updated_at
+      FROM usuarios_seguranca u
+      LEFT JOIN colaboradores c ON u.colaborador_id = c.id
+      WHERE u.id = ?`,
+      [req.params.id]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    const usuario = {
+      ...rows[0],
+      ativo: rows[0].ativo === 'ATIVO' ? 1 : 0,
+      permissoesPorSetor: []
+    };
+    
+    res.json(usuario);
+  } catch (error) {
+    console.error('Erro ao buscar usuário:', error);
+    res.status(500).json({ error: 'Erro ao buscar usuário' });
+  }
+});
+
+// POST /api/usuarios - Criar novo usuário (alias)
+app.post('/api/usuarios', async (req, res) => {
+  const { email, password, role, ativo, colaboradorId } = req.body;
+  
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+    }
+    
+    // Buscar SALT
+    const [configRows] = await pool.query('SELECT valor FROM configuracoes WHERE chave = ?', ['SALT']);
+    if (configRows.length === 0) {
+      return res.status(400).json({ error: 'SALT não configurado' });
+    }
+    
+    const salt = configRows[0].valor;
+    
+    // Verificar se já existe
+    const [existing] = await pool.query('SELECT id FROM usuarios_seguranca WHERE login = ?', [email]);
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'Email já existe' });
+    }
+    
+    const id = uuidv4();
+    const passwordHash = hashPassword(email, password, salt);
+    const status = ativo ? 'ATIVO' : 'INATIVO';
+    
+    await pool.query(
+      `INSERT INTO usuarios_seguranca 
+       (id, login, password_hash, data_vigencia_inicial, status, salt_usado, created_by, colaborador_id) 
+       VALUES (?, ?, ?, NOW(), ?, ?, ?, ?)`,
+      [id, email, passwordHash, status, salt, 'system', colaboradorId]
+    );
+    
+    const [created] = await pool.query('SELECT * FROM usuarios_seguranca WHERE id = ?', [id]);
+    
+    res.status(201).json({
+      ...created[0],
+      email: created[0].login,
+      ativo: created[0].status === 'ATIVO' ? 1 : 0,
+      role: 'admin'
+    });
+  } catch (error) {
+    console.error('Erro ao criar usuário:', error);
+    res.status(500).json({ error: 'Erro ao criar usuário', details: error.message });
+  }
+});
+
+// PUT /api/usuarios/:id - Atualizar usuário (alias)
+app.put('/api/usuarios/:id', async (req, res) => {
+  const { email, password, role, ativo, colaboradorId } = req.body;
+  
+  try {
+    const [existing] = await pool.query('SELECT * FROM usuarios_seguranca WHERE id = ?', [req.params.id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    const usuario = existing[0];
+    let passwordHash = usuario.password_hash;
+    
+    if (password) {
+      passwordHash = hashPassword(email || usuario.login, password, usuario.salt_usado);
+    }
+    
+    const status = ativo ? 'ATIVO' : 'INATIVO';
+    
+    await pool.query(
+      `UPDATE usuarios_seguranca 
+       SET login = ?, password_hash = ?, status = ?, updated_by = ?, updated_at = NOW(), colaborador_id = ?
+       WHERE id = ?`,
+      [email || usuario.login, passwordHash, status, 'system', colaboradorId || usuario.colaborador_id, req.params.id]
+    );
+    
+    const [updated] = await pool.query('SELECT * FROM usuarios_seguranca WHERE id = ?', [req.params.id]);
+    
+    res.json({
+      ...updated[0],
+      email: updated[0].login,
+      ativo: updated[0].status === 'ATIVO' ? 1 : 0,
+      role: 'admin'
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar usuário:', error);
+    res.status(500).json({ error: 'Erro ao atualizar usuário', details: error.message });
+  }
+});
+
+// DELETE /api/usuarios/:id - Excluir usuário (alias)
+app.delete('/api/usuarios/:id', async (req, res) => {
+  try {
+    const [result] = await pool.query('DELETE FROM usuarios_seguranca WHERE id = ?', [req.params.id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    res.json({ message: 'Usuário excluído com sucesso' });
+  } catch (error) {
+    console.error('Erro ao excluir usuário:', error);
+    res.status(500).json({ error: 'Erro ao excluir usuário' });
+  }
+});
+
+// GET /api/usuarios-seguranca - Listar todos os usuários de segurança
+app.get('/api/usuarios-seguranca', async (req, res) => {
+  try {
+    // Verificar se a tabela existe, criar se necessário
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS usuarios_seguranca (
+        id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+        login VARCHAR(100) NOT NULL UNIQUE,
+        password_hash VARCHAR(255) NOT NULL,
+        data_vigencia_inicial DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        data_vigencia_termino DATETIME NULL,
+        status ENUM('ATIVO', 'INATIVO', 'BLOQUEADO', 'AGUARDANDO_ATIVACAO') NOT NULL DEFAULT 'ATIVO',
+        salt_usado VARCHAR(32) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        created_by VARCHAR(100),
+        updated_by VARCHAR(100),
+        INDEX idx_login (login),
+        INDEX idx_status (status),
+        INDEX idx_vigencia (data_vigencia_inicial, data_vigencia_termino)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    
+    const [rows] = await pool.query(`
+      SELECT id, login, data_vigencia_inicial, data_vigencia_termino, status,
+             salt_usado, created_at, updated_at, created_by, updated_by
+      FROM usuarios_seguranca
+      ORDER BY created_at DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Erro ao buscar usuários de segurança:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Erro ao buscar usuários',
+      details: error.message,
+      code: error.code
+    });
+  }
+});
+
+// GET /api/usuarios-seguranca/:id - Buscar usuário específico
+app.get('/api/usuarios-seguranca/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, login, data_vigencia_inicial, data_vigencia_termino, status, salt_usado, created_at, updated_at FROM usuarios_seguranca WHERE id = ?',
+      [req.params.id]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao buscar usuário:', error);
+    res.status(500).json({ error: 'Erro ao buscar usuário' });
+  }
+});
+
+// POST /api/usuarios-seguranca - Criar novo usuário
+app.post('/api/usuarios-seguranca', async (req, res) => {
+  const { login, password, data_vigencia_termino, status, created_by } = req.body;
+  
+  try {
+    // Validações
+    if (!login || !password) {
+      return res.status(400).json({ error: 'Login e senha são obrigatórios' });
+    }
+    
+    // Buscar SALT das configurações
+    const [configRows] = await pool.query('SELECT valor FROM configuracoes WHERE chave = ?', ['SALT']);
+    if (configRows.length === 0) {
+      return res.status(400).json({ error: 'SALT não configurado. Configure o SALT em Configurações primeiro.' });
+    }
+    
+    const salt = configRows[0].valor;
+    
+    // Verificar se login já existe
+    const [existing] = await pool.query('SELECT id FROM usuarios_seguranca WHERE login = ?', [login]);
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'Login já existe' });
+    }
+    
+    // Gerar ID e hash da senha
+    const id = uuidv4();
+    const passwordHash = hashPassword(login, password, salt);
+    const dataVigenciaInicial = new Date();
+    
+    // Inserir usuário
+    await pool.query(
+      `INSERT INTO usuarios_seguranca 
+       (id, login, password_hash, data_vigencia_inicial, data_vigencia_termino, status, salt_usado, created_by) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, login, passwordHash, dataVigenciaInicial, data_vigencia_termino || null, status || 'ATIVO', salt, created_by || 'system']
+    );
+    
+    // Buscar usuário criado
+    const [created] = await pool.query(
+      'SELECT id, login, data_vigencia_inicial, data_vigencia_termino, status, created_at FROM usuarios_seguranca WHERE id = ?',
+      [id]
+    );
+    
+    res.status(201).json(created[0]);
+  } catch (error) {
+    console.error('Erro ao criar usuário:', error);
+    res.status(500).json({ error: 'Erro ao criar usuário' });
+  }
+});
+
+// PUT /api/usuarios-seguranca/:id - Atualizar usuário
+app.put('/api/usuarios-seguranca/:id', async (req, res) => {
+  const { login, password, data_vigencia_termino, status, updated_by } = req.body;
+  
+  try {
+    // Verificar se usuário existe
+    const [existing] = await pool.query('SELECT * FROM usuarios_seguranca WHERE id = ?', [req.params.id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    const usuario = existing[0];
+    
+    // Se a senha foi alterada, recriptografar
+    let passwordHash = usuario.password_hash;
+    if (password) {
+      passwordHash = hashPassword(login || usuario.login, password, usuario.salt_usado);
+    }
+    
+    // Atualizar usuário
+    await pool.query(
+      `UPDATE usuarios_seguranca 
+       SET login = ?, password_hash = ?, data_vigencia_termino = ?, status = ?, updated_by = ?, updated_at = NOW()
+       WHERE id = ?`,
+      [login || usuario.login, passwordHash, data_vigencia_termino, status || usuario.status, updated_by || 'system', req.params.id]
+    );
+    
+    // Buscar usuário atualizado
+    const [updated] = await pool.query(
+      'SELECT id, login, data_vigencia_inicial, data_vigencia_termino, status, updated_at FROM usuarios_seguranca WHERE id = ?',
+      [req.params.id]
+    );
+    
+    res.json(updated[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar usuário:', error);
+    res.status(500).json({ error: 'Erro ao atualizar usuário' });
+  }
+});
+
+// DELETE /api/usuarios-seguranca/:id - Excluir usuário
+app.delete('/api/usuarios-seguranca/:id', async (req, res) => {
+  try {
+    const [result] = await pool.query('DELETE FROM usuarios_seguranca WHERE id = ?', [req.params.id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    res.json({ message: 'Usuário excluído com sucesso' });
+  } catch (error) {
+    console.error('Erro ao excluir usuário:', error);
+    res.status(500).json({ error: 'Erro ao excluir usuário' });
   }
 });
 
@@ -10102,6 +10562,23 @@ async function startServer() {
         status
       } = req.body;
       
+      // Validações
+      if (!titulo || !titulo.trim()) {
+        return res.status(400).json({ error: 'Título é obrigatório' });
+      }
+      
+      if (!slug || !slug.trim()) {
+        return res.status(400).json({ error: 'Slug é obrigatório' });
+      }
+      
+      if (!conteudo || !conteudo.trim()) {
+        return res.status(400).json({ error: 'Conteúdo é obrigatório' });
+      }
+      
+      if (!autor || !autor.trim()) {
+        return res.status(400).json({ error: 'Autor é obrigatório' });
+      }
+      
       const id = uuidv4();
       const tagsJson = JSON.stringify(tags || []);
       const dataPublicacao = status === 'Publicado' ? new Date() : null;
@@ -10146,7 +10623,22 @@ async function startServer() {
       res.status(201).json(doc);
     } catch (error) {
       console.error('Erro ao criar documentação:', error);
-      res.status(500).json({ error: 'Erro ao criar documentação' });
+      console.error('Stack trace:', error.stack);
+      console.error('Dados recebidos:', req.body);
+      
+      // Tratamento de erro de slug duplicado
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(400).json({ 
+          error: 'Já existe uma documentação com este slug',
+          code: 'DUPLICATE_SLUG' 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: 'Erro ao criar documentação',
+        message: error.message,
+        details: error.toString()
+      });
     }
   });
 
@@ -10166,6 +10658,23 @@ async function startServer() {
         aplicacaoId,
         status
       } = req.body;
+      
+      // Validações
+      if (!titulo || !titulo.trim()) {
+        return res.status(400).json({ error: 'Título é obrigatório' });
+      }
+      
+      if (!slug || !slug.trim()) {
+        return res.status(400).json({ error: 'Slug é obrigatório' });
+      }
+      
+      if (!conteudo || !conteudo.trim()) {
+        return res.status(400).json({ error: 'Conteúdo é obrigatório' });
+      }
+      
+      if (!autor || !autor.trim()) {
+        return res.status(400).json({ error: 'Autor é obrigatório' });
+      }
       
       // Verificar se existe
       const [existing] = await pool.query('SELECT * FROM documentacao_projetos WHERE id = ?', [id]);
@@ -10219,7 +10728,19 @@ async function startServer() {
       res.json(doc);
     } catch (error) {
       console.error('Erro ao atualizar documentação:', error);
-      res.status(500).json({ error: 'Erro ao atualizar documentação' });
+      
+      // Tratamento de erro de slug duplicado
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(400).json({ 
+          error: 'Já existe uma documentação com este slug',
+          code: 'DUPLICATE_SLUG' 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: 'Erro ao atualizar documentação',
+        message: error.message 
+      });
     }
   });
 
@@ -15630,7 +16151,8 @@ app.post('/api/sdd/projetos/:id/extrair-requisitos-prd', async (req, res) => {
       const line = lines[i].trim();
       
       // Capturar requisitos principais: ### RF001 - Nome do Requisito
-      const reqPrincipalMatch = line.match(/^###\s+(RF\d+|RNF\d+|RD\d+)\s*-\s*(.+)$/i);
+      // Regex otimizada para evitar ReDoS
+      const reqPrincipalMatch = line.match(/^###\s+(RF\d{1,4}|RNF\d{1,4}|RD\d{1,4})\s*-\s*(.+?)\s*$/);
       if (reqPrincipalMatch) {
         currentRequisitoPrincipal = reqPrincipalMatch[1].toUpperCase(); // RF001, RNF001, etc.
         currentSection = `${reqPrincipalMatch[1]} - ${reqPrincipalMatch[2].trim()}`;
@@ -15671,7 +16193,8 @@ app.post('/api/sdd/projetos/:id/extrair-requisitos-prd', async (req, res) => {
       }
       
       // Capturar subtarefas/requisitos detalhados: #### RF001.1 - Nome da Tarefa
-      const subtarefaMatch = line.match(/^####\s+(RF\d+\.\d+|RNF\d+\.\d+|RD\d+\.\d+)\s*-\s*(.+)$/i);
+      // Regex otimizada para evitar ReDoS
+      const subtarefaMatch = line.match(/^####\s+(RF\d{1,4}\.\d{1,4}|RNF\d{1,4}\.\d{1,4}|RD\d{1,4}\.\d{1,4})\s*-\s*(.+?)\s*$/);
       if (subtarefaMatch) {
         const codigo = subtarefaMatch[1].toUpperCase(); // RF001.1
         const nomeSubtarefa = subtarefaMatch[2].trim();
@@ -15977,8 +16500,9 @@ app.delete('/api/sdd/decisoes/:id', async (req, res) => {
 // GET /api/docker/mkdocs/status - Verificar status do container MkDocs
 app.get('/api/docker/mkdocs/status', async (req, res) => {
   try {
-    // Tentar acessar o MkDocs diretamente via HTTP
-    const mkdocsUrl = 'http://mkdocs:8082';
+    // Usar HTTPS em produção, HTTP apenas em desenvolvimento
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+    const mkdocsUrl = `${protocol}://mkdocs:8082`;
     
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3000);

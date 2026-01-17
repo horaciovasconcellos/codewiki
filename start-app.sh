@@ -14,11 +14,14 @@ echo "   Backend PID: $BACKEND_PID"
 
 # Aguardar backend estar pronto
 echo "⏳ Aguardando backend..."
-sleep 3
+sleep 5
+
+# Detectar porta do backend
+BACKEND_PORT=${PORT:-${API_PORT:-5000}}
 
 # Verificar se backend está rodando
-if curl -f -s http://localhost:3000/health > /dev/null; then
-    echo "✅ Backend está rodando"
+if curl -f -s http://localhost:$BACKEND_PORT/health > /dev/null; then
+    echo "✅ Backend está rodando na porta $BACKEND_PORT"
 else
     echo "❌ Backend falhou ao iniciar"
     exit 1

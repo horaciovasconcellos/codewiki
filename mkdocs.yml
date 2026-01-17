@@ -7,127 +7,140 @@ docs_dir: docs
 repo_name: sistema-de-auditoria
 
 nav:
-  - "🏠 Início":
-      - "Bem-vindo": "index.md"
+  - Início:
+      - index.md
       - "Índice Geral": "INDEX.md"
       - "Convenções do Projeto": "PROJECT-CONVENTIONS.md"
       - "Constituição": "constitution.md"
   
-  - "🚀 Deployment":
+  - Deployment:
+      - deployment/index.md
       - "Guia de Deploy": "deployment/DEPLOY-GUIDE.md"
       - "Resumo de Deploy": "deployment/DEPLOY-SUMMARY.md"
       - "Docker Produção": "deployment/DOCKER-PRODUCTION-SETUP.md"
       - "Testes de Produção": "deployment/TEST-PRODUCTION.md"
   
-  - "📖 Guias":
+  - Guias:
+      - guides/index.md
       - "Teste PBIS Azure": "guides/GUIA-TESTE-PBIS-AZURE.md"
   
-  - "⚙️ Setup e Configuração":
+  - Setup e Configuração:
+      - setup/index.md
       - "LGPD Implementation": "setup/LGPD-IMPLEMENTATION.md"
       - "LGPD Setup Instructions": "setup/LGPD-SETUP-INSTRUCTIONS.md"
       - "MySQL Replication Fix": "setup/MYSQL-REPLICATION-FIX.md"
   
-  - "🐛 Issues e Troubleshooting":
-      - "Issue Colaborador Wizard": "issues/ISSUE-COLABORADOR-WIZARD.md"
+  - Qualidade de Código:
+      - "✅ Correções Aplicadas": "SONARQUBE-CORRECOES-APLICADAS.md"
+      - "🔄 Duplicação React/TS": "DUPLICACAO-CODIGO-REACT.md"
+      - "📋 Guia Passo a Passo": "GUIA-REFATORACAO-PASSO-A-PASSO.md"
+      - "SonarQube - Melhorias Backend": "SONARQUBE-MELHORIAS.md"
+      - "SonarQube - Melhorias React/TS": "SONARQUBE-MELHORIAS-REACT.md"
+      - "SonarQube - Configuração": "SONARQUBE.md"
   
-  - "📚 Documentação de Telas":
-      - "📑 Índice Geral": "TELAS-INDICE.md"
+  - Issues e Troubleshooting:
+      - issues/index.md
+      - "Issue Colaborador Wizard": "issues/ISSUE-COLABORADOR-WIZARD.md"
+      - "Fix Error 500 - Usuários Segurança": "FIX-USUARIOS-SEGURANCA-ERROR-500.md"
+  
+  - Documentação de Telas:
+      - TELAS-INDICE.md
       - "📋 Resumo Completo": "TELAS-RESUMO-COMPLETO.md"
       - "📄 Sumário Executivo": "TELAS-SUMARIO-EXECUTIVO.md"
       - "✅ Entrega da Documentação": "ENTREGA-DOCUMENTACAO-TELAS.md"
-      - "Core":
+      - Core:
           - "Dashboard": "TELA-DASHBOARD.md"
           - "Logs and Traces": "TELA-LOGS-TRACES.md"
-      - "Cadastros":
+      - Cadastros:
           - "Aplicações": "TELA-APLICACOES.md"
-      - "DevOps":
+      - DevOps:
           - "Gerador de Projetos": "TELA-GERADOR-PROJETOS.md"
-      - "Análise":
+      - Análise:
           - "ReportBook": "TELA-REPORTBOOK.md"
-      - "InnerSource":
+      - InnerSource:
           - "Visão Geral": "TELA-INNERSOURCE.md"
   
-  - "📊 Métricas e Dashboards":
+  - Métricas e Dashboards:
       - "DORA Dashboard": "DASHBOARD-DORA.md"
   
-  - "🔧 Features Implementadas":
+  - Features Implementadas:
       - "Status de Repositório": "FEATURE-STATUS-REPOSITORIO.md"
       - "Fix Colaboradores/Habilidades": "FIX-COLABORADORES-HABILIDADES-AVALIACOES.md"
   
-  - "🤖 Sistema ADR":
-      - "Visão Geral": "SISTEMA-ADR.md"
+  - Sistema ADR:
+      - SISTEMA-ADR.md
       - "Resumo de Implementação": "RESUMO-IMPLEMENTACAO-ADR.md"
       - "Guia de Carga de ADRs": "GUIA-CARGA-ADRS.md"
       - "Melhorias de UI": "MELHORIAS-UI-ADR.md"
   
-  - "⚙️ Pipelines":
+  - Pipelines:
       - "Pipeline Database": "PIPELINE-DATABASE.md"
       - "Pipeline Wizard Stages": "PIPELINE-WIZARD-STAGES.md"
       - "Stages YAML Import": "STAGES-YAML-IMPORT.md"
   
-  - "☁️ Azure DevOps":
-      - "Templates": "README-AZURE-DEVOPS-TEMPLATES.md"
+  - Azure DevOps:
+      - README-AZURE-DEVOPS-TEMPLATES.md
       - "Quick Start": "QUICK-START-AZURE-TEMPLATES.md"
       - "Troubleshooting": "TROUBLESHOOTING-AZURE-TEMPLATES.md"
       - "Work Items Sync": "azure-devops-workitems-sync.md"
   
-  - "📜 Scripts":
-      - "Documentação": "SCRIPTS-README.md"
+  - Scripts:
+      - SCRIPTS-README.md
       - "Testes": "TESTE-SCRIPTS.md"
   
-  - "📝 Logging e Auditoria":
-      - "Quick Reference": "LOGGING-QUICK-REFERENCE.md"
+  - Logging e Auditoria:
+      - LOGGING-QUICK-REFERENCE.md
       - "Implementação Completa": "LOGGING-IMPLEMENTATION-COMPLETE.md"
       - "Relatório de Auditoria": "LOGGING-AUDIT-REPORT.md"
       - "Resumo de Sucesso": "LOGGING-SUCCESS-SUMMARY.md"
   
-  - "🔗 API":
-      - "Referência Completa": "API-REFERENCIA-COMPLETA.md"
-      - "Catálogo de APIs":
-          - "Visão Geral": "api-catalog/index.md"
+  - API:
+      - API-REFERENCIA-COMPLETA.md
+      - Catálogo de APIs:
+          - api-catalog/index.md
           - "Auto Update": "CATALOGO-APIS-AUTO-UPDATE.md"
-          - "Payloads":
+          - Payloads:
               - "AZ PPP": "api-catalog/PAYLOADAZPPP.md"
               - "OrdSPL Clara": "api-catalog/PAYLOADORDSPLCLARA.md"
   
-  - "📦 Data Templates":
-      - "Guia de Carga CSV": "data-templates/GUIA-CARGA-CSV.md"
+  - Data Templates:
+      - data-templates/GUIA-CARGA-CSV.md
       - "Carga de Dados": "data-templates/README-CARGA.md"
-      - "Tecnologias":
+      - Tecnologias:
           - "README": "data-templates/README-EXEMPLOS-TECNOLOGIAS.md"
-      - "Colaboradores":
+      - Colaboradores:
           - "README": "data-templates/README-HABILIDADES.md"
           - "Quick Reference": "data-templates/HABILIDADES-QUICK-REF.md"
-      - "Aplicações":
+      - Aplicações:
           - "README": "data-templates/README-APLICACOES.md"
           - "Exemplos": "data-templates/README-APLICACOES-EXEMPLO.md"
-      - "ADRs":
+      - ADRs:
           - "README": "data-templates/README-ADRS.md"
-      - "Spec-Kit (SDD)":
+      - Spec-Kit (SDD):
           - "README": "data-templates/README-SDD.md"
-      - "InnerSource":
+      - InnerSource:
           - "README": "data-templates/README-INNERSOURCE.md"
           - "Identificador": "data-templates/README-IDENTIFICADOR-v1.5.1.md"
-      - "Comunicações":
+      - Comunicações:
           - "README": "data-templates/README-COMUNICACOES.md"
           - "Tipos": "data-templates/README-TIPOS-COMUNICACAO.md"
-      - "Infraestrutura":
+      - Infraestrutura:
           - "Servidores": "data-templates/README-SERVIDORES.md"
           - "Estruturas de Projeto": "data-templates/README-ESTRUTURAS-PROJETO.md"
-      - "Processos":
+      - Processos:
           - "Processos de Negócio": "data-templates/README-PROCESSOS-NEGOCIO.md"
-      - "Scripts":
+      - Scripts:
           - "README": "data-templates/README-SCRIPTS.md"
-      - "Payloads":
+      - Payloads:
           - "README": "data-templates/README-PAYLOADS.md"
   
-  - "📚 Runbooks":
-      - "Índice": "runbooks/index.md"
+  - Runbooks:
+      - runbooks/index.md
       - "Status": "runbooks/STATUS.md"
-      - "Banco de Dados":
-          - "MySQL":
+      - Banco de Dados:
+          - MySQL:
               - "01 - Backup e Recovery": "runbooks/database/mysql-01-backup-recovery.md"
-          - "Oracle":
+          - Oracle:
               - "01 - Backup e Recovery": "runbooks/database/oracle-01-backup-recovery.md"
               - "02 - Performance Tuning": "runbooks/database/oracle-02-performance-tuning.md"
               - "03 - Instalação": "runbooks/database/oracle-03-installation.md"
@@ -168,6 +181,10 @@ theme:
     - content.footnote.tooltips
     - navigation.instant
     - navigation.prune
+    - navigation.sections
+    - navigation.indexes
+    - navigation.tabs
+    - navigation.expand
     - search.highlight
     - search.share
     - search.suggest
@@ -205,9 +222,6 @@ plugins:
       filename: .pages
       collapse_single_pages: false
       strict: false
-
-  - "Catálogo de APIs":
-      - "Visão Geral": "api-catalog/index.md"
 
 markdown_extensions:
   - markdown.extensions.codehilite:
@@ -289,61 +303,6 @@ extra:
       link: https://gitter.im/squidfunk/mkdocs-material
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/u/77678117787
-
-# Configurações adicionais para melhor organização
-plugins:
-  - search:
-      lang: 
-        - pt
-        - en
-  - minify:
-      minify_html: true
-  - awesome-pages
-  
-# Validação de links e arquivos
-validation:
-  omitted_files: warn
-  absolute_links: warn
-  unrecognized_links: warn
-  
-# Markdown extensions para recursos avançados
-markdown_extensions:
-  - abbr
-  - admonition
-  - attr_list
-  - def_list
-  - footnotes
-  - md_in_html
-  - toc:
-      permalink: true
-      permalink_title: Link para esta seção
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
-  - pymdownx.details
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
-  - pymdownx.highlight:
-      anchor_linenums: true
-      line_spans: __span
-      pygments_lang_class: true
-  - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.tilde
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/in/hor%C3%A1cio-correa-t-de-vasconcellos-j%C3%BAnior-b7788467/
     - icon: fontawesome/brands/instagram
@@ -352,14 +311,9 @@ markdown_extensions:
       link: https://www.facebook.com/horacio.vasconcellos
     - icon: fontawesome/brands/medium
       link: http://60pportunities.com.br
-    - icon: fontawesome/brands/pied-piper-alt
-      link: https://60pportunities.com.br
     - icon: fontawesome/brands/product-hunt
       link: https://www.producthunt.com/@horacio_vasconcellos
-    - icon: fontawesome/brands/slack
-      link: https://gitlab.com/horaciovasconcellos
-    - icon: fontawesome/brands/discord
-      link: http://60pportunities.com.br
     - icon: fontawesome/solid/paper-plane
-      link: mailto:horacio.vasconcellos@gmail.com  # Adicionei 'link:'
+      link: mailto:horacio.vasconcellos@gmail.com
+
 use_directory_urls: true

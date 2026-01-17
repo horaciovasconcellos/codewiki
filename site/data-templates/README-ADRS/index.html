@@ -1,0 +1,2092 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Auditoria de Sistemas" name="description"/>
+<meta content="Horacio Vasconcellos" name="author"/>
+<link href="../README-APLICACOES-EXEMPLO/" rel="prev"/>
+<link href="../README-SDD/" rel="next"/>
+<link href="../../img/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.6.11" name="generator"/>
+<title>README - Sistema de Auditoria</title>
+<link href="../../assets/stylesheets/main.4af4bdda.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.06af60db.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<link href="../../styles/app-theme.css" rel="stylesheet"/>
+<link href="https://unpkg.com/mermaid@8.5.1/dist/mermaid.css" rel="stylesheet"/>
+<link href="../../styles/tablesort.css" rel="stylesheet"/>
+<link href="../../styles/60pthemas.css" rel="stylesheet"/>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-1234567890"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-1234567890",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-1234567890",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+<script>if("undefined"!=typeof __md_analytics){var consent=__md_get("__consent");consent&&consent.analytics&&__md_analytics()}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="deep-purple" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#carga-de-dados-adrs-architectural-decision-records">
+          Pular para conteúdo
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-color-scheme="default" data-md-component="outdated" hidden="">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Cabeçalho" class="md-header__inner md-grid">
+<a aria-label="Sistema de Auditoria" class="md-header__button md-logo" data-md-component="logo" href="../.." title="Sistema de Auditoria">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Sistema de Auditoria
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              README
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-hidden="true" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="deep-purple" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme)" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"></path></svg>
+</label>
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme: light)" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_3" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to system preference" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_3" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to system preference">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Buscar" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Buscar" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Pesquisar" class="md-search__options">
+<a aria-label="Compartilhar" class="md-search__icon md-icon" data-clipboard="" data-clipboard-text="" data-md-component="search-share" href="javascript:void(0)" tabindex="-1" title="Compartilhar">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"></path></svg>
+</a>
+<button aria-label="Limpar" class="md-search__icon md-icon" tabindex="-1" title="Limpar" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+<div class="md-search__suggest" data-md-component="search-suggest"></div>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/horaciovasconcellos/sistema-de-auditoria" title="Ir para repositório">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"></path></svg>
+</div>
+<div class="md-source__repository">
+    sistema-de-auditoria
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Abas" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../index.md">
+          
+  
+  
+    
+  
+  Início
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../deployment/">
+          
+  
+  
+    
+  
+  Deployment
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../guides/">
+          
+  
+  
+    
+  
+  Guias
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../setup/">
+          
+  
+  
+    
+  
+  Setup e Configuração
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../SONARQUBE-CORRECOES-APLICADAS/">
+          
+  
+  
+    
+  
+  Qualidade de Código
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../issues/">
+          
+  
+  
+    
+  
+  Issues e Troubleshooting
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../TELAS-INDICE/">
+          
+  
+  
+    
+  
+  Documentação de Telas
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../DASHBOARD-DORA/">
+          
+  
+  
+    
+  
+  Métricas e Dashboards
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../FEATURE-STATUS-REPOSITORIO/">
+          
+  
+  
+    
+  
+  Features Implementadas
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../SISTEMA-ADR/">
+          
+  
+  
+    
+  
+  Sistema ADR
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../PIPELINE-DATABASE/">
+          
+  
+  
+    
+  
+  Pipelines
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../README-AZURE-DEVOPS-TEMPLATES/">
+          
+  
+  
+    
+  
+  Azure DevOps
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../SCRIPTS-README/">
+          
+  
+  
+    
+  
+  Scripts
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../LOGGING-QUICK-REFERENCE/">
+          
+  
+  
+    
+  
+  Logging e Auditoria
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../API-REFERENCIA-COMPLETA/">
+          
+  
+  
+    
+  
+  API
+
+        </a>
+</li>
+<li class="md-tabs__item md-tabs__item--active">
+<a class="md-tabs__link" href="../GUIA-CARGA-CSV/">
+          
+  
+  
+    
+  
+  Data Templates
+
+        </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../runbooks/">
+          
+  
+  
+    
+  
+  Runbooks
+
+        </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navegação" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Sistema de Auditoria" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="Sistema de Auditoria">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+</a>
+    Sistema de Auditoria
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/horaciovasconcellos/sistema-de-auditoria" title="Ir para repositório">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"></path></svg>
+</div>
+<div class="md-source__repository">
+    sistema-de-auditoria
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../index.md">
+<span class="md-ellipsis">
+    Início
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../deployment/">
+<span class="md-ellipsis">
+    Deployment
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../guides/">
+<span class="md-ellipsis">
+    Guias
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../setup/">
+<span class="md-ellipsis">
+    Setup e Configuração
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../SONARQUBE-CORRECOES-APLICADAS/">
+<span class="md-ellipsis">
+    Qualidade de Código
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../issues/">
+<span class="md-ellipsis">
+    Issues e Troubleshooting
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../TELAS-INDICE/">
+<span class="md-ellipsis">
+    Documentação de Telas
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../DASHBOARD-DORA/">
+<span class="md-ellipsis">
+    Métricas e Dashboards
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../FEATURE-STATUS-REPOSITORIO/">
+<span class="md-ellipsis">
+    Features Implementadas
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../SISTEMA-ADR/">
+<span class="md-ellipsis">
+    Sistema ADR
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../PIPELINE-DATABASE/">
+<span class="md-ellipsis">
+    Pipelines
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../README-AZURE-DEVOPS-TEMPLATES/">
+<span class="md-ellipsis">
+    Azure DevOps
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../SCRIPTS-README/">
+<span class="md-ellipsis">
+    Scripts
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../LOGGING-QUICK-REFERENCE/">
+<span class="md-ellipsis">
+    Logging e Auditoria
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../API-REFERENCIA-COMPLETA/">
+<span class="md-ellipsis">
+    API
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_16" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="">
+<span class="md-ellipsis">
+    Data Templates
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_16_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_16">
+<span class="md-nav__icon md-icon"></span>
+            Data Templates
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../GUIA-CARGA-CSV/">
+<span class="md-ellipsis">
+    Guia de Carga de Dados - Arquivos CSV de Exemplo
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-CARGA/">
+<span class="md-ellipsis">
+    Carga de Dados
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_3" id="__nav_16_3_label" tabindex="">
+<span class="md-ellipsis">
+    Tecnologias
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_3_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_3">
+<span class="md-nav__icon md-icon"></span>
+            Tecnologias
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-EXEMPLOS-TECNOLOGIAS/">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_4" id="__nav_16_4_label" tabindex="">
+<span class="md-ellipsis">
+    Colaboradores
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_4_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_4">
+<span class="md-nav__icon md-icon"></span>
+            Colaboradores
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-HABILIDADES/">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../HABILIDADES-QUICK-REF/">
+<span class="md-ellipsis">
+    Quick Reference
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_5" id="__nav_16_5_label" tabindex="">
+<span class="md-ellipsis">
+    Aplicações
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_5_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_5">
+<span class="md-nav__icon md-icon"></span>
+            Aplicações
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-APLICACOES/">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-APLICACOES-EXEMPLO/">
+<span class="md-ellipsis">
+    Exemplos
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_16_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_6" id="__nav_16_6_label" tabindex="">
+<span class="md-ellipsis">
+    ADRs
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_16_6_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_6">
+<span class="md-nav__icon md-icon"></span>
+            ADRs
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+<nav aria-label="Índice" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#visao-geral">
+<span class="md-ellipsis">
+      Visão Geral
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#estrutura-de-dados">
+<span class="md-ellipsis">
+      Estrutura de Dados
+    </span>
+</a>
+<nav aria-label="Estrutura de Dados" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#campos-do-adr">
+<span class="md-ellipsis">
+      Campos do ADR
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#campos-de-aplicacao-associada">
+<span class="md-ellipsis">
+      Campos de Aplicação Associada
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#arquivos-disponiveis">
+<span class="md-ellipsis">
+      Arquivos Disponíveis
+    </span>
+</a>
+<nav aria-label="Arquivos Disponíveis" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-adrscsv">
+<span class="md-ellipsis">
+      1. adrs.csv
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-adrs-cargajson">
+<span class="md-ellipsis">
+      2. adrs-carga.json
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#formato-csv">
+<span class="md-ellipsis">
+      Formato CSV
+    </span>
+</a>
+<nav aria-label="Formato CSV" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-de-linha-csv">
+<span class="md-ellipsis">
+      Exemplo de Linha CSV
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#regras-csv">
+<span class="md-ellipsis">
+      Regras CSV
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#formato-json">
+<span class="md-ellipsis">
+      Formato JSON
+    </span>
+</a>
+<nav aria-label="Formato JSON" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-de-adr-json">
+<span class="md-ellipsis">
+      Exemplo de ADR JSON
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#array-de-adrs">
+<span class="md-ellipsis">
+      Array de ADRs
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#carga-com-aplicacoes-associadas">
+<span class="md-ellipsis">
+      Carga com Aplicações Associadas
+    </span>
+</a>
+<nav aria-label="Carga com Aplicações Associadas" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#formato-estendido-json">
+<span class="md-ellipsis">
+      Formato Estendido JSON
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#status-validos">
+<span class="md-ellipsis">
+      Status Válidos
+    </span>
+</a>
+<nav aria-label="Status Válidos" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#status-de-adr">
+<span class="md-ellipsis">
+      Status de ADR
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#status-de-aplicacao">
+<span class="md-ellipsis">
+      Status de Aplicação
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validacoes">
+<span class="md-ellipsis">
+      Validações
+    </span>
+</a>
+<nav aria-label="Validações" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validacoes-automaticas">
+<span class="md-ellipsis">
+      Validações Automáticas
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validacoes-recomendadas">
+<span class="md-ellipsis">
+      Validações Recomendadas
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scripts-de-carga">
+<span class="md-ellipsis">
+      Scripts de Carga
+    </span>
+</a>
+<nav aria-label="Scripts de Carga" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#via-interface-web">
+<span class="md-ellipsis">
+      Via Interface Web
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#via-api-rest">
+<span class="md-ellipsis">
+      Via API REST
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#via-script-nodejs">
+<span class="md-ellipsis">
+      Via Script Node.js
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplos-de-uso">
+<span class="md-ellipsis">
+      Exemplos de Uso
+    </span>
+</a>
+<nav aria-label="Exemplos de Uso" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-1-adr-simples">
+<span class="md-ellipsis">
+      Exemplo 1: ADR Simples
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-2-adr-com-aplicacoes">
+<span class="md-ellipsis">
+      Exemplo 2: ADR com Aplicações
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-3-adr-substituido">
+<span class="md-ellipsis">
+      Exemplo 3: ADR Substituído
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#boas-praticas">
+<span class="md-ellipsis">
+      Boas Práticas
+    </span>
+</a>
+<nav aria-label="Boas Práticas" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#estruturacao-de-conteudo">
+<span class="md-ellipsis">
+      Estruturação de Conteúdo
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#formatacao-markdown">
+<span class="md-ellipsis">
+      Formatação Markdown
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#referencias">
+<span class="md-ellipsis">
+      Referências
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#troubleshooting">
+<span class="md-ellipsis">
+      Troubleshooting
+    </span>
+</a>
+<nav aria-label="Troubleshooting" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-adr-substituta-nao-encontrado">
+<span class="md-ellipsis">
+      Erro: "ADR Substituta não encontrado"
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-aplicacao-nao-encontrada">
+<span class="md-ellipsis">
+      Erro: "Aplicação não encontrada"
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-descricao-muito-longa">
+<span class="md-ellipsis">
+      Erro: "Descrição muito longa"
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-status-invalido">
+<span class="md-ellipsis">
+      Erro: "Status inválido"
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#migracao-de-dados-existentes">
+<span class="md-ellipsis">
+      Migração de Dados Existentes
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#relacionado">
+<span class="md-ellipsis">
+      Relacionado
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_7" id="__nav_16_7_label" tabindex="">
+<span class="md-ellipsis">
+    Spec-Kit (SDD)
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_7_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_7">
+<span class="md-nav__icon md-icon"></span>
+            Spec-Kit (SDD)
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-SDD/">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_8" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_8" id="__nav_16_8_label" tabindex="">
+<span class="md-ellipsis">
+    InnerSource
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_8_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_8">
+<span class="md-nav__icon md-icon"></span>
+            InnerSource
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-INNERSOURCE/">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-IDENTIFICADOR-v1.5.1/">
+<span class="md-ellipsis">
+    Identificador
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_9" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_9" id="__nav_16_9_label" tabindex="">
+<span class="md-ellipsis">
+    Comunicações
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_9_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_9">
+<span class="md-nav__icon md-icon"></span>
+            Comunicações
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-COMUNICACOES/">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-TIPOS-COMUNICACAO/">
+<span class="md-ellipsis">
+    Tipos
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_10" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_10" id="__nav_16_10_label" tabindex="">
+<span class="md-ellipsis">
+    Infraestrutura
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_10_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_10">
+<span class="md-nav__icon md-icon"></span>
+            Infraestrutura
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-SERVIDORES/">
+<span class="md-ellipsis">
+    Servidores
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-ESTRUTURAS-PROJETO/">
+<span class="md-ellipsis">
+    Estruturas de Projeto
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_11" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_11" id="__nav_16_11_label" tabindex="">
+<span class="md-ellipsis">
+    Processos
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_11_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_11">
+<span class="md-nav__icon md-icon"></span>
+            Processos
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-PROCESSOS-NEGOCIO/">
+<span class="md-ellipsis">
+    Processos de Negócio
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_12" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_12" id="__nav_16_12_label" tabindex="">
+<span class="md-ellipsis">
+    Scripts
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_12_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_12">
+<span class="md-nav__icon md-icon"></span>
+            Scripts
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-SCRIPTS/">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--section md-nav__item--nested">
+<input class="md-nav__toggle md-toggle md-toggle--indeterminate" id="__nav_16_13" type="checkbox"/>
+<label class="md-nav__link" for="__nav_16_13" id="__nav_16_13_label" tabindex="">
+<span class="md-ellipsis">
+    Payloads
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_16_13_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_16_13">
+<span class="md-nav__icon md-icon"></span>
+            Payloads
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../README-PAYLOADS/">
+<span class="md-ellipsis">
+    README
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+<a class="md-nav__link" href="../../runbooks/">
+<span class="md-ellipsis">
+    Runbooks
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Índice" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#visao-geral">
+<span class="md-ellipsis">
+      Visão Geral
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#estrutura-de-dados">
+<span class="md-ellipsis">
+      Estrutura de Dados
+    </span>
+</a>
+<nav aria-label="Estrutura de Dados" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#campos-do-adr">
+<span class="md-ellipsis">
+      Campos do ADR
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#campos-de-aplicacao-associada">
+<span class="md-ellipsis">
+      Campos de Aplicação Associada
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#arquivos-disponiveis">
+<span class="md-ellipsis">
+      Arquivos Disponíveis
+    </span>
+</a>
+<nav aria-label="Arquivos Disponíveis" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-adrscsv">
+<span class="md-ellipsis">
+      1. adrs.csv
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-adrs-cargajson">
+<span class="md-ellipsis">
+      2. adrs-carga.json
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#formato-csv">
+<span class="md-ellipsis">
+      Formato CSV
+    </span>
+</a>
+<nav aria-label="Formato CSV" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-de-linha-csv">
+<span class="md-ellipsis">
+      Exemplo de Linha CSV
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#regras-csv">
+<span class="md-ellipsis">
+      Regras CSV
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#formato-json">
+<span class="md-ellipsis">
+      Formato JSON
+    </span>
+</a>
+<nav aria-label="Formato JSON" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-de-adr-json">
+<span class="md-ellipsis">
+      Exemplo de ADR JSON
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#array-de-adrs">
+<span class="md-ellipsis">
+      Array de ADRs
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#carga-com-aplicacoes-associadas">
+<span class="md-ellipsis">
+      Carga com Aplicações Associadas
+    </span>
+</a>
+<nav aria-label="Carga com Aplicações Associadas" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#formato-estendido-json">
+<span class="md-ellipsis">
+      Formato Estendido JSON
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#status-validos">
+<span class="md-ellipsis">
+      Status Válidos
+    </span>
+</a>
+<nav aria-label="Status Válidos" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#status-de-adr">
+<span class="md-ellipsis">
+      Status de ADR
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#status-de-aplicacao">
+<span class="md-ellipsis">
+      Status de Aplicação
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validacoes">
+<span class="md-ellipsis">
+      Validações
+    </span>
+</a>
+<nav aria-label="Validações" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validacoes-automaticas">
+<span class="md-ellipsis">
+      Validações Automáticas
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#validacoes-recomendadas">
+<span class="md-ellipsis">
+      Validações Recomendadas
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scripts-de-carga">
+<span class="md-ellipsis">
+      Scripts de Carga
+    </span>
+</a>
+<nav aria-label="Scripts de Carga" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#via-interface-web">
+<span class="md-ellipsis">
+      Via Interface Web
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#via-api-rest">
+<span class="md-ellipsis">
+      Via API REST
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#via-script-nodejs">
+<span class="md-ellipsis">
+      Via Script Node.js
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplos-de-uso">
+<span class="md-ellipsis">
+      Exemplos de Uso
+    </span>
+</a>
+<nav aria-label="Exemplos de Uso" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-1-adr-simples">
+<span class="md-ellipsis">
+      Exemplo 1: ADR Simples
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-2-adr-com-aplicacoes">
+<span class="md-ellipsis">
+      Exemplo 2: ADR com Aplicações
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#exemplo-3-adr-substituido">
+<span class="md-ellipsis">
+      Exemplo 3: ADR Substituído
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#boas-praticas">
+<span class="md-ellipsis">
+      Boas Práticas
+    </span>
+</a>
+<nav aria-label="Boas Práticas" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#estruturacao-de-conteudo">
+<span class="md-ellipsis">
+      Estruturação de Conteúdo
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#formatacao-markdown">
+<span class="md-ellipsis">
+      Formatação Markdown
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#referencias">
+<span class="md-ellipsis">
+      Referências
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#troubleshooting">
+<span class="md-ellipsis">
+      Troubleshooting
+    </span>
+</a>
+<nav aria-label="Troubleshooting" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-adr-substituta-nao-encontrado">
+<span class="md-ellipsis">
+      Erro: "ADR Substituta não encontrado"
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-aplicacao-nao-encontrada">
+<span class="md-ellipsis">
+      Erro: "Aplicação não encontrada"
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-descricao-muito-longa">
+<span class="md-ellipsis">
+      Erro: "Descrição muito longa"
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#erro-status-invalido">
+<span class="md-ellipsis">
+      Erro: "Status inválido"
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#migracao-de-dados-existentes">
+<span class="md-ellipsis">
+      Migração de Dados Existentes
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#relacionado">
+<span class="md-ellipsis">
+      Relacionado
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="carga-de-dados-adrs-architectural-decision-records">Carga de Dados - ADRs (Architectural Decision Records)<a class="headerlink" href="#carga-de-dados-adrs-architectural-decision-records" title="Permanent link">¶</a></h1>
+<h2 id="visao-geral">Visão Geral<a class="headerlink" href="#visao-geral" title="Permanent link">¶</a></h2>
+<p>Este diretório contém templates e exemplos para carga de Decisões Arquitetônicas (ADRs) no sistema.</p>
+<h2 id="estrutura-de-dados">Estrutura de Dados<a class="headerlink" href="#estrutura-de-dados" title="Permanent link">¶</a></h2>
+<h3 id="campos-do-adr">Campos do ADR<a class="headerlink" href="#campos-do-adr" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Tipo</th>
+<th>Obrigatório</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>descricao</code></td>
+<td>String(500)</td>
+<td>Sim</td>
+<td>Descrição resumida da decisão arquitetônica</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>Enum</td>
+<td>Sim</td>
+<td>Status da decisão: Proposto, Aceito, Rejeitado, Substituído, Obsoleto, Adiado/Retirado</td>
+</tr>
+<tr>
+<td><code>contexto</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Contexto que levou à necessidade da decisão</td>
+</tr>
+<tr>
+<td><code>decisao</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Descrição detalhada da decisão tomada</td>
+</tr>
+<tr>
+<td><code>justificativa</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Justificativa e raciocínio por trás da decisão</td>
+</tr>
+<tr>
+<td><code>consequencias_positivas</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Consequências positivas esperadas</td>
+</tr>
+<tr>
+<td><code>consequencias_negativas</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Trade-offs e consequências negativas</td>
+</tr>
+<tr>
+<td><code>riscos</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Riscos identificados na implementação</td>
+</tr>
+<tr>
+<td><code>alternativas_consideradas</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Alternativas que foram avaliadas</td>
+</tr>
+<tr>
+<td><code>compliance_constitution</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Como a decisão está alinhada com a Constitution</td>
+</tr>
+<tr>
+<td><code>adr_substituta_sequencia</code></td>
+<td>Integer</td>
+<td>Não*</td>
+<td>Sequência do ADR que substitui este (obrigatório se status = Substituído)</td>
+</tr>
+<tr>
+<td><code>referencias</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Links e referências relacionadas</td>
+</tr>
+</tbody>
+</table>
+<p>*Obrigatório apenas quando <code>status = "Substituído"</code></p>
+<h3 id="campos-de-aplicacao-associada">Campos de Aplicação Associada<a class="headerlink" href="#campos-de-aplicacao-associada" title="Permanent link">¶</a></h3>
+<p>Cada ADR pode ter múltiplas aplicações associadas:</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Tipo</th>
+<th>Obrigatório</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aplicacao_sigla</code></td>
+<td>String</td>
+<td>Sim</td>
+<td>Sigla da aplicação (deve existir na tabela aplicacoes)</td>
+</tr>
+<tr>
+<td><code>data_inicio</code></td>
+<td>Date</td>
+<td>Não</td>
+<td>Data de início da aplicação desta decisão</td>
+</tr>
+<tr>
+<td><code>data_termino</code></td>
+<td>Date</td>
+<td>Não</td>
+<td>Data de término (se aplicável)</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>Enum</td>
+<td>Sim</td>
+<td>Status: Ativo, Inativo, Planejado, Descontinuado</td>
+</tr>
+<tr>
+<td><code>observacoes</code></td>
+<td>Text</td>
+<td>Não</td>
+<td>Observações sobre a associação</td>
+</tr>
+</tbody>
+</table>
+<h2 id="arquivos-disponiveis">Arquivos Disponíveis<a class="headerlink" href="#arquivos-disponiveis" title="Permanent link">¶</a></h2>
+<h3 id="1-adrscsv">1. <code>adrs.csv</code><a class="headerlink" href="#1-adrscsv" title="Permanent link">¶</a></h3>
+<p>Arquivo CSV com 10 exemplos de ADRs completos cobrindo decisões típicas:
+- Arquitetura de Microsserviços
+- Escolha de Banco de Dados (MySQL)
+- Docker e Kubernetes
+- Framework Frontend (React + TypeScript)
+- API REST (Node.js + Express)
+- Autenticação (JWT + OAuth 2.0)
+- Logging (ELK Stack)
+- CI/CD (GitHub Actions)
+- Monitoramento (Prometheus + Grafana)
+- Cache (Redis)</p>
+<p><strong>Uso:</strong>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># Importar via interface web</span>
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="c1"># Ou usando script de carga</span>
+<a href="#__codelineno-0-3" id="__codelineno-0-3" name="__codelineno-0-3"></a>node<span class="w"> </span>scripts/carga-adrs.js<span class="w"> </span>--file<span class="w"> </span>data-templates/adrs.csv
+</code></pre></div></p>
+<h3 id="2-adrs-cargajson">2. <code>adrs-carga.json</code><a class="headerlink" href="#2-adrs-cargajson" title="Permanent link">¶</a></h3>
+<p>Arquivo JSON com 5 ADRs detalhados incluindo formatação Markdown:
+- Uso de Arquitetura de Microsserviços
+- Banco de Dados MySQL
+- React com TypeScript
+- Autenticação JWT
+- CI/CD com GitHub Actions</p>
+<p><strong>Uso:</strong>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-1-1" id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># Carga via API</span>
+<a href="#__codelineno-1-2" id="__codelineno-1-2" name="__codelineno-1-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:3000/api/adrs/bulk<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-1-3" id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-1-4" id="__codelineno-1-4" name="__codelineno-1-4"></a><span class="w">  </span>-d<span class="w"> </span>@data-templates/adrs-carga.json
+</code></pre></div></p>
+<h2 id="formato-csv">Formato CSV<a class="headerlink" href="#formato-csv" title="Permanent link">¶</a></h2>
+<h3 id="exemplo-de-linha-csv">Exemplo de Linha CSV<a class="headerlink" href="#exemplo-de-linha-csv" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-2-1" id="__codelineno-2-1" name="__codelineno-2-1"></a>descricao,status,contexto,decisao,justificativa,consequencias_positivas,consequencias_negativas,riscos,alternativas_consideradas,compliance_constitution,adr_substituta_sequencia,referencias
+<a href="#__codelineno-2-2" id="__codelineno-2-2" name="__codelineno-2-2"></a>"Uso de Microsserviços",Aceito,"Sistema monolítico com problemas","Migrar para microsserviços","Melhor escalabilidade","Deploy independente, escalabilidade","Complexidade operacional","Monitoramento complexo","Monolito modular, SOA","Alinhado com principles",,"https://microservices.io/"
+</code></pre></div>
+<h3 id="regras-csv">Regras CSV<a class="headerlink" href="#regras-csv" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Separador:</strong> Vírgula (<code>,</code>)</li>
+<li><strong>Texto com vírgulas:</strong> Entre aspas duplas (<code>"texto com, vírgula"</code>)</li>
+<li><strong>Quebras de linha:</strong> Usar <code>\n</code> dentro de campos entre aspas</li>
+<li><strong>Campos vazios:</strong> Deixar em branco ou usar aspas vazias (<code>""</code>)</li>
+<li><strong>Encoding:</strong> UTF-8</li>
+</ul>
+<h2 id="formato-json">Formato JSON<a class="headerlink" href="#formato-json" title="Permanent link">¶</a></h2>
+<h3 id="exemplo-de-adr-json">Exemplo de ADR JSON<a class="headerlink" href="#exemplo-de-adr-json" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-3-1" id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="p">{</span>
+<a href="#__codelineno-3-2" id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="w">  </span><span class="nt">"descricao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Uso de Arquitetura de Microsserviços"</span><span class="p">,</span>
+<a href="#__codelineno-3-3" id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Aceito"</span><span class="p">,</span>
+<a href="#__codelineno-3-4" id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="w">  </span><span class="nt">"contexto"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sistema monolítico atual apresenta dificuldades..."</span><span class="p">,</span>
+<a href="#__codelineno-3-5" id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="w">  </span><span class="nt">"decisao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Migrar gradualmente para arquitetura de microsserviços..."</span><span class="p">,</span>
+<a href="#__codelineno-3-6" id="__codelineno-3-6" name="__codelineno-3-6"></a><span class="w">  </span><span class="nt">"justificativa"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Microsserviços permitem melhor escalabilidade..."</span><span class="p">,</span>
+<a href="#__codelineno-3-7" id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="w">  </span><span class="nt">"consequencias_positivas"</span><span class="p">:</span><span class="w"> </span><span class="s2">"- Escalabilidade horizontal\n- Deploy independente..."</span><span class="p">,</span>
+<a href="#__codelineno-3-8" id="__codelineno-3-8" name="__codelineno-3-8"></a><span class="w">  </span><span class="nt">"consequencias_negativas"</span><span class="p">:</span><span class="w"> </span><span class="s2">"- Complexidade operacional\n- Overhead de comunicação..."</span><span class="p">,</span>
+<a href="#__codelineno-3-9" id="__codelineno-3-9" name="__codelineno-3-9"></a><span class="w">  </span><span class="nt">"riscos"</span><span class="p">:</span><span class="w"> </span><span class="s2">"- Maior complexidade no monitoramento..."</span><span class="p">,</span>
+<a href="#__codelineno-3-10" id="__codelineno-3-10" name="__codelineno-3-10"></a><span class="w">  </span><span class="nt">"alternativas_consideradas"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1. **Monolito modular**\n2. **SOA**..."</span><span class="p">,</span>
+<a href="#__codelineno-3-11" id="__codelineno-3-11" name="__codelineno-3-11"></a><span class="w">  </span><span class="nt">"compliance_constitution"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alinhado com princípios de escalabilidade..."</span><span class="p">,</span>
+<a href="#__codelineno-3-12" id="__codelineno-3-12" name="__codelineno-3-12"></a><span class="w">  </span><span class="nt">"referencias"</span><span class="p">:</span><span class="w"> </span><span class="s2">"- [Microservices Pattern](https://microservices.io/)\n- [Martin Fowler]..."</span>
+<a href="#__codelineno-3-13" id="__codelineno-3-13" name="__codelineno-3-13"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="array-de-adrs">Array de ADRs<a class="headerlink" href="#array-de-adrs" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-4-1" id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="p">[</span>
+<a href="#__codelineno-4-2" id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="w">  </span><span class="p">{</span>
+<a href="#__codelineno-4-3" id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="w">    </span><span class="nt">"descricao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ADR 1"</span><span class="p">,</span>
+<a href="#__codelineno-4-4" id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="w">    </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Aceito"</span><span class="p">,</span>
+<a href="#__codelineno-4-5" id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="w">    </span><span class="err">...</span>
+<a href="#__codelineno-4-6" id="__codelineno-4-6" name="__codelineno-4-6"></a><span class="w">  </span><span class="p">},</span>
+<a href="#__codelineno-4-7" id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="w">  </span><span class="p">{</span>
+<a href="#__codelineno-4-8" id="__codelineno-4-8" name="__codelineno-4-8"></a><span class="w">    </span><span class="nt">"descricao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ADR 2"</span><span class="p">,</span>
+<a href="#__codelineno-4-9" id="__codelineno-4-9" name="__codelineno-4-9"></a><span class="w">    </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Proposto"</span><span class="p">,</span>
+<a href="#__codelineno-4-10" id="__codelineno-4-10" name="__codelineno-4-10"></a><span class="w">    </span><span class="err">...</span>
+<a href="#__codelineno-4-11" id="__codelineno-4-11" name="__codelineno-4-11"></a><span class="w">  </span><span class="p">}</span>
+<a href="#__codelineno-4-12" id="__codelineno-4-12" name="__codelineno-4-12"></a><span class="p">]</span>
+</code></pre></div>
+<h2 id="carga-com-aplicacoes-associadas">Carga com Aplicações Associadas<a class="headerlink" href="#carga-com-aplicacoes-associadas" title="Permanent link">¶</a></h2>
+<h3 id="formato-estendido-json">Formato Estendido JSON<a class="headerlink" href="#formato-estendido-json" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-5-1" id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="p">{</span>
+<a href="#__codelineno-5-2" id="__codelineno-5-2" name="__codelineno-5-2"></a><span class="w">  </span><span class="nt">"descricao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Uso de React"</span><span class="p">,</span>
+<a href="#__codelineno-5-3" id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Aceito"</span><span class="p">,</span>
+<a href="#__codelineno-5-4" id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="w">  </span><span class="nt">"contexto"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a href="#__codelineno-5-5" id="__codelineno-5-5" name="__codelineno-5-5"></a><span class="w">  </span><span class="nt">"aplicacoes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a href="#__codelineno-5-6" id="__codelineno-5-6" name="__codelineno-5-6"></a><span class="w">    </span><span class="p">{</span>
+<a href="#__codelineno-5-7" id="__codelineno-5-7" name="__codelineno-5-7"></a><span class="w">      </span><span class="nt">"aplicacao_sigla"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PORTAL-WEB"</span><span class="p">,</span>
+<a href="#__codelineno-5-8" id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="w">      </span><span class="nt">"data_inicio"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-01-15"</span><span class="p">,</span>
+<a href="#__codelineno-5-9" id="__codelineno-5-9" name="__codelineno-5-9"></a><span class="w">      </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ativo"</span><span class="p">,</span>
+<a href="#__codelineno-5-10" id="__codelineno-5-10" name="__codelineno-5-10"></a><span class="w">      </span><span class="nt">"observacoes"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Implementação completa"</span>
+<a href="#__codelineno-5-11" id="__codelineno-5-11" name="__codelineno-5-11"></a><span class="w">    </span><span class="p">},</span>
+<a href="#__codelineno-5-12" id="__codelineno-5-12" name="__codelineno-5-12"></a><span class="w">    </span><span class="p">{</span>
+<a href="#__codelineno-5-13" id="__codelineno-5-13" name="__codelineno-5-13"></a><span class="w">      </span><span class="nt">"aplicacao_sigla"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ADMIN-PANEL"</span><span class="p">,</span>
+<a href="#__codelineno-5-14" id="__codelineno-5-14" name="__codelineno-5-14"></a><span class="w">      </span><span class="nt">"data_inicio"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-02-01"</span><span class="p">,</span>
+<a href="#__codelineno-5-15" id="__codelineno-5-15" name="__codelineno-5-15"></a><span class="w">      </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Planejado"</span><span class="p">,</span>
+<a href="#__codelineno-5-16" id="__codelineno-5-16" name="__codelineno-5-16"></a><span class="w">      </span><span class="nt">"observacoes"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Migração em andamento"</span>
+<a href="#__codelineno-5-17" id="__codelineno-5-17" name="__codelineno-5-17"></a><span class="w">    </span><span class="p">}</span>
+<a href="#__codelineno-5-18" id="__codelineno-5-18" name="__codelineno-5-18"></a><span class="w">  </span><span class="p">]</span>
+<a href="#__codelineno-5-19" id="__codelineno-5-19" name="__codelineno-5-19"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="status-validos">Status Válidos<a class="headerlink" href="#status-validos" title="Permanent link">¶</a></h2>
+<h3 id="status-de-adr">Status de ADR<a class="headerlink" href="#status-de-adr" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Proposto</strong> - Decisão em análise, aguardando aprovação</li>
+<li><strong>Aceito</strong> - Decisão aprovada e em implementação/uso</li>
+<li><strong>Rejeitado</strong> - Decisão rejeitada após análise</li>
+<li><strong>Substituído</strong> - Decisão substituída por outra (requer adr_substituta_sequencia)</li>
+<li><strong>Obsoleto</strong> - Decisão não mais aplicável ao contexto atual</li>
+<li><strong>Adiado/Retirado</strong> - Decisão adiada ou retirada por mudança de contexto</li>
+</ol>
+<h3 id="status-de-aplicacao">Status de Aplicação<a class="headerlink" href="#status-de-aplicacao" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Ativo</strong> - Aplicação está usando esta decisão atualmente</li>
+<li><strong>Inativo</strong> - Aplicação parou de usar esta decisão</li>
+<li><strong>Planejado</strong> - Planejado implementar esta decisão na aplicação</li>
+<li><strong>Descontinuado</strong> - Uso descontinuado na aplicação</li>
+</ol>
+<h2 id="validacoes">Validações<a class="headerlink" href="#validacoes" title="Permanent link">¶</a></h2>
+<h3 id="validacoes-automaticas">Validações Automáticas<a class="headerlink" href="#validacoes-automaticas" title="Permanent link">¶</a></h3>
+<ul>
+<li>✅ <code>descricao</code> não pode ser vazio (max 500 caracteres)</li>
+<li>✅ <code>status</code> deve ser um dos valores válidos</li>
+<li>✅ Se <code>status = "Substituído"</code>, <code>adr_substituta_sequencia</code> é obrigatório</li>
+<li>✅ <code>adr_substituta_sequencia</code> deve referenciar um ADR existente</li>
+<li>✅ <code>aplicacao_sigla</code> deve existir na tabela aplicacoes</li>
+<li>✅ <code>data_inicio</code> deve ser anterior a <code>data_termino</code> (se ambos preenchidos)</li>
+</ul>
+<h3 id="validacoes-recomendadas">Validações Recomendadas<a class="headerlink" href="#validacoes-recomendadas" title="Permanent link">¶</a></h3>
+<ul>
+<li>⚠️ ADRs importantes devem ter <code>contexto</code>, <code>decisao</code> e <code>justificativa</code> preenchidos</li>
+<li>⚠️ ADRs aceitos devem documentar <code>consequencias_positivas</code> e <code>consequencias_negativas</code></li>
+<li>⚠️ <code>referencias</code> devem incluir links válidos</li>
+</ul>
+<h2 id="scripts-de-carga">Scripts de Carga<a class="headerlink" href="#scripts-de-carga" title="Permanent link">¶</a></h2>
+<h3 id="via-interface-web">Via Interface Web<a class="headerlink" href="#via-interface-web" title="Permanent link">¶</a></h3>
+<ol>
+<li>Acessar <strong>DevSecOps &gt; Decisões Arquitetônicas</strong></li>
+<li>Clicar em <strong>"Novo ADR"</strong></li>
+<li>Preencher wizard de 3 etapas</li>
+<li>Salvar</li>
+</ol>
+<h3 id="via-api-rest">Via API REST<a class="headerlink" href="#via-api-rest" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-6-1" id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="c1"># Criar ADR único</span>
+<a href="#__codelineno-6-2" id="__codelineno-6-2" name="__codelineno-6-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:3000/api/adrs<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-6-3" id="__codelineno-6-3" name="__codelineno-6-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-6-4" id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<a href="#__codelineno-6-5" id="__codelineno-6-5" name="__codelineno-6-5"></a><span class="s1">    "descricao": "Minha Decisão",</span>
+<a href="#__codelineno-6-6" id="__codelineno-6-6" name="__codelineno-6-6"></a><span class="s1">    "status": "Proposto",</span>
+<a href="#__codelineno-6-7" id="__codelineno-6-7" name="__codelineno-6-7"></a><span class="s1">    "contexto": "...",</span>
+<a href="#__codelineno-6-8" id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="s1">    "aplicacoes": [</span>
+<a href="#__codelineno-6-9" id="__codelineno-6-9" name="__codelineno-6-9"></a><span class="s1">      {</span>
+<a href="#__codelineno-6-10" id="__codelineno-6-10" name="__codelineno-6-10"></a><span class="s1">        "aplicacaoId": "uuid-da-aplicacao",</span>
+<a href="#__codelineno-6-11" id="__codelineno-6-11" name="__codelineno-6-11"></a><span class="s1">        "status": "Ativo"</span>
+<a href="#__codelineno-6-12" id="__codelineno-6-12" name="__codelineno-6-12"></a><span class="s1">      }</span>
+<a href="#__codelineno-6-13" id="__codelineno-6-13" name="__codelineno-6-13"></a><span class="s1">    ]</span>
+<a href="#__codelineno-6-14" id="__codelineno-6-14" name="__codelineno-6-14"></a><span class="s1">  }'</span>
+<a href="#__codelineno-6-15" id="__codelineno-6-15" name="__codelineno-6-15"></a>
+<a href="#__codelineno-6-16" id="__codelineno-6-16" name="__codelineno-6-16"></a><span class="c1"># Carga em lote (bulk)</span>
+<a href="#__codelineno-6-17" id="__codelineno-6-17" name="__codelineno-6-17"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:3000/api/adrs/bulk<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-6-18" id="__codelineno-6-18" name="__codelineno-6-18"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-6-19" id="__codelineno-6-19" name="__codelineno-6-19"></a><span class="w">  </span>-d<span class="w"> </span>@data-templates/adrs-carga.json
+</code></pre></div>
+<h3 id="via-script-nodejs">Via Script Node.js<a class="headerlink" href="#via-script-nodejs" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-7-1" id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="c1"># Criar script de carga personalizado</span>
+<a href="#__codelineno-7-2" id="__codelineno-7-2" name="__codelineno-7-2"></a>node<span class="w"> </span>scripts/carga-adrs.js<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-7-3" id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="w">  </span>--file<span class="w"> </span>data-templates/adrs.csv<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-7-4" id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="w">  </span>--format<span class="w"> </span>csv<span class="w"> </span><span class="se">\</span>
+<a href="#__codelineno-7-5" id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="w">  </span>--dry-run
+</code></pre></div>
+<h2 id="exemplos-de-uso">Exemplos de Uso<a class="headerlink" href="#exemplos-de-uso" title="Permanent link">¶</a></h2>
+<h3 id="exemplo-1-adr-simples">Exemplo 1: ADR Simples<a class="headerlink" href="#exemplo-1-adr-simples" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-8-1" id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="p">{</span>
+<a href="#__codelineno-8-2" id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="w">  </span><span class="nt">"descricao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Uso de PostgreSQL no lugar de MySQL"</span><span class="p">,</span>
+<a href="#__codelineno-8-3" id="__codelineno-8-3" name="__codelineno-8-3"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Proposto"</span><span class="p">,</span>
+<a href="#__codelineno-8-4" id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="w">  </span><span class="nt">"contexto"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Necessidade de features avançadas de JSON"</span><span class="p">,</span>
+<a href="#__codelineno-8-5" id="__codelineno-8-5" name="__codelineno-8-5"></a><span class="w">  </span><span class="nt">"decisao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Migrar para PostgreSQL 15"</span><span class="p">,</span>
+<a href="#__codelineno-8-6" id="__codelineno-8-6" name="__codelineno-8-6"></a><span class="w">  </span><span class="nt">"justificativa"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Melhor suporte a JSONB e full-text search"</span>
+<a href="#__codelineno-8-7" id="__codelineno-8-7" name="__codelineno-8-7"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="exemplo-2-adr-com-aplicacoes">Exemplo 2: ADR com Aplicações<a class="headerlink" href="#exemplo-2-adr-com-aplicacoes" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-9-1" id="__codelineno-9-1" name="__codelineno-9-1"></a><span class="p">{</span>
+<a href="#__codelineno-9-2" id="__codelineno-9-2" name="__codelineno-9-2"></a><span class="w">  </span><span class="nt">"descricao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Implementação de GraphQL"</span><span class="p">,</span>
+<a href="#__codelineno-9-3" id="__codelineno-9-3" name="__codelineno-9-3"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Aceito"</span><span class="p">,</span>
+<a href="#__codelineno-9-4" id="__codelineno-9-4" name="__codelineno-9-4"></a><span class="w">  </span><span class="nt">"contexto"</span><span class="p">:</span><span class="w"> </span><span class="s2">"APIs REST com over-fetching"</span><span class="p">,</span>
+<a href="#__codelineno-9-5" id="__codelineno-9-5" name="__codelineno-9-5"></a><span class="w">  </span><span class="nt">"decisao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Implementar GraphQL como camada sobre REST"</span><span class="p">,</span>
+<a href="#__codelineno-9-6" id="__codelineno-9-6" name="__codelineno-9-6"></a><span class="w">  </span><span class="nt">"aplicacoes"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a href="#__codelineno-9-7" id="__codelineno-9-7" name="__codelineno-9-7"></a><span class="w">    </span><span class="p">{</span>
+<a href="#__codelineno-9-8" id="__codelineno-9-8" name="__codelineno-9-8"></a><span class="w">      </span><span class="nt">"aplicacao_sigla"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MOBILE-APP"</span><span class="p">,</span>
+<a href="#__codelineno-9-9" id="__codelineno-9-9" name="__codelineno-9-9"></a><span class="w">      </span><span class="nt">"data_inicio"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-01"</span><span class="p">,</span>
+<a href="#__codelineno-9-10" id="__codelineno-9-10" name="__codelineno-9-10"></a><span class="w">      </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ativo"</span>
+<a href="#__codelineno-9-11" id="__codelineno-9-11" name="__codelineno-9-11"></a><span class="w">    </span><span class="p">}</span>
+<a href="#__codelineno-9-12" id="__codelineno-9-12" name="__codelineno-9-12"></a><span class="w">  </span><span class="p">]</span>
+<a href="#__codelineno-9-13" id="__codelineno-9-13" name="__codelineno-9-13"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="exemplo-3-adr-substituido">Exemplo 3: ADR Substituído<a class="headerlink" href="#exemplo-3-adr-substituido" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-10-1" id="__codelineno-10-1" name="__codelineno-10-1"></a><span class="p">{</span>
+<a href="#__codelineno-10-2" id="__codelineno-10-2" name="__codelineno-10-2"></a><span class="w">  </span><span class="nt">"descricao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Uso de Vue.js (DEPRECADO)"</span><span class="p">,</span>
+<a href="#__codelineno-10-3" id="__codelineno-10-3" name="__codelineno-10-3"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Substituído"</span><span class="p">,</span>
+<a href="#__codelineno-10-4" id="__codelineno-10-4" name="__codelineno-10-4"></a><span class="w">  </span><span class="nt">"adr_substituta_sequencia"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<a href="#__codelineno-10-5" id="__codelineno-10-5" name="__codelineno-10-5"></a><span class="w">  </span><span class="nt">"contexto"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Framework inicial escolhido"</span><span class="p">,</span>
+<a href="#__codelineno-10-6" id="__codelineno-10-6" name="__codelineno-10-6"></a><span class="w">  </span><span class="nt">"decisao"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Foi substituído por React conforme ADR-005"</span>
+<a href="#__codelineno-10-7" id="__codelineno-10-7" name="__codelineno-10-7"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="boas-praticas">Boas Práticas<a class="headerlink" href="#boas-praticas" title="Permanent link">¶</a></h2>
+<h3 id="estruturacao-de-conteudo">Estruturação de Conteúdo<a class="headerlink" href="#estruturacao-de-conteudo" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Descrição:</strong> Clara, concisa, máximo 500 caracteres</li>
+<li><strong>Contexto:</strong> Explique o problema ou necessidade</li>
+<li><strong>Decisão:</strong> Seja específico sobre o que foi decidido</li>
+<li><strong>Justificativa:</strong> Explique o raciocínio</li>
+<li><strong>Consequências:</strong> Liste prós e contras honestamente</li>
+<li><strong>Alternativas:</strong> Documente o que foi considerado e por que rejeitado</li>
+</ol>
+<h3 id="formatacao-markdown">Formatação Markdown<a class="headerlink" href="#formatacao-markdown" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-11-1" id="__codelineno-11-1" name="__codelineno-11-1"></a><span class="gh"># Use markdown para estruturar texto longo</span>
+<a href="#__codelineno-11-2" id="__codelineno-11-2" name="__codelineno-11-2"></a>
+<a href="#__codelineno-11-3" id="__codelineno-11-3" name="__codelineno-11-3"></a><span class="gu">## Subtítulos ajudam na legibilidade</span>
+<a href="#__codelineno-11-4" id="__codelineno-11-4" name="__codelineno-11-4"></a>
+<a href="#__codelineno-11-5" id="__codelineno-11-5" name="__codelineno-11-5"></a><span class="k">-</span><span class="w"> </span>Listas para consequências
+<a href="#__codelineno-11-6" id="__codelineno-11-6" name="__codelineno-11-6"></a><span class="k">-</span><span class="w"> </span>Cada item em uma linha
+<a href="#__codelineno-11-7" id="__codelineno-11-7" name="__codelineno-11-7"></a>
+<a href="#__codelineno-11-8" id="__codelineno-11-8" name="__codelineno-11-8"></a><span class="gs">**Negrito**</span> para destacar pontos importantes
+<a href="#__codelineno-11-9" id="__codelineno-11-9" name="__codelineno-11-9"></a>
+<a href="#__codelineno-11-10" id="__codelineno-11-10" name="__codelineno-11-10"></a><span class="sb">`Code snippets`</span> quando relevante
+<a href="#__codelineno-11-11" id="__codelineno-11-11" name="__codelineno-11-11"></a>
+<a href="#__codelineno-11-12" id="__codelineno-11-12" name="__codelineno-11-12"></a>[<span class="nt">Links para referências</span>](<span class="na">https://example.com</span>)
+</code></pre></div>
+<h3 id="referencias">Referências<a class="headerlink" href="#referencias" title="Permanent link">¶</a></h3>
+<ul>
+<li>Sempre inclua links para documentação oficial</li>
+<li>Cite artigos técnicos respeitados</li>
+<li>Referencie RFCs quando aplicável</li>
+<li>Link para ADRs relacionados</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="erro-adr-substituta-nao-encontrado">Erro: "ADR Substituta não encontrado"<a class="headerlink" href="#erro-adr-substituta-nao-encontrado" title="Permanent link">¶</a></h3>
+<p><strong>Causa:</strong> Sequência de ADR substituta não existe<br/>
+<strong>Solução:</strong> Verifique que o ADR referenciado já foi criado ou use ID correto</p>
+<h3 id="erro-aplicacao-nao-encontrada">Erro: "Aplicação não encontrada"<a class="headerlink" href="#erro-aplicacao-nao-encontrada" title="Permanent link">¶</a></h3>
+<p><strong>Causa:</strong> Sigla de aplicação não existe na base<br/>
+<strong>Solução:</strong> Crie a aplicação primeiro ou verifique a sigla correta</p>
+<h3 id="erro-descricao-muito-longa">Erro: "Descrição muito longa"<a class="headerlink" href="#erro-descricao-muito-longa" title="Permanent link">¶</a></h3>
+<p><strong>Causa:</strong> Descrição excede 500 caracteres<br/>
+<strong>Solução:</strong> Reduza o texto ou mova detalhes para campo <code>contexto</code> ou <code>decisao</code></p>
+<h3 id="erro-status-invalido">Erro: "Status inválido"<a class="headerlink" href="#erro-status-invalido" title="Permanent link">¶</a></h3>
+<p><strong>Causa:</strong> Status não está na lista de valores permitidos<br/>
+<strong>Solução:</strong> Use um dos 6 status válidos (veja lista acima)</p>
+<h2 id="migracao-de-dados-existentes">Migração de Dados Existentes<a class="headerlink" href="#migracao-de-dados-existentes" title="Permanent link">¶</a></h2>
+<p>Se você tem ADRs em outros formatos (Markdown files, Confluence, etc.):</p>
+<ol>
+<li>Extrair dados para JSON ou CSV</li>
+<li>Mapear campos para estrutura do sistema</li>
+<li>Importar usando endpoint bulk</li>
+<li>Validar dados importados</li>
+<li>Associar aplicações manualmente se necessário</li>
+</ol>
+<h2 id="relacionado">Relacionado<a class="headerlink" href="#relacionado" title="Permanent link">¶</a></h2>
+<ul>
+<li><a href="../docs/SISTEMA-ADR.md">Documentação Completa do Sistema ADR</a></li>
+<li><a href="../src/components/adr/README.md">Guia de Componentes React</a></li>
+<li><a href="../docs/DOCUMENTACAO_API.md">API Reference</a></li>
+<li><a href="../.specify/memory/constitution.md">Constitution - Decisões Arquitetônicas</a></li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+<div class="md-copyright__highlight">
+      Copyright © 2024 Documentação <a href="#__consent">Change cookie settings</a>
+</div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+<div class="md-social">
+<a class="md-social__link" href="https://github.com/horaciovasconcellos" rel="noopener" target="_blank" title="github.com">
+<svg viewbox="0 0 496 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"></path></svg>
+</a>
+<a class="md-social__link" href="https://gitlab.com/horaciovasconcellos" rel="noopener" target="_blank" title="gitlab.com">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="m503.5 204.6-.7-1.8-69.7-181.78c-1.4-3.57-3.9-6.59-7.2-8.64-2.4-1.55-5.1-2.515-8-2.81s-5.7.083-8.4 1.11c-2.7 1.02-5.1 2.66-7.1 4.78-1.9 2.12-3.3 4.67-4.1 7.44l-47 144H160.8l-47.1-144c-.8-2.77-2.2-5.31-4.1-7.43-2-2.12-4.4-3.75-7.1-4.77a18.1 18.1 0 0 0-8.38-1.113 18.4 18.4 0 0 0-8.04 2.793 18.1 18.1 0 0 0-7.16 8.64L9.267 202.8l-.724 1.8a129.57 129.57 0 0 0-3.52 82c7.747 26.9 24.047 50.7 46.447 67.6l.27.2.59.4 105.97 79.5 52.6 39.7 32 24.2c3.7 1.9 8.3 4.3 13 4.3s9.3-2.4 13-4.3l32-24.2 52.6-39.7 106.7-79.9.3-.3c22.4-16.9 38.7-40.6 45.6-67.5 8.6-27 7.4-55.8-2.6-82"></path></svg>
+</a>
+<a class="md-social__link" href="https://twitter.com/Horacio_Junior" rel="noopener" target="_blank" title="Horacio.Vasconcellos on Twitter">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253"></path></svg>
+</a>
+<a class="md-social__link" href="" rel="noopener me" target="_blank" title="Horaci.Vasconcellos on Mastodon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M433 179.11c0-97.2-63.71-125.7-63.71-125.7-62.52-28.7-228.56-28.4-290.48 0 0 0-63.72 28.5-63.72 125.7 0 115.7-6.6 259.4 105.63 289.1 40.51 10.7 75.32 13 103.33 11.4 50.81-2.8 79.32-18.1 79.32-18.1l-1.7-36.9s-36.31 11.4-77.12 10.1c-40.41-1.4-83-4.4-89.63-54a102.5 102.5 0 0 1-.9-13.9c85.63 20.9 158.65 9.1 178.75 6.7 56.12-6.7 105-41.3 111.23-72.9 9.8-49.8 9-121.5 9-121.5m-75.12 125.2h-46.63v-114.2c0-49.7-64-51.6-64 6.9v62.5h-46.33V197c0-58.5-64-56.6-64-6.9v114.2H90.19c0-122.1-5.2-147.9 18.41-175 25.9-28.9 79.82-30.8 103.83 6.1l11.6 19.5 11.6-19.5c24.11-37.1 78.12-34.8 103.83-6.1 23.71 27.3 18.4 53 18.4 175z"></path></svg>
+</a>
+<a class="md-social__link" href="https://gitter.im/squidfunk/mkdocs-material" rel="noopener" target="_blank" title="gitter.im">
+<svg viewbox="0 0 384 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M66.4 322.5H16V0h50.4zM166.9 76.1h-50.4V512h50.4zm100.6 0h-50.4V512h50.4zM368 76h-50.4v247H368z"></path></svg>
+</a>
+<a class="md-social__link" href="https://hub.docker.com/u/77678117787" rel="noopener" target="_blank" title="hub.docker.com">
+<svg viewbox="0 0 640 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1zm0-204.3h-66.1v60.7h66.1zm78.2 144.8H362v59.4h66.1zm-156.3-72.1h-66.1v60.1h66.1zm78.1 0h-66.1v60.1h66.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1zm78.1 0h-66.1v59.4h66.1zm-78.1-72.1h-66.1v60.1h66.1z"></path></svg>
+</a>
+<a class="md-social__link" href="https://www.linkedin.com/in/hor%C3%A1cio-correa-t-de-vasconcellos-j%C3%BAnior-b7788467/" rel="noopener" target="_blank" title="www.linkedin.com">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"></path></svg>
+</a>
+<a class="md-social__link" href="https://www.instagram.com/horacio.vasconcellos/" rel="noopener" target="_blank" title="www.instagram.com">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141m0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7m146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8m76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8M398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1"></path></svg>
+</a>
+<a class="md-social__link" href="https://www.facebook.com/horacio.vasconcellos" rel="noopener" target="_blank" title="www.facebook.com">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256c0 120 82.7 220.8 194.2 248.5V334.2h-52.8V256h52.8v-33.7c0-87.1 39.4-127.5 125-127.5 16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287v175.9C413.8 494.8 512 386.9 512 256"></path></svg>
+</a>
+<a class="md-social__link" href="http://60pportunities.com.br" rel="noopener" target="_blank" title="60pportunities.com.br">
+<svg viewbox="0 0 640 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M180.5 74.262C80.813 74.262 0 155.633 0 256s80.819 181.738 180.5 181.738S361 356.373 361 256 280.191 74.262 180.5 74.262m288.25 10.646c-49.845 0-90.245 76.619-90.245 171.095s40.406 171.1 90.251 171.1 90.251-76.619 90.251-171.1H559c0-94.503-40.4-171.095-90.248-171.095Zm139.506 17.821c-17.526 0-31.735 68.628-31.735 153.274s14.2 153.274 31.735 153.274S640 340.631 640 256c0-84.649-14.215-153.271-31.742-153.271Z"></path></svg>
+</a>
+<a class="md-social__link" href="https://www.producthunt.com/@horacio_vasconcellos" rel="noopener" target="_blank" title="www.producthunt.com">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M326.3 218.8c0 20.5-16.7 37.2-37.2 37.2h-70.3v-74.4h70.3c20.5 0 37.2 16.7 37.2 37.2M504 256c0 137-111 248-248 248S8 393 8 256 119 8 256 8s248 111 248 248m-128.1-37.2c0-47.9-38.9-86.8-86.8-86.8H169.2v248h49.6v-74.4h70.3c47.9 0 86.8-38.9 86.8-86.8"></path></svg>
+</a>
+<a class="md-social__link" href="mailto:horacio.vasconcellos@gmail.com" rel="noopener" target="_blank" title="">
+<svg viewbox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480v-83.6c0-4 1.5-7.8 4.2-10.8l167.6-182.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8l-88.3-44.2C7.1 311.3.3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4"></path></svg>
+</a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<div class="md-consent" data-md-component="consent" hidden="" id="__consent">
+<div class="md-consent__overlay"></div>
+<aside class="md-consent__inner">
+<form class="md-consent__form md-grid md-typeset" name="consent">
+<h4>Consentimento</h4>
+<p>Utilizamos cookies para reconhecer as suas repetidas visitas e preferências, bem como para medir a eficácia da nossa documentação e se os usuários encontre o que eles estão procurando. Com o seu consentimento, você está nos ajudando a melhorar nossa documentação.</p>
+<input class="md-toggle" id="__settings" type="checkbox"/>
+<div class="md-consent__settings">
+<ul class="task-list">
+<li class="task-list-item">
+<label class="task-list-control">
+<input checked="" name="analytics" type="checkbox"/>
+<span class="task-list-indicator"></span>
+      Google Analytics
+    </label>
+</li>
+<li class="task-list-item">
+<label class="task-list-control">
+<input checked="" name="github" type="checkbox"/>
+<span class="task-list-indicator"></span>
+      GitHub
+    </label>
+</li>
+</ul>
+</div>
+<div class="md-consent__controls">
+<button class="md-button md-button--primary">Aceitar</button>
+<label class="md-button" for="__settings">Gerenciar configurações</label>
+</div>
+</form>
+</aside>
+</div>
+<script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
+<script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "commit", "content.action.edit", "content.code.annotate", "content.code.annotation", "content.code.copy", "content.footnote.tooltips", "navigation.instant", "navigation.prune", "navigation.sections", "navigation.indexes", "navigation.tabs", "navigation.expand", "search.highlight", "search.share", "search.suggest", "version"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": {"default": "latest", "provider": "mike"}}</script>
+<script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
+<script src="../../javascripts/tables.js"></script>
+<script src="../../javascripts/tablesort.js"></script>
+<script>document$.subscribe(() => {
+            window.update_swagger_ui_iframe_height = function (id) {
+                var iFrameID = document.getElementById(id);
+                if (iFrameID) {
+                    full_height = (iFrameID.contentWindow.document.body.scrollHeight + 80) + "px";
+                    iFrameID.height = full_height;
+                    iFrameID.style.height = full_height;
+                }
+            }
+        
+            let iframe_id_list = []
+            var iframes = document.getElementsByClassName("swagger-ui-iframe");
+            for (var i = 0; i < iframes.length; i++) { 
+                iframe_id_list.push(iframes[i].getAttribute("id"))
+            }
+        
+            let ticking = true;
+            
+            document.addEventListener('scroll', function(e) {
+                if (!ticking) {
+                    window.requestAnimationFrame(()=> {
+                        let half_vh = window.innerHeight/2;
+                        for(var i = 0; i < iframe_id_list.length; i++) {
+                            let element = document.getElementById(iframe_id_list[i])
+                            if(element==null){
+                                return
+                            }
+                            let diff = element.getBoundingClientRect().top
+                            if(element.contentWindow.update_top_val){
+                                element.contentWindow.update_top_val(half_vh - diff)
+                            }
+                        }
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+        
+            const dark_scheme_name = "slate"
+            
+            window.scheme = document.body.getAttribute("data-md-color-scheme")
+            const options = {
+                attributeFilter: ['data-md-color-scheme'],
+            };
+            function color_scheme_callback(mutations) {
+                for (let mutation of mutations) {
+                    if (mutation.attributeName === "data-md-color-scheme") {
+                        scheme = document.body.getAttribute("data-md-color-scheme")
+                        var iframe_list = document.getElementsByClassName("swagger-ui-iframe")
+                        for(var i = 0; i < iframe_list.length; i++) {
+                            var ele = iframe_list.item(i);
+                            if (ele) {
+                                if (scheme === dark_scheme_name) {
+                                    ele.contentWindow.enable_dark_mode();
+                                } else {
+                                    ele.contentWindow.disable_dark_mode();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            observer = new MutationObserver(color_scheme_callback);
+            observer.observe(document.body, options);
+            })</script></body>
+</html>
