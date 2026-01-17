@@ -3429,7 +3429,7 @@ app.get('/api/aplicacoes', async (req, res) => {
           SELECT ap.id, ap.processo_id as processoId, ap.tipo_suporte as tipoSuporte,
                  ap.criticidade, ap.data_inicio as dataInicio, 
                  ap.data_termino as dataTermino, ap.status,
-                 p.identificacao, p.nome
+                 p.identificacao, p.nome, p.area_responsavel, p.nivel_maturidade, p.complexidade
           FROM aplicacao_processos ap
           JOIN processos_negocio p ON ap.processo_id = p.id
           WHERE ap.aplicacao_id = ?

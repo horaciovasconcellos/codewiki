@@ -153,7 +153,22 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
   const [templateMainName, setTemplateMainName] = useState<string>('');
   const [templateDevelopName, setTemplateDevelopName] = useState<string>('');
 
+  // SALT para criptografia de senhas
+  const [salt, setSalt] = useState<string>('');
+  const [showSalt, setShowSalt] = useState(false);
+
   const [formData, setFormData] = useState<IntegrationConfig>(config);
+
+  // Função para gerar SALT aleatório de 32 caracteres
+  const generateSalt = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < 32; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  };
 
   // Carregar aplicações
   useEffect(() => {
@@ -200,6 +215,13 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
           }
           if (data['company-logo']) {
             setCompanyLogo(data['company-logo']);
+          }
+          if (data['salt']) {
+            setSalt(data['salt']);
+          } else {
+            // Gerar SALT automaticamente se não existir
+            const newSalt = generateSalt();
+            setSalt(newSalt);
           }
           if (data['email-notifications']) {
             const emailConfig = data['email-notifications'];
@@ -471,6 +493,13 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
           body: JSON.stringify({ valor: companyLogo })
         });
       }
+      
+      // Salvar SALT
+      await fetch('/api/configuracoes/salt', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valor: salt })
+      });
       
       // Salvar configurações de notificações via Graph API
       await fetch('/api/configuracoes/email-notifications', {
@@ -757,6 +786,56 @@ export function ConfiguracaoIntegracoesView({}: ConfiguracaoIntegracoesViewProps
                   />
                   <p className="text-xs text-muted-foreground">
                     Este nome será exibido no menu lateral e em outras áreas do sistema
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>SALT para Criptografia</CardTitle>
+                <CardDescription>
+                  Valor aleatório de 32 caracteres usado para fortalecer a criptografia de senhas
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="salt">SALT (32 caracteres)</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        id="salt"
+                        type={showSalt ? 'text' : 'password'}
+                        value={salt}
+                        onChange={(e) => {
+                          if (e.target.value.length <= 32) {
+                            setSalt(e.target.value);
+                          }
+                        }}
+                        placeholder="••••••••••••••••••••••••••••••••"
+                        maxLength={32}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() => setShowSalt(!showSalt)}
+                      >
+                        {showSalt ? <EyeSlash size={20} /> : <Eye size={20} />}
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setSalt(generateSalt())}
+                      title="Gerar novo SALT aleatório"
+                    >
+                      Gerar
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {salt.length}/32 caracteres • Este valor é usado para aumentar a segurança das senhas armazenadas
                   </p>
                 </div>
               </CardContent>

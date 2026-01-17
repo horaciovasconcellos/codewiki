@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Pencil, Trash, FileXls, FilePdf, FileText, CaretUp, CaretDown, CaretUpDown, MagnifyingGlass, FileArrowDown } from '@phosphor-icons/react';
+import { Plus, Pencil, Trash, FileXls, FileText, CaretUp, CaretDown, CaretUpDown, MagnifyingGlass, FileArrowDown } from '@phosphor-icons/react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -17,13 +17,12 @@ interface AplicacoesListProps {
   onCreateNew: () => void;
   onEdit: (aplicacao: Aplicacao) => void;
   onDelete: (aplicacao: Aplicacao) => void;
-  onPrintPDF: (aplicacao: Aplicacao) => void;
 }
 
 type SortField = 'sigla' | 'descricao';
 type SortDirection = 'asc' | 'desc';
 
-export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPrintPDF }: AplicacoesListProps) {
+export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete }: AplicacoesListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('sigla');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -80,101 +79,18 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
     currentPage * pageSize
   );
 
-  const exportToPDF = () => {
-    const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
-    
-    // Título
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Relatório de Aplicações', 14, 15);
-    
-    // Data de geração
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    const dataAtual = new Date().toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    doc.text(`Gerado em: ${dataAtual}`, 14, 22);
-    doc.text(`Total de aplicações: ${filteredAndSortedAplicacoes.length}`, 14, 27);
-
-    // Preparar dados para a tabela
-    const tableData = filteredAndSortedAplicacoes.map(app => [
-      app.sigla,
-      app.descricao.length > 80 ? app.descricao.substring(0, 80) + '...' : app.descricao,
-      app.urlDocumentacao || 'N/A',
-      app.tipoAplicacao || 'N/A',
-      app.cloudProvider || 'N/A',
-      app.faseCicloVida,
-      app.criticidadeNegocio
-    ]);
-
-    // Gerar tabela
-    autoTable(doc, {
-      head: [[
-        'Sigla',
-        'Descrição',
-        'URL Documentação',
-        'Tipo Aplicação',
-        'Cloud Provider',
-        'Fase Ciclo Vida',
-        'Criticidade Negócio'
-      ]],
-      body: tableData,
-      startY: 32,
-      styles: {
-        fontSize: 8,
-        cellPadding: 2,
-        overflow: 'linebreak',
-        halign: 'left'
-      },
-      headStyles: {
-        fillColor: [59, 130, 246], // Blue
-        textColor: 255,
-        fontStyle: 'bold',
-        halign: 'center'
-      },
-      columnStyles: {
-        0: { cellWidth: 25 }, // Sigla
-        1: { cellWidth: 65 }, // Descrição
-        2: { cellWidth: 50 }, // URL
-        3: { cellWidth: 30 }, // Tipo
-        4: { cellWidth: 30 }, // Cloud
-        5: { cellWidth: 35 }, // Fase
-        6: { cellWidth: 35 }  // Criticidade
-      },
-      alternateRowStyles: {
-        fillColor: [245, 247, 250]
-      },
-      margin: { top: 32, left: 14, right: 14 }
-    });
-
-    // Rodapé com número de páginas
-    const pageCount = (doc as any).internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text(
-        `Página ${i} de ${pageCount}`,
-        doc.internal.pageSize.getWidth() / 2,
-        doc.internal.pageSize.getHeight() - 10,
-        { align: 'center' }
-      );
-    }
-
-    // Salvar PDF
-    const data = new Date();
-    const nomeArquivo = `aplicacoes_${data.toISOString().split('T')[0]}.pdf`;
-    doc.save(nomeArquivo);
-  };
-
-  const exportDetailedReport = async () => {
+  const exportDetailedReport = async (aplicacoesParaExportar?: Aplicacao[]) => {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     const doc = new jsPDF('p', 'mm', 'a4');
+    
+    // Se nenhuma aplicação foi passada, usa todas as filtradas
+    const aplicacoesExportar = aplicacoesParaExportar || filteredAndSortedAplicacoes;
+    
+    // Validar se há aplicações para exportar
+    if (!aplicacoesExportar || aplicacoesExportar.length === 0) {
+      toast.error('Nenhuma aplicação disponível para gerar relatório');
+      return;
+    }
     
     toast.info('Gerando relatório detalhado... Por favor aguarde.');
 
@@ -216,8 +132,10 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
     };
 
     try {
-      for (let i = 0; i < filteredAndSortedAplicacoes.length; i++) {
-        const app = filteredAndSortedAplicacoes[i];
+      console.log('Iniciando exportação de', aplicacoesExportar.length, 'aplicações');
+      for (let i = 0; i < aplicacoesExportar.length; i++) {
+        const app = aplicacoesExportar[i];
+        console.log(`Processando aplicação ${i + 1}/${aplicacoesExportar.length}: ${app.sigla}`);
         
         console.log('Processando aplicação:', app.sigla, app.id);
         
@@ -235,6 +153,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         let payloadsRes: any[] = [];
         let squadsRes: any[] = [];
         let runbooksRes: any[] = [];
+        let checkpointsRes: any[] = [];
 
         try {
           const response = await fetch(`${API_URL}/api/aplicacoes/${app.id}`);
@@ -333,6 +252,20 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
           } catch (errRunbooks) {
             console.error(`Erro ao buscar runbooks da aplicação ${app.sigla}:`, errRunbooks);
           }
+
+          // Buscar checkpoints separadamente
+          try {
+            const checkpointsResponse = await fetch(`${API_URL}/api/checkpoints?aplicacao_id=${app.id}`);
+            console.log(`Buscando checkpoints da aplicação ${app.id} (${app.sigla}):`, checkpointsResponse.status);
+            if (checkpointsResponse.ok) {
+              checkpointsRes = await checkpointsResponse.json();
+              console.log(`Checkpoints encontrados para ${app.sigla}:`, checkpointsRes);
+            } else {
+              console.error(`Erro ao buscar checkpoints (status ${checkpointsResponse.status}):`, await checkpointsResponse.text());
+            }
+          } catch (errCheckpoints) {
+            console.error(`Erro ao buscar checkpoints da aplicação ${app.sigla}:`, errCheckpoints);
+          }
           
           console.log(`=== APLICAÇÃO: ${app.sigla} ===`);
           console.log('Tecnologias:', tecnologiasRes);
@@ -347,6 +280,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
           console.log('Payloads:', payloadsRes);
           console.log('Squads:', squadsRes);
           console.log('Runbooks:', runbooksRes);
+          console.log('Checkpoints:', checkpointsRes);
         } catch (err) {
           console.error('Erro ao buscar dados:', err);
         }
@@ -356,43 +290,67 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
           doc.addPage();
         }
 
-        let yPos = 15;
+        console.log('Iniciando renderização do PDF para aplicação:', app.sigla);
+        let yPos = 12;
 
-        // ========== TÍTULO DO RELATÓRIO ==========
+        // ========== CABECALHO DO RELATORIO ==========
+        // Nome do Sistema
+        doc.setFillColor(15, 23, 42); // bg-slate-900
+        doc.rect(10, yPos, 190, 12, 'F');
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.text('CODEWIKI - Sistema de Auditoria', 105, yPos + 8, { align: 'center' });
+        yPos += 14;
+
+        // Titulo do Relatorio
         doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text(`${app.sigla} - Relatório de Aplicação (Formato Tabular)`, 105, yPos, { align: 'center' });
+        doc.text('Relatorio de Aplicacao', 105, yPos, { align: 'center' });
+        yPos += 6;
+
+        // Subtitulo com sigla
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105); // text-slate-600
+        doc.text(app.sigla, 105, yPos, { align: 'center' });
         yPos += 8;
 
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        const dataAtual = new Date().toLocaleDateString('pt-BR', {
+        // Data e Hora de Emissao
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(100, 116, 139);
+        const dataHoraEmissao = new Date().toLocaleString('pt-BR', {
           day: '2-digit',
-          month: 'long',
-          year: 'numeric'
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         });
-        doc.text(`Gerado em: ${dataAtual}`, 105, yPos, { align: 'center' });
-        yPos += 10;
+        doc.text(`Data/Hora de Emissao: ${dataHoraEmissao}`, 105, yPos, { align: 'center' });
+        yPos += 8;
 
         // Separador
-        doc.setDrawColor(200, 200, 200);
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.5);
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 📋 INFORMAÇÕES BÁSICAS ==========
+        // ========== 1. INFORMAÇÕES BÁSICAS ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
-        doc.text('📋 Informações Básicas', 12, yPos);
+        doc.text('1. Informacoes Basicas', 12, yPos);
         yPos += 6;
 
         const infosBasicas = [
           ['Sigla', app.sigla || 'N/A'],
-          ['Descrição', app.descricao || 'N/A'],
-          ['URL Documentação', app.urlDocumentacao || 'N/A'],
-          ['Tipo de Aplicação', app.tipoAplicacao || 'N/A'],
+          ['Descricao', app.descricao || 'N/A'],
+          ['URL Documentacao', app.urlDocumentacao || 'N/A'],
+          ['Tipo de Aplicacao', app.tipoAplicacao || 'N/A'],
           ['Fase do Ciclo de Vida', app.faseCicloVida || 'N/A'],
-          ['Criticidade do Negócio', app.criticidadeNegocio || 'N/A'],
+          ['Criticidade do Negocio', app.criticidadeNegocio || 'N/A'],
           ['Opt-In/Out', app.optInOut ? 'Opt-In' : 'N/A']
         ];
 
@@ -402,11 +360,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 💻 TECNOLOGIAS ==========
+        // ========== 2. TECNOLOGIAS ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('💻 Tecnologias', 12, yPos);
+        doc.text('2. Tecnologias', 12, yPos);
         yPos += 6;
 
         if (tecnologiasRes.length === 0) {
@@ -427,11 +385,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 👥 SQUADS ==========
+        // ========== 3. SQUADS ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('👥 Squads', 12, yPos);
+        doc.text('3. Squads', 12, yPos);
         yPos += 6;
 
         if (squadsRes.length === 0) {
@@ -442,14 +400,14 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
           yPos += 10;
         } else {
           const squadsData = squadsRes.map((sq: any) => [
-            sq.colaboradorNome || 'N/A',
-            sq.papel || 'N/A',
-            sq.nomeSquad || 'N/A',
-            formatDate(sq.dataInicio),
-            sq.dataTermino ? formatDate(sq.dataTermino) : 'Atual'
+            sq.colaborador_nome || sq.colaboradorNome || 'N/A',
+            sq.perfil || sq.papel || 'N/A',
+            sq.nome_squad || sq.nomeSquad || sq.squad || 'N/A',
+            formatDate(sq.data_inicio || sq.dataInicio),
+            sq.data_termino || sq.dataTermino ? formatDate(sq.data_termino || sq.dataTermino) : 'Atual'
           ]);
           yPos = addFormattedTable(doc, yPos, '', 
-            ['Colaborador', 'Perfil', 'Squad', 'Início', 'Término'], 
+            ['Colaborador', 'Perfil', 'Squad', 'Inicio', 'Termino'], 
             squadsData
           );
         }
@@ -458,11 +416,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 🌐 AMBIENTES TECNOLÓGICOS ==========
+        // ========== 4. AMBIENTES TECNOLOGICOS ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('🌐 Ambientes Tecnológicos', 12, yPos);
+        doc.text('4. Ambientes Tecnologicos', 12, yPos);
         yPos += 6;
 
         if (ambientesRes.length === 0) {
@@ -473,12 +431,13 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
           yPos += 10;
         } else {
           const ambientesData = ambientesRes.map((amb: any) => [
+            amb.identificadorAplicacao || amb.identificador_aplicacao || 'N/A',
             amb.tipoAmbiente || amb.tipo_ambiente || 'N/A',
             amb.localizacaoRegiao || amb.localizacao_regiao || 'N/A',
             amb.urlAmbiente || amb.url_ambiente || 'N/A'
           ]);
           yPos = addFormattedTable(doc, yPos, '', 
-            ['Tipo', 'Localização/Região', 'URL'], 
+            ['Identificador', 'Tipo', 'Localizacao/Regiao', 'URL'], 
             ambientesData
           );
         }
@@ -493,11 +452,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 📝 ADRs ==========
+        // ========== 5. ADRs ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('📝 Architectural Decision Records (ADRs)', 12, yPos);
+        doc.text('6. Architectural Decision Records (ADRs)', 12, yPos);
         yPos += 6;
 
         if (adrsRes.length === 0) {
@@ -514,7 +473,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
             adr.adrStatus || adr.status || 'N/A'
           ]);
           yPos = addFormattedTable(doc, yPos, '', 
-            ['Sequência', 'Descrição', 'Data de Início', 'Status'], 
+            ['Sequencia', 'Descricao', 'Data de Inicio', 'Status'], 
             adrsData
           );
         }
@@ -523,11 +482,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 🎯 CAPACIDADES DO NEGÓCIO ==========
+        // ========== 5. CAPACIDADES DO NEGOCIO ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('🎯 Capacidade do Negócio', 12, yPos);
+        doc.text('5. Capacidade do Negocio', 12, yPos);
         yPos += 6;
 
         if (capacidadesRes.length === 0) {
@@ -558,11 +517,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 📊 PROCESSOS DE NEGÓCIO ==========
+        // ========== 6. PROCESSOS DE NEGOCIO ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('📊 Processo de Negócio', 12, yPos);
+        doc.text('7. Processo de Negocio', 12, yPos);
         yPos += 6;
 
         if (processosRes.length === 0) {
@@ -572,12 +531,16 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
           doc.text('Nenhum processo associado', 12, yPos);
           yPos += 10;
         } else {
-          const processosData = processosRes.map((proc: any) => [
-            proc.identificacao || proc.nome || 'N/A',
-            proc.areaResponsavel || 'N/A',
-            proc.maturidade || 'N/A',
-            proc.complexidade || 'N/A'
-          ]);
+          console.log('Dados dos processos para PDF:', processosRes);
+          const processosData = processosRes.map((proc: any) => {
+            console.log('Processo individual:', proc);
+            return [
+              proc.identificacao || proc.nome || proc.nome_processo || 'N/A',
+              proc.area_responsavel || proc.areaResponsavel || 'N/A',
+              proc.nivel_maturidade || proc.nivelMaturidade || proc.maturidade || 'N/A',
+              proc.complexidade || 'N/A'
+            ];
+          });
           yPos = addFormattedTable(doc, yPos, '', 
             ['Nome', 'Área Responsável', 'Maturidade', 'Complexidade'], 
             processosData
@@ -588,11 +551,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 📦 PAYLOADS ==========
+        // ========== 7. PAYLOADS ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('📦 Payloads', 12, yPos);
+        doc.text('8. Payloads', 12, yPos);
         yPos += 6;
 
         if (payloadsRes.length === 0) {
@@ -607,7 +570,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
             payload.descricao || 'N/A'
           ]);
           yPos = addFormattedTable(doc, yPos, '', 
-            ['Sigla', 'Descrição Curta'], 
+            ['Sigla', 'Descricao Curta'], 
             payloadsData
           );
         }
@@ -622,18 +585,18 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 🔗 INTEGRAÇÕES ==========
+        // ========== 8. INTEGRACOES ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('🔗 Integrações', 12, yPos);
+        doc.text('9. Integracoes', 12, yPos);
         yPos += 6;
 
         if (integracoesRes.length === 0) {
           doc.setFontSize(10);
           doc.setFont('helvetica', 'italic');
           doc.setTextColor(128, 128, 128);
-          doc.text('Nenhuma integração configurada', 12, yPos);
+          doc.text('Nenhuma integracao configurada', 12, yPos);
           yPos += 10;
         } else {
           const integracoesData = integracoesRes.map((integ: any) => [
@@ -651,11 +614,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== ⏱️ SLA ==========
+        // ========== 10. SLA ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('⏱️ SLA', 12, yPos);
+        doc.text('10. SLA', 12, yPos);
         yPos += 6;
 
         if (slasRes.length === 0) {
@@ -671,7 +634,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
             formatDate(sla.dataInicio)
           ]);
           yPos = addFormattedTable(doc, yPos, '', 
-            ['Descrição', 'Tipo', 'Data de Início'], 
+            ['Descricao', 'Tipo', 'Data de Inicio'], 
             slasData
           );
         }
@@ -686,11 +649,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 📖 RUNBOOKS ==========
+        // ========== 11. RUNBOOKS ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('📖 Runbooks', 12, yPos);
+        doc.text('11. Runbooks', 12, yPos);
         yPos += 6;
 
         if (runbooksRes.length === 0) {
@@ -706,7 +669,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
             rb.runbookTipo || rb.tipo || 'N/A'
           ]);
           yPos = addFormattedTable(doc, yPos, '', 
-            ['Descrição', 'Finalidade', 'Tipo'], 
+            ['Descricao', 'Finalidade', 'Tipo'], 
             runbooksData
           );
         }
@@ -715,11 +678,11 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
         doc.line(12, yPos, 198, yPos);
         yPos += 8;
 
-        // ========== 📄 CONTRATOS ==========
+        // ========== 12. CONTRATOS ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('📄 Contratos', 12, yPos);
+        doc.text('12. Contratos', 12, yPos);
         yPos += 6;
 
         if (contratosRes.length === 0) {
@@ -735,26 +698,116 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
             formatDate(c.dataVigenciaFinal)
           ]);
           yPos = addFormattedTable(doc, yPos, '', 
-            ['Número', 'Vigência Inicial', 'Vigência Final'], 
+            ['Numero', 'Vigencia Inicial', 'Vigencia Final'], 
             contratosData
           );
         }
 
         // Separador
         doc.line(12, yPos, 198, yPos);
-        yPos += 4;
+        yPos += 8;
 
-        // Rodapé com informações adicionais
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'italic');
-        doc.setTextColor(100, 100, 100);
-        doc.text('Documento gerado automaticamente', 105, 282, { align: 'center' });
-        doc.text(`Última atualização: ${new Date().toLocaleDateString('pt-BR')}`, 105, 287, { align: 'center' });
+        // ========== 13. CHECKPOINTS DE APLICACOES ==========
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('13. Checkpoints de Aplicacoes', 12, yPos);
+        yPos += 6;
+
+        // Filtrar apenas checkpoints com status diferente de OK
+        const checkpointsNaoOk = checkpointsRes.filter((cp: any) => cp.status !== 'OK');
+
+        if (checkpointsNaoOk.length === 0) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
+          doc.text('Nenhum checkpoint pendente', 12, yPos);
+          yPos += 10;
+        } else {
+          // Para cada checkpoint não OK
+          for (const checkpoint of checkpointsNaoOk) {
+            // Verificar se precisa de nova página
+            if (yPos > 240) {
+              doc.addPage();
+              yPos = 20;
+            }
+
+            // Tabela principal do checkpoint
+            const checkpointData = [[
+              checkpoint.descricao || 'N/A',
+              checkpoint.categoria || 'N/A',
+              formatDate(checkpoint.dataPrevista)
+            ]];
+            
+            yPos = addFormattedTable(doc, yPos, '', 
+              ['Descricao', 'Categoria', 'Data Prevista'], 
+              checkpointData
+            );
+
+            // Buscar detalhes do checkpoint
+            try {
+              const detalhesResponse = await fetch(`${API_URL}/api/checkpoints/${checkpoint.id}/detalhes`);
+              if (detalhesResponse.ok) {
+                const detalhes = await detalhesResponse.json();
+                
+                if (detalhes && detalhes.length > 0) {
+                  // Sub-tabela com detalhes
+                  const detalhesData = detalhes.map((det: any) => [
+                    det.responsavel_nome || det.responsavelNome || 'N/A',
+                    det.descricao_detalhada || det.descricaoDetalhada || 'N/A'
+                  ]);
+                  
+                  yPos = addFormattedTable(doc, yPos, '', 
+                    ['Responsavel', 'Descricao Detalhada'], 
+                    detalhesData
+                  );
+                }
+              }
+            } catch (errDetalhes) {
+              console.error(`Erro ao buscar detalhes do checkpoint ${checkpoint.id}:`, errDetalhes);
+            }
+
+            yPos += 4; // Espaço entre checkpoints
+          }
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 4;
+      }
+
+      // ========== ADICIONAR NUMERACAO DE PAGINAS ==========
+      const totalPages = doc.getNumberOfPages();
+      
+      for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        doc.setPage(pageNum);
+        
+        // Rodape - linha separadora
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.5);
+        doc.line(12, 282, 198, 282);
+        
+        // Rodape - informacoes
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        
+        // Esquerda: Sistema
+        doc.text('CodeWiki - Sistema de Auditoria', 12, 287);
+        
+        // Centro: Data
+        const dataRodape = new Date().toLocaleDateString('pt-BR');
+        doc.text(dataRodape, 105, 287, { align: 'center' });
+        
+        // Direita: Numeracao de pagina
+        doc.text(`Pagina ${pageNum} de ${totalPages}`, 198, 287, { align: 'right' });
       }
 
       // Salvar PDF
+      console.log('Finalizando PDF - Total de páginas:', doc.getNumberOfPages());
       const data = new Date();
       const nomeArquivo = `relatorio_aplicacoes_detalhado_${data.toISOString().split('T')[0]}.pdf`;
+      console.log('Salvando PDF:', nomeArquivo);
       doc.save(nomeArquivo);
       toast.success('Relatório gerado com sucesso!');
     } catch (error) {
@@ -846,15 +899,7 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
               disabled={aplicacoes.length === 0}
             >
               <FileText className="mr-2" weight="fill" />
-              Relatório Detalhado
-            </Button>
-            <Button 
-              onClick={exportToPDF} 
-              variant="outline"
-              disabled={aplicacoes.length === 0}
-            >
-              <FilePdf className="mr-2" weight="fill" />
-              Exportar PDF
+              Relatorio PDF
             </Button>
             <Button 
               onClick={exportToExcel} 
@@ -986,8 +1031,8 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPr
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onPrintPDF(aplicacao)}
-                          title="Imprimir Relatório PDF"
+                          onClick={() => exportDetailedReport([aplicacao])}
+                          title="Relatorio PDF Detalhado"
                         >
                           <FileArrowDown size={16} />
                         </Button>

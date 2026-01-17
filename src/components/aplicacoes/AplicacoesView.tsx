@@ -820,7 +820,6 @@ export function AplicacoesView({ capacidades: capacidadesProps }: AplicacoesView
             onCreateNew={handleCreateNew}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onPrintPDF={handlePrintPDF}
           />
         )}
       </div>
