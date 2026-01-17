@@ -18,6 +18,8 @@
         "test": "NODE_OPTIONS=--experimental-vm-modules jest",
         "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
         "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+        "sonar": "bash sonar-scan.sh",
+        "sonar:quick": "sonar-scanner -Dsonar.host.url=http://localhost:9010",
         "migrate": "node scripts/auto-migrate.cjs",
         "migrate:batch": "node scripts/batch-migrate.cjs"
     },

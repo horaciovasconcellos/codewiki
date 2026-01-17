@@ -45,7 +45,7 @@ type SortOrder = 'asc' | 'desc';
 
 const STATUS_COLORS: Record<string, string> = {
   'Ativa': 'bg-green-100 text-green-800',
-  'Em avaliação': 'bg-yellow-100 text-yellow-800',
+  'Em avaliacao': 'bg-yellow-100 text-yellow-800',
   'Obsoleta': 'bg-gray-100 text-gray-800',
   'Descontinuada': 'bg-red-100 text-red-800',
 };
@@ -256,7 +256,7 @@ export function PipelinesDataTable({
                 <SelectContent>
                   <SelectItem value="todos">Todos os status</SelectItem>
                   <SelectItem value="Ativa">Ativa</SelectItem>
-                  <SelectItem value="Em avaliação">Em avaliação</SelectItem>
+                  <SelectItem value="Em avaliacao">Em avaliação</SelectItem>
                   <SelectItem value="Obsoleta">Obsoleta</SelectItem>
                   <SelectItem value="Descontinuada">Descontinuada</SelectItem>
                 </SelectContent>

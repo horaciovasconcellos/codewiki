@@ -1,0 +1,12 @@
+Playbook de Entrada em Projeto, elabore uma tela Wizard, para preenchimento de : Orientação e Leitura do Terreno, Entendimento da Demanda,Estado Atual do Projeto, Leitura Técnica e Consolidação e Alinhamento
+
+
+
+-- Docker 
+   - SonarQube CE
+     - Previsto para inicio de fevereiro/2026
+     - Com banco de Dados,
+     - Mudança das Pipelines (Adequação das Pipelines)
+     - SPrint 35 (Carlos S Andres C Cornejo M De Araujo)
+- Stage (STG)
+  - Ver qual o caminho e 

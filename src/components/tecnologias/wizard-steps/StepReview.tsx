@@ -1,4 +1,4 @@
-import { CategoriaTecnologia, StatusTecnologia, TipoLicenciamento, MaturidadeInterna, NivelSuporteInterno, Ambiente, ContratoAMS, ResponsavelTecnologia, CustoSaaS, ManutencaoSaaS, Colaborador } from '@/lib/types';
+import { CamadaTecnologia, CategoriaTecnologia, StatusTecnologia, TipoLicenciamento, MaturidadeInterna, NivelSuporteInterno, Ambiente, ContratoAMS, ResponsavelTecnologia, CustoSaaS, ManutencaoSaaS, Colaborador } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -8,6 +8,7 @@ interface StepReviewProps {
   sigla: string;
   nome: string;
   versaoRelease: string;
+  camada: CamadaTecnologia;
   categoria: CategoriaTecnologia;
   status: StatusTecnologia;
   fornecedorFabricante: string;
@@ -29,6 +30,7 @@ export function StepReview({
   sigla,
   nome,
   versaoRelease,
+  camada,
   categoria,
   status,
   fornecedorFabricante,
@@ -88,6 +90,7 @@ export function StepReview({
             <InfoRow label="Sigla" value={sigla} />
             <InfoRow label="Nome" value={nome} />
             <InfoRow label="Versão" value={versaoRelease} />
+            <InfoRow label="Camada" value={camada} />
             <InfoRow label="Categoria" value={categoria} />
             <InfoRow label="Status" value={<Badge variant={status === 'Ativa' ? 'default' : 'secondary'}>{status}</Badge>} />
             <InfoRow label="Fornecedor/Fabricante" value={fornecedorFabricante} />

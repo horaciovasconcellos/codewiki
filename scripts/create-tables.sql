@@ -63,6 +63,7 @@ CREATE TABLE tecnologias (
     sigla VARCHAR2(50) NOT NULL,
     nome VARCHAR2(200) NOT NULL,
     versao_release VARCHAR2(50) NOT NULL,
+    camada VARCHAR2(50) NOT NULL,
     categoria VARCHAR2(100) NOT NULL,
     status VARCHAR2(50) NOT NULL,
     fornecedor_fabricante VARCHAR2(200),
@@ -83,6 +84,7 @@ CREATE TABLE tecnologias (
 );
 
 CREATE INDEX idx_tecnologias_categoria ON tecnologias(categoria);
+CREATE INDEX idx_tecnologias_camada ON tecnologias(camada);
 CREATE INDEX idx_tecnologias_status ON tecnologias(status);
 
 COMMENT ON TABLE tecnologias IS 'Cadastro de tecnologias utilizadas';

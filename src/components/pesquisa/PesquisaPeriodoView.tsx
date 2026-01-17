@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { MagnifyingGlass, CalendarBlank, Users, Code } from '@phosphor-icons/react';
+import { MagnifyingGlass, CalendarBlank, Users, Code, CheckCircle } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { formatarData } from '@/lib/utils';
 
@@ -39,6 +39,15 @@ interface ContratoResult {
   status: string;
 }
 
+interface CheckpointResult {
+  id: string;
+  aplicacaoSigla: string;
+  descricao: string;
+  categoria: string;
+  dataPrevista: string;
+  status: string;
+}
+
 export function PesquisaPeriodoView() {
   // Calcular data de início (hoje) e data fim (hoje + 180 dias)
   const hoje = new Date();
@@ -53,6 +62,7 @@ export function PesquisaPeriodoView() {
   const [loading, setLoading] = useState(false);
   const [afastamentos, setAfastamentos] = useState<AfastamentoResult[]>([]);
   const [contratos, setContratos] = useState<ContratoResult[]>([]);
+  const [checkpoints, setCheckpoints] = useState<CheckpointResult[]>([]);
   const [pesquisaRealizada, setPesquisaRealizada] = useState(false);
 
   const handlePesquisar = async () => {
@@ -87,6 +97,15 @@ export function PesquisaPeriodoView() {
       const contratosData = await contratosRes.json();
       setContratos(contratosData);
 
+      // Buscar checkpoints
+      const checkpointsRes = await fetch(
+        `${API_URL}/api/pesquisa/checkpoints?dataInicio=${dataInicio}&dataFim=${dataFim}`
+      );
+      
+      if (!checkpointsRes.ok) throw new Error('Erro ao buscar checkpoints');
+      const checkpointsData = await checkpointsRes.json();
+      setCheckpoints(checkpointsData);
+
       setPesquisaRealizada(true);
       toast.success('Pesquisa realizada com sucesso');
     } catch (error) {
@@ -102,6 +121,7 @@ export function PesquisaPeriodoView() {
     setDataFim('');
     setAfastamentos([]);
     setContratos([]);
+    setCheckpoints([]);
     setPesquisaRealizada(false);
   };
 
@@ -277,6 +297,67 @@ export function PesquisaPeriodoView() {
                               }
                             >
                               {contrato.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Checkpoints Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                <CardTitle>Checkpoints de Aplicações</CardTitle>
+              </div>
+              <CardDescription>
+                {checkpoints.length} checkpoint(s) encontrado(s) no período
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {checkpoints.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Nenhum checkpoint encontrado no período
+                </p>
+              ) : (
+                <div className="overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Aplicação</TableHead>
+                        <TableHead>Descrição</TableHead>
+                        <TableHead>Categoria</TableHead>
+                        <TableHead>Data Prevista</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {checkpoints.map((checkpoint) => (
+                        <TableRow key={checkpoint.id}>
+                          <TableCell className="font-medium">
+                            {checkpoint.aplicacaoSigla}
+                          </TableCell>
+                          <TableCell>{checkpoint.descricao}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{checkpoint.categoria}</Badge>
+                          </TableCell>
+                          <TableCell>{formatarData(checkpoint.dataPrevista)}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                checkpoint.status === 'Concluído'
+                                  ? 'default'
+                                  : checkpoint.status === 'Em Andamento'
+                                  ? 'secondary'
+                                  : 'outline'
+                              }
+                            >
+                              {checkpoint.status}
                             </Badge>
                           </TableCell>
                         </TableRow>

@@ -159,10 +159,10 @@ export function DoraDashboardView() {
   const isUnified = projetoSelecionado === 'unified';
 
   // Preparar dados para gráfico de Commits por Tipo
-  const commitsTypeData = currentData ? [
-    { name: 'Features', value: currentData.totais.featureCommitsCount, fill: '#00C49F' },
-    { name: 'Bugs', value: currentData.totais.bugCommitsCount, fill: '#FF8042' },
-    { name: 'Outros', value: currentData.totais.commitsCount - currentData.totais.featureCommitsCount - currentData.totais.bugCommitsCount, fill: '#0088FE' }
+  const commitsTypeData = currentData?.totais ? [
+    { name: 'Features', value: currentData.totais.featureCommitsCount || 0, fill: '#00C49F' },
+    { name: 'Bugs', value: currentData.totais.bugCommitsCount || 0, fill: '#FF8042' },
+    { name: 'Outros', value: (currentData.totais.commitsCount || 0) - (currentData.totais.featureCommitsCount || 0) - (currentData.totais.bugCommitsCount || 0), fill: '#0088FE' }
   ] : [];
 
   // Preparar dados para gráfico de Aging (apenas para projeto individual)
@@ -320,11 +320,11 @@ export function DoraDashboardView() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {currentData.totais.deploymentFrequencyPerDay.toFixed(2)}
+                  {(currentData.totais?.deploymentFrequencyPerDay || 0).toFixed(2)}
                 </div>
                 <p className="text-xs text-muted-foreground">deploys/dia</p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Total: {currentData.totais.deploymentsCount} deploys
+                  Total: {currentData.totais?.deploymentsCount || 0} deploys
                 </p>
               </CardContent>
             </Card>
@@ -337,13 +337,13 @@ export function DoraDashboardView() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {currentData.totais.leadTimeAvgHours?.toFixed(1) || 0}h
+                  {(currentData.totais?.leadTimeAvgHours || 0).toFixed(1)}h
                 </div>
                 <p className="text-xs text-muted-foreground">
                   tempo médio de entrega
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  {formatarTempo(currentData.totais.leadTimeAvgMinutes)}
+                  {formatarTempo(currentData.totais?.leadTimeAvgMinutes || 0)}
                 </p>
               </CardContent>
             </Card>
@@ -356,12 +356,12 @@ export function DoraDashboardView() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {currentData.totais.commitsCount}
+                  {currentData.totais?.commitsCount || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">commits na branch main</p>
                 <div className="flex gap-2 mt-2 text-xs">
-                  <span className="text-green-600">✓ {currentData.totais.featureCommitsCount} features</span>
-                  <span className="text-red-600">✗ {currentData.totais.bugCommitsCount} bugs</span>
+                  <span className="text-green-600">✓ {currentData.totais?.featureCommitsCount || 0} features</span>
+                  <span className="text-red-600">✗ {currentData.totais?.bugCommitsCount || 0} bugs</span>
                 </div>
               </CardContent>
             </Card>
@@ -374,7 +374,7 @@ export function DoraDashboardView() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {currentData.totais.pullRequestsCount}
+                  {currentData.totais?.pullRequestsCount || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">PRs completos</p>
               </CardContent>

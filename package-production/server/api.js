@@ -1891,8 +1891,14 @@ app.get('/api/aplicacoes', async (req, res) => {
       // Carregar ambientes
       try {
         const [ambientes] = await pool.query(`
-          SELECT id, tipo_ambiente as tipoAmbiente, url_ambiente as urlAmbiente, 
-                 data_criacao as dataCriacao, tempo_liberacao as tempoLiberacao, status
+          SELECT id, 
+                 COALESCE(identificador_aplicacao, 'api') as identificadorAplicacao, 
+                 tipo_ambiente as tipoAmbiente,
+                 COALESCE(localizacao_regiao, 'not-specified') as localizacaoRegiao, 
+                 url_ambiente as urlAmbiente, 
+                 data_criacao as dataCriacao, 
+                 tempo_liberacao as tempoLiberacao, 
+                 status
           FROM aplicacao_ambientes
           WHERE aplicacao_id = ?
         `, [app.id]);
@@ -2001,8 +2007,14 @@ app.get('/api/aplicacoes/:id', async (req, res) => {
     // Carregar ambientes
     try {
       const [ambientes] = await pool.query(`
-        SELECT id, tipo_ambiente as tipoAmbiente, url_ambiente as urlAmbiente, 
-               data_criacao as dataCriacao, tempo_liberacao as tempoLiberacao, status
+        SELECT id, 
+               COALESCE(identificador_aplicacao, 'api') as identificadorAplicacao, 
+               tipo_ambiente as tipoAmbiente,
+               COALESCE(localizacao_regiao, 'not-specified') as localizacaoRegiao, 
+               url_ambiente as urlAmbiente, 
+               data_criacao as dataCriacao, 
+               tempo_liberacao as tempoLiberacao, 
+               status
         FROM aplicacao_ambientes
         WHERE aplicacao_id = ?
       `, [req.params.id]);
@@ -2227,6 +2239,19 @@ app.post('/api/aplicacoes', async (req, res) => {
     // Salvar ambientes
     if (ambientes && Array.isArray(ambientes)) {
       for (const amb of ambientes) {
+        // Normalizar TipoAmbiente - converter valores antigos para novos
+        const normalizarTipoAmbiente = (tipo) => {
+          const mapeamento = {
+            'Dev': 'DEV',
+            'Prod': 'PROD',
+            'Cloud': 'DEV',
+            'On-Premise': 'PROD'
+          };
+          return mapeamento[tipo] || tipo;
+        };
+
+        const tipoAmbienteNormalizado = normalizarTipoAmbiente(amb.tipoAmbiente);
+
         // Converter data para formato MySQL (YYYY-MM-DD)
         let dataCriacao = amb.dataCriacao;
         if (dataCriacao) {
@@ -2240,8 +2265,8 @@ app.post('/api/aplicacoes', async (req, res) => {
         }
         
         await pool.query(
-          'INSERT INTO aplicacao_ambientes (id, aplicacao_id, tipo_ambiente, url_ambiente, data_criacao, tempo_liberacao, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [uuidv4(), id, amb.tipoAmbiente, amb.urlAmbiente, dataCriacao, amb.tempoLiberacao || 0, amb.status || 'Ativo']
+          'INSERT INTO aplicacao_ambientes (id, aplicacao_id, identificador_aplicacao, tipo_ambiente, localizacao_regiao, url_ambiente, data_criacao, tempo_liberacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [uuidv4(), id, amb.identificadorAplicacao || 'api', tipoAmbienteNormalizado, amb.localizacaoRegiao || 'not-specified', amb.urlAmbiente, dataCriacao, amb.tempoLiberacao || 0, amb.status || 'Ativo']
         );
       }
     }
@@ -2521,6 +2546,19 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
       await pool.query('DELETE FROM aplicacao_ambientes WHERE aplicacao_id = ?', [req.params.id]);
       if (Array.isArray(ambientes)) {
         for (const amb of ambientes) {
+          // Normalizar TipoAmbiente - converter valores antigos para novos
+          const normalizarTipoAmbiente = (tipo) => {
+            const mapeamento = {
+              'Dev': 'DEV',
+              'Prod': 'PROD',
+              'Cloud': 'DEV',
+              'On-Premise': 'PROD'
+            };
+            return mapeamento[tipo] || tipo;
+          };
+
+          const tipoAmbienteNormalizado = normalizarTipoAmbiente(amb.tipoAmbiente);
+
           // Converter data para formato MySQL (YYYY-MM-DD)
           let dataCriacao = amb.dataCriacao;
           if (dataCriacao) {
@@ -2534,8 +2572,8 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
           }
           
           await pool.query(
-            'INSERT INTO aplicacao_ambientes (id, aplicacao_id, tipo_ambiente, url_ambiente, data_criacao, tempo_liberacao, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [uuidv4(), req.params.id, amb.tipoAmbiente, amb.urlAmbiente, dataCriacao, amb.tempoLiberacao || 0, amb.status || 'Ativo']
+            'INSERT INTO aplicacao_ambientes (id, aplicacao_id, identificador_aplicacao, tipo_ambiente, localizacao_regiao, url_ambiente, data_criacao, tempo_liberacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [uuidv4(), req.params.id, amb.identificadorAplicacao || 'api', tipoAmbienteNormalizado, amb.localizacaoRegiao || 'not-specified', amb.urlAmbiente, dataCriacao, amb.tempoLiberacao || 0, amb.status || 'Ativo']
           );
         }
       }

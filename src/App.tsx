@@ -45,6 +45,8 @@ import { ReportBookView } from '@/components/reportbook/ReportBookView';
 import { SimilarityAnalyzer } from '@/components/reportbook/SimilarityAnalyzer';
 import { LGPDView } from '@/views/LGPDView';
 import { SincronismoView } from '@/views/SincronismoView';
+import { ExecucoesTesteView } from '@/components/execucoes-teste/ExecucoesTesteView';
+import { CheckpointsView } from '@/components/checkpoints/CheckpointsView';
 import { useLogging } from '@/hooks/use-logging';
 import { useApi, apiPost, apiPut, apiDelete } from '@/hooks/use-api';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -73,7 +75,7 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo' | 'finops' | 'gestao-eventos-sla';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo' | 'finops' | 'gestao-eventos-sla' | 'execucoes-teste' | 'checkpoints';
 
 function App() {
   const { logClick, logError } = useLogging('app-root');
@@ -92,7 +94,7 @@ function App() {
 
   const [runbooks] = useState<Runbook[]>([]);
   const [companyLogo, setCompanyLogo] = useState<string | null>(null);
-  const [systemName, setSystemName] = useState<string>('Sistema de Auditoria');
+  const [systemName, setSystemName] = useState<string>('Gestão de Desenvolvimento e Operações');
   const [themeColors, setThemeColors] = useState<ThemeColors>({
     primary: 'oklch(0.264 0.126 276)',
     secondary: 'oklch(0.35 0.08 265)',
@@ -453,6 +455,15 @@ function App() {
             habilidades={habilidades || []}
           />
         );
+      case 'execucoes-teste':
+        return (
+          <ExecucoesTesteView
+            colaboradores={colaboradores || []}
+            aplicacoes={aplicacoes || []}
+          />
+        );
+      case 'checkpoints':
+        return <CheckpointsView />;
       case 'tipos-afastamento':
         return <TiposAfastamentoView tiposAfastamento={tiposAfastamento || []} onRefresh={refetchTipos} />;
       default:
@@ -797,6 +808,30 @@ function App() {
                       >
                         <DeviceMobile />
                         <span>Aplicações</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'execucoes-teste'}
+                        onClick={() => {
+                          logClick('nav_execucoes_teste');
+                          setCurrentView('execucoes-teste');
+                        }}
+                      >
+                        <ListChecks />
+                        <span>Execução de Testes</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'checkpoints'}
+                        onClick={() => {
+                          logClick('nav_checkpoints');
+                          setCurrentView('checkpoints');
+                        }}
+                      >
+                        <ListChecks />
+                        <span>Checkpoints</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>

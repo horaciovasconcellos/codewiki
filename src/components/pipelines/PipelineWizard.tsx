@@ -21,7 +21,7 @@ interface PipelineWizardProps {
   onCancel: () => void;
 }
 
-const STATUS_OPTIONS: StatusPipeline[] = ['Ativa', 'Em avaliação', 'Obsoleta', 'Descontinuada'];
+const STATUS_OPTIONS: StatusPipeline[] = ['Ativa', 'Em avaliacao', 'Obsoleta', 'Descontinuada'];
 
 export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -31,7 +31,7 @@ export function PipelineWizard({ pipeline, onSave, onCancel }: PipelineWizardPro
   
   const [formData, setFormData] = useState({
     nome: '',
-    status: 'Em avaliação' as StatusPipeline,
+    status: 'Em avaliacao' as StatusPipeline,
     dataInicio: new Date().toISOString().split('T')[0],
     dataTermino: '',
     triggerBranches: '',

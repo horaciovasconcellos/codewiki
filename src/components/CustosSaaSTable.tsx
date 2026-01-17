@@ -152,10 +152,14 @@ export function CustosSaaSTable({ custos, onChange }: CustosSaaSTableProps) {
                     id="custoTotalSaaS"
                     type="number"
                     step="0.01"
+                    max="9999999999999.99"
                     value={custoTotalSaaS}
                     onChange={(e) => setCustoTotalSaaS(e.target.value)}
                     placeholder="0.00"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Até 13 dígitos
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="custoPorLicenca">Custo por Licença / Usuário (R$) *</Label>
@@ -163,16 +167,21 @@ export function CustosSaaSTable({ custos, onChange }: CustosSaaSTableProps) {
                     id="custoPorLicenca"
                     type="number"
                     step="0.01"
+                    max="9999999999999.99"
                     value={custoPorLicenca}
                     onChange={(e) => setCustoPorLicenca(e.target.value)}
                     placeholder="0.00"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Até 13 dígitos
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="numeroLicencasContratadas">Nº de Licenças Contratadas *</Label>
                   <Input
                     id="numeroLicencasContratadas"
                     type="number"
+                    min="0"
                     value={numeroLicencasContratadas}
                     onChange={(e) => setNumeroLicencasContratadas(e.target.value)}
                     placeholder="0"
@@ -183,6 +192,7 @@ export function CustosSaaSTable({ custos, onChange }: CustosSaaSTableProps) {
                   <Input
                     id="licencasUtilizadas"
                     type="number"
+                    min="0"
                     value={licencasUtilizadas}
                     onChange={(e) => setLicencasUtilizadas(e.target.value)}
                     placeholder="0"
@@ -194,10 +204,15 @@ export function CustosSaaSTable({ custos, onChange }: CustosSaaSTableProps) {
                     id="crescimentoCustoMensalMoM"
                     type="number"
                     step="0.01"
+                    min="-999.99"
+                    max="999.99"
                     value={crescimentoCustoMensalMoM}
                     onChange={(e) => setCrescimentoCustoMensalMoM(e.target.value)}
                     placeholder="0.00"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Entre -999.99 e 999.99
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="slaCumprido">SLA Cumprido (%) *</Label>
@@ -211,6 +226,9 @@ export function CustosSaaSTable({ custos, onChange }: CustosSaaSTableProps) {
                     onChange={(e) => setSlaCumprido(e.target.value)}
                     placeholder="0.00"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Entre 0 e 100
+                  </p>
                 </div>
               </div>
               <DialogFooter>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AmbienteTecnologico, TipoAmbiente } from '@/lib/types';
+import { AmbienteTecnologico, TipoAmbiente, IdentificadorAplicacao } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,16 +20,31 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState<AmbienteTecnologico | null>(null);
   const [formData, setFormData] = useState({
-    tipoAmbiente: 'Dev' as TipoAmbiente,
+    identificadorAplicacao: 'api' as IdentificadorAplicacao,
+    tipoAmbiente: 'DEV' as TipoAmbiente,
+    localizacaoRegiao: '',
     urlAmbiente: '',
     dataCriacao: getTodayDate(),
     tempoLiberacao: 0,
   });
 
+  // Normalizar valores antigos para novos
+  const normalizarTipoAmbiente = (tipo: string): string => {
+    const mapeamento: Record<string, string> = {
+      'Dev': 'DEV',
+      'Prod': 'PROD',
+      'Cloud': 'DEV',
+      'On-Premise': 'PROD'
+    };
+    return mapeamento[tipo] || tipo;
+  };
+
   const handleOpenNew = () => {
     setEditing(null);
     setFormData({
-      tipoAmbiente: 'Dev',
+      identificadorAplicacao: 'api',
+      tipoAmbiente: 'DEV',
+      localizacaoRegiao: '',
       urlAmbiente: '',
       dataCriacao: getTodayDate(),
       tempoLiberacao: 0,
@@ -56,7 +71,9 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
     };
     
     setFormData({
+      identificadorAplicacao: amb.identificadorAplicacao || 'api',
       tipoAmbiente: amb.tipoAmbiente,
+      localizacaoRegiao: amb.localizacaoRegiao || '',
       urlAmbiente: amb.urlAmbiente,
       dataCriacao: formatDateForInput(amb.dataCriacao),
       tempoLiberacao: amb.tempoLiberacao,
@@ -66,13 +83,26 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
 
   const handleSave = () => {
     if (!formData.tipoAmbiente || !formData.urlAmbiente || !formData.dataCriacao) {
-      toast.error('Preencha todos os campos obrigatórios');
+      toast.error('Preencha todos os campos obrigatórios (Tipo, URL e Data)');
+      return;
+    }
+
+    // Para novos ambientes ou edição, exigir os novos campos
+    if (!editing && (!formData.identificadorAplicacao || !formData.localizacaoRegiao)) {
+      toast.error('Preencha o Identificador da Aplicação e Localização/Região');
+      return;
+    }
+
+    if (formData.localizacaoRegiao && formData.localizacaoRegiao.length > 20) {
+      toast.error('Localização/Região deve ter no máximo 20 caracteres');
       return;
     }
 
     const ambiente: AmbienteTecnologico = {
       id: editing?.id || generateUUID(),
+      identificadorAplicacao: formData.identificadorAplicacao || 'api',
       tipoAmbiente: formData.tipoAmbiente,
+      localizacaoRegiao: formData.localizacaoRegiao || 'not-specified',
       urlAmbiente: formData.urlAmbiente,
       dataCriacao: formData.dataCriacao,
       tempoLiberacao: formData.tempoLiberacao,
@@ -138,6 +168,29 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
 
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
+                <Label htmlFor="identificadorAplicacao">Identificador da Aplicação *</Label>
+                <Select
+                  value={formData.identificadorAplicacao}
+                  onValueChange={(value) => setFormData({ ...formData, identificadorAplicacao: value as IdentificadorAplicacao })}
+                >
+                  <SelectTrigger id="identificadorAplicacao">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="portal">Portal</SelectItem>
+                    <SelectItem value="api">API</SelectItem>
+                    <SelectItem value="auth">Auth</SelectItem>
+                    <SelectItem value="erp">ERP</SelectItem>
+                    <SelectItem value="crm">CRM</SelectItem>
+                    <SelectItem value="etl">ETL</SelectItem>
+                    <SelectItem value="dw">Data Warehouse</SelectItem>
+                    <SelectItem value="mobile">Mobile</SelectItem>
+                    <SelectItem value="batch">Batch</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
                 <Label htmlFor="tipoAmbiente">Tipo de Ambiente *</Label>
                 <Select
                   value={formData.tipoAmbiente}
@@ -147,13 +200,26 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Dev">Dev</SelectItem>
+                    <SelectItem value="DEV">DEV</SelectItem>
                     <SelectItem value="QA">QA</SelectItem>
-                    <SelectItem value="Prod">Prod</SelectItem>
-                    <SelectItem value="Cloud">Cloud</SelectItem>
-                    <SelectItem value="On-Premise">On-Premise</SelectItem>
+                    <SelectItem value="LAB">LAB</SelectItem>
+                    <SelectItem value="POC">POC</SelectItem>
+                    <SelectItem value="SANDBOX">SANDBOX</SelectItem>
+                    <SelectItem value="PROD">PROD</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="localizacaoRegiao">Localização/Região *</Label>
+                <Input
+                  id="localizacaoRegiao"
+                  type="text"
+                  maxLength={20}
+                  value={formData.localizacaoRegiao}
+                  onChange={(e) => setFormData({ ...formData, localizacaoRegiao: e.target.value })}
+                  placeholder="Ex: us-east-1, sa-east-1"
+                />
               </div>
 
               <div className="grid gap-2">
@@ -210,7 +276,9 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Identificador</TableHead>
                 <TableHead>Tipo</TableHead>
+                <TableHead>Localização/Região</TableHead>
                 <TableHead>URL</TableHead>
                 <TableHead>Data Criação</TableHead>
                 <TableHead>Tempo Liberação</TableHead>
@@ -219,13 +287,32 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ambientes.map((amb) => (
-                <TableRow key={amb.id} className={`hover:bg-gray-100 ${amb.status === 'Inativo' ? 'opacity-50' : ''}`}>
-                  <TableCell className="font-medium">{amb.tipoAmbiente}</TableCell>
-                  <TableCell>{amb.urlAmbiente}</TableCell>
-                  <TableCell>{formatDate(amb.dataCriacao)}</TableCell>
-                  <TableCell>{amb.tempoLiberacao} dias</TableCell>
-                  <TableCell>
+              {ambientes.map((amb) => {
+                const isLegado = amb.tipoAmbiente && ['Dev', 'Prod', 'Cloud', 'On-Premise'].includes(amb.tipoAmbiente);
+                const tipoNormalizado = normalizarTipoAmbiente(amb.tipoAmbiente);
+                
+                return (
+                  <TableRow key={amb.id} className={`hover:bg-gray-100 ${amb.status === 'Inativo' ? 'opacity-50' : ''}`}>
+                    <TableCell className="font-medium uppercase">
+                      {amb.identificadorAplicacao || <span className="text-muted-foreground italic">não definido</span>}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        <span>{tipoNormalizado}</span>
+                        {isLegado && (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-orange-100 text-orange-700" title="Valor legado - clique em editar para atualizar">
+                            antigo
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {amb.localizacaoRegiao || <span className="text-muted-foreground italic">não especificado</span>}
+                    </TableCell>
+                    <TableCell>{amb.urlAmbiente}</TableCell>
+                    <TableCell>{formatDate(amb.dataCriacao)}</TableCell>
+                    <TableCell>{amb.tempoLiberacao} dias</TableCell>
+                    <TableCell>
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       amb.status === 'Ativo' 
                         ? 'bg-accent/20 text-accent-foreground' 
@@ -254,7 +341,8 @@ export function StepAmbientes({ ambientes, setAmbientes }: StepAmbientesProps) {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              );
+              })}
             </TableBody>
           </Table>
         </div>

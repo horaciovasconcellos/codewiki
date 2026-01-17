@@ -109,7 +109,9 @@ chmod +x prepare-aplicacoes.sh
 ```json
 "ambientes": [
   {
-    "tipoAmbiente": "Prod",
+    "identificadorAplicacao": "portal",
+    "tipoAmbiente": "PROD",
+    "localizacaoRegiao": "sa-east-1",
     "urlAmbiente": "https://app.prod.com",
     "dataCriacao": "2024-01-15",
     "tempoLiberacao": 30,
@@ -118,7 +120,14 @@ chmod +x prepare-aplicacoes.sh
 ]
 ```
 
-**Tipos válidos**: `Dev`, `QA`, `Prod`, `Cloud`, `On-Premise`
+**Campos obrigatórios:**
+- `identificadorAplicacao`: Tipo de aplicação - valores: `portal`, `api`, `auth`, `erp`, `crm`, `etl`, `dw`, `mobile`, `batch`
+- `tipoAmbiente`: Tipo de ambiente - valores: `DEV`, `QA`, `LAB`, `POC`, `SANDBOX`, `PROD`
+- `localizacaoRegiao`: Localização ou região do ambiente (ex: us-east-1, sa-east-1) - texto livre até 20 caracteres
+- `urlAmbiente`: URL do ambiente
+- `dataCriacao`: Data de criação (YYYY-MM-DD)
+- `tempoLiberacao`: Tempo de liberação em dias
+- `status`: `Ativo` ou `Inativo`
 
 ### Capacidades de Negócio
 ```json

@@ -213,15 +213,23 @@ export function AplicacaoDetails({
                   <div className="space-y-3">
                     {currentAplicacao.ambientes.filter(a => a.status === 'Ativo').map((a) => (
                       <div key={a.id} className="p-3 border rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">{a.tipoAmbiente}</p>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium px-2 py-1 rounded bg-blue-100 text-blue-700 uppercase">
+                              {a.identificadorAplicacao || 'N/A'}
+                            </span>
+                            <span className="font-medium">{a.tipoAmbiente}</span>
+                            <span className="text-xs text-muted-foreground">
+                              • {a.localizacaoRegiao || 'não especificado'}
+                            </span>
+                          </div>
                           <Badge variant="outline">{a.tempoLiberacao} dias</Badge>
                         </div>
                         <a 
                           href={a.urlAmbiente} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:underline mt-1 block"
+                          className="text-sm text-blue-600 hover:underline block"
                         >
                           {a.urlAmbiente}
                         </a>

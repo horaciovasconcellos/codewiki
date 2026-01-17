@@ -298,6 +298,7 @@ export function CargaLockfilesView() {
         sigla,
         nome: nomeTech,
         versaoRelease: versao || 'latest',
+        camada: 'Back-end',
         categoria: 'Biblioteca',
         status: 'Ativa',
         fornecedorFabricante: 'Open Source Community',

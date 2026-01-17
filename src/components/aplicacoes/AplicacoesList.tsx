@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Eye, Pencil, Trash, FileXls, FilePdf, FileText, CaretUp, CaretDown, CaretUpDown, MagnifyingGlass } from '@phosphor-icons/react';
+import { Plus, Pencil, Trash, FileXls, FilePdf, FileText, CaretUp, CaretDown, CaretUpDown, MagnifyingGlass, FileArrowDown } from '@phosphor-icons/react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -15,15 +15,15 @@ import { toast } from 'sonner';
 interface AplicacoesListProps {
   aplicacoes: Aplicacao[];
   onCreateNew: () => void;
-  onView: (aplicacao: Aplicacao) => void;
   onEdit: (aplicacao: Aplicacao) => void;
   onDelete: (aplicacao: Aplicacao) => void;
+  onPrintPDF: (aplicacao: Aplicacao) => void;
 }
 
 type SortField = 'sigla' | 'descricao';
 type SortDirection = 'asc' | 'desc';
 
-export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDelete }: AplicacoesListProps) {
+export function AplicacoesList({ aplicacoes, onCreateNew, onEdit, onDelete, onPrintPDF }: AplicacoesListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('sigla');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -184,6 +184,37 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
       return `${day}/${month}/${year}`;
     };
 
+    // Função para adicionar tabela formatada
+    const addFormattedTable = (
+      doc: jsPDF,
+      yPos: number,
+      title: string,
+      headers: string[],
+      data: string[][]
+    ) => {
+      autoTable(doc, {
+        startY: yPos,
+        head: [headers],
+        body: data,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [59, 130, 246],
+          textColor: 255,
+          fontStyle: 'bold',
+          fontSize: 9,
+        },
+        bodyStyles: {
+          fontSize: 8,
+          textColor: [0, 0, 0],
+        },
+        alternateRowStyles: {
+          fillColor: [245, 247, 250],
+        },
+        margin: { left: 12, right: 12 },
+      });
+      return (doc as any).lastAutoTable.finalY + 6;
+    };
+
     try {
       for (let i = 0; i < filteredAndSortedAplicacoes.length; i++) {
         const app = filteredAndSortedAplicacoes[i];
@@ -202,6 +233,8 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
         let adrsRes: any[] = [];
         let servidoresRes: any[] = [];
         let payloadsRes: any[] = [];
+        let squadsRes: any[] = [];
+        let runbooksRes: any[] = [];
 
         try {
           const response = await fetch(`${API_URL}/api/aplicacoes/${app.id}`);
@@ -272,6 +305,34 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
           } catch (errPayloads) {
             console.error(`Erro ao buscar payloads da aplicação ${app.sigla}:`, errPayloads);
           }
+
+          // Buscar squads separadamente
+          try {
+            const squadsResponse = await fetch(`${API_URL}/api/aplicacoes/${app.id}/squads`);
+            console.log(`Buscando squads da aplicação ${app.id} (${app.sigla}):`, squadsResponse.status);
+            if (squadsResponse.ok) {
+              squadsRes = await squadsResponse.json();
+              console.log(`Squads encontrados para ${app.sigla}:`, squadsRes);
+            } else {
+              console.error(`Erro ao buscar squads (status ${squadsResponse.status}):`, await squadsResponse.text());
+            }
+          } catch (errSquads) {
+            console.error(`Erro ao buscar squads da aplicação ${app.sigla}:`, errSquads);
+          }
+
+          // Buscar runbooks separadamente
+          try {
+            const runbooksResponse = await fetch(`${API_URL}/api/aplicacoes/${app.id}/runbooks`);
+            console.log(`Buscando runbooks da aplicação ${app.id} (${app.sigla}):`, runbooksResponse.status);
+            if (runbooksResponse.ok) {
+              runbooksRes = await runbooksResponse.json();
+              console.log(`Runbooks encontrados para ${app.sigla}:`, runbooksRes);
+            } else {
+              console.error(`Erro ao buscar runbooks (status ${runbooksResponse.status}):`, await runbooksResponse.text());
+            }
+          } catch (errRunbooks) {
+            console.error(`Erro ao buscar runbooks da aplicação ${app.sigla}:`, errRunbooks);
+          }
           
           console.log(`=== APLICAÇÃO: ${app.sigla} ===`);
           console.log('Tecnologias:', tecnologiasRes);
@@ -284,6 +345,8 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
           console.log('ADRs:', adrsRes);
           console.log('Servidores:', servidoresRes);
           console.log('Payloads:', payloadsRes);
+          console.log('Squads:', squadsRes);
+          console.log('Runbooks:', runbooksRes);
         } catch (err) {
           console.error('Erro ao buscar dados:', err);
         }
@@ -295,540 +358,398 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
 
         let yPos = 15;
 
-        // ========== CARD 1: INFORMAÇÕES BÁSICAS ==========
-        // Título do Card
-        doc.setFillColor(248, 250, 252); // bg-slate-50
-        doc.rect(10, yPos, 190, 8, 'F');
-        doc.setFontSize(13);
+        // ========== TÍTULO DO RELATÓRIO ==========
+        doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('Informações Básicas', 12, yPos + 5.5);
-        yPos += 12;
-
-        // Sigla e Descrição (grid 2 colunas)
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139); // text-muted-foreground
-        doc.text('Sigla', 12, yPos);
-        doc.text('Descrição', 105, yPos);
-        yPos += 5;
-
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(0, 0, 0);
-        doc.text(app.sigla, 12, yPos);
-        
-        doc.setFont('helvetica', 'normal');
-        const descLines = doc.splitTextToSize(app.descricao, 90);
-        doc.text(descLines, 105, yPos);
-        yPos += Math.max(5, descLines.length * 5) + 3;
-
-        // URL da Documentação
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text('URL da Documentação', 12, yPos);
-        yPos += 5;
-
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(37, 99, 235); // text-blue-600
-        const urlLines = doc.splitTextToSize(app.urlDocumentacao || 'N/A', 185);
-        doc.text(urlLines, 12, yPos);
-        yPos += (urlLines.length * 5) + 3;
-
-        // Tipo, Fase e Criticidade (grid 3 colunas)
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        
-        if (app.tipoAplicacao) {
-          doc.text('Tipo de Aplicação', 12, yPos);
-        }
-        doc.text('Fase do Ciclo de Vida', app.tipoAplicacao ? 75 : 12, yPos);
-        doc.text('Criticidade do Negócio', app.tipoAplicacao ? 138 : 105, yPos);
-        yPos += 5;
-
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        
-        // Badge simulado para Tipo
-        if (app.tipoAplicacao) {
-          doc.setFillColor(226, 232, 240); // badge background
-          doc.roundedRect(12, yPos - 3, doc.getTextWidth(app.tipoAplicacao) + 4, 5, 1, 1, 'F');
-          doc.text(app.tipoAplicacao, 14, yPos);
-        }
-        
-        // Badge para Fase
-        doc.setFillColor(226, 232, 240);
-        const faseX = app.tipoAplicacao ? 75 : 12;
-        doc.roundedRect(faseX, yPos - 3, doc.getTextWidth(app.faseCicloVida) + 4, 5, 1, 1, 'F');
-        doc.text(app.faseCicloVida, faseX + 2, yPos);
-        
-        // Badge para Criticidade
-        const criticX = app.tipoAplicacao ? 138 : 105;
-        doc.roundedRect(criticX, yPos - 3, doc.getTextWidth(app.criticidadeNegocio) + 4, 5, 1, 1, 'F');
-        doc.text(app.criticidadeNegocio, criticX + 2, yPos);
-        
-        // Badge para Opt-In/Out se ativo
-        if (app.optInOut) {
-          yPos += 7;
-          doc.setFillColor(240, 240, 245); // badge secondary background
-          const optInOutText = 'Opt-In/Out';
-          doc.roundedRect(12, yPos - 3, doc.getTextWidth(optInOutText) + 4, 5, 1, 1, 'F');
-          doc.text(optInOutText, 14, yPos);
-        }
-        
+        doc.text(`${app.sigla} - Relatório de Aplicação (Formato Tabular)`, 105, yPos, { align: 'center' });
         yPos += 8;
 
-        // ========== CARD 2: ASSOCIAÇÕES ==========
-        // Título do Card
-        doc.setFillColor(248, 250, 252);
-        doc.rect(10, yPos, 190, 8, 'F');
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const dataAtual = new Date().toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        });
+        doc.text(`Gerado em: ${dataAtual}`, 105, yPos, { align: 'center' });
+        yPos += 10;
+
+        // Separador
+        doc.setDrawColor(200, 200, 200);
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 📋 INFORMAÇÕES BÁSICAS ==========
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('📋 Informações Básicas', 12, yPos);
+        yPos += 6;
+
+        const infosBasicas = [
+          ['Sigla', app.sigla || 'N/A'],
+          ['Descrição', app.descricao || 'N/A'],
+          ['URL Documentação', app.urlDocumentacao || 'N/A'],
+          ['Tipo de Aplicação', app.tipoAplicacao || 'N/A'],
+          ['Fase do Ciclo de Vida', app.faseCicloVida || 'N/A'],
+          ['Criticidade do Negócio', app.criticidadeNegocio || 'N/A'],
+          ['Opt-In/Out', app.optInOut ? 'Opt-In' : 'N/A']
+        ];
+
+        yPos = addFormattedTable(doc, yPos, '', ['Campo', 'Valor'], infosBasicas);
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 💻 TECNOLOGIAS ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('Associações', 12, yPos + 5.5);
-        yPos += 12;
-
-        // Tecnologias
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Tecnologias (${tecnologiasRes.length})`, 12, yPos);
-        yPos += 5;
+        doc.text('💻 Tecnologias', 12, yPos);
+        yPos += 6;
 
         if (tecnologiasRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
           doc.text('Nenhuma tecnologia associada', 12, yPos);
-          yPos += 5;
+          yPos += 10;
         } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          
-          // Exibir cada tecnologia linha a linha
-          tecnologiasRes.forEach((tec: any) => {
-            const sigla = tec.sigla || 'N/A';
-            const nome = tec.nome || '';
-            const dataInicio = tec.dataInicio || tec.data_inicio;
-            const dataTermino = tec.dataTermino || tec.data_termino;
-            const status = tec.status || 'Ativo';
-            
-            doc.setTextColor(0, 0, 0);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`• ${sigla}`, 12, yPos);
-            
-            if (nome) {
-              doc.setFont('helvetica', 'normal');
-              doc.text(`- ${nome}`, 12 + doc.getTextWidth(`• ${sigla} `), yPos);
-            }
-            yPos += 4;
-            
-            // Linha adicional com datas e status
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(100, 116, 139);
-            const detalhes = `  Início: ${formatDate(dataInicio)} | Término: ${dataTermino ? formatDate(dataTermino) : 'Em uso'} | Status: ${status}`;
-            doc.text(detalhes, 12, yPos);
-            yPos += 4;
-          });
-          yPos += 1;
+          const tecnologiasData = tecnologiasRes.map((tec: any) => [
+            tec.sigla || 'N/A',
+            tec.nome || 'N/A'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', ['Sigla', 'Nome da Tecnologia'], tecnologiasData);
         }
 
         // Separador
-        doc.setDrawColor(229, 231, 235);
         doc.line(12, yPos, 198, yPos);
-        yPos += 4;
+        yPos += 8;
 
-        // Ambientes
-        doc.setFontSize(9);
+        // ========== 👥 SQUADS ==========
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Ambientes (${ambientesRes.length})`, 12, yPos);
-        yPos += 5;
+        doc.setTextColor(0, 0, 0);
+        doc.text('👥 Squads', 12, yPos);
+        yPos += 6;
+
+        if (squadsRes.length === 0) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
+          doc.text('Nenhum squad associado', 12, yPos);
+          yPos += 10;
+        } else {
+          const squadsData = squadsRes.map((sq: any) => [
+            sq.colaboradorNome || 'N/A',
+            sq.papel || 'N/A',
+            sq.nomeSquad || 'N/A',
+            formatDate(sq.dataInicio),
+            sq.dataTermino ? formatDate(sq.dataTermino) : 'Atual'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Colaborador', 'Perfil', 'Squad', 'Início', 'Término'], 
+            squadsData
+          );
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 🌐 AMBIENTES TECNOLÓGICOS ==========
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('🌐 Ambientes Tecnológicos', 12, yPos);
+        yPos += 6;
 
         if (ambientesRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
           doc.text('Nenhum ambiente configurado', 12, yPos);
-          yPos += 5;
+          yPos += 10;
         } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          
-          // Exibir cada ambiente com tipo e URL
-          ambientesRes.forEach((amb: any) => {
-            const tipoAmbiente = amb.tipoAmbiente || amb.tipo_ambiente || 'N/A';
-            const urlAmbiente = amb.urlAmbiente || amb.url_ambiente || '';
-            
-            doc.setTextColor(0, 0, 0);
-            doc.setFont('helvetica', 'bold');
-            doc.text(tipoAmbiente, 12, yPos);
-            
-            if (urlAmbiente) {
-              doc.setFont('helvetica', 'normal');
-              doc.setTextColor(37, 99, 235); // text-blue-600
-              const urlLines = doc.splitTextToSize(`: ${urlAmbiente}`, 175);
-              doc.text(urlLines, 12 + doc.getTextWidth(tipoAmbiente) + 2, yPos);
-              yPos += (urlLines.length * 4);
-            } else {
-              yPos += 4;
-            }
-          });
-          yPos += 3;
+          const ambientesData = ambientesRes.map((amb: any) => [
+            amb.tipoAmbiente || amb.tipo_ambiente || 'N/A',
+            amb.localizacaoRegiao || amb.localizacao_regiao || 'N/A',
+            amb.urlAmbiente || amb.url_ambiente || 'N/A'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Tipo', 'Localização/Região', 'URL'], 
+            ambientesData
+          );
+        }
+
+        // Verificar se precisa de nova página
+        if (yPos > 240) {
+          doc.addPage();
+          yPos = 20;
         }
 
         // Separador
-        doc.setDrawColor(229, 231, 235);
         doc.line(12, yPos, 198, yPos);
-        yPos += 4;
+        yPos += 8;
 
-        // Capacidades de Negócio
-        const capacidadesAtivas = capacidadesRes.filter((c: any) => c.status === 'Ativo');
-        doc.setFontSize(9);
+        // ========== 📝 ADRs ==========
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Capacidades de Negócio (${capacidadesRes.length})`, 12, yPos);
-        yPos += 5;
-
-        if (capacidadesRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
-          doc.text('Nenhuma capacidade associada', 12, yPos);
-          yPos += 5;
-        } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          const capBadges = capacidadesRes.map((c: any) => c.sigla || c.nome || 'N/A').join(' • ');
-          const capLines = doc.splitTextToSize(capBadges, 185);
-          doc.text(capLines, 12, yPos);
-          yPos += (capLines.length * 4) + 3;
-        }
-
-        // Separador
-        doc.setDrawColor(229, 231, 235);
-        doc.line(12, yPos, 198, yPos);
-        yPos += 4;
-
-        // Processos de Negócio
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Processos de Negócio (${processosRes.length})`, 12, yPos);
-        yPos += 5;
-
-        if (processosRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
-          doc.text('Nenhum processo associado', 12, yPos);
-          yPos += 5;
-        } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          const procBadges = processosRes.map((p: any) => p.identificacao || p.nome || 'N/A').join(' • ');
-          const procLines = doc.splitTextToSize(procBadges, 185);
-          doc.text(procLines, 12, yPos);
-          yPos += (procLines.length * 4) + 3;
-        }
-
-        // Separador
-        doc.setDrawColor(229, 231, 235);
-        doc.line(12, yPos, 198, yPos);
-        yPos += 4;
-
-        // Integrações
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Integrações (${integracoesRes.length})`, 12, yPos);
-        yPos += 5;
-
-        if (integracoesRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
-          doc.text('Nenhuma integração configurada', 12, yPos);
-          yPos += 5;
-        } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          
-          // Exibir cada integração em uma linha separada
-          integracoesRes.forEach((i: any) => {
-            const nomeIntegracao = i.nomeAplicacao || i.nome_aplicacao || i.aplicacaoIntegrada || i.aplicacao_integada || 'N/A';
-            const intLines = doc.splitTextToSize(nomeIntegracao, 185);
-            doc.text(intLines, 12, yPos);
-            yPos += (intLines.length * 4);
-          });
-          yPos += 3;
-        }
-
-        // Separador
-        doc.setDrawColor(229, 231, 235);
-        doc.line(12, yPos, 198, yPos);
-        yPos += 4;
-
-        // SLAs
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`SLAs (${slasRes.length})`, 12, yPos);
-        yPos += 5;
-
-        if (slasRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
-          doc.text('Nenhum SLA configurado', 12, yPos);
-          yPos += 5;
-        } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          const slaBadges = slasRes.map((s: any) => s.descricao || s.nome || 'N/A').join(' • ');
-          const slaLines = doc.splitTextToSize(slaBadges, 185);
-          doc.text(slaLines, 12, yPos);
-          yPos += (slaLines.length * 4) + 3;
-        }
-
-        // Separador
-        doc.setDrawColor(229, 231, 235);
-        doc.line(12, yPos, 198, yPos);
-        yPos += 4;
-
-        // Contratos
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Contratos (${contratosRes.length})`, 12, yPos);
-        yPos += 5;
-
-        if (contratosRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
-          doc.text('Nenhum contrato cadastrado', 12, yPos);
-          yPos += 5;
-        } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          
-          contratosRes.forEach((c: any) => {
-            // Box do contrato (simulando border rounded)
-            doc.setDrawColor(229, 231, 235);
-            doc.setFillColor(255, 255, 255);
-            doc.roundedRect(12, yPos - 3, 186, 10, 1, 1, 'FD');
-            
-            // Número do contrato
-            doc.setFont('helvetica', 'bold');
-            doc.text(c.numeroContrato, 14, yPos + 1);
-            
-            // Vigência
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(100, 116, 139);
-            const vigenciaText = `Vigência: ${formatDate(c.dataVigenciaInicial)} até ${formatDate(c.dataVigenciaFinal)}`;
-            doc.text(vigenciaText, 14, yPos + 5);
-            
-            // Badge do status
-            const getStatusColor = (status: string) => {
-              switch (status) {
-                case 'Vigente': return { bg: [220, 252, 231], text: [22, 101, 52] }; // green
-                case 'Vencido': return { bg: [254, 226, 226], text: [153, 27, 27] }; // red
-                case 'Em Renovação': return { bg: [254, 249, 195], text: [133, 77, 14] }; // yellow
-                default: return { bg: [243, 244, 246], text: [75, 85, 99] }; // gray
-              }
-            };
-            
-            const statusColors = getStatusColor(c.status);
-            doc.setFillColor(statusColors.bg[0], statusColors.bg[1], statusColors.bg[2]);
-            doc.setTextColor(statusColors.text[0], statusColors.text[1], statusColors.text[2]);
-            const statusWidth = doc.getTextWidth(c.status) + 4;
-            doc.roundedRect(194 - statusWidth, yPos - 2, statusWidth, 5, 1, 1, 'F');
-            doc.text(c.status, 196 - statusWidth, yPos + 1);
-            
-            doc.setTextColor(0, 0, 0);
-            yPos += 13;
-          });
-        }
-
-        // Separador
-        doc.setDrawColor(229, 231, 235);
-        doc.line(12, yPos, 198, yPos);
-        yPos += 4;
-
-        // Decisões Arquitetônicas (ADRs)
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Decisões Arquitetônicas - ADRs (${adrsRes.length})`, 12, yPos);
-        yPos += 5;
+        doc.setTextColor(0, 0, 0);
+        doc.text('📝 Architectural Decision Records (ADRs)', 12, yPos);
+        yPos += 6;
 
         if (adrsRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
           doc.text('Nenhuma ADR associada', 12, yPos);
-          yPos += 5;
+          yPos += 10;
         } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          
-          adrsRes.forEach((adr: any) => {
-            // Box da ADR (simulando border rounded)
-            doc.setDrawColor(229, 231, 235);
-            doc.setFillColor(255, 255, 255);
-            doc.roundedRect(12, yPos - 3, 186, 10, 1, 1, 'FD');
-            
-            // Sequência da ADR
-            doc.setFont('helvetica', 'bold');
-            const adrLabel = `ADR-${String(adr.adrSequencia || adr.sequencia || '0000').padStart(4, '0')}`;
-            doc.text(adrLabel, 14, yPos + 1);
-            
-            // Descrição da ADR
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(60, 60, 60);
-            const descricao = adr.adrDescricao || adr.descricao || 'Sem descrição';
-            const descricaoTruncada = descricao.length > 90 ? descricao.substring(0, 87) + '...' : descricao;
-            doc.text(descricaoTruncada, 14, yPos + 5);
-            
-            // Badge do status
-            const getADRStatusColor = (status: string) => {
-              switch (status) {
-                case 'Ativo': return { bg: [220, 252, 231], text: [22, 101, 52] }; // green
-                case 'Inativo': return { bg: [254, 226, 226], text: [153, 27, 27] }; // red
-                case 'Superado': return { bg: [243, 244, 246], text: [75, 85, 99] }; // gray
-                default: return { bg: [254, 249, 195], text: [133, 77, 14] }; // yellow
-              }
-            };
-            
-            const adrStatus = adr.adrStatus || adr.status || 'Ativo';
-            const statusColors = getADRStatusColor(adrStatus);
-            doc.setFillColor(statusColors.bg[0], statusColors.bg[1], statusColors.bg[2]);
-            doc.setTextColor(statusColors.text[0], statusColors.text[1], statusColors.text[2]);
-            const statusWidth = doc.getTextWidth(adrStatus) + 4;
-            doc.roundedRect(194 - statusWidth, yPos - 2, statusWidth, 5, 1, 1, 'F');
-            doc.text(adrStatus, 196 - statusWidth, yPos + 1);
-            
-            doc.setTextColor(0, 0, 0);
-            yPos += 13;
-          });
+          const adrsData = adrsRes.map((adr: any) => [
+            `ADR-${String(adr.adrSequencia || adr.sequencia || '0000').padStart(3, '0')}`,
+            adr.adrDescricao || adr.descricao || 'N/A',
+            formatDate(adr.adrDataInicio || adr.dataInicio),
+            adr.adrStatus || adr.status || 'N/A'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Sequência', 'Descrição', 'Data de Início', 'Status'], 
+            adrsData
+          );
         }
 
-        // ========== CARD 3: SERVIDORES ==========
-        // Título do Card
-        doc.setFillColor(248, 250, 252); // bg-slate-50
-        doc.rect(10, yPos, 190, 8, 'F');
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 🎯 CAPACIDADES DO NEGÓCIO ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('Servidores', 12, yPos + 5.5);
-        yPos += 12;
+        doc.text('🎯 Capacidade do Negócio', 12, yPos);
+        yPos += 6;
 
-        // Lista de Servidores
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Servidores Associados (${servidoresRes.length})`, 12, yPos);
-        yPos += 5;
-
-        if (servidoresRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
-          doc.text('Nenhum servidor associado', 12, yPos);
-          yPos += 5;
+        if (capacidadesRes.length === 0) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
+          doc.text('Nenhuma capacidade associada', 12, yPos);
+          yPos += 10;
         } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          
-          // Exibir cada servidor em uma linha separada
-          servidoresRes.forEach((s: any) => {
-            const sigla = s.servidorSigla || 'N/A';
-            const hostname = s.servidorHostname || 'N/A';
-            
-            doc.setFont('helvetica', 'bold');
-            doc.text(`• ${sigla}`, 12, yPos);
-            
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(100, 116, 139);
-            doc.text(`- ${hostname}`, 12 + doc.getTextWidth(`• ${sigla} `), yPos);
-            
-            doc.setTextColor(0, 0, 0);
-            yPos += 4;
-          });
-          yPos += 3;
+          const capacidadesData = capacidadesRes.map((cap: any) => [
+            cap.nome || cap.sigla || 'N/A',
+            cap.nivel || 'N/A',
+            cap.categoria || 'N/A'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Nome', 'Nível', 'Categoria'], 
+            capacidadesData
+          );
         }
 
-        // ========== CARD 4: PAYLOADS ==========
-        // Título do Card
-        doc.setFillColor(248, 250, 252); // bg-slate-50
-        doc.rect(10, yPos, 190, 8, 'F');
+        // Verificar se precisa de nova página
+        if (yPos > 240) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 📊 PROCESSOS DE NEGÓCIO ==========
         doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('Payloads / APIs', 12, yPos + 5.5);
-        yPos += 12;
+        doc.text('📊 Processo de Negócio', 12, yPos);
+        yPos += 6;
 
-        // Lista de Payloads
-        doc.setFontSize(9);
+        if (processosRes.length === 0) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
+          doc.text('Nenhum processo associado', 12, yPos);
+          yPos += 10;
+        } else {
+          const processosData = processosRes.map((proc: any) => [
+            proc.identificacao || proc.nome || 'N/A',
+            proc.areaResponsavel || 'N/A',
+            proc.maturidade || 'N/A',
+            proc.complexidade || 'N/A'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Nome', 'Área Responsável', 'Maturidade', 'Complexidade'], 
+            processosData
+          );
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 📦 PAYLOADS ==========
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text(`Payloads Associados (${payloadsRes.length})`, 12, yPos);
-        yPos += 5;
+        doc.setTextColor(0, 0, 0);
+        doc.text('📦 Payloads', 12, yPos);
+        yPos += 6;
 
         if (payloadsRes.length === 0) {
-          doc.setFontSize(9);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(100, 116, 139);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
           doc.text('Nenhum payload associado', 12, yPos);
-          yPos += 5;
+          yPos += 10;
         } else {
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(0, 0, 0);
-          
-          // Exibir cada payload em uma linha
-          payloadsRes.forEach((p: any) => {
-            const sigla = p.sigla || 'N/A';
-            const descricao = p.descricao || 'Sem descrição';
-            const dataInicio = formatDate(p.dataInicio);
-            
-            // Tudo na mesma linha: • Sigla - Descrição (truncada) - Início: data
-            doc.setFont('helvetica', 'bold');
-            doc.text(`• ${sigla}`, 12, yPos);
-            
-            doc.setFont('helvetica', 'normal');
-            const siglaWidth = doc.getTextWidth(`• ${sigla} `);
-            const descricaoTruncada = descricao.length > 50 ? descricao.substring(0, 47) + '...' : descricao;
-            doc.setTextColor(60, 60, 60);
-            doc.text(`- ${descricaoTruncada}`, 12 + siglaWidth, yPos);
-            
-            const descWidth = doc.getTextWidth(`- ${descricaoTruncada} `);
-            doc.setTextColor(100, 116, 139);
-            doc.text(`- Início: ${dataInicio}`, 12 + siglaWidth + descWidth, yPos);
-            
-            doc.setTextColor(0, 0, 0);
-            yPos += 4;
-          });
-          yPos += 3;
+          const payloadsData = payloadsRes.map((payload: any) => [
+            payload.sigla || 'N/A',
+            payload.descricao || 'N/A'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Sigla', 'Descrição Curta'], 
+            payloadsData
+          );
         }
 
-        // Rodapé
-        doc.setFontSize(8);
+        // Verificar se precisa de nova página
+        if (yPos > 240) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 🔗 INTEGRAÇÕES ==========
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('🔗 Integrações', 12, yPos);
+        yPos += 6;
+
+        if (integracoesRes.length === 0) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
+          doc.text('Nenhuma integração configurada', 12, yPos);
+          yPos += 10;
+        } else {
+          const integracoesData = integracoesRes.map((integ: any) => [
+            integ.nomeAplicacao || integ.nome_aplicacao || integ.aplicacaoIntegrada || 'N/A',
+            integ.estiloIntegracao || integ.estilo_integracao || 'N/A',
+            integ.padraoUso || integ.padrao_uso || 'N/A'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Nome', 'Estilo', 'Padrão de Uso'], 
+            integracoesData
+          );
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== ⏱️ SLA ==========
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('⏱️ SLA', 12, yPos);
+        yPos += 6;
+
+        if (slasRes.length === 0) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
+          doc.text('Nenhum SLA configurado', 12, yPos);
+          yPos += 10;
+        } else {
+          const slasData = slasRes.map((sla: any) => [
+            sla.descricao || 'N/A',
+            sla.tipo || 'N/A',
+            formatDate(sla.dataInicio)
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Descrição', 'Tipo', 'Data de Início'], 
+            slasData
+          );
+        }
+
+        // Verificar se precisa de nova página
+        if (yPos > 240) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 📖 RUNBOOKS ==========
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('📖 Runbooks', 12, yPos);
+        yPos += 6;
+
+        if (runbooksRes.length === 0) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
+          doc.text('Nenhum runbook associado', 12, yPos);
+          yPos += 10;
+        } else {
+          const runbooksData = runbooksRes.map((rb: any) => [
+            rb.runbookDescricao || rb.descricao || 'N/A',
+            rb.runbookFinalidade || rb.finalidade || 'N/A',
+            rb.runbookTipo || rb.tipo || 'N/A'
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Descrição', 'Finalidade', 'Tipo'], 
+            runbooksData
+          );
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 8;
+
+        // ========== 📄 CONTRATOS ==========
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 0, 0);
+        doc.text('📄 Contratos', 12, yPos);
+        yPos += 6;
+
+        if (contratosRes.length === 0) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(128, 128, 128);
+          doc.text('Nenhum contrato cadastrado', 12, yPos);
+          yPos += 10;
+        } else {
+          const contratosData = contratosRes.map((c: any) => [
+            c.numeroContrato || 'N/A',
+            formatDate(c.dataVigenciaInicial),
+            formatDate(c.dataVigenciaFinal)
+          ]);
+          yPos = addFormattedTable(doc, yPos, '', 
+            ['Número', 'Vigência Inicial', 'Vigência Final'], 
+            contratosData
+          );
+        }
+
+        // Separador
+        doc.line(12, yPos, 198, yPos);
+        yPos += 4;
+
+        // Rodapé com informações adicionais
+        doc.setFontSize(9);
         doc.setFont('helvetica', 'italic');
-        doc.setTextColor(128, 128, 128);
-        doc.text(`Página ${i + 1} de ${filteredAndSortedAplicacoes.length}`, 105, 285, { align: 'center' });
+        doc.setTextColor(100, 100, 100);
+        doc.text('Documento gerado automaticamente', 105, 282, { align: 'center' });
+        doc.text(`Última atualização: ${new Date().toLocaleDateString('pt-BR')}`, 105, 287, { align: 'center' });
       }
 
       // Salvar PDF
@@ -1065,10 +986,10 @@ export function AplicacoesList({ aplicacoes, onCreateNew, onView, onEdit, onDele
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onView(aplicacao)}
-                          title="Visualizar"
+                          onClick={() => onPrintPDF(aplicacao)}
+                          title="Imprimir Relatório PDF"
                         >
-                          <Eye size={16} />
+                          <FileArrowDown size={16} />
                         </Button>
                         <Button
                           variant="ghost"

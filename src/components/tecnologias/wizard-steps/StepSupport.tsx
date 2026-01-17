@@ -121,7 +121,11 @@ export function StepSupport({
                 value={documentacaoOficial}
                 onChange={(e) => setDocumentacaoOficial(e.target.value)}
                 placeholder="https://react.dev"
+                maxLength={500}
               />
+              <p className="text-xs text-muted-foreground">
+                Até 500 caracteres
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -135,7 +139,11 @@ export function StepSupport({
                 value={repositorioInterno}
                 onChange={(e) => setRepositorioInterno(e.target.value)}
                 placeholder="https://github.com/..."
+                maxLength={500}
               />
+              <p className="text-xs text-muted-foreground">
+                Até 500 caracteres
+              </p>
             </div>
           </div>
         </CardContent>

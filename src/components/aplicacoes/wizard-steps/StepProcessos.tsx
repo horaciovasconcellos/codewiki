@@ -84,7 +84,7 @@ export function StepProcessos({
 
   const getProcessoNome = (id: string) => {
     const proc = processos.find(p => p.id === id);
-    return proc ? `${proc.identificacao} - ${proc.descricao}` : 'Não encontrado';
+    return proc ? `${proc.identificacao} - ${proc.nome}` : 'Não encontrado';
   };
 
   const formatDate = (dateString: string | undefined) => {
@@ -118,7 +118,7 @@ export function StepProcessos({
               Adicionar Processo
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editing ? 'Editar Processo' : 'Novo Processo'}</DialogTitle>
               <DialogDescription>
@@ -136,10 +136,10 @@ export function StepProcessos({
                   <SelectTrigger id="processoId">
                     <SelectValue placeholder="Selecione um processo" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px]">
                     {processos.map((proc) => (
                       <SelectItem key={proc.id} value={proc.id}>
-                        {proc.identificacao} - {proc.descricao}
+                        {proc.identificacao} - {proc.nome}
                       </SelectItem>
                     ))}
                   </SelectContent>

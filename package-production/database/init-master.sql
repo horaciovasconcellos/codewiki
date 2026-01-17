@@ -177,7 +177,9 @@ CREATE TABLE IF NOT EXISTS aplicacao_tecnologias (
 CREATE TABLE IF NOT EXISTS aplicacao_ambientes (
     id VARCHAR(36) PRIMARY KEY,
     aplicacao_id VARCHAR(36) NOT NULL,
+    identificador_aplicacao VARCHAR(20) NOT NULL,
     tipo_ambiente VARCHAR(50) NOT NULL,
+    localizacao_regiao VARCHAR(20) NOT NULL,
     url_ambiente VARCHAR(500) NOT NULL,
     data_criacao DATE NOT NULL,
     tempo_liberacao INT NOT NULL,
@@ -187,6 +189,7 @@ CREATE TABLE IF NOT EXISTS aplicacao_ambientes (
     FOREIGN KEY (aplicacao_id) REFERENCES aplicacoes(id) ON DELETE CASCADE,
     INDEX idx_aplicacao (aplicacao_id),
     INDEX idx_tipo (tipo_ambiente),
+    INDEX idx_identificador (identificador_aplicacao),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

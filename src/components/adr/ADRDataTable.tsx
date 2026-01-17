@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ADR } from '@/lib/types';
-import { PencilSimple, Trash, Eye, MagnifyingGlass } from '@phosphor-icons/react';
+import { PencilSimple, Trash, FilePdf, MagnifyingGlass, Eye } from '@phosphor-icons/react';
+import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -35,6 +36,198 @@ const statusColorMap: Record<string, string> = {
 export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  const generateADRPDF = (adr: ADR) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (2 * margin);
+    let yPosition = margin;
+
+    // Função auxiliar para adicionar texto com quebra de linha
+    const addTextBlock = (label: string, text: string | undefined, isBold = false) => {
+      if (yPosition > pageHeight - 30) {
+        doc.addPage();
+        yPosition = margin;
+      }
+
+      // Label
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(label, margin, yPosition);
+      yPosition += 6;
+
+      // Conteúdo
+      doc.setFontSize(10);
+      doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+      
+      if (text && text.trim() !== '') {
+        const lines = doc.splitTextToSize(text, contentWidth);
+        lines.forEach((line: string) => {
+          if (yPosition > pageHeight - 20) {
+            doc.addPage();
+            yPosition = margin;
+          }
+          doc.text(line, margin, yPosition);
+          yPosition += 5;
+        });
+      } else {
+        doc.setTextColor(150, 150, 150);
+        doc.text('Não informado', margin, yPosition);
+        doc.setTextColor(0, 0, 0);
+        yPosition += 5;
+      }
+      yPosition += 3;
+    };
+
+    // Cabeçalho
+    doc.setFillColor(37, 99, 235); // bg-blue-600
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`ADR-${adr.sequencia}`, margin, 25);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Decisão Arquitetônica', margin, 35);
+    
+    doc.setTextColor(0, 0, 0);
+    yPosition = 55;
+
+    // Descrição (título)
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    const descLines = doc.splitTextToSize(adr.descricao, contentWidth);
+    descLines.forEach((line: string) => {
+      doc.text(line, margin, yPosition);
+      yPosition += 7;
+    });
+    yPosition += 5;
+
+    // Linha separadora
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Informações Gerais
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Informações Gerais', margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    // Status
+    doc.setFont('helvetica', 'bold');
+    doc.text('Status:', margin, yPosition);
+    doc.setFont('helvetica', 'normal');
+    doc.text(adr.status, margin + 25, yPosition);
+    yPosition += 6;
+
+    // Datas
+    if (adr.dataCriacao) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Data de Criação:', margin, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.text(formatDate(adr.dataCriacao), margin + 35, yPosition);
+      yPosition += 6;
+    }
+
+    if (adr.dataAtualizacao) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Última Atualização:', margin, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.text(formatDate(adr.dataAtualizacao), margin + 40, yPosition);
+      yPosition += 6;
+    }
+
+    // ADR Substituta
+    if (adr.adrSubstitutaSequencia) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('Substituída por:', margin, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`ADR-${adr.adrSubstitutaSequencia}`, margin + 35, yPosition);
+      yPosition += 6;
+    }
+
+    yPosition += 5;
+
+    // Linha separadora
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Contexto
+    addTextBlock('Contexto', adr.contexto);
+    
+    // Decisão
+    addTextBlock('Decisão', adr.decisao, true);
+    
+    // Justificativa
+    addTextBlock('Justificativa', adr.justificativa);
+    
+    // Consequências Positivas
+    addTextBlock('Consequências Positivas', adr.consequenciasPositivas);
+    
+    // Consequências Negativas
+    addTextBlock('Consequências Negativas', adr.consequenciasNegativas);
+    
+    // Riscos
+    addTextBlock('Riscos', adr.riscos);
+    
+    // Alternativas Consideradas
+    addTextBlock('Alternativas Consideradas', adr.alternativasConsideradas);
+    
+    // Compliance
+    addTextBlock('Compliance/Constitution', adr.complianceConstitution);
+    
+    // Referências
+    addTextBlock('Referências', adr.referencias);
+
+    // Aplicações Associadas
+    if (adr.aplicacoesCount && adr.aplicacoesCount > 0) {
+      if (yPosition > pageHeight - 40) {
+        doc.addPage();
+        yPosition = margin;
+      }
+      
+      yPosition += 5;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Aplicações Associadas', margin, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total de aplicações: ${adr.aplicacoesCount}`, margin, yPosition);
+      yPosition += 8;
+    }
+
+    // Rodapé em todas as páginas
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(
+        `Página ${i} de ${pageCount}`,
+        pageWidth / 2,
+        pageHeight - 10,
+        { align: 'center' }
+      );
+      doc.text(
+        `Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+        margin,
+        pageHeight - 10
+      );
+    }
+
+    // Salvar PDF
+    doc.save(`ADR-${adr.sequencia}-${adr.descricao.substring(0, 30).replaceAll(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+  };
 
   // Filtrar ADRs
   const filteredADRs = adrs.filter(adr => {
@@ -165,6 +358,14 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
                         title="Visualizar"
                       >
                         <Eye size={16} className="text-blue-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => generateADRPDF(adr)}
+                        title="Gerar PDF"
+                      >
+                        <FilePdf size={16} className="text-red-600" />
                       </Button>
                       <Button
                         variant="ghost"

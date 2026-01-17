@@ -15,7 +15,12 @@ import {
   CriticidadeNegocio,
   TipoAplicacao,
   Contrato,
-  StatusContrato
+  StatusContrato,
+  AssociacaoSquadAplicacao,
+  Colaborador,
+  ADR,
+  AssociacaoADRAplicacao,
+  Payload
 } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -43,7 +48,12 @@ interface StepReviewProps {
   slas: AssociacaoSLAAplicacao[];
   runbooks: AssociacaoRunbookAplicacao[];
   contratos: Contrato[];
+  squadsAssociadas: AssociacaoSquadAplicacao[];
+  colaboradores: Colaborador[];
   aplicacaoId?: string;
+  adrs?: ADR[];
+  adrsAssociados?: AssociacaoADRAplicacao[];
+  payloads?: Payload[];
 }
 
 interface Servidor {
@@ -86,7 +96,12 @@ export function StepReview({
   slas,
   runbooks,
   contratos,
+  squadsAssociadas,
+  colaboradores,
   aplicacaoId,
+  adrs = [],
+  adrsAssociados = [],
+  payloads = [],
 }: StepReviewProps) {
   const [servidores, setServidores] = useState<Servidor[]>([]);
   const [projetos, setProjetos] = useState<Projeto[]>([]);
@@ -94,6 +109,14 @@ export function StepReview({
   const [loadingProjetos, setLoadingProjetos] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+  // Log para debug
+  console.log('[StepReview] 🔍 Props recebidas:', {
+    squadsLength: squadsAssociadas?.length || 0,
+    squadsAtivos: squadsAssociadas?.filter(s => s.status === 'Ativo').length || 0,
+    colaboradoresLength: colaboradores?.length || 0,
+    squadsData: squadsAssociadas
+  });
 
   // Carregar servidores associados
   useEffect(() => {
@@ -154,6 +177,11 @@ export function StepReview({
   const getAplicacaoNome = (id: string) => {
     const app = aplicacoes.find(a => a.id === id);
     return app ? `${app.sigla} - ${app.descricao}` : id;
+  };
+
+  const getColaboradorNome = (id: string) => {
+    const colab = colaboradores.find(c => c.id === id);
+    return colab ? colab.nome : id;
   };
 
   const getStatusContratoColor = (status: StatusContrato) => {
@@ -257,7 +285,9 @@ export function StepReview({
             ) : (
               <div className="flex flex-wrap gap-2">
                 {ambientes.filter(a => a.status === 'Ativo').map((a) => (
-                  <Badge key={a.id} variant="outline">{a.tipoAmbiente}</Badge>
+                  <Badge key={a.id} variant="outline" className="uppercase">
+                    {a.identificadorAplicacao || 'N/A'} • {a.tipoAmbiente} • {a.localizacaoRegiao || 'N/A'}
+                  </Badge>
                 ))}
               </div>
             )}
@@ -342,6 +372,101 @@ export function StepReview({
                     </p>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">ADRs ({adrsAssociados.filter(a => a.status === 'Ativo').length})</p>
+            {adrsAssociados.filter(a => a.status === 'Ativo').length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum ADR associado</p>
+            ) : (
+              <div className="space-y-2">
+                {adrsAssociados.filter(a => a.status === 'Ativo').map((adrAssoc) => {
+                  const adr = adrs.find(a => a.id === adrAssoc.adrId);
+                  return (
+                    <div key={adrAssoc.id} className="p-3 border rounded-lg">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline">ADR-{adr?.sequencia || '?'}</Badge>
+                        <p className="font-medium">{adr?.descricao || 'N/A'}</p>
+                      </div>
+                      {adr?.contexto && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Contexto: {adr.contexto.substring(0, 100)}{adr.contexto.length > 100 ? '...' : ''}
+                        </p>
+                      )}
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Data Início: {formatDate(adrAssoc.dataInicio)}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Payloads ({payloads.length})</p>
+            {payloads.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum payload cadastrado</p>
+            ) : (
+              <div className="space-y-2">
+                {payloads.map((payload) => (
+                  <div key={payload.id} className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline">{payload.formatoArquivo || 'N/A'}</Badge>
+                      <p className="font-medium">{payload.sigla}</p>
+                    </div>
+                    {payload.definicao && (
+                      <p className="text-sm text-muted-foreground">{payload.definicao}</p>
+                    )}
+                    {payload.versaoOpenapi && (
+                      <p className="text-xs text-muted-foreground mt-1">OpenAPI: {payload.versaoOpenapi}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Squads ({squadsAssociadas.filter(s => s.status === 'Ativo').length})</p>
+            {squadsAssociadas.filter(s => s.status === 'Ativo').length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum squad associado</p>
+            ) : (
+              <div className="border rounded-lg">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-left p-3 text-sm font-medium">Colaborador</th>
+                      <th className="text-left p-3 text-sm font-medium">Perfil</th>
+                      <th className="text-left p-3 text-sm font-medium">Squad</th>
+                      <th className="text-left p-3 text-sm font-medium">Data Início</th>
+                      <th className="text-left p-3 text-sm font-medium">Data Término</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {squadsAssociadas.filter(s => s.status === 'Ativo').map((squad, index) => (
+                      <tr key={squad.id} className={index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
+                        <td className="p-3 text-sm">{getColaboradorNome(squad.colaboradorId)}</td>
+                        <td className="p-3 text-sm">
+                          <Badge variant="outline">{squad.perfil}</Badge>
+                        </td>
+                        <td className="p-3 text-sm">
+                          <Badge variant="outline">{squad.squad}</Badge>
+                        </td>
+                        <td className="p-3 text-sm">{formatDate(squad.dataInicio)}</td>
+                        <td className="p-3 text-sm">{squad.dataTermino ? formatDate(squad.dataTermino) : '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

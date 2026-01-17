@@ -153,11 +153,15 @@ export function ContratosTecnologiaTable({ contratos, onChange }: ContratosTecno
                   id="valorContrato"
                   type="number"
                   min="0"
+                  max="9999999999999.99"
                   step="0.01"
                   value={formData.valorContrato}
                   onChange={(e) => setFormData({ ...formData, valorContrato: parseFloat(e.target.value) || 0 })}
                   placeholder="0.00"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Até 13 dígitos
+                </p>
               </div>
 
               <div className="grid gap-2">

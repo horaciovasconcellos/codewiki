@@ -463,6 +463,7 @@ function mapTecnologia(row) {
     sigla: row.sigla || '',
     nome: row.nome,
     versaoRelease: row.versao_release || '',
+    camada: row.camada || '',
     categoria: row.categoria || '',
     status: row.status || '',
     fornecedorFabricante: row.fornecedor_fabricante || '',
@@ -2694,6 +2695,7 @@ app.post('/api/tecnologias', async (req, res) => {
     sigla,
     nome,
     versaoRelease,
+    camada,
     categoria,
     status,
     fornecedorFabricante,
@@ -2708,11 +2710,11 @@ app.post('/api/tecnologias', async (req, res) => {
   } = req.body;
 
   // Validações
-  if (!sigla || !nome) {
+  if (!sigla || !nome || !camada) {
     return res.status(400).json({
       error: 'Campos obrigatórios faltando',
       code: 'MISSING_FIELDS',
-      missing: [!sigla && 'sigla', !nome && 'nome'].filter(Boolean)
+      missing: [!sigla && 'sigla', !nome && 'nome', !camada && 'camada'].filter(Boolean)
     });
   }
 
@@ -2720,13 +2722,13 @@ app.post('/api/tecnologias', async (req, res) => {
     const id = uuidv4();
     await pool.query(
       `INSERT INTO tecnologias (
-        id, sigla, nome, versao_release, categoria, status,
+        id, sigla, nome, versao_release, camada, categoria, status,
         fornecedor_fabricante, tipo_licenciamento, maturidade_interna,
         nivel_suporte_interno, ambiente_dev, ambiente_qa, ambiente_prod,
         ambiente_cloud, ambiente_on_premise
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        id, sigla, nome, versaoRelease || null, categoria || null, status || null,
+        id, sigla, nome, versaoRelease || null, camada, categoria || null, status || null,
         fornecedorFabricante || null, tipoLicenciamento || null, maturidadeInterna || null,
         nivelSuporteInterno || null, ambienteDev || false, ambienteQa || false,
         ambienteProd || false, ambienteCloud || false, ambienteOnPremise || false
@@ -2749,6 +2751,7 @@ app.put('/api/tecnologias/:id', async (req, res) => {
     sigla,
     nome,
     versaoRelease,
+    camada,
     categoria,
     status,
     fornecedorFabricante,
@@ -2762,16 +2765,25 @@ app.put('/api/tecnologias/:id', async (req, res) => {
     ambienteOnPremise
   } = req.body;
 
+  // Validações
+  if (!sigla || !nome || !camada) {
+    return res.status(400).json({
+      error: 'Campos obrigatórios faltando',
+      code: 'MISSING_FIELDS',
+      missing: [!sigla && 'sigla', !nome && 'nome', !camada && 'camada'].filter(Boolean)
+    });
+  }
+
   try {
     const [result] = await pool.query(
       `UPDATE tecnologias SET
-        sigla = ?, nome = ?, versao_release = ?, categoria = ?, status = ?,
+        sigla = ?, nome = ?, versao_release = ?, camada = ?, categoria = ?, status = ?,
         fornecedor_fabricante = ?, tipo_licenciamento = ?, maturidade_interna = ?,
         nivel_suporte_interno = ?, ambiente_dev = ?, ambiente_qa = ?, ambiente_prod = ?,
         ambiente_cloud = ?, ambiente_on_premise = ?
       WHERE id = ?`,
       [
-        sigla, nome, versaoRelease, categoria, status,
+        sigla, nome, versaoRelease, camada, categoria, status,
         fornecedorFabricante, tipoLicenciamento, maturidadeInterna,
         nivelSuporteInterno, ambienteDev, ambienteQa, ambienteProd,
         ambienteCloud, ambienteOnPremise, req.params.id
@@ -3380,8 +3392,14 @@ app.get('/api/aplicacoes', async (req, res) => {
       // Carregar ambientes
       try {
         const [ambientes] = await pool.query(`
-          SELECT id, tipo_ambiente as tipoAmbiente, url_ambiente as urlAmbiente, 
-                 data_criacao as dataCriacao, tempo_liberacao as tempoLiberacao, status
+          SELECT id, 
+                 COALESCE(identificador_aplicacao, 'api') as identificadorAplicacao, 
+                 tipo_ambiente as tipoAmbiente,
+                 COALESCE(localizacao_regiao, 'not-specified') as localizacaoRegiao, 
+                 url_ambiente as urlAmbiente, 
+                 data_criacao as dataCriacao, 
+                 tempo_liberacao as tempoLiberacao, 
+                 status
           FROM aplicacao_ambientes
           WHERE aplicacao_id = ?
         `, [app.id]);
@@ -3584,8 +3602,14 @@ app.get('/api/aplicacoes/:id', async (req, res) => {
     // Carregar ambientes
     try {
       const [ambientes] = await pool.query(`
-        SELECT id, tipo_ambiente as tipoAmbiente, url_ambiente as urlAmbiente, 
-               data_criacao as dataCriacao, tempo_liberacao as tempoLiberacao, status
+        SELECT id, 
+               COALESCE(identificador_aplicacao, 'api') as identificadorAplicacao, 
+               tipo_ambiente as tipoAmbiente,
+               COALESCE(localizacao_regiao, 'not-specified') as localizacaoRegiao, 
+               url_ambiente as urlAmbiente, 
+               data_criacao as dataCriacao, 
+               tempo_liberacao as tempoLiberacao, 
+               status
         FROM aplicacao_ambientes
         WHERE aplicacao_id = ?
       `, [req.params.id]);
@@ -3672,6 +3696,44 @@ app.get('/api/aplicacoes/:id', async (req, res) => {
       aplicacao.runbooks = [];
     }
 
+    // Carregar squads
+    try {
+      const [squads] = await pool.query(`
+        SELECT asq.id, asq.colaborador_id as colaboradorId, asq.perfil, asq.squad,
+               asq.data_inicio as dataInicio, asq.data_termino as dataTermino, asq.status,
+               c.nome as colaboradorNome, c.matricula as colaboradorMatricula
+        FROM aplicacao_squads asq
+        JOIN colaboradores c ON asq.colaborador_id = c.id
+        WHERE asq.aplicacao_id = ?
+        ORDER BY asq.data_inicio DESC
+      `, [req.params.id]);
+      aplicacao.squads = squads;
+    } catch (e) {
+      aplicacao.squads = [];
+    }
+
+    // Carregar ADRs
+    try {
+      const [adrs] = await pool.query(`
+        SELECT aa.id, aa.adr_id as adrId, aa.aplicacao_id as aplicacaoId,
+               aa.data_inicio as dataInicio, aa.data_termino as dataTermino, 
+               aa.status, aa.observacoes,
+               a.sequencia as adrSequencia, a.descricao as adrDescricao, 
+               a.contexto as adrContexto, a.decisao as adrDecisao, 
+               a.justificativa as adrJustificativa,
+               a.consequencias_positivas as adrConsequenciasPositivas,
+               a.consequencias_negativas as adrConsequenciasNegativas,
+               a.status as adrStatus, a.data_criacao as adrDataCriacao
+        FROM adr_aplicacoes aa
+        JOIN adrs a ON aa.adr_id = a.id
+        WHERE aa.aplicacao_id = ?
+        ORDER BY a.sequencia
+      `, [req.params.id]);
+      aplicacao.adrs = adrs;
+    } catch (e) {
+      aplicacao.adrs = [];
+    }
+
     // Carregar servidores
     try {
       const [servidores] = await pool.query(`
@@ -3694,6 +3756,52 @@ app.get('/api/aplicacoes/:id', async (req, res) => {
       aplicacao.servidores = servidores;
     } catch (e) {
       aplicacao.servidores = [];
+    }
+
+    // Carregar payloads
+    try {
+      const [payloads] = await pool.query(`
+        SELECT id, aplicacao_id as aplicacaoId, sigla, definicao, descricao,
+               formato_arquivo as formatoArquivo, versao_openapi as versaoOpenapi,
+               arquivo_valido as arquivoValido, data_inicio as dataInicio, 
+               data_termino as dataTermino
+        FROM payloads
+        WHERE aplicacao_id = ?
+        ORDER BY data_inicio DESC
+      `, [req.params.id]);
+      aplicacao.payloads = payloads;
+    } catch (e) {
+      aplicacao.payloads = [];
+    }
+
+    // Carregar contratos
+    try {
+      const [contratos] = await pool.query(`
+        SELECT id, aplicacao_id as aplicacaoId, numero_contrato as numeroContrato, 
+               data_vigencia_inicial as dataVigenciaInicial, 
+               data_vigencia_final as dataVigenciaFinal, status
+        FROM contratos
+        WHERE aplicacao_id = ?
+        ORDER BY data_vigencia_inicial DESC
+      `, [req.params.id]);
+      aplicacao.contratos = contratos;
+    } catch (e) {
+      aplicacao.contratos = [];
+    }
+
+    // Carregar projetos
+    try {
+      const [projetos] = await pool.query(`
+        SELECT id, aplicacao_id as aplicacaoId, nome_projeto as nomeProjeto,
+               ia_selecionada as iaSelecionada, gerador_projetos as geradorProjetos,
+               created_at as createdAt
+        FROM projetos_sdd
+        WHERE aplicacao_id = ?
+        ORDER BY created_at DESC
+      `, [req.params.id]);
+      aplicacao.projetos = projetos;
+    } catch (e) {
+      aplicacao.projetos = [];
     }
 
     res.json(aplicacao);
@@ -3859,6 +3967,19 @@ app.post('/api/aplicacoes', async (req, res) => {
     // Salvar ambientes
     if (ambientes && Array.isArray(ambientes)) {
       for (const amb of ambientes) {
+        // Normalizar TipoAmbiente - converter valores antigos para novos
+        const normalizarTipoAmbiente = (tipo) => {
+          const mapeamento = {
+            'Dev': 'DEV',
+            'Prod': 'PROD',
+            'Cloud': 'DEV',
+            'On-Premise': 'PROD'
+          };
+          return mapeamento[tipo] || tipo;
+        };
+
+        const tipoAmbienteNormalizado = normalizarTipoAmbiente(amb.tipoAmbiente);
+
         // Converter data para formato MySQL (YYYY-MM-DD)
         let dataCriacao = amb.dataCriacao;
         if (dataCriacao) {
@@ -3872,8 +3993,8 @@ app.post('/api/aplicacoes', async (req, res) => {
         }
         
         await pool.query(
-          'INSERT INTO aplicacao_ambientes (id, aplicacao_id, tipo_ambiente, url_ambiente, data_criacao, tempo_liberacao, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [uuidv4(), id, amb.tipoAmbiente, amb.urlAmbiente, dataCriacao, amb.tempoLiberacao || 0, amb.status || 'Ativo']
+          'INSERT INTO aplicacao_ambientes (id, aplicacao_id, identificador_aplicacao, tipo_ambiente, localizacao_regiao, url_ambiente, data_criacao, tempo_liberacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [uuidv4(), id, amb.identificadorAplicacao || 'api', tipoAmbienteNormalizado, amb.localizacaoRegiao || 'not-specified', amb.urlAmbiente, dataCriacao, amb.tempoLiberacao || 0, amb.status || 'Ativo']
         );
       }
     }
@@ -3996,6 +4117,46 @@ app.post('/api/aplicacoes', async (req, res) => {
           'INSERT INTO aplicacao_runbooks (id, aplicacao_id, runbook_id, descricao, data_associacao, status) VALUES (?, ?, ?, ?, ?, ?)',
           [uuidv4(), id, runbook.runbookId, runbook.descricao || '', dataAssociacao, runbook.status || 'Ativo']
         );
+      }
+    }
+
+    // Salvar Squads
+    if (req.body.squads && Array.isArray(req.body.squads)) {
+      console.log('[API POST /aplicacoes] Salvando Squads:', req.body.squads.length);
+      for (const squad of req.body.squads) {
+        if (!squad.colaboradorId || !squad.perfil || !squad.squad) {
+          console.log('[API POST /aplicacoes] Squad com dados incompletos, pulando:', squad);
+          continue;
+        }
+        
+        // Converter data para formato MySQL (YYYY-MM-DD)
+        let dataInicio = squad.dataInicio;
+        if (dataInicio) {
+          if (typeof dataInicio === 'string') {
+            dataInicio = dataInicio.split('T')[0];
+          } else if (dataInicio instanceof Date) {
+            dataInicio = dataInicio.toISOString().split('T')[0];
+          }
+        } else {
+          dataInicio = new Date().toISOString().split('T')[0];
+        }
+        
+        let dataTermino = squad.dataTermino;
+        if (dataTermino) {
+          if (typeof dataTermino === 'string') {
+            dataTermino = dataTermino.split('T')[0];
+          } else if (dataTermino instanceof Date) {
+            dataTermino = dataTermino.toISOString().split('T')[0];
+          }
+        } else {
+          dataTermino = null;
+        }
+        
+        await pool.query(
+          'INSERT INTO aplicacao_squads (id, aplicacao_id, colaborador_id, perfil, squad, data_inicio, data_termino, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [uuidv4(), id, squad.colaboradorId, squad.perfil, squad.squad, dataInicio, dataTermino, squad.status || 'Ativo']
+        );
+        console.log('[API POST /aplicacoes] Squad salvo:', squad.colaboradorId, squad.perfil, squad.squad);
       }
     }
 
@@ -4201,6 +4362,19 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
       await pool.query('DELETE FROM aplicacao_ambientes WHERE aplicacao_id = ?', [req.params.id]);
       if (Array.isArray(ambientes)) {
         for (const amb of ambientes) {
+          // Normalizar TipoAmbiente - converter valores antigos para novos
+          const normalizarTipoAmbiente = (tipo) => {
+            const mapeamento = {
+              'Dev': 'DEV',
+              'Prod': 'PROD',
+              'Cloud': 'DEV',
+              'On-Premise': 'PROD'
+            };
+            return mapeamento[tipo] || tipo;
+          };
+
+          const tipoAmbienteNormalizado = normalizarTipoAmbiente(amb.tipoAmbiente);
+
           // Converter data para formato MySQL (YYYY-MM-DD)
           let dataCriacao = amb.dataCriacao;
           if (dataCriacao) {
@@ -4214,8 +4388,8 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
           }
           
           await pool.query(
-            'INSERT INTO aplicacao_ambientes (id, aplicacao_id, tipo_ambiente, url_ambiente, data_criacao, tempo_liberacao, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [uuidv4(), req.params.id, amb.tipoAmbiente, amb.urlAmbiente, dataCriacao, amb.tempoLiberacao || 0, amb.status || 'Ativo']
+            'INSERT INTO aplicacao_ambientes (id, aplicacao_id, identificador_aplicacao, tipo_ambiente, localizacao_regiao, url_ambiente, data_criacao, tempo_liberacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [uuidv4(), req.params.id, amb.identificadorAplicacao || 'api', tipoAmbienteNormalizado, amb.localizacaoRegiao || 'not-specified', amb.urlAmbiente, dataCriacao, amb.tempoLiberacao || 0, amb.status || 'Ativo']
           );
         }
       }
@@ -4353,6 +4527,49 @@ app.put('/api/aplicacoes/:id', async (req, res) => {
             'INSERT INTO aplicacao_runbooks (id, aplicacao_id, runbook_id, descricao, data_associacao, status) VALUES (?, ?, ?, ?, ?, ?)',
             [uuidv4(), req.params.id, runbook.runbookId, runbook.descricao || '', dataAssociacao, runbook.status || 'Ativo']
           );
+        }
+      }
+    }
+
+    // Atualizar Squads
+    if (req.body.squads !== undefined) {
+      console.log('[API PUT /aplicacoes/:id] Atualizando Squads:', req.body.squads?.length || 0);
+      await pool.query('DELETE FROM aplicacao_squads WHERE aplicacao_id = ?', [req.params.id]);
+      if (Array.isArray(req.body.squads)) {
+        for (const squad of req.body.squads) {
+          if (!squad.colaboradorId || !squad.perfil || !squad.squad) {
+            console.log('[API PUT /aplicacoes/:id] Squad com dados incompletos, pulando:', squad);
+            continue;
+          }
+          
+          // Converter data para formato MySQL (YYYY-MM-DD)
+          let dataInicio = squad.dataInicio;
+          if (dataInicio) {
+            if (typeof dataInicio === 'string') {
+              dataInicio = dataInicio.split('T')[0];
+            } else if (dataInicio instanceof Date) {
+              dataInicio = dataInicio.toISOString().split('T')[0];
+            }
+          } else {
+            dataInicio = new Date().toISOString().split('T')[0];
+          }
+          
+          let dataTermino = squad.dataTermino;
+          if (dataTermino) {
+            if (typeof dataTermino === 'string') {
+              dataTermino = dataTermino.split('T')[0];
+            } else if (dataTermino instanceof Date) {
+              dataTermino = dataTermino.toISOString().split('T')[0];
+            }
+          } else {
+            dataTermino = null;
+          }
+          
+          await pool.query(
+            'INSERT INTO aplicacao_squads (id, aplicacao_id, colaborador_id, perfil, squad, data_inicio, data_termino, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [uuidv4(), req.params.id, squad.colaboradorId, squad.perfil, squad.squad, dataInicio, dataTermino, squad.status || 'Ativo']
+          );
+          console.log('[API PUT /aplicacoes/:id] Squad salvo:', squad.colaboradorId, squad.perfil, squad.squad);
         }
       }
     }
@@ -4544,6 +4761,190 @@ app.delete('/api/aplicacoes/:id/tecnologias/:tecnologiaId', async (req, res) => 
     res.status(204).send();
   } catch (error) {
     console.error('Erro ao remover associação:', error);
+    res.status(500).json({ error: 'Erro ao remover associação', code: 'DATABASE_ERROR' });
+  }
+});
+
+// ==================== APLICAÇÃO x SQUADS ====================
+
+// Listar squads de uma aplicação
+app.get('/api/aplicacoes/:id/squads', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT asq.*, c.nome as colaborador_nome, c.matricula as colaborador_matricula
+       FROM aplicacao_squads asq
+       INNER JOIN colaboradores c ON asq.colaborador_id = c.id
+       WHERE asq.aplicacao_id = ?
+       ORDER BY asq.data_inicio DESC`,
+      [req.params.id]
+    );
+    
+    res.json(rows.map(row => ({
+      id: row.id,
+      colaboradorId: row.colaborador_id,
+      colaboradorNome: row.colaborador_nome,
+      colaboradorMatricula: row.colaborador_matricula,
+      perfil: row.perfil,
+      squad: row.squad,
+      dataInicio: row.data_inicio,
+      dataTermino: row.data_termino,
+      status: row.status
+    })));
+  } catch (error) {
+    console.error('Erro ao listar squads da aplicação:', error);
+    res.status(500).json({ error: 'Erro ao buscar dados', code: 'DATABASE_ERROR' });
+  }
+});
+
+// Adicionar colaborador ao squad da aplicação
+app.post('/api/aplicacoes/:id/squads', async (req, res) => {
+  const { colaboradorId, perfil, squad, dataInicio, dataTermino } = req.body;
+  
+  if (!colaboradorId || !perfil || !squad || !dataInicio) {
+    return res.status(400).json({
+      error: 'Campos obrigatórios faltando: colaboradorId, perfil, squad, dataInicio',
+      code: 'MISSING_FIELDS'
+    });
+  }
+  
+  try {
+    // Verificar se a aplicação existe
+    const [aplicacao] = await pool.query('SELECT id FROM aplicacoes WHERE id = ?', [req.params.id]);
+    if (aplicacao.length === 0) {
+      return res.status(404).json({ error: 'Aplicação não encontrada', code: 'NOT_FOUND' });
+    }
+    
+    // Verificar se o colaborador existe
+    const [colaborador] = await pool.query('SELECT id, nome, matricula FROM colaboradores WHERE id = ?', [colaboradorId]);
+    if (colaborador.length === 0) {
+      return res.status(404).json({ error: 'Colaborador não encontrado', code: 'NOT_FOUND' });
+    }
+    
+    // Verificar se já existe associação ativa com mesmo colaborador, perfil e squad
+    const [existing] = await pool.query(
+      `SELECT id FROM aplicacao_squads 
+       WHERE aplicacao_id = ? AND colaborador_id = ? AND perfil = ? AND squad = ? AND status = 'Ativo'`,
+      [req.params.id, colaboradorId, perfil, squad]
+    );
+    
+    if (existing.length > 0) {
+      return res.status(409).json({ 
+        error: 'Colaborador já está associado com este perfil e squad nesta aplicação', 
+        code: 'DUPLICATE_ENTRY'
+      });
+    }
+    
+    // Criar a associação
+    const id = uuidv4();
+    await pool.query(
+      `INSERT INTO aplicacao_squads 
+        (id, aplicacao_id, colaborador_id, perfil, squad, data_inicio, data_termino, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'Ativo')`,
+      [id, req.params.id, colaboradorId, perfil, squad, dataInicio, dataTermino || null]
+    );
+    
+    res.status(201).json({
+      id,
+      aplicacaoId: req.params.id,
+      colaboradorId,
+      colaboradorNome: colaborador[0].nome,
+      colaboradorMatricula: colaborador[0].matricula,
+      perfil,
+      squad,
+      dataInicio,
+      dataTermino: dataTermino || null,
+      status: 'Ativo'
+    });
+  } catch (error) {
+    console.error('Erro ao associar colaborador ao squad:', error);
+    res.status(500).json({ error: 'Erro ao associar colaborador', code: 'DATABASE_ERROR' });
+  }
+});
+
+// Atualizar associação de squad
+app.put('/api/aplicacoes/:id/squads/:squadId', async (req, res) => {
+  const { colaboradorId, perfil, squad, dataInicio, dataTermino, status } = req.body;
+  
+  if (!colaboradorId || !perfil || !squad || !dataInicio) {
+    return res.status(400).json({
+      error: 'Campos obrigatórios faltando: colaboradorId, perfil, squad, dataInicio',
+      code: 'MISSING_FIELDS'
+    });
+  }
+  
+  try {
+    // Verificar se a associação existe
+    const [existing] = await pool.query(
+      'SELECT * FROM aplicacao_squads WHERE id = ? AND aplicacao_id = ?',
+      [req.params.squadId, req.params.id]
+    );
+    
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Associação não encontrada', code: 'NOT_FOUND' });
+    }
+    
+    // Verificar se o colaborador existe
+    const [colaborador] = await pool.query('SELECT id, nome, matricula FROM colaboradores WHERE id = ?', [colaboradorId]);
+    if (colaborador.length === 0) {
+      return res.status(404).json({ error: 'Colaborador não encontrado', code: 'NOT_FOUND' });
+    }
+    
+    // Verificar duplicatas (exceto o registro atual)
+    const [duplicate] = await pool.query(
+      `SELECT id FROM aplicacao_squads 
+       WHERE aplicacao_id = ? AND colaborador_id = ? AND perfil = ? AND squad = ? 
+       AND id != ? AND status = 'Ativo'`,
+      [req.params.id, colaboradorId, perfil, squad, req.params.squadId]
+    );
+    
+    if (duplicate.length > 0) {
+      return res.status(409).json({ 
+        error: 'Colaborador já está associado com este perfil e squad nesta aplicação', 
+        code: 'DUPLICATE_ENTRY'
+      });
+    }
+    
+    // Atualizar a associação
+    await pool.query(
+      `UPDATE aplicacao_squads 
+       SET colaborador_id = ?, perfil = ?, squad = ?, data_inicio = ?, data_termino = ?, status = ?
+       WHERE id = ? AND aplicacao_id = ?`,
+      [colaboradorId, perfil, squad, dataInicio, dataTermino || null, status || 'Ativo', req.params.squadId, req.params.id]
+    );
+    
+    res.json({
+      id: req.params.squadId,
+      aplicacaoId: req.params.id,
+      colaboradorId,
+      colaboradorNome: colaborador[0].nome,
+      colaboradorMatricula: colaborador[0].matricula,
+      perfil,
+      squad,
+      dataInicio,
+      dataTermino: dataTermino || null,
+      status: status || 'Ativo'
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar associação de squad:', error);
+    res.status(500).json({ error: 'Erro ao atualizar dados', code: 'DATABASE_ERROR' });
+  }
+});
+
+// Remover associação aplicação x squad
+app.delete('/api/aplicacoes/:id/squads/:squadId', async (req, res) => {
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM aplicacao_squads WHERE id = ? AND aplicacao_id = ?',
+      [req.params.squadId, req.params.id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Associação não encontrada', code: 'NOT_FOUND' });
+    }
+    
+    res.status(204).send();
+  } catch (error) {
+    console.error('Erro ao remover associação de squad:', error);
     res.status(500).json({ error: 'Erro ao remover associação', code: 'DATABASE_ERROR' });
   }
 });
@@ -8638,7 +9039,7 @@ async function startServer() {
       resourcesContainers, schedules, stages
     } = req.body;
 
-    console.log('Status recebido:', status, '| Bytes:', Buffer.from(status || 'Em avaliação').toString('hex'));
+    console.log('Status recebido:', status, '| Bytes:', Buffer.from(status || 'Em avaliacao').toString('hex'));
     console.log('🔍 Stages recebidos:', stages ? `${stages.length} stages` : 'Nenhum stage');
     if (stages && stages.length > 0) {
       console.log('🔍 Primeiro stage:', stages[0]);
@@ -8665,7 +9066,7 @@ async function startServer() {
           resources_containers, schedules
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `, [
-        id, nome, status || 'Em avaliação', dataInicio || null, dataTermino || null,
+        id, nome, status || 'Em avaliacao', dataInicio || null, dataTermino || null,
         triggerBranches || null, triggerPaths || null, prBranches || null,
         variables || null, resourcesRepositories || null, resourcesPipelines || null,
         resourcesContainers || null, schedules || null
@@ -8805,6 +9206,7 @@ async function startServer() {
       const [rows] = await pool.query(`
         SELECT 
           a.id, a.sequencia, a.descricao, a.data_criacao as dataCriacao,
+          a.updated_at as dataAtualizacao,
           a.status, a.contexto, a.decisao, a.justificativa,
           a.consequencias_positivas as consequenciasPositivas,
           a.consequencias_negativas as consequenciasNegativas,
@@ -8832,6 +9234,7 @@ async function startServer() {
       const [rows] = await pool.query(`
         SELECT 
           a.id, a.sequencia, a.descricao, a.data_criacao as dataCriacao,
+          a.updated_at as dataAtualizacao,
           a.status, a.contexto, a.decisao, a.justificativa,
           a.consequencias_positivas as consequenciasPositivas,
           a.consequencias_negativas as consequenciasNegativas,
@@ -9936,6 +10339,47 @@ async function startServer() {
     } catch (error) {
       console.error('Erro ao buscar contratos de tecnologias:', error);
       res.status(500).json({ error: 'Erro ao buscar contratos de tecnologias' });
+    }
+  });
+
+  // GET /api/pesquisa/checkpoints - Buscar checkpoints por período
+  app.get('/api/pesquisa/checkpoints', async (req, res) => {
+    try {
+      const { dataInicio, dataFim } = req.query;
+      
+      if (!dataInicio || !dataFim) {
+        return res.status(400).json({ error: 'dataInicio e dataFim são obrigatórios' });
+      }
+      
+      const query = `
+        SELECT 
+          c.id,
+          c.descricao,
+          c.categoria,
+          c.data_prevista,
+          c.status,
+          a.sigla as aplicacao_sigla
+        FROM checkpoints c
+        LEFT JOIN aplicacoes a ON c.aplicacao_id = a.id
+        WHERE c.data_prevista BETWEEN ? AND ?
+        ORDER BY c.data_prevista ASC
+      `;
+      
+      const [rows] = await pool.query(query, [dataInicio, dataFim]);
+      
+      const resultados = rows.map(row => ({
+        id: row.id,
+        aplicacaoSigla: row.aplicacao_sigla,
+        descricao: row.descricao,
+        categoria: row.categoria,
+        dataPrevista: row.data_prevista,
+        status: row.status
+      }));
+      
+      res.json(resultados);
+    } catch (error) {
+      console.error('Erro ao buscar checkpoints:', error);
+      res.status(500).json({ error: 'Erro ao buscar checkpoints' });
     }
   });
 
@@ -12666,12 +13110,26 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     try {
       const [adrs] = await connection.query(`
         SELECT 
-          a.*,
+          a.id,
+          a.sequencia,
+          a.descricao,
           a.data_criacao as dataCriacao,
+          a.updated_at as dataAtualizacao,
+          a.status,
+          a.contexto,
+          a.decisao,
+          a.justificativa,
+          a.consequencias_positivas as consequenciasPositivas,
+          a.consequencias_negativas as consequenciasNegativas,
+          a.riscos,
+          a.alternativas_consideradas as alternativasConsideradas,
+          a.compliance_constitution as complianceConstitution,
+          a.adr_substituta_id as adrSubstitutaId,
+          a.referencias,
           a.created_at as createdAt,
           a.updated_at as updatedAt,
-          a.adr_substituta_id as adrSubstitutaId,
           sub.sequencia as adrSubstitutaSequencia,
+          sub.descricao as adrSubstitutaDescricao,
           (
             SELECT COUNT(*)
             FROM adr_aplicacoes aa
@@ -12696,11 +13154,24 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     try {
       const [adrs] = await connection.query(`
         SELECT 
-          a.*,
+          a.id,
+          a.sequencia,
+          a.descricao,
           a.data_criacao as dataCriacao,
+          a.updated_at as dataAtualizacao,
+          a.status,
+          a.contexto,
+          a.decisao,
+          a.justificativa,
+          a.consequencias_positivas as consequenciasPositivas,
+          a.consequencias_negativas as consequenciasNegativas,
+          a.riscos,
+          a.alternativas_consideradas as alternativasConsideradas,
+          a.compliance_constitution as complianceConstitution,
+          a.adr_substituta_id as adrSubstitutaId,
+          a.referencias,
           a.created_at as createdAt,
           a.updated_at as updatedAt,
-          a.adr_substituta_id as adrSubstitutaId,
           sub.sequencia as adrSubstitutaSequencia,
           COALESCE(
             (
@@ -14050,6 +14521,632 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     }
   });
 
+  // ==================== CASOS DE TESTE ====================
+  
+  // GET /api/casos-teste - Listar todos os casos de teste
+  app.get('/api/casos-teste', async (req, res) => {
+    try {
+      const { aplicacaoId } = req.query;
+      let query = `
+        SELECT ct.*, a.sigla as aplicacao_nome
+        FROM casos_teste ct
+        LEFT JOIN aplicacoes a ON ct.aplicacao_id = a.id
+      `;
+      const params = [];
+      
+      if (aplicacaoId) {
+        query += ' WHERE ct.aplicacao_id = ?';
+        params.push(aplicacaoId);
+      }
+      
+      query += ' ORDER BY ct.created_at DESC';
+      
+      const [rows] = await pool.query(query, params);
+      const casosTeste = rows.map(row => ({
+        id: row.id,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        titulo: row.titulo,
+        descricao: row.descricao,
+        requisitoVinculado: row.requisito_vinculado,
+        tipoTeste: row.tipo_teste,
+        prioridade: row.prioridade,
+        status: row.status,
+        preCondicoes: row.pre_condicoes,
+        passosExecucao: row.passos_execucao,
+        resultadoEsperado: row.resultado_esperado,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+      
+      res.json(casosTeste);
+    } catch (error) {
+      console.error('Erro ao listar casos de teste:', error);
+      res.status(500).json({ error: 'Erro ao buscar casos de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // GET /api/casos-teste/:id - Buscar caso de teste por ID
+  app.get('/api/casos-teste/:id', async (req, res) => {
+    try {
+      const [rows] = await pool.query(`
+        SELECT ct.*, a.sigla as aplicacao_nome
+        FROM casos_teste ct
+        LEFT JOIN aplicacoes a ON ct.aplicacao_id = a.id
+        WHERE ct.id = ?
+      `, [req.params.id]);
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Caso de teste não encontrado', code: 'NOT_FOUND' });
+      }
+      
+      const row = rows[0];
+      const casoTeste = {
+        id: row.id,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        titulo: row.titulo,
+        descricao: row.descricao,
+        requisitoVinculado: row.requisito_vinculado,
+        tipoTeste: row.tipo_teste,
+        prioridade: row.prioridade,
+        status: row.status,
+        preCondicoes: row.pre_condicoes,
+        passosExecucao: row.passos_execucao,
+        resultadoEsperado: row.resultado_esperado,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+      
+      res.json(casoTeste);
+    } catch (error) {
+      console.error('Erro ao buscar caso de teste:', error);
+      res.status(500).json({ error: 'Erro ao buscar caso de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // POST /api/casos-teste - Criar novo caso de teste
+  app.post('/api/casos-teste', async (req, res) => {
+    const { 
+      aplicacaoId, titulo, descricao, requisitoVinculado, tipoTeste, 
+      prioridade, status, preCondicoes, passosExecucao, resultadoEsperado 
+    } = req.body;
+    
+    if (!aplicacaoId || !titulo || !tipoTeste) {
+      return res.status(400).json({
+        error: 'Campos obrigatórios faltando',
+        code: 'MISSING_FIELDS',
+        missing: [!aplicacaoId && 'aplicacaoId', !titulo && 'titulo', !tipoTeste && 'tipoTeste'].filter(Boolean)
+      });
+    }
+    
+    try {
+      const id = uuidv4();
+      
+      await pool.query(`
+        INSERT INTO casos_teste (
+          id, aplicacao_id, titulo, descricao, requisito_vinculado, tipo_teste, 
+          prioridade, status, pre_condicoes, passos_execucao, resultado_esperado
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        id, aplicacaoId, titulo, descricao || null, requisitoVinculado || null, 
+        tipoTeste, prioridade || 'Media', status || 'Ativo', 
+        preCondicoes || null, passosExecucao || null, resultadoEsperado || null
+      ]);
+      
+      const [created] = await pool.query(`
+        SELECT ct.*, a.sigla as aplicacao_nome
+        FROM casos_teste ct
+        LEFT JOIN aplicacoes a ON ct.aplicacao_id = a.id
+        WHERE ct.id = ?
+      `, [id]);
+      
+      const row = created[0];
+      const casoTeste = {
+        id: row.id,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        titulo: row.titulo,
+        descricao: row.descricao,
+        requisitoVinculado: row.requisito_vinculado,
+        tipoTeste: row.tipo_teste,
+        prioridade: row.prioridade,
+        status: row.status,
+        preCondicoes: row.pre_condicoes,
+        passosExecucao: row.passos_execucao,
+        resultadoEsperado: row.resultado_esperado,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+      
+      res.status(201).json(casoTeste);
+    } catch (error) {
+      console.error('Erro ao criar caso de teste:', error);
+      res.status(500).json({ error: 'Erro ao criar caso de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // PUT /api/casos-teste/:id - Atualizar caso de teste
+  app.put('/api/casos-teste/:id', async (req, res) => {
+    const { 
+      aplicacaoId, titulo, descricao, requisitoVinculado, tipoTeste, 
+      prioridade, status, preCondicoes, passosExecucao, resultadoEsperado 
+    } = req.body;
+    
+    try {
+      const [existing] = await pool.query('SELECT * FROM casos_teste WHERE id = ?', [req.params.id]);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: 'Caso de teste não encontrado', code: 'NOT_FOUND' });
+      }
+      
+      await pool.query(`
+        UPDATE casos_teste SET 
+          aplicacao_id = ?, titulo = ?, descricao = ?, requisito_vinculado = ?, 
+          tipo_teste = ?, prioridade = ?, status = ?, pre_condicoes = ?, 
+          passos_execucao = ?, resultado_esperado = ?
+        WHERE id = ?
+      `, [
+        aplicacaoId || existing[0].aplicacao_id,
+        titulo || existing[0].titulo,
+        descricao !== undefined ? descricao : existing[0].descricao,
+        requisitoVinculado !== undefined ? requisitoVinculado : existing[0].requisito_vinculado,
+        tipoTeste || existing[0].tipo_teste,
+        prioridade || existing[0].prioridade,
+        status || existing[0].status,
+        preCondicoes !== undefined ? preCondicoes : existing[0].pre_condicoes,
+        passosExecucao !== undefined ? passosExecucao : existing[0].passos_execucao,
+        resultadoEsperado !== undefined ? resultadoEsperado : existing[0].resultado_esperado,
+        req.params.id
+      ]);
+      
+      const [updated] = await pool.query(`
+        SELECT ct.*, a.sigla as aplicacao_nome
+        FROM casos_teste ct
+        LEFT JOIN aplicacoes a ON ct.aplicacao_id = a.id
+        WHERE ct.id = ?
+      `, [req.params.id]);
+      
+      const row = updated[0];
+      const casoTeste = {
+        id: row.id,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        titulo: row.titulo,
+        descricao: row.descricao,
+        requisitoVinculado: row.requisito_vinculado,
+        tipoTeste: row.tipo_teste,
+        prioridade: row.prioridade,
+        status: row.status,
+        preCondicoes: row.pre_condicoes,
+        passosExecucao: row.passos_execucao,
+        resultadoEsperado: row.resultado_esperado,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+      
+      res.json(casoTeste);
+    } catch (error) {
+      console.error('Erro ao atualizar caso de teste:', error);
+      res.status(500).json({ error: 'Erro ao atualizar caso de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // DELETE /api/casos-teste/:id - Deletar caso de teste
+  app.delete('/api/casos-teste/:id', async (req, res) => {
+    try {
+      const [existing] = await pool.query('SELECT * FROM casos_teste WHERE id = ?', [req.params.id]);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: 'Caso de teste não encontrado', code: 'NOT_FOUND' });
+      }
+      
+      await pool.query('DELETE FROM casos_teste WHERE id = ?', [req.params.id]);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Erro ao deletar caso de teste:', error);
+      res.status(500).json({ error: 'Erro ao deletar caso de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // ==================== EXECUÇÕES DE TESTE ====================
+
+  // Configurar multer para upload de evidências de teste
+  const uploadTestEvidence = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => {
+        const dir = 'uploads/test-evidences/';
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, uniqueSuffix + ext);
+      }
+    }),
+    limits: {
+      fileSize: 10 * 1024 * 1024 // 10MB
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedMimes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Apenas arquivos PDF, PNG ou JPG são permitidos'));
+      }
+    }
+  });
+
+  // GET /api/execucoes-teste - Listar todas as execuções de teste
+  app.get('/api/execucoes-teste', async (req, res) => {
+    try {
+      const { aplicacaoId, casoTesteId, ambiente, executorId } = req.query;
+      let query = `
+        SELECT 
+          et.*,
+          COALESCE(ct.titulo, et.caso_teste_titulo) as caso_teste_titulo,
+          a.sigla as aplicacao_nome,
+          c.nome as executor_nome,
+          c.matricula as executor_matricula
+        FROM execucoes_teste et
+        LEFT JOIN casos_teste ct ON et.caso_teste_id = ct.id
+        LEFT JOIN aplicacoes a ON et.aplicacao_id = a.id
+        LEFT JOIN colaboradores c ON et.executor_id = c.id
+        WHERE 1=1
+      `;
+      const params = [];
+      
+      if (aplicacaoId) {
+        query += ' AND et.aplicacao_id = ?';
+        params.push(aplicacaoId);
+      }
+      if (casoTesteId) {
+        query += ' AND et.caso_teste_id = ?';
+        params.push(casoTesteId);
+      }
+      if (ambiente) {
+        query += ' AND et.ambiente = ?';
+        params.push(ambiente);
+      }
+      if (executorId) {
+        query += ' AND et.executor_id = ?';
+        params.push(executorId);
+      }
+      
+      query += ' ORDER BY et.data_hora_inicio DESC';
+      
+      const [rows] = await pool.query(query, params);
+      const execucoes = rows.map(row => ({
+        id: row.id,
+        casoTesteId: row.caso_teste_id,
+        casoTesteTitulo: row.caso_teste_titulo,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        requisitoVinculado: row.requisito_vinculado,
+        ambiente: row.ambiente,
+        executorId: row.executor_id,
+        executorNome: row.executor_nome,
+        executorMatricula: row.executor_matricula,
+        dataHoraInicio: row.data_hora_inicio,
+        dataHoraTermino: row.data_hora_termino,
+        registroAtividades: row.registro_atividades,
+        resultadoExecucao: row.resultado_execucao,
+        statusExecucao: row.status_execucao,
+        arquivoResultado: row.arquivo_resultado,
+        arquivoNomeOriginal: row.arquivo_nome_original,
+        arquivoMimeType: row.arquivo_mime_type,
+        arquivoTamanho: row.arquivo_tamanho,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+      
+      res.json(execucoes);
+    } catch (error) {
+      console.error('Erro ao listar execuções de teste:', error);
+      res.status(500).json({ error: 'Erro ao buscar execuções de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // GET /api/execucoes-teste/:id - Buscar execução de teste por ID
+  app.get('/api/execucoes-teste/:id', async (req, res) => {
+    try {
+      const [rows] = await pool.query(`
+        SELECT 
+          et.*,
+          COALESCE(ct.titulo, et.caso_teste_titulo) as caso_teste_titulo,
+          a.sigla as aplicacao_nome,
+          c.nome as executor_nome,
+          c.matricula as executor_matricula
+        FROM execucoes_teste et
+        LEFT JOIN casos_teste ct ON et.caso_teste_id = ct.id
+        LEFT JOIN aplicacoes a ON et.aplicacao_id = a.id
+        LEFT JOIN colaboradores c ON et.executor_id = c.id
+        WHERE et.id = ?
+      `, [req.params.id]);
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Execução de teste não encontrada', code: 'NOT_FOUND' });
+      }
+      
+      const row = rows[0];
+      const execucao = {
+        id: row.id,
+        casoTesteId: row.caso_teste_id,
+        casoTesteTitulo: row.caso_teste_titulo,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        requisitoVinculado: row.requisito_vinculado,
+        ambiente: row.ambiente,
+        executorId: row.executor_id,
+        executorNome: row.executor_nome,
+        executorMatricula: row.executor_matricula,
+        dataHoraInicio: row.data_hora_inicio,
+        dataHoraTermino: row.data_hora_termino,
+        registroAtividades: row.registro_atividades,
+        resultadoExecucao: row.resultado_execucao,
+        statusExecucao: row.status_execucao,
+        arquivoResultado: row.arquivo_resultado,
+        arquivoNomeOriginal: row.arquivo_nome_original,
+        arquivoMimeType: row.arquivo_mime_type,
+        arquivoTamanho: row.arquivo_tamanho,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+      
+      res.json(execucao);
+    } catch (error) {
+      console.error('Erro ao buscar execução de teste:', error);
+      res.status(500).json({ error: 'Erro ao buscar execução de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // POST /api/execucoes-teste - Criar nova execução de teste
+  app.post('/api/execucoes-teste', uploadTestEvidence.single('arquivo'), async (req, res) => {
+    const { 
+      casoTesteId, casoTesteTitulo, aplicacaoId, requisitoVinculado, ambiente, executorId,
+      dataHoraInicio, dataHoraTermino, registroAtividades, resultadoExecucao, statusExecucao
+    } = req.body;
+    
+    // Validar que pelo menos um dos dois está presente (casoTesteId ou casoTesteTitulo)
+    if ((!casoTesteId && !casoTesteTitulo) || !aplicacaoId || !ambiente || !executorId || !dataHoraInicio) {
+      return res.status(400).json({
+        error: 'Campos obrigatórios faltando',
+        code: 'MISSING_FIELDS',
+        missing: [
+          (!casoTesteId && !casoTesteTitulo) && 'casoTesteId ou casoTesteTitulo', 
+          !aplicacaoId && 'aplicacaoId', 
+          !ambiente && 'ambiente',
+          !executorId && 'executorId',
+          !dataHoraInicio && 'dataHoraInicio'
+        ].filter(Boolean)
+      });
+    }
+    
+    try {
+      const id = uuidv4();
+      
+      let arquivoResultado = null;
+      let arquivoNomeOriginal = null;
+      let arquivoMimeType = null;
+      let arquivoTamanho = null;
+      
+      if (req.file) {
+        arquivoResultado = req.file.path;
+        arquivoNomeOriginal = req.file.originalname;
+        arquivoMimeType = req.file.mimetype;
+        arquivoTamanho = req.file.size;
+      }
+      
+      await pool.query(`
+        INSERT INTO execucoes_teste (
+          id, caso_teste_id, caso_teste_titulo, aplicacao_id, requisito_vinculado, ambiente, executor_id,
+          data_hora_inicio, data_hora_termino, registro_atividades, resultado_execucao,
+          status_execucao, arquivo_resultado, arquivo_nome_original, arquivo_mime_type, arquivo_tamanho
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        id, casoTesteId || null, casoTesteTitulo || null, aplicacaoId, requisitoVinculado || null, ambiente, executorId,
+        dataHoraInicio, dataHoraTermino || null, registroAtividades || null, 
+        resultadoExecucao || null, statusExecucao || 'Aguardando',
+        arquivoResultado, arquivoNomeOriginal, arquivoMimeType, arquivoTamanho
+      ]);
+      
+      const [created] = await pool.query(`
+        SELECT 
+          et.*,
+          COALESCE(ct.titulo, et.caso_teste_titulo) as caso_teste_titulo,
+          a.sigla as aplicacao_nome,
+          c.nome as executor_nome,
+          c.matricula as executor_matricula
+        FROM execucoes_teste et
+        LEFT JOIN casos_teste ct ON et.caso_teste_id = ct.id
+        LEFT JOIN aplicacoes a ON et.aplicacao_id = a.id
+        LEFT JOIN colaboradores c ON et.executor_id = c.id
+        WHERE et.id = ?
+      `, [id]);
+      
+      const row = created[0];
+      const execucao = {
+        id: row.id,
+        casoTesteId: row.caso_teste_id,
+        casoTesteTitulo: row.caso_teste_titulo,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        requisitoVinculado: row.requisito_vinculado,
+        ambiente: row.ambiente,
+        executorId: row.executor_id,
+        executorNome: row.executor_nome,
+        executorMatricula: row.executor_matricula,
+        dataHoraInicio: row.data_hora_inicio,
+        dataHoraTermino: row.data_hora_termino,
+        registroAtividades: row.registro_atividades,
+        resultadoExecucao: row.resultado_execucao,
+        statusExecucao: row.status_execucao,
+        arquivoResultado: row.arquivo_resultado,
+        arquivoNomeOriginal: row.arquivo_nome_original,
+        arquivoMimeType: row.arquivo_mime_type,
+        arquivoTamanho: row.arquivo_tamanho,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+      
+      res.status(201).json(execucao);
+    } catch (error) {
+      console.error('Erro ao criar execução de teste:', error);
+      res.status(500).json({ error: 'Erro ao criar execução de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // PUT /api/execucoes-teste/:id - Atualizar execução de teste
+  app.put('/api/execucoes-teste/:id', uploadTestEvidence.single('arquivo'), async (req, res) => {
+    const { 
+      casoTesteId, casoTesteTitulo, aplicacaoId, requisitoVinculado, ambiente, executorId,
+      dataHoraInicio, dataHoraTermino, registroAtividades, resultadoExecucao, statusExecucao
+    } = req.body;
+    
+    try {
+      const [existing] = await pool.query('SELECT * FROM execucoes_teste WHERE id = ?', [req.params.id]);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: 'Execução de teste não encontrada', code: 'NOT_FOUND' });
+      }
+      
+      let arquivoResultado = existing[0].arquivo_resultado;
+      let arquivoNomeOriginal = existing[0].arquivo_nome_original;
+      let arquivoMimeType = existing[0].arquivo_mime_type;
+      let arquivoTamanho = existing[0].arquivo_tamanho;
+      
+      if (req.file) {
+        // Deletar arquivo antigo se existir
+        if (existing[0].arquivo_resultado && fs.existsSync(existing[0].arquivo_resultado)) {
+          fs.unlinkSync(existing[0].arquivo_resultado);
+        }
+        
+        arquivoResultado = req.file.path;
+        arquivoNomeOriginal = req.file.originalname;
+        arquivoMimeType = req.file.mimetype;
+        arquivoTamanho = req.file.size;
+      }
+      
+      await pool.query(`
+        UPDATE execucoes_teste SET 
+          caso_teste_id = ?, caso_teste_titulo = ?, aplicacao_id = ?, requisito_vinculado = ?, ambiente = ?, 
+          executor_id = ?, data_hora_inicio = ?, data_hora_termino = ?, 
+          registro_atividades = ?, resultado_execucao = ?, status_execucao = ?,
+          arquivo_resultado = ?, arquivo_nome_original = ?, arquivo_mime_type = ?, arquivo_tamanho = ?
+        WHERE id = ?
+      `, [
+        casoTesteId !== undefined ? casoTesteId : existing[0].caso_teste_id,
+        casoTesteTitulo !== undefined ? casoTesteTitulo : existing[0].caso_teste_titulo,
+        aplicacaoId || existing[0].aplicacao_id,
+        requisitoVinculado !== undefined ? requisitoVinculado : existing[0].requisito_vinculado,
+        ambiente || existing[0].ambiente,
+        executorId || existing[0].executor_id,
+        dataHoraInicio || existing[0].data_hora_inicio,
+        dataHoraTermino !== undefined ? dataHoraTermino : existing[0].data_hora_termino,
+        registroAtividades !== undefined ? registroAtividades : existing[0].registro_atividades,
+        resultadoExecucao !== undefined ? resultadoExecucao : existing[0].resultado_execucao,
+        statusExecucao || existing[0].status_execucao,
+        arquivoResultado,
+        arquivoNomeOriginal,
+        arquivoMimeType,
+        arquivoTamanho,
+        req.params.id
+      ]);
+      
+      const [updated] = await pool.query(`
+        SELECT 
+          et.*,
+          COALESCE(ct.titulo, et.caso_teste_titulo) as caso_teste_titulo,
+          a.sigla as aplicacao_nome,
+          c.nome as executor_nome,
+          c.matricula as executor_matricula
+        FROM execucoes_teste et
+        LEFT JOIN casos_teste ct ON et.caso_teste_id = ct.id
+        LEFT JOIN aplicacoes a ON et.aplicacao_id = a.id
+        LEFT JOIN colaboradores c ON et.executor_id = c.id
+        WHERE et.id = ?
+      `, [req.params.id]);
+      
+      const row = updated[0];
+      const execucao = {
+        id: row.id,
+        casoTesteId: row.caso_teste_id,
+        casoTesteTitulo: row.caso_teste_titulo,
+        aplicacaoId: row.aplicacao_id,
+        aplicacaoNome: row.aplicacao_nome,
+        requisitoVinculado: row.requisito_vinculado,
+        ambiente: row.ambiente,
+        executorId: row.executor_id,
+        executorNome: row.executor_nome,
+        executorMatricula: row.executor_matricula,
+        dataHoraInicio: row.data_hora_inicio,
+        dataHoraTermino: row.data_hora_termino,
+        registroAtividades: row.registro_atividades,
+        resultadoExecucao: row.resultado_execucao,
+        statusExecucao: row.status_execucao,
+        arquivoResultado: row.arquivo_resultado,
+        arquivoNomeOriginal: row.arquivo_nome_original,
+        arquivoMimeType: row.arquivo_mime_type,
+        arquivoTamanho: row.arquivo_tamanho,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
+      
+      res.json(execucao);
+    } catch (error) {
+      console.error('Erro ao atualizar execução de teste:', error);
+      res.status(500).json({ error: 'Erro ao atualizar execução de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // DELETE /api/execucoes-teste/:id - Deletar execução de teste
+  app.delete('/api/execucoes-teste/:id', async (req, res) => {
+    try {
+      const [existing] = await pool.query('SELECT * FROM execucoes_teste WHERE id = ?', [req.params.id]);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: 'Execução de teste não encontrada', code: 'NOT_FOUND' });
+      }
+      
+      // Deletar arquivo se existir
+      if (existing[0].arquivo_resultado && fs.existsSync(existing[0].arquivo_resultado)) {
+        fs.unlinkSync(existing[0].arquivo_resultado);
+      }
+      
+      await pool.query('DELETE FROM execucoes_teste WHERE id = ?', [req.params.id]);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Erro ao deletar execução de teste:', error);
+      res.status(500).json({ error: 'Erro ao deletar execução de teste', code: 'DATABASE_ERROR' });
+    }
+  });
+
+  // GET /api/execucoes-teste/:id/download - Download do arquivo de evidência
+  app.get('/api/execucoes-teste/:id/download', async (req, res) => {
+    try {
+      const [rows] = await pool.query('SELECT * FROM execucoes_teste WHERE id = ?', [req.params.id]);
+      
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Execução de teste não encontrada', code: 'NOT_FOUND' });
+      }
+      
+      const execucao = rows[0];
+      
+      if (!execucao.arquivo_resultado || !fs.existsSync(execucao.arquivo_resultado)) {
+        return res.status(404).json({ error: 'Arquivo não encontrado', code: 'FILE_NOT_FOUND' });
+      }
+      
+      res.setHeader('Content-Type', execucao.arquivo_mime_type);
+      res.setHeader('Content-Disposition', `attachment; filename="${execucao.arquivo_nome_original}"`);
+      res.setHeader('Content-Length', execucao.arquivo_tamanho);
+      
+      const fileStream = fs.createReadStream(execucao.arquivo_resultado);
+      fileStream.pipe(res);
+    } catch (error) {
+      console.error('Erro ao fazer download do arquivo:', error);
+      res.status(500).json({ error: 'Erro ao fazer download do arquivo', code: 'DOWNLOAD_ERROR' });
+    }
+  });
+
   // Middleware de tratamento de erros global
   app.use((err, req, res, next) => {
     console.error('[GLOBAL ERROR HANDLER]', err);
@@ -14949,6 +16046,331 @@ app.post('/api/docker/mkdocs/restart', async (req, res) => {
       'Execute: docker-compose restart mkdocs'
     ]
   });
+});
+
+// =====================================================
+// CHECKPOINTS - Gestão de Checkpoints de Aplicações
+// =====================================================
+
+// GET - Listar checkpoints de uma aplicação
+app.get('/api/checkpoints', async (req, res) => {
+  try {
+    const { aplicacaoId } = req.query;
+    
+    let query = `
+      SELECT c.*, 
+             a.sigla as aplicacaoSigla
+      FROM checkpoints c
+      LEFT JOIN aplicacoes a ON c.aplicacao_id = a.id
+    `;
+    
+    const params = [];
+    if (aplicacaoId) {
+      query += ' WHERE c.aplicacao_id = ?';
+      params.push(aplicacaoId);
+    }
+    
+    query += ' ORDER BY c.data_prevista ASC';
+    
+    const [rows] = await pool.query(query, params);
+    res.json(rows);
+  } catch (error) {
+    console.error('Erro ao listar checkpoints:', error);
+    res.status(500).json({ error: 'Erro ao listar checkpoints', code: 'DATABASE_ERROR', details: error.message });
+  }
+});
+
+// POST - Criar checkpoint
+app.post('/api/checkpoints', async (req, res) => {
+  const {
+    aplicacaoId, descricao, categoria, status, dataPrevista, dataReal
+  } = req.body;
+
+  if (!aplicacaoId || !descricao || !categoria || !dataPrevista) {
+    return res.status(400).json({
+      error: 'Campos obrigatórios: aplicacaoId, descricao, categoria, dataPrevista',
+      code: 'MISSING_FIELDS'
+    });
+  }
+
+  const connection = await getUtf8Connection();
+  try {
+    const checkpointId = uuidv4();
+    
+    // Se data_real está preenchida, status deve ser 'OK'
+    const finalStatus = dataReal ? 'OK' : (status || 'Em Risco');
+    
+    await connection.query(`
+      INSERT INTO checkpoints (
+        id, aplicacao_id, descricao, categoria, status,
+        data_prevista, data_real
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [
+      checkpointId, aplicacaoId, descricao, categoria, finalStatus,
+      dataPrevista, dataReal || null
+    ]);
+
+    const [rows] = await connection.query(`
+      SELECT c.*, 
+             a.sigla as aplicacaoSigla
+      FROM checkpoints c
+      LEFT JOIN aplicacoes a ON c.aplicacao_id = a.id
+      WHERE c.id = ?
+    `, [checkpointId]);
+    
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao criar checkpoint:', error);
+    res.status(500).json({ error: 'Erro ao criar checkpoint', code: 'DATABASE_ERROR', details: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// PUT - Atualizar checkpoint
+app.put('/api/checkpoints/:id', async (req, res) => {
+  const {
+    descricao, categoria, status, dataPrevista, dataReal
+  } = req.body;
+
+  const connection = await getUtf8Connection();
+  try {
+    // Verificar se checkpoint já tem data_real (está finalizado)
+    const [existing] = await connection.query(
+      'SELECT data_real FROM checkpoints WHERE id = ?',
+      [req.params.id]
+    );
+
+    if (existing.length === 0) {
+      return res.status(404).json({ error: 'Checkpoint não encontrado', code: 'NOT_FOUND' });
+    }
+
+    if (existing[0].data_real && !dataReal) {
+      return res.status(400).json({ 
+        error: 'Checkpoint finalizado não pode ser editado', 
+        code: 'CHECKPOINT_FINALIZED' 
+      });
+    }
+
+    // Se data_real está preenchida, status deve ser 'OK'
+    const finalStatus = dataReal ? 'OK' : (status || 'Em Risco');
+
+    const [result] = await connection.query(`
+      UPDATE checkpoints SET
+        descricao = ?, categoria = ?, status = ?,
+        data_prevista = ?, data_real = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `, [
+      descricao, categoria, finalStatus,
+      dataPrevista, dataReal || null,
+      req.params.id
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Checkpoint não encontrado', code: 'NOT_FOUND' });
+    }
+
+    const [rows] = await connection.query(`
+      SELECT c.*, 
+             a.sigla as aplicacaoSigla
+      FROM checkpoints c
+      LEFT JOIN aplicacoes a ON c.aplicacao_id = a.id
+      WHERE c.id = ?
+    `, [req.params.id]);
+    
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar checkpoint:', error);
+    res.status(500).json({ error: 'Erro ao atualizar checkpoint', code: 'DATABASE_ERROR', details: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// DELETE - Remover checkpoint
+app.delete('/api/checkpoints/:id', async (req, res) => {
+  try {
+    const [result] = await pool.query('DELETE FROM checkpoints WHERE id = ?', [req.params.id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Checkpoint não encontrado', code: 'NOT_FOUND' });
+    }
+    
+    res.json({ message: 'Checkpoint removido com sucesso' });
+  } catch (error) {
+    console.error('Erro ao remover checkpoint:', error);
+    res.status(500).json({ error: 'Erro ao remover checkpoint', code: 'DATABASE_ERROR', details: error.message });
+  }
+});
+
+// =====================================================
+// CHECKPOINT DETALHES - Gestão de Detalhes de Checkpoints
+// =====================================================
+
+// GET - Listar detalhes de um checkpoint
+app.get('/api/checkpoints/:checkpointId/detalhes', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT d.*, 
+             col.nome as responsavelNome
+      FROM checkpoint_detalhes d
+      LEFT JOIN colaboradores col ON d.responsavel_id = col.id
+      WHERE d.checkpoint_id = ?
+      ORDER BY d.created_at DESC
+    `, [req.params.checkpointId]);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Erro ao listar detalhes:', error);
+    res.status(500).json({ error: 'Erro ao listar detalhes', code: 'DATABASE_ERROR', details: error.message });
+  }
+});
+
+// POST - Criar detalhe de checkpoint
+app.post('/api/checkpoints/:checkpointId/detalhes', async (req, res) => {
+  const { responsavelId, dataPlanejada, dataEfetiva, descricaoDetalhada, comentarios } = req.body;
+
+  const connection = await getUtf8Connection();
+  try {
+    // Verificar se checkpoint está finalizado
+    const [checkpoint] = await connection.query(
+      'SELECT data_real FROM checkpoints WHERE id = ?',
+      [req.params.checkpointId]
+    );
+
+    if (checkpoint.length === 0) {
+      return res.status(404).json({ error: 'Checkpoint não encontrado', code: 'NOT_FOUND' });
+    }
+
+    if (checkpoint[0].data_real) {
+      return res.status(400).json({ 
+        error: 'Não é possível adicionar detalhes a checkpoint finalizado', 
+        code: 'CHECKPOINT_FINALIZED' 
+      });
+    }
+
+    const detalheId = uuidv4();
+    await connection.query(`
+      INSERT INTO checkpoint_detalhes (
+        id, checkpoint_id, responsavel_id, data_planejada,
+        data_efetiva, descricao_detalhada, comentarios
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [
+      detalheId, req.params.checkpointId, responsavelId || null,
+      dataPlanejada || null, dataEfetiva || null,
+      descricaoDetalhada || null, comentarios || null
+    ]);
+
+    const [rows] = await connection.query(`
+      SELECT d.*, 
+             col.nome as responsavelNome
+      FROM checkpoint_detalhes d
+      LEFT JOIN colaboradores col ON d.responsavel_id = col.id
+      WHERE d.id = ?
+    `, [detalheId]);
+    
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao criar detalhe:', error);
+    res.status(500).json({ error: 'Erro ao criar detalhe', code: 'DATABASE_ERROR', details: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// PUT - Atualizar detalhe de checkpoint
+app.put('/api/checkpoints/:checkpointId/detalhes/:id', async (req, res) => {
+  const { responsavelId, dataPlanejada, dataEfetiva, descricaoDetalhada, comentarios } = req.body;
+
+  const connection = await getUtf8Connection();
+  try {
+    // Verificar se checkpoint está finalizado
+    const [checkpoint] = await connection.query(
+      'SELECT data_real FROM checkpoints WHERE id = ?',
+      [req.params.checkpointId]
+    );
+
+    if (checkpoint.length === 0) {
+      return res.status(404).json({ error: 'Checkpoint não encontrado', code: 'NOT_FOUND' });
+    }
+
+    if (checkpoint[0].data_real) {
+      return res.status(400).json({ 
+        error: 'Não é possível editar detalhes de checkpoint finalizado', 
+        code: 'CHECKPOINT_FINALIZED' 
+      });
+    }
+
+    const [result] = await connection.query(`
+      UPDATE checkpoint_detalhes SET
+        responsavel_id = ?, data_planejada = ?,
+        data_efetiva = ?, descricao_detalhada = ?,
+        comentarios = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND checkpoint_id = ?
+    `, [
+      responsavelId || null, dataPlanejada || null,
+      dataEfetiva || null, descricaoDetalhada || null,
+      comentarios || null,
+      req.params.id, req.params.checkpointId
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Detalhe não encontrado', code: 'NOT_FOUND' });
+    }
+
+    const [rows] = await connection.query(`
+      SELECT d.*, 
+             col.nome as responsavelNome
+      FROM checkpoint_detalhes d
+      LEFT JOIN colaboradores col ON d.responsavel_id = col.id
+      WHERE d.id = ?
+    `, [req.params.id]);
+    
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar detalhe:', error);
+    res.status(500).json({ error: 'Erro ao atualizar detalhe', code: 'DATABASE_ERROR', details: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// DELETE - Remover detalhe de checkpoint
+app.delete('/api/checkpoints/:checkpointId/detalhes/:id', async (req, res) => {
+  try {
+    // Verificar se checkpoint está finalizado
+    const [checkpoint] = await pool.query(
+      'SELECT data_real FROM checkpoints WHERE id = ?',
+      [req.params.checkpointId]
+    );
+
+    if (checkpoint.length === 0) {
+      return res.status(404).json({ error: 'Checkpoint não encontrado', code: 'NOT_FOUND' });
+    }
+
+    if (checkpoint[0].data_real) {
+      return res.status(400).json({ 
+        error: 'Não é possível excluir detalhes de checkpoint finalizado', 
+        code: 'CHECKPOINT_FINALIZED' 
+      });
+    }
+
+    const [result] = await pool.query(
+      'DELETE FROM checkpoint_detalhes WHERE id = ? AND checkpoint_id = ?',
+      [req.params.id, req.params.checkpointId]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Detalhe não encontrado', code: 'NOT_FOUND' });
+    }
+    
+    res.json({ message: 'Detalhe removido com sucesso' });
+  } catch (error) {
+    console.error('Erro ao remover detalhe:', error);
+    res.status(500).json({ error: 'Erro ao remover detalhe', code: 'DATABASE_ERROR', details: error.message });
+  }
 });
 
 startServer();

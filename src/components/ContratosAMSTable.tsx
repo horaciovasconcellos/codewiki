@@ -142,10 +142,15 @@ export function ContratosAMSTable({ contratos, onChange }: ContratosAMSTableProp
                     id="custoAnual"
                     type="number"
                     step="0.01"
+                    min="0"
+                    max="9999999999999.99"
                     value={custoAnual}
                     onChange={(e) => setCustoAnual(e.target.value)}
                     placeholder="0.00"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Até 13 dígitos
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="status">Status *</Label>

@@ -49,3 +49,16 @@ export function formatarData(data: string): string {
     year: 'numeric'
   });
 }
+
+export function formatarDataHora(dataHora: string): string {
+  if (!dataHora) return '';
+  
+  const date = new Date(dataHora);
+  return date.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}

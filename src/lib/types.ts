@@ -67,12 +67,19 @@ export interface Colaborador {
   optInOuts?: OptInOut[];
 }
 
+export type CamadaTecnologia =
+  | 'Front-End'
+  | 'UI'
+  | 'Design'
+  | 'Back-end'
+  | 'Linguagem';
+
 export type CategoriaTecnologia = 
   | 'Aplicação Terceira'
   | 'Banco de Dados'
   | 'Biblioteca'
-  | 'Frontend'
-  | 'Backend'
+  | 'Framework'
+  | 'Gerenciador'
   | 'Infraestrutura'
   | 'Devops'
   | 'Segurança'
@@ -161,6 +168,7 @@ export interface Tecnologia {
   sigla: string;
   nome: string;
   versaoRelease: string;
+  camada: CamadaTecnologia;
   categoria: CategoriaTecnologia;
   status: StatusTecnologia;
   fornecedorFabricante: string;
@@ -224,7 +232,8 @@ export type FaseCicloVida = 'Ideação' | 'Planejamento' | 'Desenvolvimento' | '
 export type CriticidadeNegocio = 'Muito Baixa' | 'Baixa' | 'Média' | 'Alta' | 'Muito Alta';
 export type TipoAplicacao = 'BOT' | 'COTS' | 'INTERNO' | 'MOTS' | 'OSS' | 'OTS' | 'PAAS' | 'SAAS';
 export type CloudProvider = 'AWS' | 'Microsoft Azure' | 'Google Cloud' | 'Alibaba Cloud' | 'Oracle' | 'Salesforce' | 'IBM Cloud' | 'Tencent Cloud' | 'ON-PREMISE' | 'Outros';
-export type TipoAmbiente = 'Dev' | 'QA' | 'Prod' | 'Cloud' | 'On-Premise';
+export type TipoAmbiente = 'DEV' | 'QA' | 'LAB' | 'POC' | 'SANDBOX' | 'PROD' | 'Dev' | 'Prod' | 'Cloud' | 'On-Premise'; // Inclui valores legados
+export type IdentificadorAplicacao = 'portal' | 'api' | 'auth' | 'erp' | 'crm' | 'etl' | 'dw' | 'mobile' | 'batch';
 export type TipoSLA = 
   | 'SLA por Serviço'
   | 'SLA por Cliente'
@@ -249,7 +258,9 @@ export interface AssociacaoTecnologiaAplicacao {
 
 export interface AmbienteTecnologico {
   id: string;
+  identificadorAplicacao?: IdentificadorAplicacao;
   tipoAmbiente: TipoAmbiente;
+  localizacaoRegiao?: string;
   urlAmbiente: string;
   dataCriacao: string;
   tempoLiberacao: number;
@@ -391,6 +402,44 @@ export interface AssociacaoRunbookAplicacao {
   status: 'Ativo' | 'Inativo';
 }
 
+export type PerfilSquad = 
+  | 'Analista Negocio'
+  | 'Product Owner'
+  | 'Scrum Master'
+  | 'Desenvolvedor Backend'
+  | 'Desenvolvedor Frontend'
+  | 'Desenvolvedor Mobile'
+  | 'QA/Test Engineer'
+  | 'DevOps / SRE'
+  | 'UX/UI Designer'
+  | 'Data Engineer'
+  | 'Stakeholder'
+  | 'Product Manager'
+  | 'Tech Lead'
+  | 'Agile Coach'
+  | 'Temporário'
+  | 'Gerente de Produto';
+
+export type TipoSquad = 
+  | 'Produto'
+  | 'Plataforma'
+  | 'DevOps Enablement / Coaching'
+  | 'Site Reliability Engineering'
+  | 'Segurança'
+  | 'Integração / APIs'
+  | 'DataOps / MLOps'
+  | 'Modernização';
+
+export interface AssociacaoSquadAplicacao {
+  id: string;
+  colaboradorId: string;
+  perfil: PerfilSquad;
+  squad: TipoSquad;
+  dataInicio: string;
+  dataTermino?: string;
+  status: 'Ativo' | 'Inativo';
+}
+
 export interface Aplicacao {
   id: string;
   sigla: string;
@@ -419,6 +468,7 @@ export interface Aplicacao {
   integracoes?: IntegracaoAplicacao[];
   slas?: AssociacaoSLAAplicacao[];
   runbooks?: AssociacaoRunbookAplicacao[];
+  squads?: AssociacaoSquadAplicacao[];
   adrs?: ADRAplicacao[];
   createdAt?: string;
   updatedAt?: string;
@@ -1162,7 +1212,7 @@ export interface Stage {
 // PIPELINE DATABASE TYPES
 // =====================================================
 
-export type StatusPipeline = 'Ativa' | 'Em avaliação' | 'Obsoleta' | 'Descontinuada';
+export type StatusPipeline = 'Ativa' | 'Em avaliacao' | 'Obsoleta' | 'Descontinuada';
 
 export interface Pipeline {
   id: string;
@@ -1478,3 +1528,92 @@ export interface FinOpsDailySummary {
   taggedCost: number;
   untaggedCost: number;
 }
+
+// ============================================
+// Tipos para Execução de Testes
+// ============================================
+
+export type TipoTeste = 'Funcional' | 'Integracao' | 'Regressao' | 'Performance' | 'Seguranca' | 'Unitario' | 'Aceitacao';
+export type PrioridadeTeste = 'Baixa' | 'Media' | 'Alta' | 'Critica';
+export type StatusCasoTeste = 'Ativo' | 'Inativo' | 'Obsoleto';
+export type AmbienteTeste = 'DEV' | 'QA' | 'HML' | 'PRD';
+export type StatusExecucao = 'Aguardando' | 'Em Execucao' | 'Passou' | 'Falhou' | 'Bloqueado' | 'Cancelado';
+
+export interface CasoTeste {
+  id: string;
+  aplicacaoId: string;
+  aplicacaoNome?: string;
+  titulo: string;
+  descricao?: string;
+  requisitoVinculado?: string;
+  tipoTeste: TipoTeste;
+  prioridade: PrioridadeTeste;
+  status: StatusCasoTeste;
+  preCondicoes?: string;
+  passosExecucao?: string;
+  resultadoEsperado?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ExecucaoTeste {
+  id: string;
+  casoTesteId: string;
+  casoTesteTitulo?: string;
+  aplicacaoId: string;
+  aplicacaoNome?: string;
+  requisitoVinculado?: string;
+  ambiente: AmbienteTeste;
+  executorId: string;
+  executorNome?: string;
+  executorMatricula?: string;
+  dataHoraInicio: string;
+  dataHoraTermino?: string;
+  registroAtividades?: string;
+  resultadoExecucao?: string;
+  statusExecucao: StatusExecucao;
+  arquivoResultado?: string;
+  arquivoNomeOriginal?: string;
+  arquivoMimeType?: string;
+  arquivoTamanho?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Tipos para Checkpoints
+export type CategoriaCheckpoint = 'Escopo' | 'Prazo' | 'Custo' | 'Qualidade' | 'Seguranca' | 'Compliance';
+export type StatusCheckpoint = 'OK' | 'Em Risco' | 'Bloqueado';
+
+export interface CheckpointDetalhe {
+  id?: string;
+  checkpointId?: string;
+  responsavelId?: string;
+  responsavelNome?: string;
+  dataPlanejada?: string;
+  dataEfetiva?: string;
+  descricaoDetalhada?: string;
+  comentarios?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Checkpoint {
+  id: string;
+  aplicacaoId: string;
+  aplicacaoSigla?: string;
+  descricao: string;
+  categoria: CategoriaCheckpoint;
+  status: StatusCheckpoint;
+  dataPrevista: string;
+  dataReal?: string;
+  detalheId?: string;
+  responsavelId?: string;
+  responsavelNome?: string;
+  dataPlanejada?: string;
+  dataEfetiva?: string;
+  descricaoDetalhada?: string;
+  comentarios?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tecnologia, Colaborador, CategoriaTecnologia, StatusTecnologia, TipoLicenciamento, MaturidadeInterna, NivelSuporteInterno, Ambiente, ContratoAMS, ContratoTecnologia, ResponsavelTecnologia, CustoSaaS, ManutencaoSaaS } from '@/lib/types';
+import { Tecnologia, Colaborador, CamadaTecnologia, CategoriaTecnologia, StatusTecnologia, TipoLicenciamento, MaturidadeInterna, NivelSuporteInterno, Ambiente, ContratoAMS, ContratoTecnologia, ResponsavelTecnologia, CustoSaaS, ManutencaoSaaS } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, ArrowRight, Check, X } from '@phosphor-icons/react';
@@ -27,7 +27,8 @@ export function TecnologiaWizard({ tecnologia, tecnologias, colaboradores, onSav
   const [sigla, setSigla] = useState(tecnologia?.sigla || '');
   const [nome, setNome] = useState(tecnologia?.nome || '');
   const [versaoRelease, setVersaoRelease] = useState(tecnologia?.versaoRelease || '');
-  const [categoria, setCategoria] = useState<CategoriaTecnologia>(tecnologia?.categoria || 'Backend');
+  const [camada, setCamada] = useState<CamadaTecnologia>(tecnologia?.camada || 'Back-end');
+  const [categoria, setCategoria] = useState<CategoriaTecnologia>(tecnologia?.categoria || 'Biblioteca');
   const [status, setStatus] = useState<StatusTecnologia>(tecnologia?.status || 'Ativa');
   const [fornecedorFabricante, setFornecedorFabricante] = useState(tecnologia?.fornecedorFabricante || '');
   const [tipoLicenciamento, setTipoLicenciamento] = useState<TipoLicenciamento>(tecnologia?.tipoLicenciamento || 'Open Source');
@@ -152,16 +153,16 @@ export function TecnologiaWizard({ tecnologia, tecnologias, colaboradores, onSav
           toast.error('Preencha todos os campos obrigatórios');
           return false;
         }
-        if (sigla.length > 30) {
-          toast.error('Sigla deve ter até 30 caracteres');
+        if (sigla.length > 50) {
+          toast.error('Sigla deve ter até 50 caracteres');
           return false;
         }
-        if (nome.length > 50) {
-          toast.error('Nome da tecnologia deve ter até 50 caracteres');
+        if (nome.length > 100) {
+          toast.error('Nome da tecnologia deve ter até 100 caracteres');
           return false;
         }
-        if (fornecedorFabricante.length > 50) {
-          toast.error('Fornecedor/Fabricante deve ter até 50 caracteres');
+        if (fornecedorFabricante.length > 100) {
+          toast.error('Fornecedor/Fabricante deve ter até 100 caracteres');
           return false;
         }
         const siglaExiste = tecnologias.some(
@@ -201,6 +202,7 @@ export function TecnologiaWizard({ tecnologia, tecnologias, colaboradores, onSav
       sigla,
       nome,
       versaoRelease,
+      camada,
       categoria,
       status,
       fornecedorFabricante,
@@ -285,6 +287,8 @@ export function TecnologiaWizard({ tecnologia, tecnologias, colaboradores, onSav
                 setNome={setNome}
                 versaoRelease={versaoRelease}
                 setVersaoRelease={setVersaoRelease}
+                camada={camada}
+                setCamada={setCamada}
                 categoria={categoria}
                 setCategoria={setCategoria}
                 status={status}
@@ -341,6 +345,7 @@ export function TecnologiaWizard({ tecnologia, tecnologias, colaboradores, onSav
                 sigla={sigla}
                 nome={nome}
                 versaoRelease={versaoRelease}
+                camada={camada}
                 categoria={categoria}
                 status={status}
                 fornecedorFabricante={fornecedorFabricante}

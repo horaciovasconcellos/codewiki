@@ -1,12 +1,14 @@
-sigla,nome,versaoRelease,categoria,status,fornecedorFabricante,tipoLicenciamento,maturidadeInterna,nivelSuporteInterno
-REACT,React,18.2.0,Frontend,Ativa,Meta,Open Source,Padronizada,Suporte Completo / Especializado
-MYSQL,MySQL,8.0.35,Banco de Dados,Ativa,Oracle,Open Source,Padronizada,AMS
-POSTGRES,PostgreSQL,16.0,Banco de Dados,Ativa,PostgreSQL Global Development Group,Open Source,Adotada,Suporte Intermediário
-ORACLE-DB,Oracle Database,19c,Banco de Dados,Ativa,Oracle Corporation,Proprietária,Padronizada,Suporte Avançado
-AWS-EC2,Amazon EC2,Latest,Infraestrutura,Ativa,Amazon,SaaS,Adotada,Suporte Intermediário
-NODE,Node.js,20.10.0,Backend,Ativa,OpenJS Foundation,Open Source,Padronizada,Suporte Completo / Especializado
-JAVA,Java JDK,21,Backend,Ativa,Oracle Corporation,Open Source,Padronizada,Suporte Avançado
-PYTHON,Python,3.12,Backend,Ativa,Python Software Foundation,Open Source,Adotada,Suporte Intermediário
-DOCKER,Docker,24.0.7,Infraestrutura,Ativa,Docker Inc.,Open Source,Padronizada,Suporte Completo / Especializado
+sigla,nome,versaoRelease,camada,categoria,status,fornecedorFabricante,tipoLicenciamento,maturidadeInterna,nivelSuporteInterno
+REACT,React,18.2.0,Front-End,Biblioteca,Ativa,Meta,Open Source,Padronizada,Suporte Completo / Especializado
+MYSQL,MySQL,8.0.35,,Banco de Dados,Ativa,Oracle,Open Source,Padronizada,AMS
+POSTGRES,PostgreSQL,16.0,,Banco de Dados,Ativa,PostgreSQL Global Development Group,Open Source,Adotada,Suporte Intermediário
+ORACLE-DB,Oracle Database,19c,,Banco de Dados,Ativa,Oracle Corporation,Proprietária,Padronizada,Suporte Avançado
+AWS-EC2,Amazon EC2,Latest,,Infraestrutura,Ativa,Amazon,SaaS,Adotada,Suporte Intermediário
+NODE,Node.js,20.10.0,Back-end,Linguagem,Ativa,OpenJS Foundation,Open Source,Padronizada,Suporte Completo / Especializado
+JAVA,Java JDK,21,Linguagem,Linguagem,Ativa,Oracle Corporation,Open Source,Padronizada,Suporte Avançado
+PYTHON,Python,3.12,Linguagem,Linguagem,Ativa,Python Software Foundation,Open Source,Adotada,Suporte Intermediário
+DOCKER,Docker,24.0.7,,Gerenciador,Ativa,Docker Inc.,Open Source,Padronizada,Suporte Completo / Especializado
+FIGMA,Figma,Latest,Design,Outras,Ativa,Figma Inc.,SaaS,Adotada,Suporte Intermediário
+MUI,Material-UI,5.14.0,UI,Biblioteca,Ativa,MUI,Open Source,Padronizada,Suporte Completo / Especializado
 KUBERNETES,Kubernetes,1.28.0,Infraestrutura,Ativa,CNCF,Open Source,Em Adoção,Suporte Básico
 

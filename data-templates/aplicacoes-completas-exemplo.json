@@ -14,21 +14,27 @@
     ],
     "ambientes": [
       {
-        "tipoAmbiente": "Dev",
+        "identificadorAplicacao": "portal",
+        "tipoAmbiente": "DEV",
+        "localizacaoRegiao": "us-east-1",
         "urlAmbiente": "https://portal-dev.empresa.com",
         "dataCriacao": "2024-01-10",
         "tempoLiberacao": 7,
         "status": "Ativo"
       },
       {
+        "identificadorAplicacao": "portal",
         "tipoAmbiente": "QA",
+        "localizacaoRegiao": "us-east-1",
         "urlAmbiente": "https://portal-qa.empresa.com",
         "dataCriacao": "2024-01-12",
         "tempoLiberacao": 14,
         "status": "Ativo"
       },
       {
-        "tipoAmbiente": "Prod",
+        "identificadorAplicacao": "portal",
+        "tipoAmbiente": "PROD",
+        "localizacaoRegiao": "sa-east-1",
         "urlAmbiente": "https://portal.empresa.com",
         "dataCriacao": "2024-01-15",
         "tempoLiberacao": 30,
