@@ -99,7 +99,7 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
               margin-top: 24px; 
               margin-bottom: 14px; 
               color: #334155;
-              font-weight: 600;
+              font-weight: 700;
               border-bottom: 2px solid #e2e8f0;
               padding-bottom: 6px;
             }
@@ -215,7 +215,7 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
         </head>
         <body>
           <div class="header">
-            <h1>Relatório de Execução de Teste</h1>
+            <h1>Relatorio de Execucao de Teste</h1>
             <div class="metadata">
               <div class="metadata-item">
                 <strong>Gerado em:</strong> ${formatarDataHora(new Date().toISOString())}
@@ -226,10 +226,10 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
             </div>
           </div>
 
-          <h2><strong>1. Informações Básicas</strong></h2>
+          <h2>1. Informacoes Basicas</h2>
           <div class="info-grid">
             <div class="info-item">
-              <div class="label">ID da Execução</div>
+              <div class="label">ID da Execucao</div>
               <div class="value"><strong>#${execucao.id}</strong></div>
             </div>
             <div class="info-item">
@@ -260,19 +260,19 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
 
           <div class="separator"></div>
 
-          <h2><strong>2. Período de Execução</strong></h2>
+          <h2>2. Periodo de Execucao</h2>
           <div class="info-grid">
             <div class="info-item">
               <div class="label">Data/Hora Início</div>
               <div class="value">${formatarDataHora(execucao.dataHoraInicio)}</div>
             </div>
             <div class="info-item">
-              <div class="label">Data/Hora Término</div>
+              <div class="label">Data/Hora Termino</div>
               <div class="value">${execucao.dataHoraTermino ? formatarDataHora(execucao.dataHoraTermino) : 'Não informado'}</div>
             </div>
             ${duracao !== 'Não disponível' ? `
             <div class="info-item">
-              <div class="label">Duração Total</div>
+              <div class="label">Duracao Total</div>
               <div class="value">${duracao}</div>
             </div>
             ` : ''}
@@ -280,7 +280,7 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
 
           ${execucao.registroAtividades || execucao.resultadoExecucao ? `
             <div class="separator"></div>
-            <h2><strong>3. Registros</strong></h2>
+            <h2>3. Registros</h2>
             ${execucao.registroAtividades ? `
               <div class="no-break" style="margin-bottom: 20px;">
                 <div class="label">Registro de Atividades</div>
@@ -289,7 +289,7 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
             ` : ''}
             ${execucao.resultadoExecucao ? `
               <div class="no-break">
-                <div class="label">Resultado da Execução</div>
+                <div class="label">Resultado da Execucao</div>
                 <div class="text-box">${execucao.resultadoExecucao}</div>
               </div>
             ` : ''}
@@ -297,7 +297,7 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
 
           ${execucao.arquivoResultado ? `
             <div class="separator"></div>
-            <h2><strong>4. Evidência</strong></h2>
+            <h2>4. Evidencia</h2>
             <div class="evidence-box">
               <div class="info-item" style="border-left: 3px solid #10b981;">
                 <div class="label">Arquivo Anexado</div>
@@ -321,7 +321,7 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
           <div class="footer">
             <div>
               <p><strong>CodeWiki</strong> - Sistema de Auditoria</p>
-              <p>Relatório de Execução de Teste - ID: #${execucao.id}</p>
+              <p>Relatorio de Execucao de Teste - ID: #${execucao.id}</p>
             </div>
             <div style="text-align: right;">
               <p>${new Date().toLocaleDateString('pt-BR')}</p>
@@ -331,11 +331,10 @@ export function ExecucaoTesteRelatorio({ execucao, open, onClose }: ExecucaoTest
       </html>
     `;
 
-    // Escrever o documento com encoding UTF-8 correto
+    // Escrever o documento com encoding UTF-8 correto usando innerHTML
     printWindow.document.open();
-    printWindow.document.write('\uFEFF'); // BOM UTF-8
-    printWindow.document.write(htmlContent);
     printWindow.document.close();
+    printWindow.document.documentElement.innerHTML = htmlContent;
     
     // Aguardar o carregamento das imagens antes de imprimir
     if (isImage && imagemUrl) {
