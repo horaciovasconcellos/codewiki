@@ -2,5 +2,5 @@ projectKey=codewiki
 serverUrl=http://localhost:9010
 serverVersion=26.1.0.118079
 dashboardUrl=http://localhost:9010/dashboard?id=codewiki
-ceTaskId=08945382-e45b-4fdb-8ac3-3afc8f28ab45
-ceTaskUrl=http://localhost:9010/api/ce/task?id=08945382-e45b-4fdb-8ac3-3afc8f28ab45
+ceTaskId=bc473d4b-1d7c-4b3c-b6a1-608329c191a0
+ceTaskUrl=http://localhost:9010/api/ce/task?id=bc473d4b-1d7c-4b3c-b6a1-608329c191a0

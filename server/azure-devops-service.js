@@ -209,6 +209,13 @@ export class AzureDevOpsService {
   }
 
   /**
+   * Alias para getProject - para compatibilidade
+   */
+  async getProjectByName(projectName) {
+    return this.getProject(projectName);
+  }
+
+  /**
    * Cria um projeto no Azure DevOps (versão simplificada sem verificação de existência)
    * @param {object} config - Configuração do projeto
    * @returns {Promise<object>} Projeto criado
@@ -2249,190 +2256,262 @@ Este projeto foi gerado automaticamente pelo Sistema de Auditoria e Gestão de D
    * @returns {Promise<void>}
    */
   async configureBranchPolicies(projectName, repositoryId) {
+    const policies = [];
+    const errors = [];
+    
     try {
-      console.log(`[Azure DevOps] Configurando branch policies para repositório ${repositoryId}`);
+      console.log(`[Azure DevOps] ========================================`);
+      console.log(`[Azure DevOps] Configurando branch policies`);
+      console.log(`[Azure DevOps] Projeto: ${projectName}`);
+      console.log(`[Azure DevOps] Repositório ID: ${repositoryId}`);
+      console.log(`[Azure DevOps] ========================================`);
 
       // 1. Commit author email validation - *@bbts.com.br
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: 'bca1b469-a735-4095-a829-8ea9beb98f5e' // Commit author email validation
-        },
-        settings: {
-          authorEmailPatterns: ['*@bbts.com.br'],
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      try {
+        const policy1 = await this.createPolicy(projectName, {
+          isEnabled: true,
+          isBlocking: true,
+          type: {
+            id: 'bca1b469-a735-4095-a829-8ea9beb98f5e' // Commit author email validation
+          },
+          settings: {
+            authorEmailPatterns: ['*@bbts.com.br'],
+            scope: [
+              {
+                repositoryId: repositoryId,
+                refName: 'refs/heads/main',
+                matchKind: 'Exact'
+              }
+            ]
+          }
+        });
+        if (policy1) policies.push('Commit author email validation');
+      } catch (e) {
+        errors.push({ policy: 'Commit author email', error: e.message });
+      }
 
-      // 2. Case enforcement
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: '7ed39669-655c-494e-b4a0-a08b4da0fcce' // File name restriction
-        },
-        settings: {
-          enforceConsistentCase: true,
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      // 2. Case enforcement (DESABILITADA - não suportada)
+      try {
+        // Esta política não existe como tipo separado no Azure DevOps
+        // Comentada para evitar erros
+        /*
+        const policy2 = await this.createPolicy(projectName, {
+          isEnabled: true,
+          isBlocking: true,
+          type: {
+            id: '7ed39669-655c-494e-b4a0-a08b4da0fcce' // File name restriction
+          },
+          settings: {
+            enforceConsistentCase: true,
+            scope: [
+              {
+                repositoryId: repositoryId,
+                refName: 'refs/heads/main',
+                matchKind: 'Exact'
+              }
+            ]
+          }
+        });
+        if (policy2) policies.push('Case enforcement');
+        */
+        console.log(`[Azure DevOps] ⏭️  Política 'Case enforcement' desabilitada (não suportada)`);
+      } catch (e) {
+        errors.push({ policy: 'Case enforcement', error: e.message });
+      }
 
-      // 3. Reserved names
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: '7ed39669-655c-494e-b4a0-a08b4da0fcce' // File name restriction (reused)
-        },
-        settings: {
-          filenamePatterns: [
-            'CON', 'PRN', 'AUX', 'NUL',
-            'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-            'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
-          ],
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      // 3. Reserved names (DESABILITADA - formato incorreto)
+      try {
+        // Esta política precisa de configuração específica diferente
+        /*
+        const policy3 = await this.createPolicy(projectName, {
+          isEnabled: true,
+          isBlocking: true,
+          type: {
+            id: '7ed39669-655c-494e-b4a0-a08b4da0fcce' // File name restriction (reused)
+          },
+          settings: {
+            filenamePatterns: [
+              'CON', 'PRN', 'AUX', 'NUL',
+              'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+              'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+            ],
+            scope: [
+              {
+                repositoryId: repositoryId,
+                refName: 'refs/heads/main',
+                matchKind: 'Exact'
+              }
+            ]
+          }
+        });
+        if (policy3) policies.push('Reserved names');
+        */
+        console.log(`[Azure DevOps] ⏭️  Política 'Reserved names' desabilitada (formato incorreto)`);
+      } catch (e) {
+        errors.push({ policy: 'Reserved names', error: e.message });
+      }
 
-      // 4. Maximum path length - 260
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: '001a79cf-fda1-4c4e-9e7c-bbb4e3ed7650' // Path length restriction
-        },
-        settings: {
-          maxPathLength: 260,
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      // 4. Maximum path length - 260 (DESABILITADA - ID não existe)
+      try {
+        // Esta política não existe no Azure DevOps com este ID
+        /*
+        const policy4 = await this.createPolicy(projectName, {
+          isEnabled: true,
+          isBlocking: true,
+          type: {
+            id: '001a79cf-fda1-4c4e-9e7c-bbb4e3ed7650' // Path length restriction
+          },
+          settings: {
+            maxPathLength: 260,
+            scope: [
+              {
+                repositoryId: repositoryId,
+                refName: 'refs/heads/main',
+                matchKind: 'Exact'
+              }
+            ]
+          }
+        });
+        if (policy4) policies.push('Maximum path length');
+        */
+        console.log(`[Azure DevOps] ⏭️  Política 'Maximum path length' desabilitada (ID não existe)`);
+      } catch (e) {
+        errors.push({ policy: 'Maximum path length', error: e.message });
+      }
 
-      // 5. Maximum file size - 10MB
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: '2e26e725-8201-4edd-8bf5-978563c34a80' // File size restriction
-        },
-        settings: {
-          maximumGitBlobSizeInBytes: 10485760, // 10MB em bytes
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      // 5. Maximum file size - 10MB (DESABILITADA - formato incorreto)
+      try {
+        // Esta política tem formato de escopo diferente
+        /*
+        const policy5 = await this.createPolicy(projectName, {
+          isEnabled: true,
+          isBlocking: true,
+          type: {
+            id: '2e26e725-8201-4edd-8bf5-978563c34a80' // File size restriction
+          },
+          settings: {
+            maximumGitBlobSizeInBytes: 10485760, // 10MB em bytes
+            scope: [
+              {
+                repositoryId: repositoryId,
+                refName: 'refs/heads/main',
+                matchKind: 'Exact'
+              }
+            ]
+          }
+        });
+        if (policy5) policies.push('Maximum file size');
+        */
+        console.log(`[Azure DevOps] ⏭️  Política 'Maximum file size' desabilitada (formato incorreto)`);
+      } catch (e) {
+        errors.push({ policy: 'Maximum file size', error: e.message });
+      }
 
-      // 6. Minimum number of reviewers - 2
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' // Minimum number of reviewers
-        },
-        settings: {
-          minimumApproverCount: 2,
-          creatorVoteCounts: false, // Allow requestors to approve their own changes
-          allowDownvotes: false,
-          resetOnSourcePush: true, // Prohibit the most recent pusher from approving
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      // 6. Minimum number of reviewers - 2 (PRINCIPAL)
+      try {
+        console.log(`[Azure DevOps] 🔑 Criando política PRINCIPAL: Minimum number of reviewers`);
+        const policy6 = await this.createPolicy(projectName, {
+          isEnabled: true,
+          isBlocking: true,
+          type: {
+            id: 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' // Minimum number of reviewers
+          },
+          settings: {
+            minimumApproverCount: 2,
+            creatorVoteCounts: false, // Criador não pode aprovar seu próprio PR
+            allowDownvotes: false,
+            resetOnSourcePush: true, // Reseta aprovações ao fazer novo push
+            scope: [
+              {
+                repositoryId: repositoryId,
+                refName: 'refs/heads/main',
+                matchKind: 'Exact'
+              }
+            ]
+          }
+        });
+        if (policy6) policies.push('✅ Minimum number of reviewers (2)');
+      } catch (e) {
+        errors.push({ policy: '❌ Minimum number of reviewers', error: e.message });
+      }
 
       // 7. Check for linked work items - Required
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e' // Work item linking
-        },
-        settings: {
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      try {
+        const policy7 = await this.createPolicy(projectName, {
+          isEnabled: true,
+          isBlocking: true,
+          type: {
+            id: '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e' // Work item linking
+          },
+          settings: {
+            scope: [
+              {
+                repositoryId: repositoryId,
+                refName: 'refs/heads/main',
+                matchKind: 'Exact'
+              }
+            ]
+          }
+        });
+        if (policy7) policies.push('Work item linking');
+      } catch (e) {
+        errors.push({ policy: 'Work item linking', error: e.message });
+      }
 
       // 8. Check for comment resolution - Required
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: 'c6a1889d-b943-4856-b76f-9e46bb6b0df2' // Comment requirements
-        },
-        settings: {
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      try {
+        const policy8 = await this.createPolicy(projectName, {
+          isEnabled: true,
+          isBlocking: true,
+          type: {
+            id: 'c6a1889d-b943-4856-b76f-9e46bb6b0df2' // Comment requirements
+          },
+          settings: {
+            scope: [
+              {
+                repositoryId: repositoryId,
+                refName: 'refs/heads/main',
+                matchKind: 'Exact'
+              }
+            ]
+          }
+        });
+        if (policy8) policies.push('Comment resolution');
+      } catch (e) {
+        errors.push({ policy: 'Comment resolution', error: e.message });
+      }
 
-      // 9. Limit merge types - Allow squash merge
-      await this.createPolicy(projectName, {
-        isEnabled: true,
-        isBlocking: true,
-        type: {
-          id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d8f2b5' // Merge strategy
-        },
-        settings: {
-          allowSquash: true,
-          allowRebase: false,
-          allowRebaseMerge: false,
-          allowBasicMerge: false,
-          scope: [
-            {
-              repositoryId: repositoryId,
-              refName: 'refs/heads/main',
-              matchKind: 'exact'
-            }
-          ]
-        }
-      });
+      // 9. Limit merge types - Allow squash merge (DESABILITADA - não existe como política)
+      try {
+        // A estratégia de merge é configurada no repositório, não como branch policy
+        // Use: Repository Settings → Policies → Merge types
+        console.log(`[Azure DevOps] ⏭️  Política 'Merge strategy' deve ser configurada manualmente nas settings do repositório`);
+      } catch (e) {
+        errors.push({ policy: 'Merge strategy', error: e.message });
+      }
 
-      console.log(`[Azure DevOps] Branch policies configuradas com sucesso`);
+      console.log(`[Azure DevOps] ========================================`);
+      console.log(`[Azure DevOps] RESUMO DE POLÍTICAS CRIADAS`);
+      console.log(`[Azure DevOps] Total de políticas configuradas: ${policies.length}/5 (4 desabilitadas por incompatibilidade)`);
+      console.log(`[Azure DevOps] Políticas criadas:`);
+      policies.forEach(p => console.log(`[Azure DevOps]   ✅ ${p}`));
+      
+      if (errors.length > 0) {
+        console.error(`[Azure DevOps] ❌ Erros encontrados: ${errors.length}`);
+        errors.forEach(e => console.error(`[Azure DevOps]   ❌ ${e.policy}: ${e.error}`));
+      }
+      console.log(`[Azure DevOps] ========================================`);
+
+      // Se houver erros críticos (como a política de reviewers), relançar
+      const criticalError = errors.find(e => e.policy.includes('Minimum number of reviewers'));
+      if (criticalError) {
+        throw new Error(`Falha crítica: ${criticalError.policy} - ${criticalError.error}`);
+      }
+
+      return { success: true, policies, errors };
+
     } catch (error) {
+      console.error(`[Azure DevOps] ❌ ERRO FATAL ao configurar branch policies:`, error.message);
       throw new Error(`Erro ao configurar branch policies: ${error.message}`);
     }
   }
@@ -2447,14 +2526,27 @@ Este projeto foi gerado automaticamente pelo Sistema de Auditoria e Gestão de D
   async createPolicy(projectName, policyData) {
     try {
       const url = `/${projectName}/_apis/policy/configurations?api-version=${this.apiVersion}`;
+      
+      console.log(`[Azure DevOps] Criando política ${policyData.type.id}...`);
+      console.log(`[Azure DevOps] URL: https://dev.azure.com/${this.organization}${url}`);
+      console.log(`[Azure DevOps] Payload:`, JSON.stringify(policyData, null, 2));
+      
       const policy = await this.request('POST', url, policyData);
       
-      console.log(`[Azure DevOps] Política criada: ${policy.type.displayName}`);
+      console.log(`[Azure DevOps] ✅ Política criada com sucesso: ${policy.type?.displayName || policyData.type.id}`);
       return policy;
     } catch (error) {
-      // Não lançar erro se a política já existir ou não for suportada
-      console.warn(`[Azure DevOps] Aviso ao criar política: ${error.message}`);
-      return null;
+      // Não lançar erro se a política já existir
+      if (error.message.includes('already exists') || error.message.includes('409')) {
+        console.log(`[Azure DevOps] ⚠️  Política ${policyData.type.id} já existe, pulando...`);
+        return null;
+      }
+      
+      // Para outros erros, logar detalhes e relançar
+      console.error(`[Azure DevOps] ❌ ERRO ao criar política ${policyData.type.id}:`, error.message);
+      console.error(`[Azure DevOps] Status:`, error.statusCode);
+      console.error(`[Azure DevOps] Response:`, error.response);
+      throw error; // Relançar o erro para ser tratado no nível superior
     }
   }
 
@@ -2508,6 +2600,228 @@ Este projeto foi gerado automaticamente pelo Sistema de Auditoria e Gestão de D
       console.error(`[Azure DevOps] Erro ao configurar repository policies: ${error.message}`);
       // Não falhar a operação principal se não conseguir configurar as políticas
       return null;
+    }
+  }
+
+  /**
+   * Obtém o scopeDescriptor de um projeto
+   * 
+   * @param {string} projectId - ID do projeto (GUID)
+   * @returns {Promise<string>} scopeDescriptor do projeto
+   */
+  async getProjectScopeDescriptor(projectId) {
+    try {
+      const vsspsBaseUrl = `https://vssps.dev.azure.com/${this.organization}`;
+      const url = `${vsspsBaseUrl}/_apis/graph/descriptors/${projectId}?api-version=7.1-preview.1`;
+      
+      const result = await this.request('GET', url);
+      return result.value;
+    } catch (error) {
+      throw new Error(`Erro ao obter scopeDescriptor do projeto: ${error.message}`);
+    }
+  }
+
+  /**
+   * Cria um grupo de segurança no projeto
+   * 
+   * @param {string} projectId - ID do projeto (GUID)
+   * @param {string} groupName - Nome do grupo
+   * @param {string} groupDescription - Descrição do grupo
+   * @returns {Promise<object>} Grupo criado
+   */
+  async createSecurityGroup(projectId, groupName, groupDescription) {
+    try {
+      console.log(`[Azure DevOps] Criando grupo de segurança: ${groupName}`);
+      
+      // Obter o scopeDescriptor correto do projeto
+      const scopeDescriptor = await this.getProjectScopeDescriptor(projectId);
+      console.log(`[Azure DevOps] ScopeDescriptor obtido: ${scopeDescriptor}`);
+      
+      // Usar vssps para criar grupos (Visual Studio Security Platform Service)
+      const vsspsBaseUrl = `https://vssps.dev.azure.com/${this.organization}`;
+      const url = `${vsspsBaseUrl}/_apis/graph/groups?scopeDescriptor=${scopeDescriptor}&api-version=7.1-preview.1`;
+      
+      const groupData = {
+        displayName: groupName,
+        description: groupDescription
+      };
+      
+      const group = await this.request('POST', url, groupData);
+      
+      console.log(`[Azure DevOps] ✅ Grupo criado: ${group.displayName} (${group.descriptor})`);
+      return group;
+    } catch (error) {
+      // Se o grupo já existir, tentar buscar
+      if (error.message.includes('already exists') || error.message.includes('409')) {
+        console.log(`[Azure DevOps] ⚠️  Grupo ${groupName} já existe, buscando...`);
+        return await this.getSecurityGroup(projectId, groupName);
+      }
+      throw new Error(`Erro ao criar grupo de segurança: ${error.message}`);
+    }
+  }
+
+  /**
+   * Busca um grupo de segurança existente
+   * 
+   * @param {string} projectId - ID do projeto (GUID)
+   * @param {string} groupName - Nome do grupo
+   * @returns {Promise<object>} Grupo encontrado
+   */
+  async getSecurityGroup(projectId, groupName) {
+    try {
+      // Obter o scopeDescriptor correto do projeto
+      const scopeDescriptor = await this.getProjectScopeDescriptor(projectId);
+      
+      const vsspsBaseUrl = `https://vssps.dev.azure.com/${this.organization}`;
+      const url = `${vsspsBaseUrl}/_apis/graph/groups?scopeDescriptor=${scopeDescriptor}&api-version=7.1-preview.1`;
+      
+      const result = await this.request('GET', url);
+      const groups = result.value || [];
+      
+      const group = groups.find(g => g.displayName === groupName);
+      if (!group) {
+        throw new Error(`Grupo ${groupName} não encontrado`);
+      }
+      
+      return group;
+    } catch (error) {
+      throw new Error(`Erro ao buscar grupo de segurança: ${error.message}`);
+    }
+  }
+
+  /**
+   * Configura permissões de segurança do repositório
+   * Define Contribute e Force Push como DENY para todos os usuários
+   * 
+   * @param {string} projectId - ID do projeto (GUID)
+   * @param {string} repositoryId - ID do repositório (GUID)
+   * @param {string} projectName - Nome do projeto
+   * @returns {Promise<void>}
+   */
+  async configureRepositoryPermissions(projectId, repositoryId, projectName) {
+    try {
+      console.log(`[Azure DevOps] ========================================`);
+      console.log(`[Azure DevOps] Configurando permissões de segurança do repositório`);
+      console.log(`[Azure DevOps] Projeto: ${projectName} (${projectId})`);
+      console.log(`[Azure DevOps] Repositório ID: ${repositoryId}`);
+      console.log(`[Azure DevOps] ========================================`);
+
+      // Buscar informações do projeto para obter os grupos
+      const projectUrl = `/_apis/projects/${projectId}?api-version=${this.apiVersion}`;
+      const projectData = await this.request('GET', projectUrl);
+      
+      console.log(`[Azure DevOps] Projeto obtido: ${projectData.name}`);
+
+      // 2. Obter o namespace de segurança de Git Repositories
+      const securityNamespaceId = '2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87'; // Git Repositories namespace
+
+      // 3. Token de segurança do repositório (formato: repoV2/ProjectId/RepositoryId)
+      const securityToken = `repoV2/${projectId}/${repositoryId}`;
+      
+      console.log(`[Azure DevOps] Security Token: ${securityToken}`);
+
+      // 4. Buscar todos os grupos do projeto usando a API correta
+      const identitiesUrl = `https://vssps.dev.azure.com/${this.organization}/_apis/identities?searchFilter=General&filterValue=${projectName}&queryMembership=None&api-version=7.1-preview.1`;
+      const identitiesResult = await this.request('GET', identitiesUrl);
+      
+      console.log(`[Azure DevOps] Identidades encontradas: ${identitiesResult.value?.length || 0}`);
+
+      // Encontrar o grupo "Project Valid Users" ou equivalente
+      const projectValidUsersGroup = identitiesResult.value?.find(identity => 
+        identity.properties?.Account?.$value?.includes('Project Valid Users') ||
+        identity.providerDisplayName?.includes('Project Valid Users') ||
+        (identity.customDisplayName?.includes(projectName) && identity.customDisplayName?.includes('Valid Users'))
+      );
+
+      if (!projectValidUsersGroup) {
+        console.warn(`[Azure DevOps] ⚠️  Grupo 'Project Valid Users' não encontrado. Permissões não serão aplicadas.`);
+        console.log(`[Azure DevOps] Grupos disponíveis:`, identitiesResult.value?.map(i => i.providerDisplayName || i.customDisplayName));
+        
+        // Não falhar, apenas avisar
+        console.log(`[Azure DevOps] ⏭️  Continuando sem configurar permissões de segurança`);
+        return { success: false, message: 'Project Valid Users group not found' };
+      }
+      
+      console.log(`[Azure DevOps] Project Valid Users encontrado: ${projectValidUsersGroup.descriptor}`);
+
+      // 5. Configurar permissões via Access Control Entries (ACEs)
+      const aclUrl = `https://dev.azure.com/${this.organization}/_apis/accesscontrolentries/${securityNamespaceId}?api-version=7.1-preview.1`;
+      
+      // Permissões Git:
+      // GenericContribute = 4 (bit 2)
+      // ForcePush = 32 (bit 5)
+      
+      const denyMask = 4 + 32; // Deny Contribute (4) + Force Push (32) = 36
+      
+      const aceData = {
+        token: securityToken,
+        merge: true,
+        accessControlEntries: [
+          {
+            descriptor: projectValidUsersGroup.descriptor,
+            allow: 0,
+            deny: denyMask, // Deny Contribute + Force Push
+            extendedInfo: {
+              effectiveAllow: 0,
+              effectiveDeny: denyMask
+            }
+          }
+        ]
+      };
+
+      console.log(`[Azure DevOps] Aplicando ACL:`, JSON.stringify(aceData, null, 2));
+
+      await this.request('POST', aclUrl, aceData);
+
+      console.log(`[Azure DevOps] ✅ Permissões configuradas com sucesso:`);
+      console.log(`[Azure DevOps]   ❌ Contribute: DENY para todos os usuários`);
+      console.log(`[Azure DevOps]   ❌ Force Push: DENY para todos os usuários`);
+      console.log(`[Azure DevOps] ========================================`);
+
+      return { success: true };
+
+    } catch (error) {
+      console.error(`[Azure DevOps] ❌ ERRO ao configurar permissões:`, error.message);
+      // Não falhar a criação do repositório por causa das permissões
+      console.warn(`[Azure DevOps] ⚠️  Repositório criado, mas permissões não foram configuradas automaticamente`);
+      console.warn(`[Azure DevOps] ⚠️  Configure manualmente: Repository Settings → Security`);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Busca um grupo do projeto (ex: Project Valid Users, Project Administrators)
+   * 
+   * @param {string} projectId - ID do projeto (GUID)
+   * @param {string} groupName - Nome do grupo (ex: 'Project Valid Users')
+   * @returns {Promise<object>} Grupo encontrado
+   */
+  async getProjectGroup(projectId, groupName) {
+    try {
+      // Obter o scopeDescriptor correto do projeto
+      const scopeDescriptor = await this.getProjectScopeDescriptor(projectId);
+      
+      const vsspsBaseUrl = `https://vssps.dev.azure.com/${this.organization}`;
+      const url = `${vsspsBaseUrl}/_apis/graph/groups?scopeDescriptor=${scopeDescriptor}&api-version=7.1-preview.1`;
+      
+      const result = await this.request('GET', url);
+      const groups = result.value || [];
+      
+      // Buscar por nome parcial pois o nome completo inclui o nome do projeto
+      const group = groups.find(g => 
+        g.displayName === groupName || 
+        g.displayName.includes(groupName) ||
+        g.principalName.includes(groupName)
+      );
+      
+      if (!group) {
+        console.log(`[Azure DevOps] Grupos disponíveis:`, groups.map(g => g.displayName));
+        throw new Error(`Grupo ${groupName} não encontrado no projeto`);
+      }
+      
+      return group;
+    } catch (error) {
+      throw new Error(`Erro ao buscar grupo do projeto: ${error.message}`);
     }
   }
 

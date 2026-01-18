@@ -64,10 +64,20 @@ export function useLogging(screenName: string) {
     });
   }, []);
 
-  const logError = useCallback((error: Error, eventName: string, attributes?: LogAttributes) => {
+  const logError = useCallback((error: Error, attributes?: LogAttributes) => {
     loggingService.logError(error, {
       screen_name: screenNameRef.current,
-      event_name: eventName,
+      event_name: 'error',
+      attributes
+    });
+  }, []);
+
+  const logScreenView = useCallback((attributes?: LogAttributes) => {
+    loggingService.logEvent({
+      screen_name: screenNameRef.current,
+      event_name: 'screen_view',
+      event_type: 'navigation',
+      severity: 'info',
       attributes
     });
   }, []);
@@ -77,6 +87,7 @@ export function useLogging(screenName: string) {
     logInput,
     logEvent,
     logError,
+    logScreenView,
     screenName: screenNameRef.current
   };
 }

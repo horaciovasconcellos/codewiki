@@ -27,6 +27,8 @@ interface DocumentacaoDataTableProps {
   onEdit: (doc: DocumentacaoProjeto) => void;
   onDelete: (doc: DocumentacaoProjeto) => void;
   onPrint?: (doc: DocumentacaoProjeto) => void;
+  canUpdate?: boolean;
+  canDelete?: boolean;
 }
 
 export function DocumentacaoDataTable({
@@ -35,6 +37,8 @@ export function DocumentacaoDataTable({
   onEdit,
   onDelete,
   onPrint,
+  canUpdate = true,
+  canDelete = true,
 }: DocumentacaoDataTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState<string>('all');
@@ -250,6 +254,7 @@ export function DocumentacaoDataTable({
                         size="sm"
                         onClick={() => onEdit(doc)}
                         title="Editar"
+                        disabled={!canUpdate}
                       >
                         <Pencil weight="bold" />
                       </Button>
@@ -258,6 +263,7 @@ export function DocumentacaoDataTable({
                         size="sm"
                         onClick={() => onDelete(doc)}
                         title="Excluir"
+                        disabled={!canDelete}
                       >
                         <Trash weight="bold" />
                       </Button>

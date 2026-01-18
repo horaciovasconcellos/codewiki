@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLogging } from '@/hooks/use-logging';
+import { useAuth } from '@/hooks/usePermissions';
 import { DocumentacaoProjeto } from '@/lib/types';
 import { DocumentacaoDataTable } from './DocumentacaoDataTable';
 import { DocumentacaoEditor } from './DocumentacaoEditor';
@@ -43,6 +44,7 @@ mermaid.initialize({
 
 export function DocumentacaoProjetosView() {
   const { logEvent, logError } = useLogging('documentacao-projetos-view');
+  const { canCreate, canUpdate, canDelete } = useAuth();
   const [documentacoes, setDocumentacoes] = useState<DocumentacaoProjeto[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
@@ -586,7 +588,7 @@ export function DocumentacaoProjetosView() {
                 {documentacoes.length} documentação(ões) cadastrada(s)
               </CardDescription>
             </div>
-            <Button onClick={handleNew}>
+            <Button onClick={handleNew} disabled={!canCreate('documentacao-projetos')}>
               <Plus className="mr-2" weight="bold" />
               Nova Documentação
             </Button>
@@ -602,6 +604,8 @@ export function DocumentacaoProjetosView() {
               onEdit={handleEdit}
               onDelete={handleDeleteClick}
               onPrint={handlePrint}
+              canUpdate={canUpdate('documentacao-projetos')}
+              canDelete={canDelete('documentacao-projetos')}
             />
           )}
         </CardContent>

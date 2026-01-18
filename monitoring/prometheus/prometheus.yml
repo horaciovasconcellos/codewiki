@@ -1,0 +1,84 @@
+# Configuração do Prometheus para Auditoria App
+global:
+  scrape_interval: 15s      # Intervalo padrão de coleta de métricas
+  evaluation_interval: 15s  # Intervalo de avaliação de regras
+  external_labels:
+    cluster: 'auditoria-system'
+    environment: 'development'
+
+# Configuração de alertas
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - alertmanager:9093
+
+# Carregar regras de alerta
+rule_files:
+  - "alerts.yml"
+
+# Configuração de scrape (coleta de métricas)
+scrape_configs:
+  # Métricas do próprio Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          tier: 'monitoring'
+
+  # Métricas da aplicação Node.js (Backend)
+  - job_name: 'auditoria-backend'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['auditoria-app:3000']
+        labels:
+          service: 'auditoria-api'
+          tier: 'backend'
+          app: 'auditoria'
+    metrics_path: '/metrics'
+    
+  # Métricas do MySQL (se habilitado o exporter)
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['mysql-exporter:9104']
+        labels:
+          service: 'mysql-master'
+          tier: 'database'
+    # Descomente quando adicionar mysql-exporter ao docker-compose
+    # relabel_configs:
+    #   - source_labels: [__address__]
+    #     target_label: instance
+    #     replacement: 'mysql-master'
+
+  # Métricas do SonarQube (se disponível)
+  - job_name: 'sonarqube'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:9010']
+        labels:
+          service: 'sonarqube'
+          tier: 'quality'
+    metrics_path: '/api/monitoring/metrics'
+    # SonarQube pode não expor métricas Prometheus por padrão
+    # Considere usar um exporter dedicado
+
+  # Métricas de container Docker (cAdvisor)
+  # Descomente se adicionar cAdvisor
+  # - job_name: 'cadvisor'
+  #   scrape_interval: 15s
+  #   static_configs:
+  #     - targets: ['cadvisor:8080']
+  #       labels:
+  #         service: 'cadvisor'
+  #         tier: 'monitoring'
+
+  # Node Exporter (métricas do sistema operacional)
+  # Descomente se adicionar node-exporter
+  # - job_name: 'node-exporter'
+  #   scrape_interval: 15s
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+  #       labels:
+  #         service: 'node-exporter'
+  #         tier: 'infrastructure'

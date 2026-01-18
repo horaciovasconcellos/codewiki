@@ -43,6 +43,7 @@ export function GeradorProjetosView() {
   const [projetoToAzure, setProjetoToAzure] = useState<ProjetoGerado | null>(null);
   const [showRepositoriesDialog, setShowRepositoriesDialog] = useState(false);
   const [projetoToCreateRepos, setProjetoToCreateRepos] = useState<ProjetoGerado | null>(null);
+  const [repositoriosCriados, setRepositoriosCriados] = useState<Set<string>>(new Set());
 
   const handleSave = async (projeto: ProjetoGerado, gerar: boolean) => {
     try {
@@ -221,11 +222,11 @@ export function GeradorProjetosView() {
         mensagem = `${novos} repositório(s) criado(s) com sucesso!\nEstrutura inicial, CODEOWNERS e políticas de branch configuradas.`;
       } else {
         mensagem = `${jaExistentes} repositório(s) já existente(s). Nenhuma alteração necessária.`;
+      }
+
       // Marcar repositórios como criados
       setRepositoriosCriados(prev => new Set(prev).add(projetoToCreateRepos.id));
       logClick('repositories_created', { projeto_id: projetoToCreateRepos.id, count: result.sucesso });
-
-      }
 
       toast.success(mensagem, { duration: 6000 });
 

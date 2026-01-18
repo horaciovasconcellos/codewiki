@@ -36,6 +36,8 @@ const statusColorMap: Record<string, string> = {
 export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const generateADRPDF = (adr: ADR) => {
     const doc = new jsPDF();
@@ -243,6 +245,13 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
     return matchesSearch && matchesStatus;
   });
 
+  // Paginação
+  const totalPages = Math.ceil(filteredADRs.length / pageSize);
+  const paginatedADRs = filteredADRs.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
     try {
@@ -287,7 +296,7 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
 
       {/* Contador */}
       <div className="text-sm text-muted-foreground">
-        Exibindo {filteredADRs.length} de {adrs.length} ADRs
+        Mostrando {paginatedADRs.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} até {Math.min(currentPage * pageSize, filteredADRs.length)} de {filteredADRs.length} ADRs
       </div>
 
       {/* Tabela */}
@@ -305,7 +314,7 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredADRs.length === 0 ? (
+            {paginatedADRs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                   {searchTerm || statusFilter !== 'all' 
@@ -314,7 +323,7 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
                 </TableCell>
               </TableRow>
             ) : (
-              filteredADRs.map((adr) => (
+              paginatedADRs.map((adr) => (
                 <TableRow key={adr.id} className="hover:bg-gray-100 data-[state=selected]:bg-gray-100">
                   <TableCell className="font-mono font-semibold">
                     ADR-{adr.sequencia}
@@ -391,6 +400,54 @@ export function ADRDataTable({ adrs, onEdit, onDelete, onView }: ADRDataTablePro
           </TableBody>
         </Table>
       </div>
+
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Itens por página:</span>
+            <Select 
+              value={pageSize.toString()} 
+              onValueChange={(value) => {
+                setPageSize(Number(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Anterior
+            </Button>
+            <span className="text-sm">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Próxima
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

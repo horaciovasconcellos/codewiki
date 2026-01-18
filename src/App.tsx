@@ -23,18 +23,20 @@ import { LogsAndTracesView } from '@/components/LogsAndTracesView';
 import { ADRsView } from '@/components/adr/ADRsView';
 import { DocumentacaoProjetosView } from '@/components/documentacao-projetos/DocumentacaoProjetosView';
 import { PesquisaPeriodoView } from '@/components/pesquisa/PesquisaPeriodoView';
+import { LogsOperacoesView } from '@/components/pesquisa/LogsOperacoesView';
 import { FinOpsView } from '@/components/finops/FinOpsView';
 import { GestaoEventosSLAView } from '@/components/eventos-sla/GestaoEventosSLAView';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
-import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope, MagnifyingGlass, CurrencyDollar, ShieldCheck } from '@phosphor-icons/react';
+import { Users, ListChecks, Code, GitBranch, ChartBar, DeviceMobile, BookOpen, Terminal, Target, ClipboardText, GearSix, FileText, Download, ChartLineUp, Certificate, Key, FolderPlus, ShareNetwork, Database, HardDrives, Gear, Envelope, MagnifyingGlass, CurrencyDollar, ShieldCheck, SignOut, ClockCounterClockwise } from '@phosphor-icons/react';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarTrigger } from '@/components/ui/sidebar';
 import { IntegracaoView } from '@/components/integracoes/IntegracaoView';
 import { DocumentacaoAPIsView } from '@/components/DocumentacaoAPIsView';
 import { DocumentacaoSDDView } from '@/components/sdd/DocumentacaoSDDView';
 import { GeradorProjetosView } from '@/components/gerador-projetos/GeradorProjetosView';
 import { InnerSourceView } from '@/components/innersource/InnerSourceView';
+import { SincronizacaoLegadaView } from '@/components/azure/SincronizacaoLegadaView';
 import { CargaDadosView } from '@/components/carga/CargaDadosView';
 import { CargaLockfilesView } from '@/components/carga/CargaLockfilesView';
 import { AzureWorkItemsView } from '@/components/azure-work-items/AzureWorkItemsView';
@@ -48,8 +50,11 @@ import { SincronismoView } from '@/views/SincronismoView';
 import { ExecucoesTesteView } from '@/components/execucoes-teste/ExecucoesTesteView';
 import { CheckpointsView } from '@/components/checkpoints/CheckpointsView';
 import { UsuariosView } from '@/components/usuarios/UsuariosView';
+import { LoginPage } from '@/components/auth/LoginPage';
 import { useLogging } from '@/hooks/use-logging';
 import { useApi, apiPost, apiPut, apiDelete } from '@/hooks/use-api';
+import { useAuth } from '@/hooks/usePermissions';
+import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from '@/ErrorFallback';
 import { toast } from 'sonner';
@@ -76,10 +81,24 @@ interface CardStyles {
   padding: string;
 }
 
-type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo' | 'finops' | 'gestao-eventos-sla' | 'execucoes-teste' | 'checkpoints' | 'usuarios-seguranca';
+type ViewType = 'dashboard' | 'colaboradores' | 'tipos-afastamento' | 'tecnologias' | 'processos-negocio' | 'aplicacoes' | 'runbooks' | 'scripts' | 'capacidades-negocio' | 'slas' | 'habilidades' | 'comunicacao' | 'integracoes' | 'servidores' | 'payloads' | 'stages' | 'pipelines' | 'documentacao-apis' | 'documentacao-sdd' | 'documentacao-projetos' | 'pesquisa-periodo' | 'logs-operacoes' | 'logs-traces' | 'tokens-acesso' | 'configuracoes' | 'gerador-projetos' | 'sincronizacao-legada' | 'carga-dados' | 'notificacoes' | 'azure-work-items' | 'adrs' | 'lgpd' | 'sincronismo' | 'finops' | 'gestao-eventos-sla' | 'execucoes-teste' | 'checkpoints' | 'usuarios-seguranca';
 
-function App() {
+function AppContent() {
   const { logClick, logError } = useLogging('app-root');
+  const { logout, user } = useAuth();
+
+  // Handler de logout
+  const handleLogout = async () => {
+    try {
+      logClick('logout');
+      await logout();
+      toast.success('Logout realizado com sucesso');
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      toast.error('Erro ao fazer logout');
+    }
+  };
 
   // Buscar dados da API
   const { data: tiposAfastamento, loading: loadingTipos, refetch: refetchTipos } = useApi<TipoAfastamento[]>('/tipos-afastamento', []);
@@ -418,6 +437,8 @@ function App() {
         return <DocumentacaoProjetosView />;
       case 'pesquisa-periodo':
         return <PesquisaPeriodoView />;
+      case 'logs-operacoes':
+        return <LogsOperacoesView />;
       case 'finops':
         return <FinOpsView />;
       case 'gestao-eventos-sla':
@@ -428,6 +449,8 @@ function App() {
         return <ConfiguracaoIntegracoesView />;
       case 'gerador-projetos':
         return <GeradorProjetosView />;
+      case 'sincronizacao-legada':
+        return <SincronizacaoLegadaView />;
       case 'innersource':
         return <InnerSourceView />;
       case 'azure-work-items':
@@ -509,6 +532,27 @@ function App() {
                 </div>
               )}
               <h2 className="text-lg font-semibold text-sidebar-foreground text-center">{systemName || 'Sistema de Auditoria'}</h2>
+              
+              {/* Informações do usuário e botão de logout */}
+              <div className="mt-4 pt-4 border-t border-sidebar-border">
+                {user && (
+                  <div className="flex flex-col gap-2">
+                    <div className="text-xs text-sidebar-foreground/70 text-center">
+                      <div className="font-medium truncate">{user.nome || user.email}</div>
+                      <div className="text-[10px] truncate">{user.email}</div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-center gap-2 text-xs"
+                    >
+                      <SignOut size={14} weight="bold" />
+                      Sair
+                    </Button>
+                  </div>
+                )}
+              </div>
             </SidebarHeader>
             <SidebarContent>
               <SidebarGroup>
@@ -545,6 +589,18 @@ function App() {
                       >
                         <MagnifyingGlass />
                         <span>Pesquisa por Período</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'logs-operacoes'}
+                        onClick={() => {
+                          logClick('nav_logs_operacoes');
+                          setCurrentView('logs-operacoes');
+                        }}
+                      >
+                        <ClockCounterClockwise />
+                        <span>Logs de Operações</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>
@@ -606,6 +662,18 @@ function App() {
                       >
                         <FolderPlus />
                         <span>Gerador de Projetos</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={currentView === 'sincronizacao-legada'}
+                        onClick={() => {
+                          logClick('nav_sincronizacao_legada');
+                          setCurrentView('sincronizacao-legada');
+                        }}
+                      >
+                        <ClockCounterClockwise />
+                        <span>Sincronização Legada</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
@@ -1104,6 +1172,46 @@ function App() {
       </SidebarProvider>
     </ErrorBoundary>
   );
+}
+
+// Componente principal com controle de autenticação
+function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
+
+  // Verificar se já tem token salvo ao carregar
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+    setIsCheckingAuth(false);
+  }, []);
+
+  // Mostrar loading durante verificação
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não autenticado, mostrar tela de login
+  if (!isAuthenticated) {
+    return (
+      <>
+        <LoginPage onLoginSuccess={() => setIsAuthenticated(true)} />
+        <Toaster position="top-right" richColors />
+      </>
+    );
+  }
+
+  // Se autenticado, mostrar aplicação completa
+  return <AppContent />;
 }
 
 export default App;

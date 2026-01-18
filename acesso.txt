@@ -1,0 +1,4 @@
+admin@empresa.com: Todas as permissões (criar/ler/editar/excluir) para:
+teste@gmail.com: Somente leitura para os mesmos recursos
+
+

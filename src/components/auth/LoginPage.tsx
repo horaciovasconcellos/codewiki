@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { Lock, Envelope, Eye, EyeSlash, Warning, Spinner } from '@phosphor-icons/react';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useAuth } from '@/hooks/usePermissions';
 import { useLogging } from '@/hooks/use-logging';
 
 interface LoginPageProps {
@@ -14,7 +14,7 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
-  const { login } = usePermissions();
+  const { login } = useAuth();
   const { logScreenView, logClick, logInput, logError } = useLogging('login');
 
   const [email, setEmail] = useState('');

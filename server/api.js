@@ -10,10 +10,112 @@ import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import crypto from 'crypto';
+import NodeCache from 'node-cache';
+import Joi from 'joi';
+import winston from 'winston';
+import promClient from 'prom-client';
 import AzureDevOpsService from './azure-devops-service.js';
 
 const execAsync = promisify(exec);
 const app = express();
+
+// ==================== PROMETHEUS METRICS ====================
+// Configurar Prometheus client
+const register = new promClient.Registry();
+
+// Coletar métricas padrão do Node.js (CPU, memória, event loop, etc)
+promClient.collectDefaultMetrics({ 
+  register,
+  prefix: 'nodejs_',
+  gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5]
+});
+
+// Métricas customizadas
+const httpRequestDuration = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status'],
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10]
+});
+register.registerMetric(httpRequestDuration);
+
+const httpRequestsTotal = new promClient.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status']
+});
+register.registerMetric(httpRequestsTotal);
+
+const dbPoolConnections = new promClient.Gauge({
+  name: 'db_pool_connections_active',
+  help: 'Number of active database connections'
+});
+register.registerMetric(dbPoolConnections);
+
+const cacheHits = new promClient.Counter({
+  name: 'cache_hits_total',
+  help: 'Total number of cache hits',
+  labelNames: ['cache_name']
+});
+register.registerMetric(cacheHits);
+
+const cacheMisses = new promClient.Counter({
+  name: 'cache_misses_total',
+  help: 'Total number of cache misses',
+  labelNames: ['cache_name']
+});
+register.registerMetric(cacheMisses);
+
+const azureApiCalls = new promClient.Counter({
+  name: 'azure_api_calls_total',
+  help: 'Total number of Azure DevOps API calls',
+  labelNames: ['operation', 'status']
+});
+register.registerMetric(azureApiCalls);
+
+// Middleware para coletar métricas de requisições
+app.use((req, res, next) => {
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000;
+    const route = req.route ? req.route.path : req.path;
+    const labels = { method: req.method, route, status: res.statusCode };
+    
+    httpRequestDuration.observe(labels, duration);
+    httpRequestsTotal.inc(labels);
+  });
+  
+  next();
+});
+
+// ==================== END PROMETHEUS METRICS ====================
+
+// Configurar cache (TTL: 5 minutos)
+const configCache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
+
+// Configurar logger estruturado
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'logs/combined.log' }),
+    ...(process.env.NODE_ENV !== 'production' 
+      ? [new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.simple()
+          )
+        })] 
+      : []
+    )
+  ]
+});
 
 // Configurar multer para upload de arquivos em memória
 const upload = multer({
@@ -299,6 +401,87 @@ function formatDateForMySQL(dateString) {
   return dateString;
 }
 
+// Helper para buscar configurações do Azure DevOps (com cache)
+async function getAzureDevOpsConfig() {
+  const cacheKey = 'azure-devops-config';
+  
+  // Verificar cache primeiro
+  const cachedConfig = configCache.get(cacheKey);
+  if (cachedConfig) {
+    logger.debug('Azure DevOps config retrieved from cache');
+    cacheHits.inc({ cache_name: 'azure_config' });
+    return cachedConfig;
+  }
+
+  logger.debug('Fetching Azure DevOps config from database');
+  cacheMisses.inc({ cache_name: 'azure_config' });
+  
+  const [configRows] = await pool.query(
+    "SELECT chave, valor FROM configuracoes WHERE chave = 'integration-config'"
+  );
+  
+  if (configRows.length === 0) {
+    logger.error('Azure DevOps config not found in database');
+    throw new Error('AZURE_CONFIG_NOT_FOUND: Configurações de integração não encontradas');
+  }
+
+  const integrationConfig = JSON.parse(configRows[0].valor);
+  const azureConfig = integrationConfig.azureDevOps;
+
+  if (!azureConfig || !azureConfig.urlOrganizacao || !azureConfig.personalAccessToken) {
+    logger.error('Azure DevOps config incomplete', { azureConfig });
+    throw new Error('AZURE_CONFIG_INCOMPLETE: Configurações do Azure DevOps incompletas');
+  }
+
+  // Extrair nome da organização da URL
+  const urlMatch = azureConfig.urlOrganizacao.match(/dev\.azure\.com\/([^\/]+)/);
+  const organization = urlMatch ? urlMatch[1] : azureConfig.urlOrganizacao;
+  const pat = azureConfig.personalAccessToken;
+
+  const config = { organization, pat, config: azureConfig };
+  
+  // Armazenar no cache
+  configCache.set(cacheKey, config);
+  logger.info('Azure DevOps config cached successfully', { organization });
+
+  return config;
+}
+
+// Helper para tratamento de erros do Azure DevOps
+function handleAzureError(error) {
+  const errorMessage = error.message || '';
+  
+  logger.error('Azure DevOps error occurred', { 
+    message: errorMessage,
+    stack: error.stack 
+  });
+  
+  if (errorMessage.includes('AZURE_CONFIG_NOT_FOUND')) {
+    return {
+      status: 400,
+      error: 'Configurações de integração não encontradas',
+      message: 'Configure as integrações nas Configurações',
+      code: 'AZURE_CONFIG_NOT_FOUND'
+    };
+  }
+  
+  if (errorMessage.includes('AZURE_CONFIG_INCOMPLETE')) {
+    return {
+      status: 400,
+      error: 'Configurações do Azure DevOps incompletas',
+      message: 'Configure a URL da organização e o token PAT nas Configurações de Integração',
+      code: 'AZURE_CONFIG_INCOMPLETE'
+    };
+  }
+  
+  return {
+    status: 500,
+    error: 'Erro ao processar requisição',
+    message: error.message,
+    code: 'INTERNAL_ERROR'
+  };
+}
+
 // Helper para converter Date do MySQL para formato ISO (YYYY-MM-DD)
 function formatDateToISO(date) {
   if (!date) return null;
@@ -337,6 +520,31 @@ async function initializeDatabase() {
     await connection.query("SET NAMES utf8mb4");
     await connection.query("SET CHARACTER SET utf8mb4");
     console.log('✓ Conectado ao MySQL');
+    
+    // Criar tabela de logs de acesso se não existir
+    try {
+      await connection.query(`
+        CREATE TABLE IF NOT EXISTS logs_acesso (
+          id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+          usuario_id VARCHAR(36),
+          email VARCHAR(255) NOT NULL,
+          tipo_evento ENUM('LOGIN', 'LOGOUT', 'LOGIN_FAILED', 'BLOCKED') NOT NULL,
+          ip_origem VARCHAR(45),
+          user_agent TEXT,
+          sucesso TINYINT(1) DEFAULT 1,
+          detalhes TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_usuario (usuario_id),
+          INDEX idx_email (email),
+          INDEX idx_tipo (tipo_evento),
+          INDEX idx_created (created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      `);
+      console.log('✓ Tabela logs_acesso verificada/criada');
+    } catch (err) {
+      console.log('⚠ Erro ao criar tabela logs_acesso:', err.message);
+    }
+    
     connection.release();
     return true;
   } catch (error) {
@@ -7740,32 +7948,8 @@ app.post('/api/azure-devops/criar-repositorios', async (req, res) => {
 
     console.log(`[CRIAR REPOSITÓRIOS] Iniciando criação de repositórios para projeto ${projetoId}`);
 
-    // 1. Buscar configurações do Azure DevOps
-    const [configRows] = await pool.query(
-      "SELECT chave, valor FROM configuracoes WHERE chave = 'integration-config'"
-    );
-    
-    if (configRows.length === 0) {
-      return res.status(400).json({
-        error: 'Configurações de integração não encontradas',
-        message: 'Configure as integrações nas Configurações'
-      });
-    }
-
-    const integrationConfig = JSON.parse(configRows[0].valor);
-    const azureConfig = integrationConfig.azureDevOps;
-
-    if (!azureConfig || !azureConfig.urlOrganizacao || !azureConfig.personalAccessToken) {
-      return res.status(400).json({
-        error: 'Configurações do Azure DevOps incompletas',
-        message: 'Configure a URL da organização e o token PAT nas Configurações de Integração'
-      });
-    }
-
-    // Extrair o nome da organização da URL
-    const urlMatch = azureConfig.urlOrganizacao.match(/dev\.azure\.com\/([^\/]+)/);
-    const organization = urlMatch ? urlMatch[1] : azureConfig.urlOrganizacao;
-    const pat = azureConfig.personalAccessToken;
+    // 1. Buscar configurações do Azure DevOps usando helper
+    const { organization, pat } = await getAzureDevOpsConfig();
 
     // 2. Buscar dados do projeto
     const [projetos] = await pool.query('SELECT * FROM estruturas_projeto WHERE id = ?', [projetoId]);
@@ -7908,6 +8092,24 @@ app.post('/api/azure-devops/criar-repositorios', async (req, res) => {
           );
 
           console.log(`[CRIAR REPOSITÓRIOS] Repository policies configuradas para ${repoName}`);
+
+          // Configurar permissões de segurança do repositório (não crítico)
+          try {
+            const permResult = await azureService.configureRepositoryPermissions(
+              projeto.project_id,
+              repository.id,
+              projectName
+            );
+
+            if (permResult.success) {
+              console.log(`[CRIAR REPOSITÓRIOS] ✅ Permissões de segurança configuradas para ${repoName}`);
+            } else {
+              console.warn(`[CRIAR REPOSITÓRIOS] ⚠️  Permissões não configuradas para ${repoName}: ${permResult.message || permResult.error}`);
+            }
+          } catch (permError) {
+            console.warn(`[CRIAR REPOSITÓRIOS] ⚠️  Erro ao configurar permissões para ${repoName}:`, permError.message);
+            console.warn(`[CRIAR REPOSITÓRIOS] ⚠️  Repositório criado com sucesso, mas configure permissões manualmente`);
+          }
         }
 
         repositoriosCriados.push({
@@ -7976,11 +8178,8 @@ app.post('/api/azure-devops/criar-repositorios', async (req, res) => {
 
   } catch (error) {
     console.error('[CRIAR REPOSITÓRIOS] Erro:', error);
-    res.status(500).json({
-      error: 'Erro ao criar repositórios',
-      message: error.message,
-      code: 'CREATE_REPOSITORIES_ERROR'
-    });
+    const errorResponse = handleAzureError(error);
+    res.status(errorResponse.status).json(errorResponse);
   }
 });
 
@@ -8300,6 +8499,261 @@ app.get('/api/azure-devops/templates/:templateType', async (req, res) => {
   }
 });
 
+// ========================================================================
+// SINCRONIZAÇÃO LEGADA - Azure DevOps
+// ========================================================================
+
+// GET /api/azure/sincronizacao-legada - Listar todas as sincronizações
+app.get('/api/azure/sincronizacao-legada', async (req, res) => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    const [sincronizacoes] = await connection.execute(`
+      SELECT 
+        sl.id,
+        sl.aplicacao_id,
+        sl.url_projeto,
+        sl.projeto_nome,
+        sl.repositorio_nome,
+        sl.status,
+        sl.mensagem_erro,
+        sl.created_at,
+        sl.updated_at,
+        a.sigla AS aplicacao_sigla,
+        a.descricao AS aplicacao_nome
+      FROM sincronizacao_legada sl
+      LEFT JOIN aplicacoes a ON a.id = sl.aplicacao_id
+      ORDER BY sl.created_at DESC
+    `);
+
+    res.json(sincronizacoes);
+  } catch (error) {
+    console.error('Erro ao buscar sincronizações:', error);
+    res.status(500).json({
+      error: 'Erro ao buscar sincronizações',
+      message: error.message
+    });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// Schema de validação para sincronização legada
+const sincronizarLegadoSchema = Joi.object({
+  aplicacao_id: Joi.string().required()
+    .messages({
+      'any.required': 'aplicacao_id é obrigatório',
+      'string.empty': 'aplicacao_id não pode ser vazio'
+    }),
+  url_projeto: Joi.string().pattern(/^https:\/\/dev\.azure\.com\/([^\/]+)\/([^\/]+)\/_git\/([^\/]+)\/?$/).required()
+    .messages({
+      'any.required': 'url_projeto é obrigatório',
+      'string.empty': 'url_projeto não pode ser vazio',
+      'string.pattern.base': 'Formato esperado: https://dev.azure.com/{org}/{project}/_git/{repository}'
+    })
+});
+
+// POST /api/azure/sincronizar-legado - Sincronizar aplicação legada
+app.post('/api/azure/sincronizar-legado', async (req, res) => {
+  let connection;
+  try {
+    // Validar entrada com Joi
+    const { error, value } = sincronizarLegadoSchema.validate(req.body);
+    if (error) {
+      logger.warn('Validation failed for sincronizar-legado', { 
+        errors: error.details,
+        body: req.body 
+      });
+      return res.status(400).json({
+        error: 'Validação falhou',
+        message: error.details[0].message,
+        details: error.details
+      });
+    }
+
+    const { aplicacao_id, url_projeto } = value;
+
+    logger.info('Starting legacy sync', { aplicacao_id, url_projeto });
+
+    // Extrair dados da URL
+    const urlPattern = /^https:\/\/dev\.azure\.com\/([^\/]+)\/([^\/]+)\/_git\/([^\/]+)\/?$/;
+    const match = url_projeto.match(urlPattern);
+    const [org, projectName, repoName] = match.slice(1);
+
+    // Buscar configurações do Azure DevOps usando helper
+    const { pat } = await getAzureDevOpsConfig();
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    // Buscar dados da aplicação
+    const [aplicacoes] = await connection.execute(
+      'SELECT id, sigla, descricao FROM aplicacoes WHERE id = ?',
+      [aplicacao_id]
+    );
+
+    if (aplicacoes.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({
+        error: 'Aplicação não encontrada',
+        message: `Aplicação com ID ${aplicacao_id} não foi encontrada`
+      });
+    }
+
+    const aplicacao = aplicacoes[0];
+
+    try {
+      // Buscar informações do projeto no Azure DevOps
+      // Usar organização extraída da URL
+      const azureService = new AzureDevOpsService(org, pat);
+      const projectInfo = await azureService.getProjectByName(projectName);
+
+      if (!projectInfo) {
+        throw new Error('Projeto não encontrado no Azure DevOps');
+      }
+
+      // Gerar ID único
+      const estruturaId = ulid();
+
+      // Criar registro na tabela estruturas_projeto
+      await connection.execute(`
+        INSERT INTO estruturas_projeto (
+          id, produto, projeto, work_item_process,
+          data_inicial, iteracao, incluir_query, incluir_maven,
+          incluir_liquibase, criar_time_sustentacao, repositorios,
+          url_projeto, status, aplicacao_base_id, status_repositorio,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, CURDATE(), 1, 1, 0, 0, 0, '[]', ?, 'Processado', ?, 'N', NOW(), NOW())
+      `, [
+        estruturaId,
+        aplicacao.sigla,
+        projectName,
+        projectInfo.capabilities?.processTemplate?.templateName || 'Agile',
+        url_projeto,
+        aplicacao_id
+      ]);
+
+      // Criar registro de sincronização
+      const sincId = ulid();
+      await connection.execute(`
+        INSERT INTO sincronizacao_legada (
+          id, aplicacao_id, url_projeto, projeto_nome, repositorio_nome,
+          status, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, 'Sincronizado', NOW(), NOW())
+      `, [sincId, aplicacao_id, url_projeto, projectName, repoName]);
+
+      await connection.commit();
+
+      logger.info('Legacy sync completed successfully', {
+        estruturaId,
+        aplicacao_id,
+        projectName,
+        repoName
+      });
+
+      res.json({
+        success: true,
+        message: 'Sincronização realizada com sucesso',
+        data: {
+          id: sincId,
+          estrutura_id: estruturaId,
+          projeto: projectName,
+          repositorio: repoName,
+          aplicacao: aplicacao.sigla
+        }
+      });
+
+    } catch (azureError) {
+      await connection.rollback();
+      
+      logger.error('Azure sync failed, recording error', { 
+        aplicacao_id, 
+        url_projeto, 
+        error: azureError.message 
+      });
+      
+      // Registrar erro na tabela de sincronização
+      const errorId = ulid();
+      await connection.execute(`
+        INSERT INTO sincronizacao_legada (
+          id, aplicacao_id, url_projeto, status, mensagem_erro,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, 'Erro', ?, NOW(), NOW())
+      `, [errorId, aplicacao_id, url_projeto, azureError.message]);
+
+      throw azureError;
+    }
+
+  } catch (error) {
+    logger.error('Failed to sync legacy application', { 
+      error: error.message, 
+      stack: error.stack 
+    });
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackError) {
+        logger.error('Rollback failed', { error: rollbackError.message });
+      }
+    }
+    const errorResponse = handleAzureError(error);
+    res.status(errorResponse.status).json(errorResponse);
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+// DELETE /api/azure/sincronizacao-legada/:id - Excluir sincronização
+app.delete('/api/azure/sincronizacao-legada/:id', async (req, res) => {
+  let connection;
+  try {
+    const { id } = req.params;
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    // Verificar se existe
+    const [sincronizacoes] = await connection.execute(
+      'SELECT id FROM sincronizacao_legada WHERE id = ?',
+      [id]
+    );
+
+    if (sincronizacoes.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({
+        error: 'Sincronização não encontrada'
+      });
+    }
+
+    // Excluir
+    await connection.execute('DELETE FROM sincronizacao_legada WHERE id = ?', [id]);
+
+    await connection.commit();
+
+    res.json({
+      success: true,
+      message: 'Sincronização excluída com sucesso'
+    });
+
+  } catch (error) {
+    console.error('Erro ao excluir sincronização:', error);
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rollbackError) {
+        console.error('Erro ao fazer rollback:', rollbackError);
+      }
+    }
+    res.status(500).json({
+      error: 'Erro ao excluir sincronização',
+      message: error.message
+    });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
 // DELETE /api/azure-devops/templates/:templateType - Deletar template
 app.delete('/api/azure-devops/templates/:templateType', async (req, res) => {
   let connection;
@@ -8507,7 +8961,7 @@ app.post('/api/usuarios', async (req, res) => {
     }
     
     // Buscar SALT
-    const [configRows] = await pool.query('SELECT valor FROM configuracoes WHERE chave = ?', ['SALT']);
+    const [configRows] = await pool.query('SELECT valor FROM configuracoes WHERE chave = ?', ['PASSWORD_SALT']);
     if (configRows.length === 0) {
       return res.status(400).json({ error: 'SALT não configurado' });
     }
@@ -8727,7 +9181,18 @@ app.put('/api/usuarios-seguranca/:id', async (req, res) => {
     // Se a senha foi alterada, recriptografar
     let passwordHash = usuario.password_hash;
     if (password) {
-      passwordHash = hashPassword(login || usuario.login, password, usuario.salt_usado);
+      // Buscar SALT do banco
+      const [configRows] = await pool.query(
+        'SELECT valor FROM configuracoes WHERE chave = ? LIMIT 1',
+        ['PASSWORD_SALT']
+      );
+      
+      if (configRows.length === 0) {
+        return res.status(500).json({ error: 'SALT não configurado no sistema' });
+      }
+      
+      const SALT = configRows[0].valor;
+      passwordHash = hashPassword(login || usuario.login, password, SALT);
     }
     
     // Atualizar usuário
@@ -10901,6 +11366,56 @@ async function startServer() {
     } catch (error) {
       console.error('Erro ao buscar checkpoints:', error);
       res.status(500).json({ error: 'Erro ao buscar checkpoints' });
+    }
+  });
+
+  // GET /api/pesquisa/logs-operacoes - Buscar logs de operações de usuários
+  app.get('/api/pesquisa/logs-operacoes', async (req, res) => {
+    try {
+      const { dataInicio, dataFim, usuarioId, tipoEvento } = req.query;
+
+      if (!dataInicio || !dataFim) {
+        return res.status(400).json({ error: 'Data de início e término são obrigatórias' });
+      }
+
+      // Construir query dinâmica com filtros opcionais
+      let query = `
+        SELECT 
+          l.id,
+          l.usuario_id,
+          l.email,
+          l.tipo_evento,
+          l.ip_origem,
+          l.user_agent,
+          l.sucesso,
+          l.detalhes,
+          l.created_at
+        FROM logs_acesso l
+        WHERE DATE(l.created_at) BETWEEN ? AND ?
+      `;
+
+      const params = [dataInicio, dataFim];
+
+      // Adicionar filtro de usuário se informado
+      if (usuarioId) {
+        query += ' AND l.usuario_id = ?';
+        params.push(usuarioId);
+      }
+
+      // Adicionar filtro de tipo de evento se informado
+      if (tipoEvento && tipoEvento !== 'TODOS') {
+        query += ' AND l.tipo_evento = ?';
+        params.push(tipoEvento);
+      }
+
+      query += ' ORDER BY l.created_at DESC LIMIT 1000';
+
+      const [rows] = await pool.query(query, params);
+
+      res.json(rows);
+    } catch (error) {
+      console.error('Erro ao buscar logs de operações:', error);
+      res.status(500).json({ error: 'Erro ao buscar logs de operações' });
     }
   });
 
@@ -15668,6 +16183,262 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     }
   });
 
+  // ==================== AUTENTICAÇÃO ====================
+
+  // POST /api/auth/login - Fazer login
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, senha } = req.body;
+
+      if (!email || !senha) {
+        return res.status(400).json({ 
+          error: 'E-mail e senha são obrigatórios',
+          code: 'MISSING_CREDENTIALS'
+        });
+      }
+
+      // 1. Buscar usuário pelo e-mail com dados do colaborador
+      const [usuarios] = await pool.query(`
+        SELECT 
+          u.id,
+          u.login,
+          u.password_hash,
+          u.status,
+          u.data_vigencia_inicial,
+          u.data_vigencia_termino,
+          u.colaborador_id,
+          c.nome AS colaborador_nome,
+          c.matricula AS colaborador_matricula,
+          c.setor AS colaborador_setor
+        FROM usuarios_seguranca u
+        LEFT JOIN colaboradores c ON u.colaborador_id = c.id
+        WHERE u.login = ?
+      `, [email]);
+
+      if (usuarios.length === 0) {
+        // Não revelar se o usuário existe ou não (segurança)
+        return res.status(401).json({ 
+          error: 'E-mail ou senha inválidos',
+          code: 'INVALID_CREDENTIALS'
+        });
+      }
+
+      const usuario = usuarios[0];
+
+      // 2. Verificar se usuário está ativo
+      if (usuario.status !== 'ATIVO') {
+        return res.status(403).json({ 
+          error: 'Usuário inativo. Entre em contato com o administrador',
+          code: 'USER_INACTIVE'
+        });
+      }
+
+      // 3. Verificar data de vigência
+      const agora = new Date();
+      if (usuario.data_vigencia_inicial && new Date(usuario.data_vigencia_inicial) > agora) {
+        return res.status(403).json({ 
+          error: 'Acesso ainda não liberado',
+          code: 'ACCESS_NOT_STARTED'
+        });
+      }
+
+      if (usuario.data_vigencia_termino && new Date(usuario.data_vigencia_termino) < agora) {
+        return res.status(403).json({ 
+          error: 'Acesso expirado. Entre em contato com o administrador',
+          code: 'ACCESS_EXPIRED'
+        });
+      }
+
+      // 4. Buscar SALT do banco
+      const [configRows] = await pool.query(
+        'SELECT valor FROM configuracoes WHERE chave = ? LIMIT 1',
+        ['PASSWORD_SALT']
+      );
+
+      if (configRows.length === 0) {
+        console.error('SALT não configurado no banco de dados');
+        return res.status(500).json({ 
+          error: 'Erro de configuração do sistema',
+          code: 'SALT_NOT_CONFIGURED'
+        });
+      }
+
+      const SALT = configRows[0].valor;
+
+      // 5. Validar senha com hash
+      const senhaHash = hashPassword(usuario.login, senha, SALT);
+      
+      if (senhaHash !== usuario.password_hash) {
+        // Senha inválida
+        return res.status(401).json({ 
+          error: 'E-mail ou senha inválidos',
+          code: 'INVALID_CREDENTIALS'
+        });
+      }
+
+      // 6. Login bem-sucedido - gerar tokens
+      const token = crypto.randomBytes(32).toString('hex');
+      const refreshToken = crypto.randomBytes(32).toString('hex');
+
+      // 7. Buscar permissões do usuário (se existir tabela de permissões)
+      let permissoes = [];
+      let permissoesPorRecurso = {};
+      
+      try {
+        const [perms] = await pool.query(`
+          SELECT tela, create_permission, read_permission, update_permission, delete_permission
+          FROM permissoes_usuario
+          WHERE usuario_id = ?
+        `, [usuario.id]);
+        
+        permissoes = perms.map(p => ({
+          tela: p.tela,
+          create: p.create_permission === 1,
+          read: p.read_permission === 1,
+          update: p.update_permission === 1,
+          delete: p.delete_permission === 1
+        }));
+
+        permissoesPorRecurso = perms.reduce((acc, p) => {
+          acc[p.tela] = {
+            create: p.create_permission === 1,
+            read: p.read_permission === 1,
+            update: p.update_permission === 1,
+            delete: p.delete_permission === 1
+          };
+          return acc;
+        }, {});
+      } catch (err) {
+        // Tabela de permissões ainda não existe - retornar permissões padrão
+        console.log('Tabela de permissões não encontrada, usando permissões padrão');
+      }
+
+      // 8. Registrar log de acesso
+      try {
+        await pool.query(`
+          INSERT INTO logs_acesso (
+            usuario_id,
+            email,
+            tipo_evento,
+            ip_origem,
+            user_agent,
+            sucesso,
+            created_at
+          ) VALUES (?, ?, 'LOGIN', ?, ?, 1, NOW())
+        `, [
+          usuario.id,
+          usuario.login,
+          req.ip || req.connection.remoteAddress,
+          req.headers['user-agent']
+        ]);
+      } catch (err) {
+        // Tabela de logs pode não existir ainda
+        console.log('Não foi possível registrar log de acesso:', err.message);
+      }
+
+      // 11. Retornar dados do usuário autenticado
+      res.json({
+        success: true,
+        token,
+        refreshToken,
+        user: {
+          id: usuario.id,
+          email: usuario.login,
+          nome: usuario.colaborador_nome,
+          matricula: usuario.colaborador_matricula,
+          setor: usuario.colaborador_setor,
+          role: 'admin' // Por enquanto, todos são admin
+        },
+        permissions: permissoes,
+        permissionsByResource: permissoesPorRecurso
+      });
+
+    } catch (error) {
+      console.error('Erro no login:', error);
+      res.status(500).json({ 
+        error: 'Erro ao processar login',
+        code: 'LOGIN_ERROR'
+      });
+    }
+  });
+
+  // POST /api/auth/logout - Fazer logout
+  app.post('/api/auth/logout', async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace('Bearer ', '');
+      
+      if (token) {
+        // Aqui poderia invalidar o token em uma blacklist
+        // Por enquanto, apenas registrar o evento
+        console.log('Logout realizado - Token:', token.substring(0, 10) + '...');
+      }
+
+      res.json({ success: true, message: 'Logout realizado com sucesso' });
+    } catch (error) {
+      console.error('Erro no logout:', error);
+      res.status(500).json({ 
+        error: 'Erro ao processar logout',
+        code: 'LOGOUT_ERROR'
+      });
+    }
+  });
+
+  // POST /api/auth/refresh - Renovar token
+  app.post('/api/auth/refresh', async (req, res) => {
+    try {
+      const { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        return res.status(400).json({ 
+          error: 'Refresh token não fornecido',
+          code: 'MISSING_REFRESH_TOKEN'
+        });
+      }
+
+      // Aqui implementaria validação do refresh token
+      // Por enquanto, apenas gera um novo token
+      const novoToken = crypto.randomBytes(32).toString('hex');
+
+      res.json({
+        success: true,
+        token: novoToken
+      });
+    } catch (error) {
+      console.error('Erro ao renovar token:', error);
+      res.status(500).json({ 
+        error: 'Erro ao renovar token',
+        code: 'REFRESH_ERROR'
+      });
+    }
+  });
+
+  // Endpoint de métricas Prometheus
+  app.get('/metrics', async (req, res) => {
+    try {
+      res.set('Content-Type', register.contentType);
+      const metrics = await register.metrics();
+      res.end(metrics);
+    } catch (err) {
+      logger.error('Error collecting metrics', { error: err.message });
+      res.status(500).end(err.message);
+    }
+  });
+
+  // Endpoint de health check
+  app.get('/health', (req, res) => {
+    const health = {
+      status: 'UP',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: pool ? 'connected' : 'disconnected',
+      cache: {
+        keys: configCache.keys().length,
+        stats: configCache.getStats()
+      }
+    };
+    res.json(health);
+  });
+
   // Middleware de tratamento de erros global
   app.use((err, req, res, next) => {
     console.error('[GLOBAL ERROR HANDLER]', err);
@@ -15683,6 +16454,8 @@ Este catálogo é gerado automaticamente a partir dos payloads cadastrados no si
     console.log('');
     console.log('🚀 API Server rodando em http://localhost:' + PORT);
     console.log('📊 Conectado ao MySQL:', dbConfig.host + ':' + dbConfig.port);
+    console.log('📈 Prometheus metrics: http://localhost:' + PORT + '/metrics');
+    console.log('❤️  Health check: http://localhost:' + PORT + '/health');
     console.log('');
     console.log('Endpoints disponíveis:');
     console.log('  GET    /api/tipos-afastamento');
